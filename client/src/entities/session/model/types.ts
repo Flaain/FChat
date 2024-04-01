@@ -1,7 +1,18 @@
-import { Profile } from "@/shared/model/types";
-
-export interface SessionSliceState extends Profile {
+export interface SessionContextProps {
+    userId?: string;
+    accessToken?: string;
     isAuthorized: boolean;
     isAuthInProgress: boolean;
-    accessToken?: string;
+    setUserId: React.Dispatch<React.SetStateAction<string | undefined>>;
+    setAccessToken: React.Dispatch<React.SetStateAction<string | undefined>>;
+    setIsAuthorized: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsAuthInProgress: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export interface SessionProviderProps {
+    defaultIsAuthorized?: boolean;
+    defaultIsAuthInProgress?: boolean;
+    defaultAccessToken?: string;
+    defaultUserId?: string;
+    children: React.ReactNode;
 }

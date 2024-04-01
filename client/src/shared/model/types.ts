@@ -1,26 +1,26 @@
 export interface Message {
     id: string;
-    senderId: string;
-    receiverId: string;
+    sender: Participant;
+    receiver: Participant;
     conversationId: string;
+    hasBeenRead: boolean;
     text: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface Participant {
+    id: string;
+    username: string;
     createdAt: string;
     updatedAt: string;
 }
 
 export interface Conversation {
     id: string;
-    participants: Array<string>;
+    name?: string;
+    participants: Array<Participant>;
     messages: Array<Message>;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface Profile {
-    id: string;
-    username: string;
-    email: string;
-    conversations: Array<Conversation>;
     createdAt: string;
     updatedAt: string;
 }

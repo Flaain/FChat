@@ -1,10 +1,9 @@
 import { Navigate } from "react-router";
 import { routerList } from "../constants";
-import { selectSessionSlice } from "@/entities/session/model/slice";
-import { useAppSelector } from "../model/hooks";
+import { useSession } from "@/entities/session/lib/hooks/useSession";
 
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
-    const { isAuthInProgress, isAuthorized } = useAppSelector(selectSessionSlice);
+    const { isAuthInProgress, isAuthorized } = useSession();
 
     if (isAuthInProgress) return <div>Loading...</div>;
 

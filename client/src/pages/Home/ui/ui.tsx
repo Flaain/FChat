@@ -1,10 +1,11 @@
-import { selectSessionSlice } from "@/entities/session/model/slice";
-import { useAppSelector } from "@/shared/model/hooks";
+import { useProfile } from "@/shared/lib/hooks/useProfile";
 
 const Home = () => {
-    const profile = useAppSelector(selectSessionSlice);
+    const { profile } = useProfile();
+    
     console.log(profile);
+
     return <div>Home</div>;
-}
+};
 
 export default Home;
