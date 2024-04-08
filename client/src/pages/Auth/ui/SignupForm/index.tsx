@@ -6,7 +6,7 @@ import { Button } from "@/shared/ui/Button";
 import { useSignup } from "../../lib/hooks/useSignup";
 
 const SignupForm = () => {
-    const { form, loading, onBack, onNext, step, stepsLength, isNextButtonDisabled, isLastStep, onSubmit } = useSignup();
+    const { form, loading, step, stepsLength, isLastStep, isNextButtonDisabled, onBack, onNext, onSubmit } = useSignup();
 
     const forms: Record<number, React.ReactNode> = {
         0: <FirstStepSignUp form={form} />,
@@ -39,7 +39,7 @@ const SignupForm = () => {
                                 variant='secondary'
                                 className='w-24'
                                 onClick={onBack}
-                                disabled={form.formState.isSubmitting || loading}
+                                disabled={loading}
                             >
                                 Back
                             </Button>

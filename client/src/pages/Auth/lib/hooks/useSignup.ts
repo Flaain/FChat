@@ -1,13 +1,15 @@
 import React from "react";
-import { z } from "zod";
-import { FieldErrors, FieldPath, useForm } from "react-hook-form";
-import { signupSchema } from "../../model/schema";
+import { FieldPath, useForm } from "react-hook-form";
 import { useAuth } from "./useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { api } from "@/shared/api";
+import { isSignupFormError } from "@/shared/lib/utils/isApiError";
+import { SignupSchema } from "../../model/types";
+import { signupSchema } from "../../model/schema";
 
-const steps: Array<{ fields: Array<FieldPath<z.infer<typeof signupSchema>>> }> = [
-    { fields: ["email", "password", "confirmPassword", "birthDate"] },
-    { fields: ["name"] },
+const steps: Array<{ fields: Array<FieldPath<SignupSchema>> }> = [
+    { fields: ["email", "password", "confirmPassword"] },
+    { fields: ["name", "birthDate"] },
 ];
 
 export const useSignup = () => {
@@ -16,14 +18,14 @@ export const useSignup = () => {
     const [step, setStep] = React.useState(0);
     const [loading, setLoading] = React.useState(false);
 
-    const form = useForm<z.infer<typeof signupSchema>>({
+    const form = useForm<SignupSchema>({
         resolver: zodResolver(signupSchema),
         defaultValues: {
-            email: "test@test.com",
-            password: "testtest",
-            confirmPassword: "testtest",
+            email: "",
+            password: "",
+            confirmPassword: "",
             name: "",
-            birthDate: "2010-01-01",
+            birthDate: "",
         },
         disabled: loading,
         mode: "all",
@@ -31,68 +33,62 @@ export const useSignup = () => {
     });
 
     const checkNextAvailability = () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { name, ...restErrors } = form.formState.errors;
-
         const validateActions = {
-            0: !!Object.keys(restErrors).length || !form.getValues(steps[step].fields).some(Boolean),
+            0: !!Object.keys(form.formState.errors).length || !form.getValues(steps[step].fields).every(Boolean),
             1: !form.formState.isValid,
         };
 
-        return  form.formState.isSubmitting || validateActions[step as keyof typeof validateActions] || loading
+        return form.formState.isSubmitting || validateActions[step as keyof typeof validateActions] || loading;
     };
 
-    const onSubmit = React.useCallback(async (data: z.infer<typeof signupSchema>) => {
-        console.log(data);
+    const onSubmit = React.useCallback(async (data: SignupSchema) => {
+        console.log(data)
     }, []);
 
     const onNext = React.useCallback(async () => {
         try {
-            const valid = await form.trigger(steps[step].fields);
-
+            const valid = await form.trigger(steps[step].fields, { shouldFocus: true });
+            
             if (!valid) return;
 
             setLoading(true);
-            setStep((prevState) => prevState + 1);
 
-            // const actions = {
-            //     0: async () => {
-            //         const res = await new Promise((resolve, reject) => {
-            //             setTimeout(() => {
-            //                 resolve(1);
-            //             }, 5000);
-            //         });
+            const actions = {
+                0: async () => {
+                    await api.user.checkEmailBeforeSignup({ body: JSON.stringify({ email: form.getValues("email") }) })
 
-            //         setStep((prevState) => prevState + 1);
-            //     },
-            //     1: () => form.handleSubmit(onSubmit)(),
-            // };
+                    setStep((prevState) => prevState + 1);
+                    form.reset(form.getValues());
+                },
+                1: () => form.handleSubmit(onSubmit)(),
+            };
 
-            // await actions[step as keyof typeof actions]();
+            await actions[step as keyof typeof actions]();
         } catch (error) {
-            setLoading(false);
-            error instanceof Error && console.error(error);
-            if (!(error instanceof Error)) {
-                Object.entries(error as FieldErrors<z.infer<typeof signupSchema>>).forEach(([key, value]) => {
-                    form.setError(key as FieldPath<z.infer<typeof signupSchema>>, { message: value.message });
-                });
-            }
+            console.error(error);
+            isSignupFormError(error) && Object.entries(error.error).forEach(([key, value]) => form.setError(key as FieldPath<SignupSchema>, { 
+                message: value.message 
+            }));
         } finally {
             setLoading(false);
         }
-    }, [form, step]);
+    }, [form, onSubmit, step]);
 
-    const onBack = React.useCallback(() => (step ? setStep((prevState) => prevState - 1) : setAuthStage("welcome")), [setAuthStage, step]);
+    const onBack = React.useCallback(() => {
+        setStep((prevState) => prevState - 1);
+        form.reset(form.getValues());
+        !step && setAuthStage("welcome");
+    }, [form, setAuthStage, step]);
 
     return {
         form,
         step,
+        loading,
         stepsLength: steps.length,
         isLastStep: step === steps.length - 1,
-        loading,
+        isNextButtonDisabled: checkNextAvailability(),
         onNext,
         onBack,
         onSubmit,
-        isNextButtonDisabled: checkNextAvailability(),
     };
 };

@@ -1,12 +1,25 @@
+import React from "react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { forwardRef, useState } from "react";
 import { Input, InputProps } from "./Input";
 import { cn } from "../lib/utils/cn";
 import { Button } from "./Button";
 
-const PasswordInput = forwardRef<HTMLInputElement, InputProps>(({ className, ...props }, ref) => {
-    const [showPassword, setShowPassword] = useState(false);
+// const strengthTitles = {
+//     1: { title: "Weak", color: "bg-red-500" },
+//     2: { title: "Medium", color: "bg-yellow-500" },
+//     3: { title: "Strong", color: "bg-green-500" },
+//     4: { title: "Strong", color: "bg-green-500" },
+// };
+
+const PasswordInput = React.forwardRef<HTMLInputElement, InputProps & { showStrength?: boolean }>(({ className, ...props }, ref) => {
+    const [showPassword, setShowPassword] = React.useState(false);
+    // const [strength, setStrength] = React.useState(0);
+
     const disabled = !props.value || !props.value.toString().trim().length || props.disabled;
+
+    // React.useEffect(() => {
+    //     setStrength(passwordRules.filter(({ rule }) => rule(props.value as string)).length);
+    // }, [props.value]);
 
     return (
         <div className='relative'>
@@ -34,16 +47,27 @@ const PasswordInput = forwardRef<HTMLInputElement, InputProps>(({ className, ...
 
             {/* hides browsers password toggles */}
             <style>{`
-					.hide-password-toggle::-ms-reveal,
-					.hide-password-toggle::-ms-clear {
-						visibility: hidden;
-						pointer-events: none;
-						display: none;
-					}
-				`}</style>
+                .hide-password-toggle::-ms-reveal,
+                .hide-password-toggle::-ms-clear {
+                    visibility: hidden;
+                    pointer-events: none;
+                    display: none;
+                }
+            `}</style>
+            {/* {showStrength && !!strength && (
+                <span
+                    className={cn(
+                        "absolute bottom-0 left-0 right-2/3 h-2 rounded-bl-md",
+                        strengthTitles[strength as keyof typeof strengthTitles].color
+                    )}
+                >
+                    {strengthTitles[strength as keyof typeof strengthTitles].title}
+                </span>
+            )} */}
         </div>
     );
 });
+
 PasswordInput.displayName = "PasswordInput";
 
 export { PasswordInput };
