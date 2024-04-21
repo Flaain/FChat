@@ -1,46 +1,36 @@
-import {
-    Body,
-    Controller,
-    Get,
-    HttpException,
-    HttpStatus,
-    Post,
-} from '@nestjs/common';
-import { MeDTO } from './dto/auth.me.dto';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SigninDTO } from './dto/auth.signin.dto';
-import { SigninResponse } from './types';
-import { SignupDTO } from './dto/auth.signup.dto';
+import { SigninDTO } from './dtos/auth.signin.dto';
+import { SignupDTO } from './dtos/auth.signup.dto';
+import { JwtAuthGuard } from './guards/jwt.guard';
+import { AuthResponse } from './types';
+import { Routes } from 'src/utils/types';
+import { UserDocumentType } from 'src/user/types';
+import { SkipThrottle } from '@nestjs/throttler';
 
-@Controller('auth')
+@Controller(Routes.AUTH)
 export class AuthController {
     constructor(private authService: AuthService) {}
 
-    @Post('signup')
-    async signup(@Body() dto: SignupDTO) {
+    @Post(Routes.SIGNUP)
+    signup(@Body() dto: SignupDTO): Promise<AuthResponse> {
         return this.authService.signup(dto);
     }
 
-    @Post('signup/check-email')
-    async checkEmail(@Body() dto: SignupDTO) {
-        return this.authService.checkEmail(dto);
+    @Post(Routes.CHECK_EMAIL)
+    checkEmail(@Body() dto: Pick<SigninDTO, 'email'>) {
+        return this.authService._checkEmail(dto);
     }
-    
-    @Post('signin')
-    async signin(@Body() dto: SigninDTO): Promise<SigninResponse> {
+
+    @Post(Routes.SIGNIN)
+    signin(@Body() dto: SigninDTO) {
         return this.authService.signin(dto);
     }
 
-    @Get('me')
-    async me(@Body() dto: MeDTO) {
-        return {
-            id: 'window.crypto.randomUUID()',
-            username: 'User',
-            email: 'g7yJt@example.com',
-            conversations: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            token: 123,
-        };
+    @UseGuards(JwtAuthGuard)
+    @Get(Routes.ME)
+    @SkipThrottle()
+    profile(@Req() req: Request & { user: UserDocumentType }) {
+        return this.authService.getProfile(req.user);
     }
 }

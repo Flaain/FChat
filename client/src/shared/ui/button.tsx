@@ -15,7 +15,7 @@ const buttonVariants = cva(
                 outline: "border border-primary-white text-primary-white dark:border-primary-dark-50",
                 ghost: "text-primary-dark-200 hover:bg-primary-white dark:text-primary-white dark:hover:bg-primary-dark-50",
                 link: "dark:text-primary-white text-primary-dark-200 hover:underline hover:underline-offset-2",
-                commerce: "bg-primary-commerce",
+                commerce: "bg-primary-commerce text-primary-white hover:bg-primary-commerce/90",
             },
             size: {
                 default: "h-10 px-4 py-2",

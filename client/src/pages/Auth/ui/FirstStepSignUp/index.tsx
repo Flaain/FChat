@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/Form";
-import { Input } from "@/shared/ui/Input";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/form";
+import { Input } from "@/shared/ui/input";
 import { PasswordInput } from "@/shared/ui/PasswordInput";
 import { SignupSchema } from "../../model/types";
 

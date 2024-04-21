@@ -5,7 +5,7 @@ const WelcomeStage = () => {
     const { setAuthStage } = useAuth();
 
     return (
-        <section className='w-full h-screen flex flex-col gap-8 items-center justify-center bg-primary-dark-200'>
+        <div className="flex flex-col items-center justify-center w-full gap-5">
             <div className='flex flex-col gap-2 items-center'>
                 <h1 className='dark:text-white text-white text-6xl font-bold'>FChat</h1>
                 <p className='dark:text-white opacity-50 text-slate-400'>What's up?</p>
@@ -16,7 +16,7 @@ const WelcomeStage = () => {
                     Sign in
                 </Button>
             </div>
-        </section>
+        </div>
     );
 };
 

@@ -1,29 +1,12 @@
 import React from "react";
 import { SessionContextProps, SessionProviderProps } from "./types";
 import { SessionContext } from "./context";
+import { sessionReducer } from "./reducer";
 
-export const SessionProvider = ({
-    defaultUserId,
-    defaultAccessToken,
-    defaultIsAuthInProgress = true,
-    defaultIsAuthorized = false,
-    children,
-}: SessionProviderProps) => {
-    const [userId, setUserId] = React.useState(defaultUserId);
-    const [accessToken, setAccessToken] = React.useState(defaultAccessToken);
-    const [isAuthInProgress, setIsAuthInProgress] = React.useState(defaultIsAuthInProgress);
-    const [isAuthorized, setIsAuthorized] = React.useState(defaultIsAuthorized);
+export const SessionProvider = ({ defaultSessionState, children }: SessionProviderProps) => {
+    const [state, dispatch] = React.useReducer(sessionReducer, { isAuthInProgress: true, isAuthorized: false, ...defaultSessionState });
 
-    const value = React.useMemo<SessionContextProps>(() => ({
-        userId,
-        accessToken,
-        isAuthInProgress,
-        isAuthorized,
-        setUserId,
-        setAccessToken,
-        setIsAuthInProgress,
-        setIsAuthorized,
-    }), [userId, accessToken, isAuthInProgress, isAuthorized]);
+    const value = React.useMemo<SessionContextProps>(() => ({ state, dispatch }), [state]);
 
     return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 };

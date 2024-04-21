@@ -1,12 +1,14 @@
 import React from "react";
 import FirstStepSignUp from "../FirstStepSignUp";
 import SecondStepSignUp from "../SecondStepSignUp";
-import { Form } from "@/shared/ui/Form";
-import { Button } from "@/shared/ui/Button";
+import { Form } from "@/shared/ui/form";
+import { Button } from "@/shared/ui/button";
 import { useSignup } from "../../lib/hooks/useSignup";
+import { LoaderCircle } from "lucide-react";
 
 const SignupForm = () => {
-    const { form, loading, step, stepsLength, isLastStep, isNextButtonDisabled, onBack, onNext, onSubmit } = useSignup();
+    const { form, loading, step, stepsLength, isLastStep, isNextButtonDisabled, onBack, onNext, onSubmit } =
+        useSignup();
 
     const forms: Record<number, React.ReactNode> = {
         0: <FirstStepSignUp form={form} />,
@@ -44,7 +46,7 @@ const SignupForm = () => {
                                 Back
                             </Button>
                             <Button type='button' onClick={onNext} className='w-24' disabled={isNextButtonDisabled}>
-                                {isLastStep ? "Submit" : "Next"}
+                                {loading ? <LoaderCircle className='w-5 h-5 animate-loading' /> : isLastStep ? "Submit" : "Next"}
                             </Button>
                         </div>
                     </form>

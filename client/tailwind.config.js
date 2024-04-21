@@ -15,6 +15,8 @@ export default {
                 "primary-dark-50": "#424242",
                 "primary-dark-100": "#222222",
                 "primary-dark-200": "#141414",
+                "dark-side-panel": "#161718",
+                "dark-conversation-panel": "#18191B",
                 modal: "rgba(0, 0, 0, .5)",
             },
             keyframes: {

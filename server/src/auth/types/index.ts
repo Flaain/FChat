@@ -8,6 +8,7 @@ export type SigninRequest = z.infer<typeof signinRequestSchema>;
 export type SignupRequest = Omit<z.infer<typeof signupSchema>, "confirmPassword">;
 export type MeRequest = z.infer<typeof meRequestSchema>;
 
-export interface SigninResponse extends User {
+export interface AuthResponse extends User {
     accessToken: string;
+    expiersIn: string;
 }

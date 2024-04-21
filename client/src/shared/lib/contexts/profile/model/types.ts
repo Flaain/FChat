@@ -10,8 +10,8 @@ export interface Profile {
 }
 
 export interface ProfileContextProps {
-    profile: Profile | undefined;
-    setProfile: React.Dispatch<React.SetStateAction<Profile | undefined>>;
+    profile: Profile;
+    setProfile: React.Dispatch<React.SetStateAction<Profile>>;
 }
 
 export interface ProfileProviderProps {

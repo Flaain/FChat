@@ -1,7 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { UserRegister } from '../types';
 
 @Schema({ timestamps: true })
-export class UserSchema {
+export class User implements UserRegister {
     @Prop({ required: true, unique: true })
     name: string;
 
@@ -15,4 +16,4 @@ export class UserSchema {
     birthDate: Date;
 }
 
-export const userSchema = SchemaFactory.createForClass(UserSchema);
+export const UserSchema = SchemaFactory.createForClass(User);

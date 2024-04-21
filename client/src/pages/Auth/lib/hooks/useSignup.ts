@@ -3,9 +3,15 @@ import { FieldPath, useForm } from "react-hook-form";
 import { useAuth } from "./useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/shared/api";
-import { isSignupFormError } from "@/shared/lib/utils/isApiError";
+import { isApiError, isFormError } from "@/shared/lib/utils/isApiError";
 import { SignupSchema } from "../../model/types";
 import { signupSchema } from "../../model/schema";
+import { useProfile } from "@/shared/lib/hooks/useProfile";
+import { useSession } from "@/entities/session/lib/hooks/useSession";
+import { SessionTypes } from "@/entities/session/model/types";
+import { saveDataToLocalStorage } from "@/shared/lib/utils/saveDataToLocalStorage";
+import { localStorageKeys } from "@/shared/constants";
+import { toast } from "sonner";
 
 const steps: Array<{ fields: Array<FieldPath<SignupSchema>> }> = [
     { fields: ["email", "password", "confirmPassword"] },
@@ -14,6 +20,8 @@ const steps: Array<{ fields: Array<FieldPath<SignupSchema>> }> = [
 
 export const useSignup = () => {
     const { setAuthStage } = useAuth();
+    const { setProfile } = useProfile();
+    const { dispatch } = useSession();
 
     const [step, setStep] = React.useState(0);
     const [loading, setLoading] = React.useState(false);
@@ -33,29 +41,38 @@ export const useSignup = () => {
     });
 
     const checkNextAvailability = () => {
-        const validateActions = {
-            0: !!Object.keys(form.formState.errors).length || !form.getValues(steps[step].fields).every(Boolean),
-            1: !form.formState.isValid,
-        };
-
-        return form.formState.isSubmitting || validateActions[step as keyof typeof validateActions] || loading;
+        return (
+            form.formState.isSubmitting ||
+            !!Object.keys(form.formState.errors).length ||
+            !form.getValues(steps[step].fields).every(Boolean) ||
+            loading
+        );
     };
 
     const onSubmit = React.useCallback(async (data: SignupSchema) => {
-        console.log(data)
+        const {
+            data: { accessToken, expiresIn, ...profile },
+        } = await api.user.signup({ body: data });
+
+        setProfile(profile);
+        dispatch({
+            type: SessionTypes.SET_ON_AUTH,
+            payload: { isAuthorized: true, accessToken, userId: profile.id, expiresIn },
+        });
+        saveDataToLocalStorage({ key: localStorageKeys.TOKEN, data: accessToken });
     }, []);
 
     const onNext = React.useCallback(async () => {
         try {
-            const valid = await form.trigger(steps[step].fields, { shouldFocus: true });
-            
-            if (!valid) return;
+            const isValid = await form.trigger(steps[step].fields, { shouldFocus: true });
+
+            if (!isValid) return;
 
             setLoading(true);
 
             const actions = {
                 0: async () => {
-                    await api.user.checkEmailBeforeSignup({ body: JSON.stringify({ email: form.getValues("email") }) })
+                    await api.user.checkEmailBeforeSignup({ body: { email: form.getValues("email") } });
 
                     setStep((prevState) => prevState + 1);
                     form.reset(form.getValues());
@@ -66,9 +83,17 @@ export const useSignup = () => {
             await actions[step as keyof typeof actions]();
         } catch (error) {
             console.error(error);
-            isSignupFormError(error) && Object.entries(error.error).forEach(([key, value]) => form.setError(key as FieldPath<SignupSchema>, { 
-                message: value.message 
-            }));
+            isFormError<SignupSchema>(error)
+                ? Object.entries(error.error).forEach(([key, { message }]) =>
+                      form.setError(
+                          key as FieldPath<SignupSchema>,
+                          {
+                              message,
+                          },
+                          { shouldFocus: true }
+                      )
+                  )
+                : isApiError(error) && toast.error(error.message);
         } finally {
             setLoading(false);
         }
@@ -86,6 +111,7 @@ export const useSignup = () => {
         loading,
         stepsLength: steps.length,
         isLastStep: step === steps.length - 1,
+        rootError: form.formState.errors?.root?.serverError,
         isNextButtonDisabled: checkNextAvailability(),
         onNext,
         onBack,

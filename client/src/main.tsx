@@ -4,23 +4,20 @@ import App from "./app/ui/ui";
 
 import Providers, { ProvidersProps } from "./providers";
 import { getTheme } from "./shared/lib/utils/getTheme";
+import { getDataFromLocalStorage } from "./shared/lib/utils/getDataFromLocalStorage";
+import { localStorageKeys } from "./shared/constants";
 import "./app/styles/index.css";
 
-const rootElement = document.getElementById("root")!;
-const root = ReactDOM.createRoot(rootElement);
+const providerProps: Omit<ProvidersProps, "children"> = {
+    theme: { defaultTheme: getTheme() },
+    session: { defaultSessionState: { accessToken: getDataFromLocalStorage({ key: localStorageKeys.TOKEN, defaultData: undefined }) } },
+    profile: { defaultProfile: undefined },
+};
 
-(() => {
-    const providerProps: Omit<ProvidersProps, "children"> = {
-        theme: { defaultTheme: getTheme() },
-        profile: { defaultProfile: undefined },
-        session: { defaultIsAuthInProgress: true },
-    };
-
-    root.render(
-        <React.StrictMode>
-            <Providers {...providerProps}>
-                <App />
-            </Providers>
-        </React.StrictMode>
-    );
-})();
+ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+        <Providers {...providerProps}>
+            <App />
+        </Providers>
+    </React.StrictMode>
+);

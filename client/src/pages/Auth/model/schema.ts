@@ -1,40 +1,32 @@
 import { passwordRules } from "@/shared/constants";
 import { z } from "zod";
+import { emailForSchema, passwordForSchema } from "./constants";
 
 export const signinSchema = z.strictObject({
-    email: z.string().email("Invalid email address"),
-    password: z.string().trim().min(6, "Password must be at least 6 characters long"),
+    email: emailForSchema,
+    password: passwordForSchema,
 });
 
 export const firstStepSignUpSchema = z
     .object({
-        email: z.string().min(1, "Email is required").email("Invalid email address"),
-        password: z
-            .string()
-            .trim()
-            .min(1, "Password is required")
-            .min(6, "Password must be at least 6 characters long")
-            .max(32, "Password must be at most 32 characters long"),
+        email: emailForSchema,
+        password: passwordForSchema,
         confirmPassword: z.string().trim().min(1, "Confirm password is required"),
     })
     .superRefine(({ confirmPassword, password }, ctx) => {
         for (const { rule, message } of passwordRules) {
-            if (!rule(password)) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    path: ["password"],
-                    message,
-                });
-            }
-        }
-
-        if (confirmPassword !== password) {
-            ctx.addIssue({
+            !rule(password) && ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                path: ["confirmPassword"],
-                message: "Passwords do not match",
+                path: ["password"],
+                message
             });
         }
+
+        confirmPassword !== password && ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["confirmPassword"],
+            message: "Passwords do not match",
+        });
     });
 
 export const secondStepSignUpSchema = z.object({
