@@ -1,5 +1,4 @@
 import { HttpStatus } from '@nestjs/common';
-import { z } from 'zod';
 
 export const NAME_ALREADY_EXISTS = {
     status: HttpStatus.BAD_REQUEST,
@@ -22,27 +21,3 @@ export const EMAIL_ALREADY_EXISTS = {
         },
     },
 };
-
-export const SOMETHING_WENT_WRONG = {
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    message: 'something went wrong',
-};
-
-export const INVALID_CREDENTIALS = {
-    status: HttpStatus.UNAUTHORIZED,
-    message: 'invalid credentials',
-};
-
-export const nameForAuthSchema = z
-    .string()
-    .trim()
-    .regex(/^[a-zA-Z0-9\s]*$/, 'Name must contain only letters, numbers, and spaces')
-    .min(1, 'Name is required')
-    .min(3, 'Name must be at least 3 characters long')
-    .max(32, 'Name must be at most 32 characters long');
-
-export const emailForAuthSchema = z
-    .string()
-    .trim()
-    .min(1, 'Email is required')
-    .email('Invalid email address');

@@ -1,25 +1,30 @@
+import Typography from "@/shared/ui/Typography";
 import { PasswordInput } from "@/shared/ui/PasswordInput";
 import { useSignin } from "../../lib/hooks/useSignin";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/form";
-import { Input } from "@/shared/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/Form";
+import { Input } from "@/shared/ui/Input";
 import { Button } from "@/shared/ui/Button";
+import { LoaderCircle } from "lucide-react";
+import { AuthContainer } from "../AuthContainer";
 
 const SigninForm = () => {
     const { form, isSubmitButtonDisabled, onSubmit, onBack, loading } = useSignin();
 
     return (
-        <div className='flex items-center w-full h-full max-w-[1230px] mx-auto px-3 box-border'>
-            <div className='flex flex-col gap-2 items-end pr-10 max-md:hidden'>
-                <h1 className='text-6xl max-lg:text-4xl font-bold text-white text-balance text-right'>Sign in</h1>
-                <p className='text-xl max-lg:text-base text-white opacity-50 text-right'>
+        <div className='flex items-center w-full h-full max-w-[1230px] mx-auto box-border'>
+            <div className='flex flex-col gap-3 items-end px-10 max-lg:px-5 max-md:hidden'>
+                <Typography variant='primary' as='h1' size='6xl' weight='bold' align='right'>
+                    Sign in
+                </Typography>
+                <Typography as='p' size='xl' variant='secondary' align='right'>
                     Enter your username and password
-                </p>
+                </Typography>
             </div>
             <Form {...form}>
-                <div className='flex max-md:justify-center flex-1 md:pl-10 md:border-l md:border-solid md:border-primary-dark-50 md:h-full'>
+                <AuthContainer>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className='flex flex-col gap-4 h-full justify-center md:min-w-[560px] max-md:max-w-[500px] max-md:w-full'
+                        className='flex flex-col gap-4 h-full justify-center max-w-[560px] w-full'
                     >
                         <FormField
                             name='email'
@@ -67,11 +72,11 @@ const SigninForm = () => {
                                 Back
                             </Button>
                             <Button className='w-24' disabled={isSubmitButtonDisabled}>
-                                Submit
+                                {loading ? <LoaderCircle className='w-5 h-5 animate-loading' /> : "Submit"}
                             </Button>
                         </div>
                     </form>
-                </div>
+                </AuthContainer>
             </Form>
         </div>
     );

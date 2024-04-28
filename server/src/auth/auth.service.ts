@@ -2,10 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { AuthResponse, SigninRequest, SignupRequest } from './types';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { EMAIL_ALREADY_EXISTS, INVALID_CREDENTIALS, NAME_ALREADY_EXISTS, SOMETHING_WENT_WRONG } from './auth.constants';
+import { EMAIL_ALREADY_EXISTS, NAME_ALREADY_EXISTS } from './auth.constants';
 import { ConfigService } from '@nestjs/config';
 import { compare } from 'bcrypt';
 import { UserDocumentType } from 'src/user/types';
+import { INVALID_CREDENTIALS, SOMETHING_WENT_WRONG } from 'src/utils/constants';
 
 @Injectable()
 export class AuthService {

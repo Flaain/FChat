@@ -16,12 +16,14 @@ const buttonVariants = cva(
                 ghost: "text-primary-dark-200 hover:bg-primary-white dark:text-primary-white dark:hover:bg-primary-dark-50",
                 link: "dark:text-primary-white text-primary-dark-200 hover:underline hover:underline-offset-2",
                 commerce: "bg-primary-commerce text-primary-white hover:bg-primary-commerce/90",
+                text: "dark:text-primary-white text-primary-dark-200 hover:opacity-50 ring-offset-0 rounded-none transition-opacity ring-0 ring-transparent",
             },
             size: {
                 default: "h-10 px-4 py-2",
                 sm: "h-9 rounded-md px-3",
                 lg: "h-11 rounded-md px-8",
                 icon: "h-10 w-10",
+                text: "p-0"
             },
         },
         defaultVariants: {

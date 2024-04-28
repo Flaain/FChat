@@ -1,7 +1,8 @@
 import { SigininSchema, SignupSchema } from "@/pages/Auth/model/types";
 import { Profile } from "../lib/contexts/profile/model/types";
-import { APIMethodParams, AuthResponse, WithRequired } from "../model/types";
+import { APIMethodParams, AuthResponse, SearchUser, WithRequired } from "../model/types";
 import { API } from "./API";
+import { CreateConversationFormType } from "@/widgets/CreateConversationForm/model/types";
 
 export class UserAPI extends API {
     checkEmailBeforeSignup = async ({ body }: WithRequired<APIMethodParams<Pick<SignupSchema, "email">>, "body">) => {
@@ -41,5 +42,18 @@ export class UserAPI extends API {
         });
 
         return this._checkResponse<Profile>(response);
+    };
+
+    search = async ({
+        token,
+        body: { name },
+        ...rest
+    }: WithRequired<APIMethodParams<CreateConversationFormType>, "token" | "body">) => {
+        const response = await fetch(this._baseUrl + `/user?name=${name}`, {
+            headers: { ...this._headers, Authorization: `Bearer ${token}` },
+            ...rest,
+        });
+
+        return this._checkResponse<Array<SearchUser>>(response);
     };
 }

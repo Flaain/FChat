@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SigninDTO } from './dtos/auth.signin.dto';
 import { SignupDTO } from './dtos/auth.signup.dto';
-import { JwtAuthGuard } from './guards/jwt.guard';
+import { JwtGuard } from '../utils/jwt.guard';
 import { AuthResponse } from './types';
 import { Routes } from 'src/utils/types';
 import { UserDocumentType } from 'src/user/types';
@@ -27,7 +27,7 @@ export class AuthController {
         return this.authService.signin(dto);
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtGuard)
     @Get(Routes.ME)
     @SkipThrottle()
     profile(@Req() req: Request & { user: UserDocumentType }) {

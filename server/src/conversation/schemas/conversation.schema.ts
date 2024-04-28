@@ -12,6 +12,9 @@ export class Conversation implements ConversationTypeForSchema {
 
     @Prop({ type: [{ type: Types.ObjectId, ref: 'Message' }] })
     messages: Types.ObjectId[];
+
+    @Prop({ type: Types.ObjectId, ref: 'User' })
+    creator: Types.ObjectId;
 }
 
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);

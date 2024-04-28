@@ -3,6 +3,7 @@ export enum Routes {
     SIGNUP = 'signup',
     CHECK_EMAIL = 'signup/check-email',
     SIGNIN = 'signin',
+    USER = "user",
     ME = 'me',
     CONVERSATION = 'conversation',
     MESSAGE = 'conversation/message',

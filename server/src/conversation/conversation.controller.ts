@@ -1,9 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Post } from '@nestjs/common';
 
 @Controller('conversation')
 export class ConversationController {
-    @Get('all')
-    getAll() {
-        return 'all';
-    }
+    @Post('create')
+    createConversation() {}
 }

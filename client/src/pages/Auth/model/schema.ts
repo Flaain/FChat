@@ -1,6 +1,5 @@
-import { passwordRules } from "@/shared/constants";
 import { z } from "zod";
-import { emailForSchema, passwordForSchema } from "./constants";
+import { emailForSchema, nameForSchema, passwordForSchema, passwordRules } from "@/shared/constants";
 
 export const signinSchema = z.strictObject({
     email: emailForSchema,
@@ -18,7 +17,7 @@ export const firstStepSignUpSchema = z
             !rule(password) && ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 path: ["password"],
-                message
+                message,
             });
         }
 
@@ -30,13 +29,7 @@ export const firstStepSignUpSchema = z
     });
 
 export const secondStepSignUpSchema = z.object({
-    name: z
-        .string()
-        .regex(/^[a-zA-Z0-9\s]*$/, "Name must contain only letters, numbers, and spaces")
-        .trim()
-        .min(1, "Name is required")
-        .min(3, "Name must be at least 3 characters long")
-        .max(32, "Name must be at most 32 characters long"),
+    name: nameForSchema,
     birthDate: z.coerce
         .date({ required_error: "Birth date is required" })
         .min(new Date("1900-01-01"), "Invalid birth date")

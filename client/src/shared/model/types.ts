@@ -10,10 +10,6 @@ export interface BaseAPI {
     };
 }
 
-// export interface IAbstractAPI extends BaseAPI {
-//    _checkResponse<T>(response: Response): Promise<APIData<T>>;
-// } <-- cannot use protected so decided to comment for now
-
 export interface APIData<T> {
     data: T;
     status: Response["status"];
@@ -66,4 +62,47 @@ export interface Conversation {
     messages: Array<Message>;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface ModalProps {
+    title?: string;
+    closeHandler: () => void;
+    children: React.ReactNode;
+}
+
+export type TypographyVariant = "primary" | "secondary" | "commerce" | "error";
+export type TypographySize = "base" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl";
+export type TypographyWeight = "normal" | "medium" | "semibold" | "bold" | "extrabold";
+export type TypographyAlign = "left" | "center" | "right";
+
+export interface TypographyVariants {
+    variant: Record<TypographyVariant, string>;
+    size: Record<TypographySize, string>;
+    weight: Record<TypographyWeight, string>;
+}
+
+interface BaseTypographyProps {
+    variant?: TypographyVariant;
+    size?: TypographySize;
+    weight?: TypographyWeight;
+    align?: TypographyAlign;
+}
+
+export type PolymorphicRef<T extends React.ElementType> = React.ComponentPropsWithRef<T>["ref"];
+
+type PropsOf<T extends React.ElementType> = React.ComponentPropsWithRef<T>;
+
+type PolymorphicProps<T extends React.ElementType = React.ElementType, TProps = object> = {
+    as?: T;
+} & TProps &
+    Omit<PropsOf<T>, keyof TProps | "as" | "ref"> & { ref?: PolymorphicRef<T> };
+
+
+export type TypographyProps<T extends React.ElementType = "span"> = PolymorphicProps<T, BaseTypographyProps>;
+
+export type TypographyComponent = <T extends React.ElementType = "span">(props: PolymorphicProps<T, TypographyProps<T>>) => React.ReactNode;
+
+export interface SearchUser {
+    _id: string;
+    name: string;
 }

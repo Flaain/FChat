@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -6,17 +6,29 @@ import { SignupDTO } from 'src/auth/dtos/auth.signup.dto';
 import { User } from './schemas/user.schema';
 import { Conversation } from 'src/conversation/schemas/conversation.schema';
 import { UserDocumentType } from './types';
+import { USER_NOT_FOUND } from 'src/utils/constants';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel(User.name) private readonly userModel: Model<User>,
-        @InjectModel(Conversation.name)
-        private readonly conversationModel: Model<Conversation>,
+        @InjectModel(Conversation.name) private readonly conversationModel: Model<Conversation>,
     ) {}
 
-    findByPayload = async (payload: Partial<Pick<User, 'email' | 'name'>>) =>
-        this.userModel.findOne(payload);
+    findByPayload = async (payload: Partial<Pick<User, 'email' | 'name'>>) => this.userModel.findOne(payload);
+
+    searchUser = async (name: string) => {
+        try {
+            const users = await this.userModel.find({ name: { $regex: name, $options: 'i' } }, { _id: 1, name: 1 });
+
+            if (!users.length) throw new HttpException(USER_NOT_FOUND, USER_NOT_FOUND.status);
+
+            return users;
+        } catch (error) {
+            console.log(error);
+            throw new HttpException(error.response, error.status);
+        }
+    };
 
     getConversations = async (_id: Types.ObjectId) => {
         try {

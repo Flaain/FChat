@@ -1,9 +1,9 @@
+import { emailForSchema, nameForSchema } from 'src/utils/constants';
 import { z } from 'zod';
-import { emailForAuthSchema, nameForAuthSchema } from '../auth.constants';
 
 export const signupSchema = z.object({
-    email: emailForAuthSchema,
-    name: nameForAuthSchema,
+    email: emailForSchema,
+    name: nameForSchema,
     password: z
         .string()
         .trim()
@@ -18,5 +18,10 @@ export const signupSchema = z.object({
         .date({ required_error: 'Birth date is required' })
         .min(new Date('1900-01-01'), 'Invalid birth date')
         .max(new Date(), 'Birth date cannot be in the future')
-        .refine((date) => new Date().getTime() - date.getTime() >= 14 * 365 * 24 * 60 * 60 * 1000, 'You must be at least 14 years old'),
+        .refine(
+            (date) =>
+                new Date().getTime() - date.getTime() >=
+                14 * 365 * 24 * 60 * 60 * 1000,
+            'You must be at least 14 years old',
+        ),
 });
