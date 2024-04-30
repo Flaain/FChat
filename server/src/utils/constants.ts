@@ -27,7 +27,7 @@ export const USER_NOT_FOUND = {
     message: 'please try to search for another user',
     type: 'form',
     error: {
-        name: {
+        username: {
             message: 'user not found',
         },
     },

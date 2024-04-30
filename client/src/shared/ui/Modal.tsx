@@ -1,7 +1,27 @@
 import React from "react";
-import { ModalProps } from "@/shared/model/types";
-import { XIcon } from "lucide-react";
 import Typography from "./Typography";
+import { ModalBodyProps, ModalProps } from "@/shared/model/types";
+import { XIcon } from "lucide-react";
+import { cva } from "class-variance-authority";
+import { cn } from "../lib/utils/cn";
+
+const modalVariants = cva(
+    "flex flex-col gap-5 overflow-auto dark:bg-primary-dark-100 dark:border-primary-dark-200 bg-white rounded-lg box-border border border-solid border-primary-gray",
+    {
+        variants: {
+            size: {
+                default: "w-full h-full max-w-[750px] max-h-[600px] p-8",
+                sm: "w-full h-full max-w-[550px] max-h-[400px] p-5",
+                lg: "w-full h-full max-w-[900px] max-h-[700px] p-10",
+                fitHeight: "max-w-[750px] w-full h-auto p-8 max-h-[600px]",
+                screen: "w-full h-full p-8",
+            },
+        },
+        defaultVariants: {
+            size: "default",
+        },
+    }
+);
 
 const ModalHeader = ({ title, closeHandler }: Omit<ModalProps, "children">) => {
     return (
@@ -52,18 +72,18 @@ const ModalContainer = ({ children, closeHandler }: Omit<ModalProps, "title">) =
     );
 };
 
-const ModalBody = ({ children }: { children: React.ReactNode }) => {
+const ModalBody = ({ children, size, className, ...rest }: ModalBodyProps) => {
     return (
-        <div className='flex flex-col gap-5 max-h-[600px] max-w-[750px] overflow-auto w-full h-full dark:bg-primary-dark-100 dark:border-primary-dark-200 bg-white rounded-lg p-8 box-border border border-solid border-primary-gray'>
+        <div className={cn(modalVariants({ size, className }))} {...rest}>
             {children}
         </div>
     );
 };
 
-const Modal = ({ closeHandler, title, children }: ModalProps) => {
+const Modal = ({ closeHandler, title, children, size }: ModalProps) => {
     return (
         <ModalContainer closeHandler={closeHandler}>
-            <ModalBody>
+            <ModalBody size={size}>
                 <ModalHeader title={title} closeHandler={closeHandler} />
                 {children}
             </ModalBody>

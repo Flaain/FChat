@@ -1,6 +1,8 @@
+import { ModalConfig } from "../lib/contexts/modal/types";
 import { Profile } from "../lib/contexts/profile/model/types";
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+export type ModalSize = "default" | "sm" | "lg" | "fitHeight" | "screen";
 
 export interface BaseAPI {
     baseUrl?: string;
@@ -49,14 +51,14 @@ export interface Message {
 }
 
 export interface Participant {
-    id: string;
-    username: string;
+    _id: string;
+    name: string;
     createdAt: string;
     updatedAt: string;
 }
 
 export interface Conversation {
-    id: string;
+    _id: string;
     name?: string;
     participants: Array<Participant>;
     messages: Array<Message>;
@@ -64,8 +66,7 @@ export interface Conversation {
     updatedAt: string;
 }
 
-export interface ModalProps {
-    title?: string;
+export interface ModalProps extends Omit<ModalConfig, "content"> {
     closeHandler: () => void;
     children: React.ReactNode;
 }
@@ -105,4 +106,9 @@ export type TypographyComponent = <T extends React.ElementType = "span">(props: 
 export interface SearchUser {
     _id: string;
     name: string;
+}
+
+export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
+    children: React.ReactNode;
+    size?: ModalSize;
 }

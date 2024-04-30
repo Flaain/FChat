@@ -57,7 +57,7 @@ export const useSignup = () => {
         setProfile(profile);
         dispatch({
             type: SessionTypes.SET_ON_AUTH,
-            payload: { isAuthorized: true, accessToken, userId: profile.id, expiresIn },
+            payload: { isAuthorized: true, accessToken, userId: profile._id, expiresIn },
         });
         saveDataToLocalStorage({ key: localStorageKeys.TOKEN, data: accessToken });
     }, []);

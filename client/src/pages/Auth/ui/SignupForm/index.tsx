@@ -9,8 +9,7 @@ import Typography from "@/shared/ui/Typography";
 import { AuthContainer } from "../AuthContainer";
 
 const SignupForm = () => {
-    const { form, loading, step, stepsLength, isLastStep, isNextButtonDisabled, onBack, onNext, onSubmit } =
-        useSignup();
+    const { form, loading, step, stepsLength, isLastStep, isNextButtonDisabled, onBack, onNext, onSubmit } = useSignup();
 
     const forms: Record<number, React.ReactNode> = {
         0: <FirstStepSignUp form={form} />,

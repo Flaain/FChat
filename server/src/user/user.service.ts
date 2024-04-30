@@ -1,7 +1,7 @@
 import { HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { SignupDTO } from 'src/auth/dtos/auth.signup.dto';
 import { User } from './schemas/user.schema';
 import { Conversation } from 'src/conversation/schemas/conversation.schema';
@@ -15,11 +15,11 @@ export class UserService {
         @InjectModel(Conversation.name) private readonly conversationModel: Model<Conversation>,
     ) {}
 
-    findByPayload = async (payload: Partial<Pick<User, 'email' | 'name'>>) => this.userModel.findOne(payload);
+    findByPayload = async (payload: FilterQuery<User>, projection?: ProjectionType<User>, options?: QueryOptions<User>) => this.userModel.findOne(payload, projection, options);
 
-    searchUser = async (name: string) => {
+    searchUser = async (initiatorId: string, name: string) => {
         try {
-            const users = await this.userModel.find({ name: { $regex: name, $options: 'i' } }, { _id: 1, name: 1 });
+            const users = await this.userModel.find({ name: { $regex: name, $options: 'i' }, _id: { $ne: initiatorId } }, { _id: 1, name: 1 });
 
             if (!users.length) throw new HttpException(USER_NOT_FOUND, USER_NOT_FOUND.status);
 

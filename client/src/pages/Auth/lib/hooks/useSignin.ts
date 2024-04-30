@@ -40,7 +40,7 @@ export const useSignin = () => {
             setProfile(profile);
             dispatch({
                 type: SessionTypes.SET_ON_AUTH,
-                payload: { accessToken, expiresIn, isAuthorized: true, userId: profile.id },
+                payload: { accessToken, expiresIn, isAuthorized: true, userId: profile._id },
             });
 
             saveDataToLocalStorage({ key: localStorageKeys.TOKEN, data: accessToken })

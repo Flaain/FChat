@@ -1,7 +1,7 @@
 import { Conversation } from "@/shared/model/types";
 
 export interface Profile {
-    id: string;
+    _id: string;
     username: string;
     email: string;
     conversations: Array<Conversation>;

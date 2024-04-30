@@ -46,10 +46,10 @@ export class UserAPI extends API {
 
     search = async ({
         token,
-        body: { name },
+        body: { username },
         ...rest
     }: WithRequired<APIMethodParams<CreateConversationFormType>, "token" | "body">) => {
-        const response = await fetch(this._baseUrl + `/user?name=${name}`, {
+        const response = await fetch(this._baseUrl + `/user?name=${username}`, {
             headers: { ...this._headers, Authorization: `Bearer ${token}` },
             ...rest,
         });

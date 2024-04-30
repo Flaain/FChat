@@ -1,7 +1,8 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Routes } from 'src/utils/types';
 import { JwtGuard } from 'src/utils/jwt.guard';
+import { UserDocumentType } from './types';
 
 @Controller(Routes.USER)
 export class UserController {
@@ -9,8 +10,8 @@ export class UserController {
     
     @Get()
     @UseGuards(JwtGuard)
-    getUsers(@Query("name") name: string) {
-        return this.userService.searchUser(name);
+    getUsers(@Req() req: Request & { user: UserDocumentType }, @Query("name") name: string) {
+        return this.userService.searchUser(req.user._id.toString(), name);
     }
 
     @Get('profile')

@@ -18,7 +18,7 @@ export const ProfileProvider = ({ defaultProfile, children }: ProfileProviderPro
                 const { data: profile } = await api.user.profile({ token: accessToken });
 
                 setProfile(profile);
-                dispatch({ type: SessionTypes.SET_AUTH_DONE, payload: { userId: profile.id, isAuthorized: true } });
+                dispatch({ type: SessionTypes.SET_AUTH_DONE, payload: { userId: profile._id, isAuthorized: true } });
             } catch (error) {
                 console.error(error);
                 // localStorage.removeItem(localStorageKeys.TOKEN);

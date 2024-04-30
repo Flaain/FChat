@@ -46,8 +46,8 @@ export class AuthService {
         return { status: HttpStatus.OK, message: 'OK' };
     };
 
-    private _checkName = async (payload: Pick<SignupRequest, 'name'>) => {
-        const candidate = await this.userService.findByPayload(payload);
+    private _checkName = async ({ name }: Pick<SignupRequest, 'name'>) => {
+        const candidate = await this.userService.findByPayload({ name: { $regex: name, $options: 'i' } });
 
         if (candidate) throw new HttpException(NAME_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
 

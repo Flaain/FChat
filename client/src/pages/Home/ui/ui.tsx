@@ -12,7 +12,7 @@ const Home = () => {
             <Typography as="h1" variant='primary' size='2xl' weight='bold'>
                 Select or&nbsp;
                 <Button
-                    onClick={() => openModal({ title: "New conversation", content: <CreateConversationForm /> })}
+                    onClick={() => openModal({ title: "New conversation", content: <CreateConversationForm />, size: "fitHeight" })}
                     variant='text'
                     size='text'
                     className='text-2xl font-bold underline uppercase'
