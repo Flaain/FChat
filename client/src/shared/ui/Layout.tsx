@@ -25,7 +25,7 @@ const Layout = () => {
                     style={{ overflow: "unset" }}
                     onResize={(size) => saveDataToLocalStorage({ key: localStorageKeys.ASIDE_PANEL_SIZE, data: size })}
                 >
-                    <aside className='flex flex-col h-screen sticky top-0 p-5 gap-8 bg-dark-side-panel'>
+                    <aside className='flex flex-col h-screen sticky top-0 p-5 gap-8 dark:bg-primary-dark-150 bg-primary-white'>
                         <div className='flex items-center justify-between gap-2'>
                             <Input
                                 onChange={handleSearch}

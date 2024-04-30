@@ -14,6 +14,7 @@ export default {
                 "primary-destructive": "#E64646",
                 "primary-dark-50": "#424242",
                 "primary-dark-100": "#222222",
+                "primary-dark-150": "#1B1B1B",
                 "primary-dark-200": "#141414",
                 "dark-side-panel": "#161718",
                 "dark-conversation-panel": "#18191B",

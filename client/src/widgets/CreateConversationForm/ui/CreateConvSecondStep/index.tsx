@@ -1,11 +1,10 @@
 import AvatarByName from "@/shared/ui/AvatarByName";
 import { Button } from "@/shared/ui/Button";
 import Typography from "@/shared/ui/Typography";
-import { LoaderCircle, Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
 import { CreateConvSecondStepProps } from "../../model/types";
 
 const CreateConvSecondStep = ({
-    loading,
     searchedUsers,
     selectedUsers,
     handleSelect,
@@ -66,9 +65,6 @@ const CreateConvSecondStep = ({
                             </li>
                         ))}
                     </ul>
-                    <Button type='submit' variant='default' className='w-full mt-5'>
-                        {loading ? <LoaderCircle className='w-5 h-5 animate-loading' /> : "Create conversation"}
-                    </Button>
                 </>
             )}
         </>

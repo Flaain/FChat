@@ -7,12 +7,9 @@ export type CreateConversationFormType = z.infer<typeof createConversationSchema
 
 export interface CreateConvFirstStepProps {
     form: UseFormReturn<CreateConversationFormType>;
-    loading: boolean;
-    isButtonDisabled: boolean;
 }
 
 export interface CreateConvSecondStepProps {
-    loading: boolean;
     searchedUsers: Array<SearchUser>;
     selectedUsers: Map<string, SearchUser>;
     handleSelect: (user: SearchUser) => void;
