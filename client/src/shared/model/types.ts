@@ -53,8 +53,7 @@ export interface Message {
 export interface Participant {
     _id: string;
     name: string;
-    createdAt: string;
-    updatedAt: string;
+    email: string;
 }
 
 export interface Conversation {
@@ -62,6 +61,7 @@ export interface Conversation {
     name?: string;
     participants: Array<Participant>;
     messages: Array<Message>;
+    creator: Participant;
     createdAt: string;
     updatedAt: string;
 }

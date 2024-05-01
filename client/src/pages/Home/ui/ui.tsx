@@ -1,9 +1,9 @@
 import Typography from "@/shared/ui/Typography";
-import CreateConversationForm from "@/widgets/CreateConversationForm/ui/ui";
 import { useModal } from "@/shared/lib/hooks/useModal";
 import { Button } from "@/shared/ui/Button";
 import { useProfile } from "@/shared/lib/hooks/useProfile";
 import { LucideMessagesSquare } from "lucide-react";
+import CreateConversation from "@/features/CreateConversation/ui/ui";
 
 const Home = () => {
     const { openModal } = useModal();
@@ -18,7 +18,7 @@ const Home = () => {
                         onClick={() =>
                             openModal({
                                 title: "New conversation",
-                                content: <CreateConversationForm />,
+                                content: <CreateConversation />,
                                 size: "fitHeight",
                             })
                         }
@@ -37,7 +37,7 @@ const Home = () => {
                         onClick={() =>
                             openModal({
                                 title: "New conversation",
-                                content: <CreateConversationForm />,
+                                content: <CreateConversation />,
                                 size: "fitHeight",
                             })
                         }

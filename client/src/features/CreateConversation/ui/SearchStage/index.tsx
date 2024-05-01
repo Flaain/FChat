@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shar
 import { Input } from "@/shared/ui/Input";
 import { CreateConvFirstStepProps } from "../../model/types";
 
-const CreateConvFirstStep = ({ form }: CreateConvFirstStepProps) => {
+const SearchStage = ({ form }: CreateConvFirstStepProps) => {
     return (
         <FormField
             name='username'
@@ -24,4 +24,4 @@ const CreateConvFirstStep = ({ form }: CreateConvFirstStepProps) => {
     );
 };
 
-export default CreateConvFirstStep;
+export default SearchStage;

@@ -12,23 +12,35 @@ import { SkipThrottle } from '@nestjs/throttler';
 export class AuthController {
     constructor(private authService: AuthService) {}
 
-    @Post(Routes.SIGNUP)
+    @Post("signup")
     signup(@Body() dto: SignupDTO): Promise<AuthResponse> {
         return this.authService.signup(dto);
     }
 
-    @Post(Routes.CHECK_EMAIL)
+    @Post("checkEmail")
     checkEmail(@Body() dto: Pick<SigninDTO, 'email'>) {
         return this.authService._checkEmail(dto);
     }
 
-    @Post(Routes.SIGNIN)
+    @Post("signin")
     signin(@Body() dto: SigninDTO) {
         return this.authService.signin(dto);
     }
 
+    // @UseGuards(JwtGuard)
+    // @Post("signout")
+    // signout(@Req() req: Request & { user: UserDocumentType }) {
+    //     return this.authService.signout(req.user);
+    // }
+
+    // @UseGuards(JwtGuard)
+    // @Post("refresh")
+    // refreshToken() {
+    //     return 'refresh';
+    // }
+
     @UseGuards(JwtGuard)
-    @Get(Routes.ME)
+    @Get("me")
     @SkipThrottle()
     profile(@Req() req: Request & { user: UserDocumentType }) {
         return this.authService.getProfile(req.user);

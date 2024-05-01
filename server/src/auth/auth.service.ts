@@ -13,14 +13,14 @@ export class AuthService {
     constructor(
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
     ) {}
 
     async signin({ email, password }: SigninRequest) {
         const candidate = await this.userService.findByPayload({ email });
-        
+
         if (!candidate) throw new HttpException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
-        
+
         try {
             const { password: candidatePassword, ...rest } = candidate.toObject();
             const isPasswordValid = await compare(password, candidatePassword);
@@ -52,9 +52,12 @@ export class AuthService {
         if (candidate) throw new HttpException(NAME_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
 
         return { status: HttpStatus.OK, message: 'OK' };
-    }
+    };
 
-    private _createToken = (_id: string) => ({ accessToken: this.jwtService.sign({ _id }), expiersIn: this.configService.get<string>('JWT_EXPIERSIN') });
+    private _createToken = (_id: string) => ({
+        accessToken: this.jwtService.sign({ _id }),
+        expiersIn: this.configService.get<string>('JWT_EXPIERSIN'),
+    });
 
     private _validateUserBeforeSignup = async (dto: SignupRequest) => {
         await Promise.all([this._checkEmail({ email: dto.email }), this._checkName({ name: dto.name })]);
@@ -62,7 +65,7 @@ export class AuthService {
 
     signup = async (dto: SignupRequest): Promise<AuthResponse> => {
         await this._validateUserBeforeSignup(dto);
-        
+
         try {
             const { _id, ...user } = await this.userService.create(dto);
             const token = this._createToken(_id.toString());

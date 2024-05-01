@@ -14,6 +14,9 @@ export class User implements UserRegister {
 
     @Prop({ required: true })
     birthDate: Date;
+
+    @Prop({ required: true, default: false })
+    isPrivate: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

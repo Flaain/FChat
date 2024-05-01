@@ -12,14 +12,26 @@ import { USER_NOT_FOUND } from 'src/utils/constants';
 export class UserService {
     constructor(
         @InjectModel(User.name) private readonly userModel: Model<User>,
-        @InjectModel(Conversation.name) private readonly conversationModel: Model<Conversation>,
+        @InjectModel(Conversation.name)
+        private readonly conversationModel: Model<Conversation>,
     ) {}
 
-    findByPayload = async (payload: FilterQuery<User>, projection?: ProjectionType<User>, options?: QueryOptions<User>) => this.userModel.findOne(payload, projection, options);
+    findByPayload = async (
+        payload: FilterQuery<User>,
+        projection?: ProjectionType<User>,
+        options?: QueryOptions<User>,
+    ) => this.userModel.findOne(payload, projection, options);
 
     searchUser = async (initiatorId: string, name: string) => {
         try {
-            const users = await this.userModel.find({ name: { $regex: name, $options: 'i' }, _id: { $ne: initiatorId } }, { _id: 1, name: 1 });
+            const users = await this.userModel.find(
+                {
+                    _id: { $ne: initiatorId },
+                    name: { $regex: name, $options: 'i' },
+                    isPrivate: false,
+                },
+                { _id: 1, name: 1 },
+            );
 
             if (!users.length) throw new HttpException(USER_NOT_FOUND, USER_NOT_FOUND.status);
 
@@ -33,12 +45,24 @@ export class UserService {
     getConversations = async (_id: Types.ObjectId) => {
         try {
             const conversations = await this.conversationModel
-            .find({ participants: { $in: [_id] } })
-            .populate([
-                { path: 'participants', model: 'User', select: 'name email' },
-                { path: 'messages', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name email' } },
-            ])
-            .lean();
+                .find({ participants: { $in: [_id] } })
+                .populate([
+                    {
+                        path: 'participants',
+                        model: 'User',
+                        select: 'name email',
+                    },
+                    {
+                        path: 'messages',
+                        model: 'Message',
+                        populate: {
+                            path: 'sender',
+                            model: 'User',
+                            select: 'name email',
+                        },
+                    },
+                ])
+                .lean();
             return conversations;
         } catch (error) {
             console.log(error);
@@ -68,7 +92,14 @@ export class UserService {
         birthDate,
     }: SignupDTO): Promise<Omit<User, 'password'> & { _id: Types.ObjectId }> => {
         const hashedPassword = await hash(password, 10);
-        const { password: _, ...user } = (await new this.userModel({ email, name, password: hashedPassword, birthDate }).save()).toObject();
+        const { password: _, ...user } = (
+            await new this.userModel({
+                email,
+                name,
+                password: hashedPassword,
+                birthDate,
+            }).save()
+        ).toObject();
 
         return user;
     };

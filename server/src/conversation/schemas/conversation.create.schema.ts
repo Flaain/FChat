@@ -4,7 +4,7 @@ export const conversationCreateSchema = z
     .object({
         participants: z
             .array(z.string())
-            .min(2, 'At least two participants are required')
+            .min(1, 'At least two participants are required')
             .max(10, 'Too many participants'),
         name: z
             .string()
@@ -14,7 +14,7 @@ export const conversationCreateSchema = z
             .optional(),
     })
     .superRefine(({ participants, name }, ctx) => {
-        participants.length > 2 && !name && ctx.addIssue({
+        participants.length >= 2 && !name && ctx.addIssue({
             code: 'custom',
             message: 'Conversation name for groups is required'
         });

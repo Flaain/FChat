@@ -1,13 +1,13 @@
-import CreateConvFirstStep from "./CreateConvFirstStep";
-import CreateConvSecondStep from "./CreateConvSecondStep";
-import CreateConvThirdStep from "./CreateConvThirdStep";
+import SearchStage from "./SearchStage";
+import SelectStage from "./SelectStage";
+import SetupStage from "./SetupStage";
 import { Form } from "@/shared/ui/Form";
 import { useCreateConversation } from "../lib/hooks/useCreateConversation";
 import { Button } from "@/shared/ui/Button";
 import { LoaderCircle } from "lucide-react";
 import { cn } from "@/shared/lib/utils/cn";
 
-const CreateConversationForm = () => {
+const CreateConversation = () => {
     const {
         form,
         step,
@@ -27,26 +27,33 @@ const CreateConversationForm = () => {
         2: "Create group conversation",
     };
 
-    const components: Record<number, React.ReactNode> = {
-        0: <CreateConvFirstStep form={form} />,
+    const stages: Record<number, React.ReactNode> = {
+        0: <SearchStage form={form} />,
         1: (
-            <CreateConvSecondStep
+            <SelectStage
                 searchedUsers={searchedUsers}
                 selectedUsers={selectedUsers}
                 handleSelect={handleSelect}
                 handleRemove={handleRemove}
             />
         ),
-        2: <CreateConvThirdStep form={form} />,
+        2: <SetupStage form={form} />,
     };
 
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-5 mt-5'>
-                {components[step]}
+                {stages[step]}
                 <div className={cn("flex items-center gap-5 justify-between", { "mt-5": step === 1 })}>
                     {!!step && (
-                        <Button type='button' size='lg' variant='secondary' className='w-1/3' onClick={handleBack}>
+                        <Button
+                            type='button'
+                            size='lg'
+                            variant='secondary'
+                            className='w-1/3'
+                            onClick={handleBack}
+                            disabled={loading}
+                        >
                             Back
                         </Button>
                     )}
@@ -68,4 +75,4 @@ const CreateConversationForm = () => {
     );
 };
 
-export default CreateConversationForm;
+export default CreateConversation;

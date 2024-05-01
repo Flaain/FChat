@@ -1,12 +1,7 @@
 export enum Routes {
     AUTH = 'auth',
-    SIGNUP = 'signup',
-    CHECK_EMAIL = 'signup/check-email',
-    SIGNIN = 'signin',
     USER = "user",
-    ME = 'me',
     CONVERSATION = 'conversation',
-    MESSAGE = 'conversation/message',
 }
 
 export interface Message {

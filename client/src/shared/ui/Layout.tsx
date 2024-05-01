@@ -1,3 +1,4 @@
+import CreateConversation from "@/features/CreateConversation/ui/ui";
 import ConversationsList from "@/widgets/ConversationsList/ui/ui";
 import { Outlet } from "react-router-dom";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./Resizable";
@@ -7,7 +8,6 @@ import { getDataFromLocalStorage } from "../lib/utils/getDataFromLocalStorage";
 import { Input } from "./Input";
 import { Button } from "./Button";
 import { Plus } from "lucide-react";
-import CreateConversationForm from "@/widgets/CreateConversationForm/ui/ui";
 import { useLayout } from "../lib/hooks/useLayout";
 import { Toaster } from "sonner";
 
@@ -36,7 +36,7 @@ const Layout = () => {
                             <Button
                                 variant='text'
                                 size='icon'
-                                onClick={() => openModal({ title: "New conversation", content: <CreateConversationForm />, size: "fitHeight" })}
+                                onClick={() => openModal({ title: "New conversation", content: <CreateConversation />, size: "fitHeight" })}
                             >
                                 <Plus />
                             </Button>

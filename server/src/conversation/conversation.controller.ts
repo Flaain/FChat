@@ -10,10 +10,7 @@ export class ConversationController {
 
     @Post('create')
     @UseGuards(JwtGuard)
-    createConversation(
-        @Req() req: Request & { user: UserDocumentType },
-        @Body() dto: ConversationCreateDTO,
-    ) {
+    createConversation(@Req() req: Request & { user: UserDocumentType }, @Body() dto: ConversationCreateDTO) {
         return this.conversationService.createConversation({
             initiator: req.user,
             ...dto,

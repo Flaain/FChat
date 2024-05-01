@@ -1,10 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
 import { ConversationController } from './conversation.controller';
-import {
-    Conversation,
-    ConversationSchema,
-} from './schemas/conversation.schema';
+import { Conversation, ConversationSchema } from './schemas/conversation.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from 'src/user/schemas/user.schema';
 

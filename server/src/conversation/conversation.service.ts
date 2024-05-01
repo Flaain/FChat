@@ -3,27 +3,33 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from 'src/user/schemas/user.schema';
 import { Conversation } from './schemas/conversation.schema';
-import { UserDocumentType } from 'src/user/types';
-import { ConversationCreateDTO } from './dtos/conversation.create.dto';
+import { CONVERSATION_ALREADY_EXISTS } from 'src/utils/constants';
+import { CreateConversationArgs, IConversationService } from './types';
 
 @Injectable()
-export class ConversationService {
+export class ConversationService implements IConversationService {
     constructor(
         @InjectModel(User.name) private readonly userModel: Model<User>,
         @InjectModel(Conversation.name) private readonly conversationModel: Model<Conversation>,
     ) {}
 
-    createConversation = async ({ initiator, participants, name }: ConversationCreateDTO & { initiator: UserDocumentType }) => {
-        const users = await this.userModel.find({ _id: { $in: participants } });
+    createConversation = async ({ initiator, participants, name }: CreateConversationArgs) => {
+        const users = await this.userModel.find({ _id: { $in: participants, $ne: initiator._id }, isPrivate: false });
 
-        if (users.length !== participants.length) throw new HttpException('Cannot create conversation', HttpStatus.BAD_REQUEST);
+        if (!users.length) throw new HttpException({ message: 'Users not found' }, HttpStatus.BAD_REQUEST);
 
-        const isConversationExist = await this.conversationModel.findOne({ participants: { $all: participants } });
+        const _participants = [...users.map((user) => user._id), initiator._id];
 
-        if (isConversationExist) throw new HttpException({ message: 'Conversation already exists', conversationId: isConversationExist._id }, HttpStatus.BAD_REQUEST);
+        const isConversationExist = await this.conversationModel.findOne({ participants: { $all: _participants } });
 
-        const conversation = new this.conversationModel({ participants: users.map(user => user._id), name, creator: initiator._id });
-        
+        if (isConversationExist) throw new HttpException(CONVERSATION_ALREADY_EXISTS, CONVERSATION_ALREADY_EXISTS.status);
+
+        const conversation = new this.conversationModel({
+            participants: _participants,
+            creator: initiator._id,
+            ...(_participants.length > 2 && { name }),
+        });
+
         const savedConversation = await conversation.save();
         const populatedConversation = await savedConversation.populate([
             { path: 'participants', model: 'User', select: 'name email' },
@@ -32,5 +38,5 @@ export class ConversationService {
         ]);
 
         return populatedConversation;
-    }
+    };
 }

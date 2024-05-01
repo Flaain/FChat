@@ -1,10 +1,10 @@
 import AvatarByName from "@/shared/ui/AvatarByName";
-import { Button } from "@/shared/ui/Button";
 import Typography from "@/shared/ui/Typography";
+import { Button } from "@/shared/ui/Button";
 import { Minus, Plus, X } from "lucide-react";
 import { CreateConvSecondStepProps } from "../../model/types";
 
-const CreateConvSecondStep = ({
+const SelectStage = ({
     searchedUsers,
     selectedUsers,
     handleSelect,
@@ -71,4 +71,4 @@ const CreateConvSecondStep = ({
     );
 };
 
-export default CreateConvSecondStep;
+export default SelectStage;
