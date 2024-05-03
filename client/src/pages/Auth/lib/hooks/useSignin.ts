@@ -23,7 +23,7 @@ export const useSignin = () => {
     const form = useForm<SigininSchema>({
         resolver: zodResolver(signinSchema),
         defaultValues: {
-            email: "",
+            str: "",
             password: "",
         },
         disabled: loading,

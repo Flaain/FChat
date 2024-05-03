@@ -3,8 +3,9 @@ import { UserDocumentType } from 'src/user/types';
 import { JwtGuard } from 'src/utils/jwt.guard';
 import { ConversationService } from './conversation.service';
 import { ConversationCreateDTO } from './dtos/conversation.create.dto';
+import { Routes } from 'src/utils/types';
 
-@Controller('conversation')
+@Controller(Routes.CONVERSATION)
 export class ConversationController {
     constructor(private readonly conversationService: ConversationService) {}
 

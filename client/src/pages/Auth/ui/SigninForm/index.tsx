@@ -17,7 +17,7 @@ const SigninForm = () => {
                     Sign in
                 </Typography>
                 <Typography as='p' size='xl' variant='secondary' align='right'>
-                    Enter your username and password
+                    Enter your email or username and password
                 </Typography>
             </div>
             <Form {...form}>
@@ -27,15 +27,15 @@ const SigninForm = () => {
                         className='flex flex-col gap-4 h-full justify-center max-w-[560px] w-full'
                     >
                         <FormField
-                            name='email'
+                            name='str'
                             control={form.control}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className='text-white'>Email</FormLabel>
+                                    <FormLabel className='text-white'>Email or Name</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
-                                            placeholder='Enter your email address'
+                                            placeholder='Enter your email address or name'
                                             className='focus:placeholder:opacity-0 placeholder:transition-opacity placeholder:duration-300 placeholder:ease-in-out dark:ring-offset-0 dark:focus-visible:ring-primary-dark-50 dark:focus:bg-primary-dark-200 dark:bg-primary-dark-100 border-none text-white hover:ring-1 dark:placeholder:text-white placeholder:opacity-50 dark:hover:ring-primary-dark-50'
                                         />
                                     </FormControl>

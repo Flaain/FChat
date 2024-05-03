@@ -45,7 +45,7 @@ export class UserService {
     getConversations = async (_id: Types.ObjectId) => {
         try {
             const conversations = await this.conversationModel
-                .find({ participants: { $in: [_id] } })
+                .find({ participants: { $in: [_id] } }, { messages: { $slice: -1 } })
                 .populate([
                     {
                         path: 'participants',
@@ -85,21 +85,9 @@ export class UserService {
         return { ...rest, conversations };
     };
 
-    create = async ({
-        email,
-        name,
-        password,
-        birthDate,
-    }: SignupDTO): Promise<Omit<User, 'password'> & { _id: Types.ObjectId }> => {
-        const hashedPassword = await hash(password, 10);
-        const { password: _, ...user } = (
-            await new this.userModel({
-                email,
-                name,
-                password: hashedPassword,
-                birthDate,
-            }).save()
-        ).toObject();
+    create = async (userDetails: SignupDTO): Promise<Omit<User, 'password'> & { _id: Types.ObjectId }> => {
+        const password = await hash(userDetails.password, 10);
+        const { password: _, ...user } = (await new this.userModel({ ...userDetails, password }).save()).toObject();
 
         return user;
     };

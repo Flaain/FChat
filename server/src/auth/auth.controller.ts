@@ -7,6 +7,7 @@ import { AuthResponse } from './types';
 import { Routes } from 'src/utils/types';
 import { UserDocumentType } from 'src/user/types';
 import { SkipThrottle } from '@nestjs/throttler';
+import { CheckEmailDTO } from './dtos/auth.checkEmail.dto';
 
 @Controller(Routes.AUTH)
 export class AuthController {
@@ -18,7 +19,7 @@ export class AuthController {
     }
 
     @Post("checkEmail")
-    checkEmail(@Body() dto: Pick<SigninDTO, 'email'>) {
+    checkEmail(@Body() dto: CheckEmailDTO) {
         return this.authService._checkEmail(dto);
     }
 
