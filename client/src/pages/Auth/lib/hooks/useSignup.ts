@@ -43,67 +43,54 @@ export const useSignup = () => {
     const checkNextAvailability = () => {
         return (
             form.formState.isSubmitting ||
-            !!Object.keys(form.formState.errors).length ||
+            !!Object.entries(form.formState.errors).some(([key]) => steps[step].fields.includes(key as FieldPath<SignupSchema>)) ||
             !form.getValues(steps[step].fields).every(Boolean) ||
             loading
         );
     };
 
-    const onSubmit = React.useCallback(async (data: SignupSchema) => {
-        const {
-            data: { accessToken, expiresIn, ...profile },
-        } = await api.user.signup({ body: data });
-
-        setProfile(profile);
-        dispatch({
-            type: SessionTypes.SET_ON_AUTH,
-            payload: { isAuthorized: true, accessToken, userId: profile._id, expiresIn },
-        });
-        saveDataToLocalStorage({ key: localStorageKeys.TOKEN, data: accessToken });
-    }, []);
-
-    const onNext = React.useCallback(async () => {
+    const onSubmit = React.useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
         try {
+            event.preventDefault();
+            
             const isValid = await form.trigger(steps[step].fields, { shouldFocus: true });
-
+            
             if (!isValid) return;
+            
+            const data = form.getValues();
 
             setLoading(true);
 
             const actions = {
                 0: async () => {
-                    await api.user.checkEmailBeforeSignup({ body: { email: form.getValues("email") } });
+                    await api.user.checkEmailBeforeSignup({ body: { email: data.email } });
 
                     setStep((prevState) => prevState + 1);
-                    form.reset(form.getValues());
                 },
-                1: () => form.handleSubmit(onSubmit)(),
+                1: async () => {
+                    const { data: { accessToken, expiresIn, ...profile } } = await api.user.signup({ body: data });
+
+                    setProfile(profile);
+                    dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { isAuthorized: true, accessToken, userId: profile._id, expiresIn } });
+                    saveDataToLocalStorage({ key: localStorageKeys.TOKEN, data: accessToken });
+                },
             };
 
             await actions[step as keyof typeof actions]();
         } catch (error) {
             console.error(error);
             isFormError<SignupSchema>(error)
-                ? Object.entries(error.error).forEach(([key, { message }]) =>
-                      form.setError(
-                          key as FieldPath<SignupSchema>,
-                          {
-                              message,
-                          },
-                          { shouldFocus: true }
-                      )
-                  )
+                ? Object.entries(error.error).forEach(([key, { message }]) => form.setError(key as FieldPath<SignupSchema>, { message }, { shouldFocus: true }))
                 : isApiError(error) && toast.error(error.message);
         } finally {
             setLoading(false);
         }
-    }, [form, onSubmit, step]);
+    }, [dispatch, form, setProfile, step]);
 
     const onBack = React.useCallback(() => {
         setStep((prevState) => prevState - 1);
-        form.reset(form.getValues());
         !step && setAuthStage("welcome");
-    }, [form, setAuthStage, step]);
+    }, [setAuthStage, step]);
 
     return {
         form,
@@ -113,7 +100,6 @@ export const useSignup = () => {
         isLastStep: step === steps.length - 1,
         rootError: form.formState.errors?.root?.serverError,
         isNextButtonDisabled: checkNextAvailability(),
-        onNext,
         onBack,
         onSubmit,
     };

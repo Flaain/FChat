@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const signinRequestSchema = z.object({
-    str: z
+    login: z
         .string()
         .trim()
         .min(3, 'Field must be at least 3 characters long')

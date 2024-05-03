@@ -18,7 +18,7 @@ export class AuthController {
         return this.authService.signup(dto);
     }
 
-    @Post("checkEmail")
+    @Post("signup/check-email")
     checkEmail(@Body() dto: CheckEmailDTO) {
         return this.authService._checkEmail(dto);
     }

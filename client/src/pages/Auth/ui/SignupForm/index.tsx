@@ -9,7 +9,7 @@ import Typography from "@/shared/ui/Typography";
 import { AuthContainer } from "../AuthContainer";
 
 const SignupForm = () => {
-    const { form, loading, step, stepsLength, isLastStep, isNextButtonDisabled, onBack, onNext, onSubmit } = useSignup();
+    const { form, loading, step, stepsLength, isLastStep, isNextButtonDisabled, onBack, onSubmit } = useSignup();
 
     const forms: Record<number, React.ReactNode> = {
         0: <FirstStepSignUp form={form} />,
@@ -29,7 +29,7 @@ const SignupForm = () => {
             <Form {...form}>
                 <AuthContainer>
                     <form
-                        onSubmit={form.handleSubmit(onSubmit)}
+                        onSubmit={onSubmit}
                         className='flex flex-col gap-4 h-full justify-center max-w-[560px] w-full'
                     >
                         <Typography variant='primary' weight='medium' className='mb-5'>
@@ -46,7 +46,7 @@ const SignupForm = () => {
                             >
                                 Back
                             </Button>
-                            <Button type='button' onClick={onNext} className='w-24' disabled={isNextButtonDisabled}>
+                            <Button className='w-24' disabled={isNextButtonDisabled}>
                                 {loading ? (
                                     <LoaderCircle className='w-5 h-5 animate-loading' />
                                 ) : isLastStep ? (

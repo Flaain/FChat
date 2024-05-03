@@ -16,8 +16,8 @@ export class AuthService {
         private readonly configService: ConfigService,
     ) {}
 
-    async signin({ str, password }: SigninRequest) {
-        const candidate = await this.userService.findByPayload({ $or: [{ email: str }, { name: { $regex: str, $options: 'i' } }] });
+    async signin({ login, password }: SigninRequest) {
+        const candidate = await this.userService.findByPayload({ $or: [{ email: login }, { name: { $regex: login, $options: 'i' } }] });
 
         if (!candidate) throw new HttpException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
 

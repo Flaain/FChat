@@ -27,7 +27,7 @@ const SigninForm = () => {
                         className='flex flex-col gap-4 h-full justify-center max-w-[560px] w-full'
                     >
                         <FormField
-                            name='str'
+                            name='login'
                             control={form.control}
                             render={({ field }) => (
                                 <FormItem>
