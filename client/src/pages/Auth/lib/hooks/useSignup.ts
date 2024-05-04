@@ -42,9 +42,8 @@ export const useSignup = () => {
 
     const checkNextAvailability = () => {
         return (
-            form.formState.isSubmitting ||
-            !!Object.entries(form.formState.errors).some(([key]) => steps[step].fields.includes(key as FieldPath<SignupSchema>)) ||
             !form.getValues(steps[step].fields).every(Boolean) ||
+            !!Object.entries(form.formState.errors).some(([key]) => steps[step].fields.includes(key as FieldPath<SignupSchema>)) ||
             loading
         );
     };

@@ -30,8 +30,9 @@ export const useCreateConversation = () => {
 
     const form = useForm<CreateConversationFormType>({
         resolver: zodResolver(createConversationSchema),
-        defaultValues: { 
-            username: "", 
+        defaultValues: {
+            username: "",
+            groupName: "",
         },
         disabled: loading,
         mode: "all",
@@ -40,19 +41,17 @@ export const useCreateConversation = () => {
 
     const _isNextButtonDisabled = () => {
         const fieldsCondition =
-            !!Object.keys(form.formState.errors).length ||
+            !!Object.entries(form.formState.errors).some(([key]) => steps[step]?.fields.includes(key as FieldPath<CreateConversationFormType>)) ||
             !form.getValues(steps[step]?.fields).every?.(Boolean) ||
             loading;
         const actions = {
             0: fieldsCondition,
             1: !selectedUsers.size || selectedUsers.size >= MAX_CONVERSATION_SIZE || loading,
-            2: fieldsCondition || !form.formState.isValid,
+            2: fieldsCondition
         };
 
         return actions[step as keyof typeof actions];
     };
-
-    const _validateStep = async () => form.trigger(steps[step].fields, { shouldFocus: true });
 
     const handleSelect = React.useCallback((user: SearchUser) => {
         setSelectedUsers((prevState) => {
@@ -74,45 +73,44 @@ export const useCreateConversation = () => {
         });
     }, []);
 
-    const _createConversation = async ({ groupName }: Pick<CreateConversationFormType, "groupName">) => {
-        const { data } = await api.conversation.create({
+    const _createConversation = React.useCallback(async ({ groupName }: Partial<Pick<CreateConversationFormType, "groupName">> = {}) => {
+        const { data } = await api.conversation.createConversation({
             token: accessToken!,
             body: { participants: [...selectedUsers.keys()], name: groupName },
         });
 
         setProfile((prevState) => ({ ...prevState, conversations: [data, ...prevState.conversations] }));
         closeModal();
-    };
+    }, [accessToken, closeModal, selectedUsers, setProfile]);
 
-    const onSubmit = async ({ username, groupName }: CreateConversationFormType) => {
+    const onSubmit = React.useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
         try {
+            event.preventDefault();
+
             setLoading(true);
+
+            const { username, groupName } = form.getValues();
 
             const actions = {
                 0: async () => {
-                    if (!(await _validateStep())) return;
+                    const isValid = await form.trigger(steps[step].fields, { shouldFocus: true });
+                    
+                    if (!isValid) return;
 
                     const { data } = await api.user.search({ token: accessToken!, body: { username } });
 
                     setSearchedUsers(data);
                     setStep((prevState) => prevState + 1);
-
-                    form.reset(form.getValues());
                 },
                 1: async () => {
                     if (!selectedUsers.size || selectedUsers.size >= MAX_CONVERSATION_SIZE) throw new Error("Please select at least one user and less than 10");
                     // ^^^^ not necessary but just to be sure that we won't create group conversation with less or more 2/10 users
-                    if (selectedUsers.size > 1) {
-                        setStep((prevState) => prevState + 1);
-                        form.reset(form.getValues());
-
-                        return;
-                    }
-
-                    await _createConversation({ groupName });
+                    selectedUsers.size > 1 ? setStep((prevState) => prevState + 1) : await _createConversation();
                 },
                 2: async () => {
-                    if (!(await _validateStep())) return;
+                    const isValid = await form.trigger(steps[step].fields, { shouldFocus: true });
+                    
+                    if (!isValid) return;
 
                     await _createConversation({ groupName });
                 },
@@ -120,20 +118,20 @@ export const useCreateConversation = () => {
 
             await actions[step as keyof typeof actions]();
         } catch (error) {
+            console.error(error);
             isFormError<CreateConversationFormType>(error)
                 ? Object.entries(error.error).forEach(([key, { message }]) =>
                       form.setError(key as FieldPath<CreateConversationFormType>, { message }, { shouldFocus: true })
                   )
-                : (error instanceof Error || isApiError(error)) && toast.error(error.message);
+                : isApiError(error) && toast.error(error.message);
         } finally {
             setLoading(false);
         }
-    };
+    }, [form, step, accessToken, selectedUsers.size, _createConversation]);
 
-    const handleBack = () => {
+    const handleBack = React.useCallback(() => {
         setStep((prevState) => prevState - 1);
-        form.reset(form.getValues());
-    };
+    }, []);
 
     return {
         form,

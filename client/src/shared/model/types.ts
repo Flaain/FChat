@@ -112,3 +112,7 @@ export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
     size?: ModalSize;
 }
+
+export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement> {
+    name: string;
+}

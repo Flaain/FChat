@@ -42,7 +42,7 @@ const CreateConversation = () => {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-5 mt-5'>
+            <form onSubmit={onSubmit} className='flex flex-col gap-5 mt-5'>
                 {stages[step]}
                 <div className={cn("flex items-center gap-5 justify-between", { "mt-5": step === 1 })}>
                     {!!step && (

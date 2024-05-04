@@ -38,11 +38,7 @@ export const useSignin = () => {
             const { data: { accessToken, expiresIn, ...profile } } = await api.user.signin({ body: data });
 
             setProfile(profile);
-            dispatch({
-                type: SessionTypes.SET_ON_AUTH,
-                payload: { accessToken, expiresIn, isAuthorized: true, userId: profile._id },
-            });
-
+            dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { accessToken, expiresIn, isAuthorized: true, userId: profile._id } });
             saveDataToLocalStorage({ key: localStorageKeys.TOKEN, data: accessToken })
         } catch (error) {
             console.error(error);

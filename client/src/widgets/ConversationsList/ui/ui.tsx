@@ -29,7 +29,7 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
                 const lastMessage = conversation.messages[0];
                 const filteredParticipants = conversation.participants.filter((participant) => participant._id !== userId);
                 const isGroup = filteredParticipants.length >= 2;
-                const lastMessageDescription = `${lastMessage.sender._id === userId ? "You" : isGroup ? lastMessage.sender.name : ""}`;
+                const lastMessageDescription = `${lastMessage.sender._id === userId ? "You: " : isGroup ? lastMessage.sender.name : ""}`;
 
                 return (
                     <li key={conversation._id}>
@@ -56,7 +56,7 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
                                             variant='secondary'
                                             className='max-w-[200px] w-full truncate'
                                         >
-                                            {lastMessageDescription}:&nbsp;{lastMessage.text}
+                                            {lastMessageDescription}{lastMessage.text}
                                         </Typography>
                                         <Typography className='ml-auto' variant='secondary'>
                                             {new Date(lastMessage.createdAt).toLocaleTimeString(navigator.language, {

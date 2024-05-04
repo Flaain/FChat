@@ -9,7 +9,7 @@ const SearchStage = ({ form }: CreateConvFirstStepProps) => {
             control={form.control}
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel className='text-white'>user name</FormLabel>
+                    <FormLabel className='text-white'>User name</FormLabel>
                     <FormControl>
                         <Input
                             {...field}

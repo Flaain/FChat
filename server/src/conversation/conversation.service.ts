@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User } from 'src/user/schemas/user.schema';
 import { Conversation } from './schemas/conversation.schema';
 import { CONVERSATION_ALREADY_EXISTS } from 'src/utils/constants';
@@ -38,5 +38,19 @@ export class ConversationService implements IConversationService {
         ]);
 
         return populatedConversation;
+    };
+
+    getConversation = async (initiatorId: Types.ObjectId, conversationId: string) => {
+        const conversation = await this.conversationModel
+            .findOne({ _id: conversationId, participants: { $in: [initiatorId] } })
+            .populate([
+                { path: 'participants', model: 'User', select: 'name email' },
+                { path: 'messages', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name email' } },
+                { path: 'creator', model: 'User', select: 'name email' },
+            ]);
+
+        if (!conversation) throw new HttpException({ message: 'Conversation not found' }, HttpStatus.BAD_REQUEST);
+
+        return conversation;
     };
 }
