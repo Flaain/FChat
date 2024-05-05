@@ -5,7 +5,6 @@ import { useProfile } from "@/shared/lib/hooks/useProfile";
 import { Conversation } from "@/shared/model/types";
 import { ConversationListProps } from "../model/types";
 import { useSession } from "@/entities/session/lib/hooks/useSession";
-import { MessagesSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ConversationsList = ({ searchValue }: ConversationListProps) => {
@@ -24,7 +23,7 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
     const filteredConversations = conversations.filter(filterConversationsByInput);
 
     return filteredConversations.length ? (
-        <ul className='flex flex-col gap-5'>
+        <ul className='flex flex-col gap-5 px-3 overflow-auto'>
             {filteredConversations.map((conversation) => {
                 const lastMessage = conversation.messages[0];
                 const filteredParticipants = conversation.participants.filter((participant) => participant._id !== userId);
@@ -37,13 +36,7 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
                             to={`conversation/${conversation._id}`}
                             className='flex items-center gap-5 p-2 rounded-lg dark:hover:bg-primary-dark-50 transition-colors duration-200 ease-in-out'
                         >
-                            {isGroup ? (
-                                <span className='min-w-[50px] min-h-[50px] flex justify-center items-center rounded-full dark:bg-primary-white bg-primary-dark-100 text-2xl font-bold dark:text-primary-dark-200 text-primary-white'>
-                                    <MessagesSquare />
-                                </span>
-                            ) : (
-                                <AvatarByName name={filteredParticipants[0].name} />
-                            )}
+                            {!isGroup && <AvatarByName name={filteredParticipants[0].name} size="lg"/>}
                             <div className='flex flex-col items-start w-full'>
                                 <Typography as='h2'>
                                     {conversation.name ??
@@ -73,7 +66,7 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
             })}
         </ul>
     ) : (
-        <Typography as='p' variant='secondary'>
+        <Typography as='p' variant='secondary' className='self-center'>
             No conversations finded
         </Typography>
     );

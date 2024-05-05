@@ -40,7 +40,7 @@ export interface APIError<T> {
 }
 
 export interface Message {
-    id: string;
+    _id: string;
     sender: Participant;
     receiver: Participant;
     conversationId: string;
@@ -115,4 +115,5 @@ export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement> {
     name: string;
+    size?: "sm" | "md" | "lg";
 }

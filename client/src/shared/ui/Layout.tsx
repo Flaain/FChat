@@ -12,7 +12,7 @@ import { useLayout } from "../lib/hooks/useLayout";
 import { Toaster } from "sonner";
 
 const Layout = () => {
-    const { searchValue, handleSearch, openModal, handleLogout } = useLayout()
+    const { searchValue, handleSearch, openModal, handleLogout } = useLayout();
 
     return (
         <ResizablePanelGroup direction='horizontal' style={{ overflow: "unset" }}>
@@ -25,8 +25,8 @@ const Layout = () => {
                     style={{ overflow: "unset" }}
                     onResize={(size) => saveDataToLocalStorage({ key: localStorageKeys.ASIDE_PANEL_SIZE, data: size })}
                 >
-                    <aside className='flex flex-col h-screen sticky top-0 p-5 gap-8 dark:bg-primary-dark-150 bg-primary-white'>
-                        <div className='flex items-center justify-between gap-2'>
+                    <aside className='flex flex-col h-screen sticky top-0 gap-8 dark:bg-primary-dark-150 bg-primary-white'>
+                        <div className='flex items-center justify-between gap-2 sticky top-0 py-4 px-3'>
                             <Input
                                 onChange={handleSearch}
                                 value={searchValue}
@@ -36,15 +36,23 @@ const Layout = () => {
                             <Button
                                 variant='text'
                                 size='icon'
-                                onClick={() => openModal({ title: "New conversation", content: <CreateConversation />, size: "fitHeight" })}
+                                onClick={() =>
+                                    openModal({
+                                        title: "New conversation",
+                                        content: <CreateConversation />,
+                                        size: "fitHeight",
+                                    })
+                                }
                             >
                                 <Plus />
                             </Button>
                         </div>
                         <ConversationsList searchValue={searchValue} />
-                        <Button onClick={handleLogout} className='mt-auto' variant='secondary'>
-                            Logout
-                        </Button>
+                        <div className='mt-auto dark:bg-primary-dark-100 sticky bottom-0 py-4 px-3 max-h-[70px] box-border'>
+                            <Button onClick={handleLogout} variant='secondary' className='w-full'>
+                                Logout
+                            </Button>
+                        </div>
                     </aside>
                 </ResizablePanel>
                 <ResizableHandle className='w-1 dark:bg-primary-dark-50 dark:hover:bg-primary-50 transition-colors duration-200 ease-in-out' />
