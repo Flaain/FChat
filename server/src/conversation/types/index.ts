@@ -9,7 +9,7 @@ export interface ConversationTypeForSchema {
     messages: Array<Types.ObjectId>;
 }
 
-export type CreateConversationArgs = ConversationCreateDTO & { initiator: UserDocumentType };
+export type CreateConversationArgs = ConversationCreateDTO & { initiatorId: Types.ObjectId };
 export type CreateConversationReturn = Promise<Omit<Document<unknown, {}, Conversation> & Conversation & { _id: Types.ObjectId }, never>>;
 
 export interface IConversationService {

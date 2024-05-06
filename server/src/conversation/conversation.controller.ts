@@ -13,14 +13,14 @@ export class ConversationController {
     @UseGuards(JwtGuard)
     createConversation(@Req() req: Request & { user: UserDocumentType }, @Body() dto: ConversationCreateDTO) {
         return this.conversationService.createConversation({
-            initiator: req.user,
+            initiatorId: req.user._id,
             ...dto,
         });
     }
 
     @Get(':id')
     @UseGuards(JwtGuard)
-    getConversation(@Req() req: Request & { user: UserDocumentType }, @Param("id") id: string) {
+    getConversation(@Req() req: Request & { user: UserDocumentType }, @Param('id') id: string) {
         return this.conversationService.getConversation(req.user._id, id);
     }
 }

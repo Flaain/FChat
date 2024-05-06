@@ -1,6 +1,6 @@
 const SideConversationSkeleton = () => {
     return (
-        <ul className="flex flex-col gap-5 overflow-auto scrollbar_type_conversation">
+        <ul className="flex flex-col gap-5 overflow-auto scrollbar_type_conversation px-3">
             {[...new Array(10)].map((_, index, array) => (
                 <li key={index} className='flex justify-between items-center' style={{ opacity: (array.length - index) / array.length }}>
                     <div className='flex items-center gap-5 w-full'>

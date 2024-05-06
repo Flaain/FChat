@@ -22,6 +22,11 @@ export const INVALID_CREDENTIALS = {
     message: 'invalid credentials',
 };
 
+export const UNAUTHORIZED = {
+    status: HttpStatus.UNAUTHORIZED,
+    message: 'unauthorized',
+}
+
 export const USER_NOT_FOUND = {
     status: HttpStatus.NOT_FOUND,
     message: 'please try to search for another user',

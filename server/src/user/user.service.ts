@@ -16,13 +16,19 @@ export class UserService {
         private readonly conversationModel: Model<Conversation>,
     ) {}
 
-    findByPayload = async (
+    findOneByPayload = async (
         payload: FilterQuery<User>,
         projection?: ProjectionType<User>,
         options?: QueryOptions<User>,
     ) => this.userModel.findOne(payload, projection, options);
 
-    searchUser = async (initiatorId: string, name: string) => {
+    findManyByPayload = async (
+        payload: FilterQuery<User>,
+        projection?: ProjectionType<User>,
+        options?: QueryOptions<User>,
+    ) => this.userModel.findOne(payload, projection, options);
+
+    searchUser = async (initiatorId: Types.ObjectId, name: string) => {
         try {
             const users = await this.userModel.find(
                 {
@@ -70,7 +76,7 @@ export class UserService {
         }
     };
 
-    findById = async (id: string) => {
+    findById = async (id: string | Types.ObjectId) => {
         const candidate = await this.userModel.findById(id);
 
         if (!candidate) throw new UnauthorizedException();

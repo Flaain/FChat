@@ -42,9 +42,8 @@ export interface APIError<T> {
 export interface Message {
     _id: string;
     sender: Participant;
-    receiver: Participant;
-    conversationId: string;
     hasBeenRead: boolean;
+    hasBeenEdited: boolean;
     text: string;
     createdAt: string;
     updatedAt: string;
@@ -54,6 +53,7 @@ export interface Participant {
     _id: string;
     name: string;
     email: string;
+    lastSeen: string;
 }
 
 export interface Conversation {

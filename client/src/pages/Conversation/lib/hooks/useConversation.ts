@@ -8,10 +8,18 @@ import { toast } from "sonner";
 
 export const useConversation = () => {
     const { id } = useParams();
-    const { state: { accessToken } } = useSession();
+    const { state: { accessToken, userId } } = useSession();
 
     const [conversation, setConversation] = React.useState<Conversation | null>(null);
     const [status, setStatus] = React.useState<"idle" | "loading" | "error">("loading");
+
+    const filteredParticipants = React.useMemo(() => {
+        return conversation ? conversation?.participants.filter((participant) => participant._id !== userId) : [];
+    }, [conversation, userId]);
+    const isGroup = filteredParticipants.length >= 2;
+    const conversationName = React.useMemo(() => {
+        return isGroup ? (conversation?.name ?? filteredParticipants.map((participant) => participant.name).join(", ")) : filteredParticipants[0]?.name;
+    }, [conversation?.name, filteredParticipants, isGroup]);
 
     const navigate = useNavigate();
 
@@ -38,5 +46,5 @@ export const useConversation = () => {
         })();
     }, []);
 
-    return { conversation, status };
+    return { conversation, setConversation, status, info: { filteredParticipants, isGroup, conversationName } };
 };

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Type, UnauthorizedException } from '@nestjs/common';
 import { AuthResponse, SigninRequest, SignupRequest } from './types';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
@@ -6,7 +6,8 @@ import { EMAIL_ALREADY_EXISTS, NAME_ALREADY_EXISTS } from './auth.constants';
 import { ConfigService } from '@nestjs/config';
 import { compare } from 'bcrypt';
 import { UserDocumentType } from 'src/user/types';
-import { INVALID_CREDENTIALS, SOMETHING_WENT_WRONG } from 'src/utils/constants';
+import { INVALID_CREDENTIALS, SOMETHING_WENT_WRONG, UNAUTHORIZED } from 'src/utils/constants';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,9 @@ export class AuthService {
     ) {}
 
     async signin({ login, password }: SigninRequest) {
-        const candidate = await this.userService.findByPayload({ $or: [{ email: login }, { name: { $regex: login, $options: 'i' } }] });
+        const candidate = await this.userService.findOneByPayload({
+            $or: [{ email: login }, { name: { $regex: login, $options: 'i' } }],
+        });
 
         if (!candidate) throw new HttpException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
 
@@ -39,7 +42,7 @@ export class AuthService {
     }
 
     _checkEmail = async (payload: Pick<SignupRequest, 'email'>) => {
-        const candidate = await this.userService.findByPayload(payload);
+        const candidate = await this.userService.findOneByPayload(payload);
 
         if (candidate) throw new HttpException(EMAIL_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
 
@@ -47,7 +50,7 @@ export class AuthService {
     };
 
     private _checkName = async ({ name }: Pick<SignupRequest, 'name'>) => {
-        const candidate = await this.userService.findByPayload({ name: { $regex: name, $options: 'i' } });
+        const candidate = await this.userService.findOneByPayload({ name: { $regex: name, $options: 'i' } });
 
         if (candidate) throw new HttpException(NAME_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
 
@@ -75,6 +78,14 @@ export class AuthService {
             console.log(error);
             throw new HttpException(SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    };
+
+    validateUser = async (id: Types.ObjectId | string) => {
+        const candidate = await this.userService.findById(id);
+
+        if (!candidate) throw new UnauthorizedException(UNAUTHORIZED);
+
+        return candidate;
     };
 
     getProfile = async (user: UserDocumentType) => this.userService.profile(user);

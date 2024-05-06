@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { User } from 'src/user/schemas/user.schema';
 import { Conversation } from './schemas/conversation.schema';
 import { CONVERSATION_ALREADY_EXISTS } from 'src/utils/constants';
@@ -13,20 +13,21 @@ export class ConversationService implements IConversationService {
         @InjectModel(Conversation.name) private readonly conversationModel: Model<Conversation>,
     ) {}
 
-    createConversation = async ({ initiator, participants, name }: CreateConversationArgs) => {
-        const users = await this.userModel.find({ _id: { $in: participants, $ne: initiator._id }, isPrivate: false });
+    createConversation = async ({ initiatorId, participants, name }: CreateConversationArgs) => {
+        const users = await this.userModel.find({ _id: { $in: participants, $ne: initiatorId }, isPrivate: false });
 
         if (!users.length) throw new HttpException({ message: 'Users not found' }, HttpStatus.BAD_REQUEST);
 
-        const _participants = [...users.map((user) => user._id), initiator._id];
+        const _participants = [...users.map((user) => user._id), initiatorId];
 
         const isConversationExist = await this.conversationModel.findOne({ participants: { $all: _participants } });
 
-        if (isConversationExist) throw new HttpException(CONVERSATION_ALREADY_EXISTS, CONVERSATION_ALREADY_EXISTS.status);
+        if (isConversationExist)
+            throw new HttpException(CONVERSATION_ALREADY_EXISTS, CONVERSATION_ALREADY_EXISTS.status);
 
         const conversation = new this.conversationModel({
             participants: _participants,
-            creator: initiator._id,
+            creator: initiatorId,
             ...(_participants.length > 2 && { name }),
         });
 
@@ -45,7 +46,11 @@ export class ConversationService implements IConversationService {
             .findOne({ _id: conversationId, participants: { $in: [initiatorId] } })
             .populate([
                 { path: 'participants', model: 'User', select: 'name email' },
-                { path: 'messages', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name email' } },
+                {
+                    path: 'messages',
+                    model: 'Message',
+                    populate: { path: 'sender', model: 'User', select: 'name email' },
+                },
                 { path: 'creator', model: 'User', select: 'name email' },
             ]);
 
@@ -53,4 +58,16 @@ export class ConversationService implements IConversationService {
 
         return conversation;
     };
+
+    findOneByPayload = async (
+        payload: FilterQuery<Conversation>,
+        projection?: ProjectionType<Conversation>,
+        options?: QueryOptions<Conversation>,
+    ) => this.conversationModel.findOne(payload, projection, options);
+
+    findManyByPayload = async (
+        payload: FilterQuery<Conversation>,
+        projection?: ProjectionType<Conversation>,
+        options?: QueryOptions<Conversation>,
+    ) => this.conversationModel.find(payload, projection, options);
 }

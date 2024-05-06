@@ -14,5 +14,6 @@ import { User, UserSchema } from 'src/user/schemas/user.schema';
     ],
     providers: [ConversationService],
     controllers: [ConversationController],
+    exports: [ConversationService],
 })
 export class ConversationModule {}

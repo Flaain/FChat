@@ -2,6 +2,7 @@ export enum Routes {
     AUTH = 'auth',
     USER = "user",
     CONVERSATION = 'conversation',
+    MESSAGE = 'message',
 }
 
 export interface Message {

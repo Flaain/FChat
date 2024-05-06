@@ -28,18 +28,6 @@ export class AuthController {
         return this.authService.signin(dto);
     }
 
-    // @UseGuards(JwtGuard)
-    // @Post("signout")
-    // signout(@Req() req: Request & { user: UserDocumentType }) {
-    //     return this.authService.signout(req.user);
-    // }
-
-    // @UseGuards(JwtGuard)
-    // @Post("refresh")
-    // refreshToken() {
-    //     return 'refresh';
-    // }
-
     @UseGuards(JwtGuard)
     @Get("me")
     @SkipThrottle()
