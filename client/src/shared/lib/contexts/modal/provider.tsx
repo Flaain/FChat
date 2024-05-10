@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import Modal from "@/shared/ui/Modal";
 import { ModalContext } from "./context";
 import { ModalConfig } from "./types";
@@ -21,11 +22,14 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <ModalContext.Provider value={value}>
-            {isModalOpen && config?.content && (
-                <Modal size={config.size} title={config.title} closeHandler={() => setIsModalOpen(false)}>
-                    {config.content}
-                </Modal>
-            )}
+            {isModalOpen &&
+                config?.content &&
+                ReactDOM.createPortal(
+                    <Modal size={config.size} title={config.title} closeHandler={() => setIsModalOpen(false)}>
+                        {config.content}
+                    </Modal>,
+                    document.querySelector("#modal-root")!
+                )}
             {children}
         </ModalContext.Provider>
     );

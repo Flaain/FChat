@@ -1,4 +1,5 @@
 import { ModalSize } from "@/shared/model/types";
+import React from "react";
 
 export interface ModalContextProps {
     isModalOpen: boolean;

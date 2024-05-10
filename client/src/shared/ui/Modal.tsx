@@ -72,9 +72,53 @@ const ModalContainer = ({ children, closeHandler }: Omit<ModalProps, "title">) =
     );
 };
 
-const ModalBody = ({ children, size, className, ...rest }: ModalBodyProps) => {
+const ModalBody = ({ children, closeHandler, size, className, ...rest }: ModalBodyProps) => {
+    const bodyRef = React.useRef<HTMLDivElement | null>(null);
+    const focusableElements = React.useRef<Array<HTMLElement>>([]);
+    const activeIndex = React.useRef(-1);
+
+    const handleTabDown = (event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
+        event.preventDefault();
+
+        const total = focusableElements.current.length
+        const currentIndex = activeIndex.current;
+
+        if (!event.shiftKey) {  
+          currentIndex + 1 === total ? (activeIndex.current = 0) : (activeIndex.current += 1)
+    
+          focusableElements.current[activeIndex.current].focus()
+        } else {
+          currentIndex - 1 < 0 ? (activeIndex.current = total - 1) : (activeIndex.current -= 1)
+    
+          focusableElements.current[activeIndex.current].focus()
+        }
+    };
+
+    const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
+        const keyListeners = {
+            Escape: closeHandler,
+            Tab: handleTabDown,
+        };
+        
+        keyListeners[event.key as keyof typeof keyListeners]?.(event);
+    }, []);
+
+    React.useEffect(() => {   
+        document.addEventListener('keydown', handleKeyDown)
+    
+        return () => {
+          document.removeEventListener('keydown', handleKeyDown)
+        }
+      }, [handleKeyDown])
+
+    React.useEffect(() => {
+        if (!bodyRef.current) return;
+
+        focusableElements.current = Array.from(bodyRef.current.querySelectorAll("a, button, textarea, input, select"));
+    }, []);
+
     return (
-        <div className={cn(modalVariants({ size, className }))} {...rest}>
+        <div ref={bodyRef} onKeyDown={handleKeyDown} className={cn(modalVariants({ size, className }))} {...rest}>
             {children}
         </div>
     );
@@ -83,7 +127,7 @@ const ModalBody = ({ children, size, className, ...rest }: ModalBodyProps) => {
 const Modal = ({ closeHandler, title, children, size }: ModalProps) => {
     return (
         <ModalContainer closeHandler={closeHandler}>
-            <ModalBody size={size}>
+            <ModalBody closeHandler={closeHandler} size={size}>
                 <ModalHeader title={title} closeHandler={closeHandler} />
                 {children}
             </ModalBody>

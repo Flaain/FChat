@@ -116,6 +116,7 @@ export interface SearchUser {
 
 export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
+    closeHandler: () => void;
     size?: ModalSize;
 }
 
@@ -141,3 +142,12 @@ export type FormErrorsType = [
               }>)
     )
 ];
+
+export interface ConfirmationProps {
+    onConfirm: () => void;
+    onCancel: () => void;
+    text: string;
+    onConfirmText?: string;
+    controlsDisabled?: boolean;
+    onCancelText?: string;
+}

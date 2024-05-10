@@ -1,5 +1,6 @@
 import Typography from "@/shared/ui/Typography";
 import AvatarByName from "@/shared/ui/AvatarByName";
+import Confirmation from "@/shared/ui/Confirmation";
 import { Check, CheckCheck, Copy, Edit2, Trash2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils/cn";
 import { IMessage } from "@/shared/model/types";
@@ -7,10 +8,27 @@ import { forwardRef } from "react";
 import { getRelativeTimeString } from "@/shared/lib/utils/getRelativeTimeString";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/shared/ui/context-menu";
 import { useMessage } from "../lib/hooks/useMessage";
+import { useModal } from "@/shared/lib/hooks/useModal";
+import { ModalConfig } from "@/shared/lib/contexts/modal/types";
 
 const Message = forwardRef<HTMLLIElement, { message: IMessage }>(({ message }, ref) => {
-    const { createTime, isMessageFromMe, handleCopyToClipboard, handleMessageDelete, handleMessageEdit } = useMessage(message);
+    const { createTime, isMessageFromMe, isLoading, handleCopyToClipboard, handleMessageDelete, handleMessageEdit } = useMessage(message);
+    const { openModal, closeModal } = useModal();
     const { sender, text, hasBeenRead } = message;
+
+    const confirmationConfig: ModalConfig = {
+        content: (
+            <Confirmation
+                onCancel={closeModal}
+                onConfirm={handleMessageDelete}
+                controlsDisabled={isLoading}
+                onConfirmText="Delete"
+                text='Are you sure you want to delete this message?'
+            />
+        ),
+        title: "Delete message",
+        size: "fitHeight",
+    }
 
     return (
         <ContextMenu>
@@ -81,7 +99,7 @@ const Message = forwardRef<HTMLLIElement, { message: IMessage }>(({ message }, r
                             Edit <Edit2 className='w-4 h-4' />
                         </ContextMenuItem>
                         <ContextMenuItem
-                            onClick={handleMessageDelete}
+                            onClick={() => openModal(confirmationConfig)}
                             className='flex items-center justify-between gap-2 dark:text-primary-white text-primary-dark-200 rounded-md dark:hover:bg-primary-dark-200 hover:bg-primary-gray dark:focus:bg-primary-dark-200 focus:bg-primary-gray'
                         >
                             Delete <Trash2 className='w-4 h-4' />
