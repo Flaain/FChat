@@ -1,92 +1,79 @@
-import React from "react";
+import Typography from "@/shared/ui/Typography";
 import { cn } from "@/shared/lib/utils/cn";
 import { Button } from "@/shared/ui/Button";
-import { Paperclip, SendHorizonal } from "lucide-react";
+import { Edit2Icon, Paperclip, SendHorizonal, X } from "lucide-react";
 import { toast } from "sonner";
-import { useSession } from "@/entities/session/lib/hooks/useSession";
-import { api } from "@/shared/api";
-import { isApiError } from "@/shared/lib/utils/isApiError";
-import { Conversation } from "@/shared/model/types";
+import { ContainerConversationTypes } from "@/widgets/ConversationContainer/model/types";
+import { useSendMessage } from "../lib/hooks/useSendMessage";
 
-const SendMessage = ({
-    conversationId,
-    setConversation,
-}: {
-    conversationId: string;
-    setConversation: React.Dispatch<React.SetStateAction<Conversation | null>>;
-}) => {
+const SendMessage = () => {
     const {
-        state: { accessToken },
-    } = useSession();
-
-    const [isMessageInputFocused, setIsMessageInputFocused] = React.useState(false);
-    const [messageInputValue, setMessageInputValue] = React.useState("");
-    const [loading, setLoading] = React.useState(false);
-
-    const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (event.key === "Enter" && !event.shiftKey && "form" in event.target) {
-            event.preventDefault();
-            (event.target.form as HTMLFormElement).requestSubmit();
-        }
-    };
-
-    const onSendMessage = async (event: React.FormEvent<HTMLFormElement>) => {
-        try {
-            event.preventDefault();
-            if (!messageInputValue.trim().length) {
-                setMessageInputValue("");
-                return;
-            }
-
-            const { data } = await api.message.send({
-                token: accessToken!,
-                body: { message: messageInputValue, conversationId },
-            });
-
-            setConversation((prev) => ({...prev!, messages: [...prev!.messages, data]}));
-            setMessageInputValue("");
-        } catch (error) {
-            console.error(error);
-            isApiError(error) && toast.error(error.message, { position: "top-center" });
-        }
-    };
+        handleSubmitMessage,
+        onKeyDown,
+        handleCloseEdit,
+        setIsMessageInputFocused,
+        dispatch,
+        isMessageInputFocused,
+        loading,
+        messageInputValue,
+        sendMessageFormStatus,
+        selectedMessageEdit,
+    } = useSendMessage();
 
     return (
-        <form className='w-full sticky bottom-0 max-h-[70px] box-border' onSubmit={onSendMessage}>
-            <div
-                className={cn(
-                    "flex items-center h-full dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out py-3 box-border",
-                    isMessageInputFocused && "dark:bg-primary-dark-150 bg-primary-gray"
-                )}
-            >
-                <Button
-                    variant='text'
-                    type='button'
-                    onClick={() => toast.info("Coming soon!", { position: "top-center" })}
-                >
-                    <Paperclip className='w-6 h-6' />
-                </Button>
-                <textarea
-                    value={messageInputValue}
-                    onChange={({ target: { value } }) => setMessageInputValue(value)}
-                    onKeyDown={onKeyDown}
-                    onFocus={() => setIsMessageInputFocused(true)}
-                    onBlur={() => setIsMessageInputFocused(false)}
-                    placeholder='Write a message...'
-                    className='h-[50px] flex py-3 pl-1 pr-11 box-border w-full transition-colors duration-200 ease-in-out resize-none appearance-none ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none focus:placeholder:opacity-0 focus:placeholder:translate-x-2 outline-none ring-0 placeholder:transition-all placeholder:duration-300 placeholder:ease-in-out dark:focus:bg-primary-dark-150 dark:bg-primary-dark-100 border-none text-white dark:placeholder:text-white placeholder:opacity-50'
-                ></textarea>
-                <Button
-                    variant='text'
-                    disabled={!messageInputValue.trim().length || loading}
+        <div className='flex flex-col sticky bottom-0 w-full'>
+            {sendMessageFormStatus === "edit" && (
+                <div className='border-b border-solid dark:border-primary-dark-50 border-primary-gray w-full flex items-center h-full dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out py-3 px-4 gap-4 box-border'>
+                    <Edit2Icon className='dark:text-primary-white text-primary-gray' />
+                    <div className='flex flex-col'>
+                        <Typography as='p' size='md' weight='medium' variant='primary'>
+                            Edit message
+                        </Typography>
+                        <Typography as='p' variant='secondary'>
+                            {selectedMessageEdit!.text}
+                        </Typography>
+                    </div>
+                    <Button variant='text' className='ml-auto pr-0' onClick={handleCloseEdit}>
+                        <X className='w-6 h-6' />
+                    </Button>
+                </div>
+            )}
+            <form className='w-full max-h-[70px] box-border' onSubmit={handleSubmitMessage}>
+                <div
                     className={cn(
-                        "opacity-0 pointer-events-none invisible scale-50 transition-all duration-100 ease-in-out",
-                        !!messageInputValue.trim().length && "opacity-100 visible scale-100 pointer-events-auto"
+                        "flex items-center h-full dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out py-3 box-border",
+                        isMessageInputFocused && "dark:bg-primary-dark-150 bg-primary-gray"
                     )}
                 >
-                    <SendHorizonal className='w-6 h-6' />
-                </Button>
-            </div>
-        </form>
+                    <Button
+                        variant='text'
+                        type='button'
+                        onClick={() => toast.info("Coming soon!", { position: "top-center" })}
+                    >
+                        <Paperclip className='w-6 h-6' />
+                    </Button>
+                    <textarea
+                        value={messageInputValue}
+                        onChange={({ target: { value } }) => dispatch({ type: ContainerConversationTypes.SET_MESSAGE_INPUT_VALUE, payload: { value } })}
+                        onKeyDown={onKeyDown}
+                        onFocus={() => setIsMessageInputFocused(true)}
+                        onBlur={() => setIsMessageInputFocused(false)}
+                        placeholder='Write a message...'
+                        className='h-[50px] flex py-3 pl-1 pr-11 box-border w-full transition-colors duration-200 ease-in-out resize-none appearance-none ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none focus:placeholder:opacity-0 focus:placeholder:translate-x-2 outline-none ring-0 placeholder:transition-all placeholder:duration-300 placeholder:ease-in-out dark:focus:bg-primary-dark-150 dark:bg-primary-dark-100 border-none text-white dark:placeholder:text-white placeholder:opacity-50'
+                    ></textarea>
+                    <Button
+                        variant='text'
+                        disabled={(!messageInputValue.trim().length && sendMessageFormStatus === "send") || loading}
+                        className={cn(
+                            "opacity-0 pointer-events-none invisible scale-50 transition-all duration-100 ease-in-out",
+                            (!!messageInputValue.trim().length || sendMessageFormStatus === "edit") && "opacity-100 visible scale-100 pointer-events-auto"
+                        )}
+                    >
+                        <SendHorizonal className='w-6 h-6' />
+                    </Button>
+                </div>
+            </form>
+        </div>
     );
 };
 

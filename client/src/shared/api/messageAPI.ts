@@ -1,4 +1,4 @@
-import { APIMethodParams, Message, WithRequired } from "../model/types";
+import { APIMethodParams, IMessage, WithRequired } from "../model/types";
 import { API } from "./API";
 
 export class MessageAPI extends API {
@@ -14,6 +14,21 @@ export class MessageAPI extends API {
             ...rest,
         });
 
-        return this._checkResponse<Message>(response);
+        return this._checkResponse<IMessage>(response);
+    };
+
+    delete = async ({
+        body: { conversationId, messageId },
+        token,
+        ...rest
+    }: WithRequired<APIMethodParams<{ messageId: string; conversationId: string }>, "body" | "token">) => {
+        const response = await fetch(this._baseUrl + `/message/delete/${messageId}`, {
+            method: "DELETE",
+            headers: { ...this._headers, Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ conversationId }),
+            ...rest,
+        });
+
+        return this._checkResponse<{ success: boolean }>(response);
     };
 }

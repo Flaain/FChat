@@ -28,7 +28,7 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
                 const lastMessage = conversation.messages[0];
                 const filteredParticipants = conversation.participants.filter((participant) => participant._id !== userId);
                 const isGroup = filteredParticipants.length >= 2;
-                const lastMessageDescription = `${lastMessage.sender._id === userId ? "You: " : isGroup ? lastMessage.sender.name : ""}`;
+                const lastMessageDescription = lastMessage && `${lastMessage.sender._id === userId ? "You: " : isGroup ? lastMessage.sender.name : ""}`;
 
                 return (
                     <li key={conversation._id}>
@@ -43,7 +43,7 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
                                         filteredParticipants.map((participant) => participant.name).join(", ")}
                                 </Typography>
                                 {!!lastMessage && (
-                                    <div className='flex items-center w-full'>
+                                    <div className='flex items-center w-full gap-5'>
                                         <Typography
                                             as='p'
                                             variant='secondary'

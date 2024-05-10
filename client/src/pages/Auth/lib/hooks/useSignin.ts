@@ -4,14 +4,14 @@ import { useSession } from "@/entities/session/lib/hooks/useSession";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signinSchema } from "../../model/schema";
-import { SigininSchema } from "../../model/types";
-import { isApiError } from "@/shared/lib/utils/isApiError";
+import { SigininSchemaType } from "../../model/types";
 import { api } from "@/shared/api";
 import { SessionTypes } from "@/entities/session/model/types";
 import { toast } from "sonner";
 import { useAuth } from "./useAuth";
 import { saveDataToLocalStorage } from "@/shared/lib/utils/saveDataToLocalStorage";
 import { localStorageKeys } from "@/shared/constants";
+import { ApiError } from "@/shared/api/error";
 
 export const useSignin = () => {
     const { setAuthStage } = useAuth();
@@ -20,7 +20,7 @@ export const useSignin = () => {
 
     const [loading, setLoading] = React.useState(false);
 
-    const form = useForm<SigininSchema>({
+    const form = useForm<SigininSchemaType>({
         resolver: zodResolver(signinSchema),
         defaultValues: {
             login: "",
@@ -31,7 +31,7 @@ export const useSignin = () => {
         shouldFocusError: true,
     });
 
-    const onSubmit = React.useCallback(async (data: SigininSchema) => {
+    const onSubmit = React.useCallback(async (data: SigininSchemaType) => {
         try {
             setLoading(true);
 
@@ -42,7 +42,7 @@ export const useSignin = () => {
             saveDataToLocalStorage({ key: localStorageKeys.TOKEN, data: accessToken })
         } catch (error) {
             console.error(error);
-            isApiError(error) && toast.error(error.message);
+            error instanceof ApiError && toast.error(error.message);
         } finally {
             setLoading(false);
         }

@@ -1,5 +1,7 @@
+import { HTMLAttributes } from "react";
 import { ModalConfig } from "../lib/contexts/modal/types";
 import { Profile } from "../lib/contexts/profile/model/types";
+import { FieldError } from "react-hook-form";
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type ModalSize = "default" | "sm" | "lg" | "fitHeight" | "screen";
@@ -26,20 +28,23 @@ export interface AuthResponse extends Profile {
     expiresIn: string | number;
 }
 
-export interface APIMethodParams<T = undefined> extends Partial<Omit<BaseAPI, "baseUrl">>, Omit<RequestInit, "headers" | "body"> {
+export interface APIMethodParams<T = undefined>
+    extends Partial<Omit<BaseAPI, "baseUrl">>,
+        Omit<RequestInit, "headers" | "body"> {
     endpoint?: string;
     token?: string;
     body?: T;
 }
 
-export interface APIError<T> {
+export interface APIError<E> {
+    error: E;
     status: number;
+    headers?: Record<string, string>;
     message: string;
-    error: T;
-    type?: string; 
+    type?: string;
 }
 
-export interface Message {
+export interface IMessage extends HTMLAttributes<HTMLLIElement> {
     _id: string;
     sender: Participant;
     hasBeenRead: boolean;
@@ -60,7 +65,7 @@ export interface Conversation {
     _id: string;
     name?: string;
     participants: Array<Participant>;
-    messages: Array<Message>;
+    messages: Array<IMessage>;
     creator: Participant;
     createdAt: string;
     updatedAt: string;
@@ -98,10 +103,11 @@ type PolymorphicProps<T extends React.ElementType = React.ElementType, TProps = 
 } & TProps &
     Omit<PropsOf<T>, keyof TProps | "as" | "ref"> & { ref?: PolymorphicRef<T> };
 
-
 export type TypographyProps<T extends React.ElementType = "span"> = PolymorphicProps<T, BaseTypographyProps>;
 
-export type TypographyComponent = <T extends React.ElementType = "span">(props: PolymorphicProps<T, TypographyProps<T>>) => React.ReactNode;
+export type TypographyComponent = <T extends React.ElementType = "span">(
+    props: PolymorphicProps<T, TypographyProps<T>>
+) => React.ReactNode;
 
 export interface SearchUser {
     _id: string;
@@ -117,3 +123,21 @@ export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement>
     name: string;
     size?: "sm" | "md" | "lg";
 }
+
+export type FormErrorsType = [
+    string,
+    (
+        | FieldError
+        | (Record<
+              string,
+              Partial<{
+                  type: string | number;
+                  message: string;
+              }>
+          > &
+              Partial<{
+                  type: string | number;
+                  message: string;
+              }>)
+    )
+];

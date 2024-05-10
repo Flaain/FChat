@@ -16,5 +16,4 @@ export interface CreateConvSecondStepProps {
     handleRemove: (id: string) => void;
 }
 
-export interface CreateConvThirdStepProps extends CreateConvFirstStepProps {
-}
+export interface CreateConvThirdStepProps extends CreateConvFirstStepProps {}

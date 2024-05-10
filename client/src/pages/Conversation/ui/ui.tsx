@@ -1,16 +1,11 @@
 import ScreenLoader from "@/shared/ui/ScreenLoader";
 import ConversationContainer from "@/widgets/ConversationContainer/ui/ui";
-import { useConversation } from "../lib/hooks/useConversation";
+import { useConversationContext } from "../lib/hooks/useConversationContext";
 
 const Conversation = () => {
-    const { conversation, setConversation, status, info } = useConversation();
+    const { isLoading } = useConversationContext();
 
-    const statusses = {
-        idle: <ConversationContainer conversation={conversation!} setConversation={setConversation} info={info} />,
-        loading: <ScreenLoader />,
-    };
-
-    return statusses[status as keyof typeof statusses];
+    return isLoading ? <ScreenLoader /> : <ConversationContainer />;
 };
 
 export default Conversation;

@@ -1,10 +1,9 @@
 import React from "react";
-import { FieldPath, useForm } from "react-hook-form";
+import { FieldErrors, FieldPath, useForm } from "react-hook-form";
 import { useAuth } from "./useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/shared/api";
-import { isApiError, isFormError } from "@/shared/lib/utils/isApiError";
-import { SignupSchema } from "../../model/types";
+import { SignupSchemaType } from "../../model/types";
 import { signupSchema } from "../../model/schema";
 import { useProfile } from "@/shared/lib/hooks/useProfile";
 import { useSession } from "@/entities/session/lib/hooks/useSession";
@@ -12,8 +11,10 @@ import { SessionTypes } from "@/entities/session/model/types";
 import { saveDataToLocalStorage } from "@/shared/lib/utils/saveDataToLocalStorage";
 import { localStorageKeys } from "@/shared/constants";
 import { toast } from "sonner";
+import { ApiError } from "@/shared/api/error";
+import { FormErrorsType } from "@/shared/model/types";
 
-const steps: Array<{ fields: Array<FieldPath<SignupSchema>> }> = [
+const steps: Array<{ fields: Array<FieldPath<SignupSchemaType>> }> = [
     { fields: ["email", "password", "confirmPassword"] },
     { fields: ["name", "birthDate"] },
 ];
@@ -26,7 +27,7 @@ export const useSignup = () => {
     const [step, setStep] = React.useState(0);
     const [loading, setLoading] = React.useState(false);
 
-    const form = useForm<SignupSchema>({
+    const form = useForm<SignupSchemaType>({
         resolver: zodResolver(signupSchema),
         defaultValues: {
             email: "",
@@ -43,10 +44,14 @@ export const useSignup = () => {
     const checkNextAvailability = () => {
         return (
             !form.getValues(steps[step].fields).every(Boolean) ||
-            !!Object.entries(form.formState.errors).some(([key]) => steps[step].fields.includes(key as FieldPath<SignupSchema>)) ||
+            !!Object.entries(form.formState.errors).some(([key]) => steps[step].fields.includes(key as FieldPath<SignupSchemaType>)) ||
             loading
         );
     };
+
+    const _displayErrorsFromAPI = React.useCallback(([key, { message }]: FormErrorsType) => {
+        form.setError(key as FieldPath<SignupSchemaType>, { message }, { shouldFocus: true });
+    }, [form]);
 
     const onSubmit = React.useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
         try {
@@ -78,13 +83,16 @@ export const useSignup = () => {
             await actions[step as keyof typeof actions]();
         } catch (error) {
             console.error(error);
-            isFormError<SignupSchema>(error)
-                ? Object.entries(error.error).forEach(([key, { message }]) => form.setError(key as FieldPath<SignupSchema>, { message }, { shouldFocus: true }))
-                : isApiError(error) && toast.error(error.message);
+            if (error instanceof Error) {
+                const isFormError = error instanceof ApiError && error.type === 'form';
+
+                isFormError && Object.entries(error.error as FieldErrors<SignupSchemaType>).forEach(_displayErrorsFromAPI);
+                !isFormError && toast.error(error.message);
+            }
         } finally {
             setLoading(false);
         }
-    }, [dispatch, form, setProfile, step]);
+    }, [_displayErrorsFromAPI, dispatch, form, setProfile, step]);
 
     const onBack = React.useCallback(() => {
         setStep((prevState) => prevState - 1);
