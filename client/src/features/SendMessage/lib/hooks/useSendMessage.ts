@@ -15,6 +15,15 @@ export const useSendMessage = () => {
     const [isMessageInputFocused, setIsMessageInputFocused] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
 
+    const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+
+    React.useEffect(() => {
+        if (!textareaRef.current) return
+
+        const scrollHeight = textareaRef.current.scrollHeight;
+        textareaRef.current.style.height = !messageInputValue.trim().length ? "50px" : scrollHeight + "px";  
+    }, [messageInputValue])
+
     const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === "Enter" && !event.shiftKey && "form" in event.target) {
             event.preventDefault();
@@ -23,8 +32,13 @@ export const useSendMessage = () => {
     };
 
     const onSendEditedMessage = async () => {
-        !messageInputValue.trim().length && console.log("wanna delete?");
-        messageInputValue.trim() === selectedMessageEdit?.text && console.log("wanna undo?");
+        if (messageInputValue.trim() === selectedMessageEdit?.text) {
+            dispatch({ 
+                type: ContainerConversationTypes.SET_CLOSE_EDIT_FORM, 
+                payload: { selectedMessageEdit: null, sendMessageFormStatus: "send", value: "" } 
+            });
+            return;
+        }
     };
 
     const onSendMessage = async () => {
@@ -68,8 +82,9 @@ export const useSendMessage = () => {
 
     return {
         loading,
-        onKeyDown,
         dispatch,
+        onKeyDown,
+        textareaRef,
         handleCloseEdit,
         handleSubmitMessage,
         selectedMessageEdit,

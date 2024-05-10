@@ -47,7 +47,7 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
                                         <Typography
                                             as='p'
                                             variant='secondary'
-                                            className='max-w-[200px] w-full truncate'
+                                            className='line-clamp-1'
                                         >
                                             {lastMessageDescription}{lastMessage.text}
                                         </Typography>

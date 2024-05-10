@@ -16,7 +16,7 @@ export const useLayout = () => {
         setProfile(undefined!);
         dispatch({ type: SessionTypes.SET_ON_LOGOUT, payload: { isAuthorized: false } });
         localStorage.removeItem(localStorageKeys.TOKEN);
-    }, [])
+    }, [dispatch, setProfile])
 
     const handleSearch = React.useCallback(({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         setSearchValue(!value || !value.trim().length ? "" : value);

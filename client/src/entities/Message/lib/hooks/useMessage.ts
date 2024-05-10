@@ -28,24 +28,23 @@ export const useMessage = (message: IMessage) => {
     }, [text]);
 
     const handleMessageDelete = React.useCallback(async () => {
-        // try {
-        //     setIsLoading(true);
+        try {
+            setIsLoading(true);
 
-        //     await api.message.delete({ body: { conversationId, messageId: _id }, token: accessToken! });
+            await api.message.delete({ body: { conversationId, messageId: _id }, token: accessToken! });
 
-        //     setConversation((prev) => ({
-        //         ...prev!,
-        //         messages: prev!.messages.filter((message) => message._id !== _id),
-        //     }));
-        //     closeModal();
-        //     toast.success("Message deleted", { position: "top-center" });
-        // } catch (error) {
-        //     console.error(error);
-        //     toast.error("Cannot delete message", { position: "top-center" });
-        // } finally {
-        //     setIsLoading(false);
-        // }
-        setIsLoading(true);
+            setConversation((prev) => ({
+                ...prev!,
+                messages: prev!.messages.filter((message) => message._id !== _id),
+            }));
+            closeModal();
+            toast.success("Message deleted", { position: "top-center" });
+        } catch (error) {
+            console.error(error);
+            toast.error("Cannot delete message", { position: "top-center" });
+        } finally {
+            setIsLoading(false);
+        }
     }, [conversationId, _id, accessToken, setConversation, closeModal]);
 
     const handleMessageEdit = React.useCallback(async () => {
