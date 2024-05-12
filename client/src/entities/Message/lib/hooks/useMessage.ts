@@ -7,10 +7,8 @@ import { useSession } from "@/entities/session/lib/hooks/useSession";
 import { useConversationContext } from "@/pages/Conversation/lib/hooks/useConversationContext";
 import { useConversationContainer } from "@/widgets/ConversationContainer/lib/hooks/useConversationContainer";
 import { ContainerConversationTypes } from "@/widgets/ConversationContainer/model/types";
-import { useModal } from "@/shared/lib/hooks/useModal";
 
 export const useMessage = (message: IMessage) => {
-    const { closeModal } = useModal();
     const { dispatch } = useConversationContainer();
     const { setConversation } = useConversationContext();
     const { state: { accessToken, userId } } = useSession();
@@ -37,7 +35,6 @@ export const useMessage = (message: IMessage) => {
                 ...prev!,
                 messages: prev!.messages.filter((message) => message._id !== _id),
             }));
-            closeModal();
             toast.success("Message deleted", { position: "top-center" });
         } catch (error) {
             console.error(error);
@@ -45,7 +42,7 @@ export const useMessage = (message: IMessage) => {
         } finally {
             setIsLoading(false);
         }
-    }, [conversationId, _id, accessToken, setConversation, closeModal]);
+    }, [conversationId, _id, accessToken, setConversation]);
 
     const handleMessageEdit = React.useCallback(async () => {
         dispatch({

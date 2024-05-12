@@ -1,11 +1,12 @@
-import AvatarByName from "@/shared/ui/AvatarByName";
-import Typography from "@/shared/ui/Typography";
-import SideConversationSkeleton from "./Skeletons/SideConversationSkeleton";
-import { useProfile } from "@/shared/lib/hooks/useProfile";
-import { Conversation } from "@/shared/model/types";
-import { ConversationListProps } from "../model/types";
-import { useSession } from "@/entities/session/lib/hooks/useSession";
-import { Link } from "react-router-dom";
+import AvatarByName from '@/shared/ui/AvatarByName';
+import Typography from '@/shared/ui/Typography';
+import SideConversationSkeleton from './Skeletons/SideConversationSkeleton';
+import { useProfile } from '@/shared/lib/hooks/useProfile';
+import { Conversation } from '@/shared/model/types';
+import { ConversationListProps } from '../model/types';
+import { useSession } from '@/entities/session/lib/hooks/useSession';
+import { NavLink } from 'react-router-dom';
+import { cn } from '@/shared/lib/utils/cn';
 
 const ConversationsList = ({ searchValue }: ConversationListProps) => {
     const { profile: { conversations } } = useProfile();
@@ -28,39 +29,40 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
                 const lastMessage = conversation.messages[0];
                 const filteredParticipants = conversation.participants.filter((participant) => participant._id !== userId);
                 const isGroup = filteredParticipants.length >= 2;
-                const lastMessageDescription = lastMessage && `${lastMessage.sender._id === userId ? "You: " : isGroup ? lastMessage.sender.name : ""}`;
+                const lastMessageDescription = lastMessage && `${lastMessage.sender._id === userId ? 'You: ' : isGroup ? `${lastMessage.sender.name}: ` : ''}`;
 
                 return (
                     <li key={conversation._id}>
-                        <Link
+                        <NavLink
                             to={`conversation/${conversation._id}`}
-                            className='flex items-center gap-5 p-2 rounded-lg dark:hover:bg-primary-dark-50 transition-colors duration-200 ease-in-out'
+                            className={({ isActive }) =>
+                                cn(
+                                    'flex items-center gap-5 p-2 rounded-lg dark:hover:bg-primary-dark-50 transition-colors duration-200 ease-in-out',
+                                    isActive && 'bg-primary-dark-50'
+                                )
+                            }
                         >
-                            {!isGroup && <AvatarByName name={filteredParticipants[0].name} size="lg"/>}
+                            <AvatarByName name={isGroup ? undefined : filteredParticipants[0].name} size='lg' />
                             <div className='flex flex-col items-start w-full'>
                                 <Typography as='h2'>
-                                    {conversation.name ??
-                                        filteredParticipants.map((participant) => participant.name).join(", ")}
+                                    {conversation.name || filteredParticipants.map((participant) => participant.name).join(', ')}
                                 </Typography>
                                 {!!lastMessage && (
                                     <div className='flex items-center w-full gap-5'>
-                                        <Typography
-                                            as='p'
-                                            variant='secondary'
-                                            className='line-clamp-1'
-                                        >
-                                            {lastMessageDescription}{lastMessage.text}
+                                        <Typography as='p' variant='secondary' className='line-clamp-1'>
+                                            {lastMessageDescription}
+                                            {lastMessage.text}
                                         </Typography>
                                         <Typography className='ml-auto' variant='secondary'>
                                             {new Date(lastMessage.createdAt).toLocaleTimeString(navigator.language, {
-                                                hour: "numeric",
-                                                minute: "numeric",
+                                                hour: 'numeric',
+                                                minute: 'numeric'
                                             })}
                                         </Typography>
                                     </div>
                                 )}
                             </div>
-                        </Link>
+                        </NavLink>
                     </li>
                 );
             })}

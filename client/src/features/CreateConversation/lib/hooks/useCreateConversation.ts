@@ -1,22 +1,22 @@
-import React from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FieldErrors, FieldPath, useForm } from "react-hook-form";
-import { createConversationSchema } from "../../model/schemas";
-import { CreateConversationFormType } from "../../model/types";
-import { toast } from "sonner";
-import { api } from "@/shared/api";
-import { useSession } from "@/entities/session/lib/hooks/useSession";
-import { FormErrorsType, SearchUser } from "@/shared/model/types";
-import { useModal } from "@/shared/lib/hooks/useModal";
-import { useProfile } from "@/shared/lib/hooks/useProfile";
-import { useNavigate } from "react-router-dom";
-import { ApiError } from "@/shared/api/error";
+import React from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { FieldErrors, FieldPath, useForm } from 'react-hook-form';
+import { createConversationSchema } from '../../model/schemas';
+import { CreateConversationFormType } from '../../model/types';
+import { toast } from 'sonner';
+import { api } from '@/shared/api';
+import { useSession } from '@/entities/session/lib/hooks/useSession';
+import { FormErrorsType, SearchUser } from '@/shared/model/types';
+import { useModal } from '@/shared/lib/hooks/useModal';
+import { useProfile } from '@/shared/lib/hooks/useProfile';
+import { useNavigate } from 'react-router-dom';
+import { ApiError } from '@/shared/api/error';
 
 const MAX_CONVERSATION_SIZE = 10;
 
 const steps: Record<number, { fields: Array<FieldPath<CreateConversationFormType>> }> = {
-    0: { fields: ["username"] },
-    2: { fields: ["groupName"] },
+    0: { fields: ['username'] },
+    2: { fields: ['groupName'] }
 };
 
 export const useCreateConversation = () => {
@@ -34,22 +34,25 @@ export const useCreateConversation = () => {
     const form = useForm<CreateConversationFormType>({
         resolver: zodResolver(createConversationSchema),
         defaultValues: {
-            username: "",
-            groupName: "",
+            username: '',
+            groupName: ''
         },
         disabled: loading,
-        mode: "all",
-        shouldFocusError: true,
+        mode: 'all',
+        shouldFocusError: true
     });
 
     const _isNextButtonDisabled = () => {
-        const fieldsCondition = !!Object.entries(form.formState.errors).some(([key]) => steps[step]?.fields.includes(key as FieldPath<CreateConversationFormType>)) ||
-            !form.getValues(steps[step]?.fields).every?.(Boolean) || loading;
-        
-            const actions = {
+        const fieldsCondition =
+            !!Object.entries(form.formState.errors).some(([key]) =>
+                steps[step]?.fields.includes(key as FieldPath<CreateConversationFormType>)
+            ) ||
+            !form.getValues(steps[step]?.fields).every?.(Boolean) ||
+            loading;
+
+        const actions = {
             0: fieldsCondition,
             1: !selectedUsers.size || selectedUsers.size >= MAX_CONVERSATION_SIZE || loading,
-            2: fieldsCondition,
         };
 
         return actions[step as keyof typeof actions];
@@ -75,71 +78,67 @@ export const useCreateConversation = () => {
         });
     }, []);
 
-    const _createConversation = React.useCallback(
-        async ({ groupName }: Partial<Pick<CreateConversationFormType, "groupName">> = {}) => {
-            const { data } = await api.conversation.createConversation({
-                token: accessToken!,
-                body: { participants: [...selectedUsers.keys()], name: groupName },
-            });
+    const _createConversation = React.useCallback(async ({ groupName }: Partial<Pick<CreateConversationFormType, 'groupName'>> = {}) => {
+        const { data } = await api.conversation.createConversation({
+            token: accessToken!,
+            body: { participants: [...selectedUsers.keys()], name: groupName }
+        });
 
-            setProfile((prevState) => ({ ...prevState, conversations: [...prevState.conversations, data] }));
-            closeModal();
-            navigate(`/conversation/${data._id}`);
-        },
-        [accessToken, closeModal, navigate, selectedUsers, setProfile]
-    );
+        setProfile((prevState) => ({ ...prevState, conversations: [...prevState.conversations, data] }));
+        closeModal();
+        navigate(`/conversation/${data._id}`);
+    }, [accessToken, closeModal, navigate, selectedUsers, setProfile]);
 
     const _displayErrorsFromAPI = React.useCallback(([key, { message }]: FormErrorsType) => {
         form.setError(key as FieldPath<CreateConversationFormType>, { message }, { shouldFocus: true });
     }, [form]);
 
-    const onSubmit = React.useCallback(
-        async (event: React.FormEvent<HTMLFormElement>) => {
-            try {
-                event.preventDefault();
+    const onSubmit = React.useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
+        try {
+            event.preventDefault();
 
-                setLoading(true);
+            setLoading(true);
 
-                const { username, groupName } = form.getValues();
+            const { username, groupName } = form.getValues();
 
-                const actions = {
-                    0: async () => {
-                        const isValid = await form.trigger(steps[step].fields, { shouldFocus: true });
+            const actions = {
+                0: async () => {
+                    const isValid = await form.trigger(steps[step].fields, { shouldFocus: true });
 
-                        if (!isValid) return;
+                    if (!isValid) return;
 
-                        const { data } = await api.user.search({ token: accessToken!, body: { username } });
+                    const { data } = await api.user.search({ token: accessToken!, body: { username } });
 
-                        setSearchedUsers(data);
-                        setStep((prevState) => prevState + 1);
-                    },
-                    1: async () => {
-                        if (!selectedUsers.size || selectedUsers.size >= MAX_CONVERSATION_SIZE) throw new Error("Please select at least one user and less than 10");
-                        // ^^^^ not necessary but just to be sure that we won't create group conversation with less or more 2/10 users
-                        selectedUsers.size > 1 ? setStep((prevState) => prevState + 1) : await _createConversation();
-                    },
-                    2: async () => {
-                        const isValid = await form.trigger(steps[step].fields, { shouldFocus: true });
+                    setSearchedUsers(data);
+                    setStep((prevState) => prevState + 1);
+                },
+                1: async () => {
+                    if (!selectedUsers.size || selectedUsers.size >= MAX_CONVERSATION_SIZE) throw new Error('Please select at least one user and less than 10');
+                    // ^^^^ not necessary but just to be sure that we won't create group conversation with less or more 2/10 users
+                    selectedUsers.size > 1 ? setStep((prevState) => prevState + 1) : await _createConversation();
+                },
+                2: async () => {
+                    const isValid = await form.trigger(steps[step].fields, { shouldFocus: true });
 
-                        if (!isValid) return;
+                    if (!isValid) return;
 
-                        await _createConversation({ groupName });
-                    },
-                };
-
-                await actions[step as keyof typeof actions]();
-            } catch (error) {
-                console.error(error);
-                if (error instanceof Error) {
-                    const isFormError = error instanceof ApiError && error.type === 'form';
-
-                    isFormError && Object.entries(error.error as FieldErrors<CreateConversationFormType>).forEach(_displayErrorsFromAPI);
-                    !isFormError && toast.error(error.message, { position: "top-center" });
+                    await _createConversation({ groupName });
                 }
-                
-            } finally {
-                setLoading(false);
+            };
+
+            await actions[step as keyof typeof actions]();
+        } catch (error) {
+            console.error(error);
+            if (error instanceof Error) {
+                const isFormError = error instanceof ApiError && error.type === 'form';
+
+                isFormError ? Object.entries(error.error as FieldErrors<CreateConversationFormType>).forEach(_displayErrorsFromAPI) : toast.error(error.message, {
+                    position: 'top-center'
+                });
             }
+        } finally {
+            setLoading(false);
+        }
         },
         [form, step, accessToken, selectedUsers.size, _createConversation, _displayErrorsFromAPI]
     );
@@ -153,12 +152,12 @@ export const useCreateConversation = () => {
         step,
         loading,
         searchedUsers,
-        isNextButtonDisabled: _isNextButtonDisabled(),
+        isNextButtonDisabled: _isNextButtonDisabled?.(),
         selectedUsers,
         setSearchedUsers,
         handleSelect,
         handleRemove,
         handleBack,
-        onSubmit,
+        onSubmit
     };
 };

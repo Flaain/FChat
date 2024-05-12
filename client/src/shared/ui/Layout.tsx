@@ -1,28 +1,28 @@
-import CreateConversation from "@/features/CreateConversation/ui/ui";
-import ConversationsList from "@/widgets/ConversationsList/ui/ui";
-import { Outlet } from "react-router-dom";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./Resizable";
-import { saveDataToLocalStorage } from "../lib/utils/saveDataToLocalStorage";
-import { localStorageKeys } from "../constants";
-import { getDataFromLocalStorage } from "../lib/utils/getDataFromLocalStorage";
-import { Input } from "./Input";
-import { Button } from "./Button";
-import { Plus } from "lucide-react";
-import { useLayout } from "../lib/hooks/useLayout";
-import { Toaster } from "sonner";
+import CreateConversation from '@/features/CreateConversation/ui/ui';
+import ConversationsList from '@/widgets/ConversationsList/ui/ui';
+import { Outlet } from 'react-router-dom';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './Resizable';
+import { saveDataToLocalStorage } from '../lib/utils/saveDataToLocalStorage';
+import { localStorageKeys } from '../constants';
+import { getDataFromLocalStorage } from '../lib/utils/getDataFromLocalStorage';
+import { Input } from './Input';
+import { Button } from './Button';
+import { Plus } from 'lucide-react';
+import { useLayout } from '../lib/hooks/useLayout';
+import { Toaster } from 'sonner';
 
 const Layout = () => {
     const { searchValue, handleSearch, openModal, handleLogout } = useLayout();
 
     return (
-        <ResizablePanelGroup direction='horizontal' style={{ overflow: "unset" }}>
+        <ResizablePanelGroup direction='horizontal' style={{ overflow: 'unset' }}>
             <main className='flex dark:bg-primary-dark-200 w-full'>
                 <Toaster />
                 <ResizablePanel
                     defaultSize={getDataFromLocalStorage({ key: localStorageKeys.ASIDE_PANEL_SIZE, defaultData: 20 })}
                     minSize={20}
                     maxSize={30}
-                    style={{ overflow: "unset" }}
+                    style={{ overflow: 'unset' }}
                     onResize={(size) => saveDataToLocalStorage({ key: localStorageKeys.ASIDE_PANEL_SIZE, data: size })}
                 >
                     <aside className='flex flex-col h-screen sticky top-0 gap-8 dark:bg-primary-dark-150 bg-primary-white'>
@@ -38,9 +38,9 @@ const Layout = () => {
                                 size='icon'
                                 onClick={() =>
                                     openModal({
-                                        title: "New conversation",
+                                        title: 'New conversation',
                                         content: <CreateConversation />,
-                                        size: "fitHeight",
+                                        size: 'fitHeight'
                                     })
                                 }
                             >
@@ -56,7 +56,7 @@ const Layout = () => {
                     </aside>
                 </ResizablePanel>
                 <ResizableHandle className='w-1 dark:bg-primary-dark-50 dark:hover:bg-primary-50 transition-colors duration-200 ease-in-out' />
-                <ResizablePanel className='flex' style={{ overflow: "unset" }}>
+                <ResizablePanel className='flex' style={{ overflow: 'unset' }}>
                     <Outlet />
                 </ResizablePanel>
             </main>

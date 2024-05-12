@@ -1,6 +1,7 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/Form";
 import { CreateConvThirdStepProps } from "../../model/types";
 import { Input } from "@/shared/ui/Input";
+import Typography from "@/shared/ui/Typography";
 
 const SetupStage = ({ form }: CreateConvThirdStepProps) => {
     return (
@@ -9,7 +10,7 @@ const SetupStage = ({ form }: CreateConvThirdStepProps) => {
             control={form.control}
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel className='text-white'>Group name</FormLabel>
+                    <FormLabel className='text-white'>Group name <Typography weight="medium" size="md" variant='secondary'>(optional)</Typography></FormLabel>
                     <FormControl>
                         <Input
                             {...field}

@@ -1,7 +1,8 @@
 import React from "react";
 import { ConversationContainerContext } from "./context";
-import { ContainerConversationState, ConversationContainerProviderProps } from "./types";
+import { ContainerConversationState, ContainerConversationTypes, ConversationContainerProviderProps } from "./types";
 import { containerReducer } from "./reducer";
+import { useParams } from "react-router-dom";
 
 const initialState: ContainerConversationState = {
     messageInputValue: "",
@@ -10,9 +11,14 @@ const initialState: ContainerConversationState = {
 };
 
 export const ConversationContainerProvider = ({ children, defaultState }: ConversationContainerProviderProps) => {
+    const { id } = useParams();
     const [state, dispatch] = React.useReducer(containerReducer, { ...initialState, ...defaultState });
-
+    
     const value = React.useMemo(() => ({ dispatch, state }), [dispatch, state]);
+
+    React.useEffect(() => {
+        dispatch({ type: ContainerConversationTypes.SET_MESSAGE_INPUT_VALUE, payload: { value: "" } });
+    }, [id])
 
     return (
         <ConversationContainerContext.Provider value={value}>

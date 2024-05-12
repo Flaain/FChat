@@ -11,11 +11,6 @@ export const conversationCreateSchema = z
             .trim()
             .min(1, 'Name is required')
             .max(32, 'Name must be at most 32 characters long')
-            .optional(),
+            .optional()
+            .or(z.literal('')),
     })
-    .superRefine(({ participants, name }, ctx) => {
-        participants.length >= 2 && !name && ctx.addIssue({
-            code: 'custom',
-            message: 'Conversation name for groups is required'
-        });
-    });

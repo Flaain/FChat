@@ -18,7 +18,7 @@ export const useConversation = () => {
     }, [conversation, userId]);
     const isGroup = filteredParticipants.length >= 2;
     const conversationName = React.useMemo(() => {
-        return isGroup ? conversation?.name ?? filteredParticipants.map((participant) => participant.name).join(", ") : filteredParticipants[0]?.name;
+        return isGroup ? conversation?.name || filteredParticipants.map((participant) => participant.name).join(", ") : filteredParticipants[0]?.name;
     }, [conversation?.name, filteredParticipants, isGroup]);
 
     const navigate = useNavigate();
@@ -39,13 +39,14 @@ export const useConversation = () => {
                 });
 
                 setConversation(data);
-                setIsLoading(false);
             } catch (error) {
                 if (error instanceof Error && error.name !== "AbortError") {
                     console.error(error);
                     error instanceof ApiError && toast.error("Cannot get conversation", { position: "top-center", description: error.message });
                     navigate("/");
                 }
+            } finally {
+                setIsLoading(false);
             }
         })();
 

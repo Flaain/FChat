@@ -4,7 +4,7 @@ import { Profile } from "../lib/contexts/profile/model/types";
 import { FieldError } from "react-hook-form";
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
-export type ModalSize = "default" | "sm" | "lg" | "fitHeight" | "screen";
+export type ModalSize = "default" | "sm" | "lg" | "fit"| "fitHeight" | "screen";
 
 export interface BaseAPI {
     baseUrl?: string;
@@ -51,7 +51,7 @@ export interface IMessage extends HTMLAttributes<HTMLLIElement> {
     hasBeenEdited: boolean;
     text: string;
     createdAt: string;
-    updatedAt: string;
+    sendingInProgress?: boolean;
 }
 
 export interface Participant {
@@ -121,7 +121,7 @@ export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement> {
-    name: string;
+    name?: string;
     size?: "sm" | "md" | "lg";
 }
 
@@ -144,10 +144,9 @@ export type FormErrorsType = [
 ];
 
 export interface ConfirmationProps {
-    onConfirm: () => void;
+    onConfirm: () => Promise<void>;
     onCancel: () => void;
     text: string;
     onConfirmText?: string;
-    controlsDisabled?: boolean;
     onCancelText?: string;
 }

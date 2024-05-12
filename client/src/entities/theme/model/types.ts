@@ -3,7 +3,7 @@ import React from "react";
 export type Theme = "light" | "dark";
 
 export interface ThemeContextProps {
-    theme?: Theme;
+    theme: Theme;
     setTheme: React.Dispatch<React.SetStateAction<Theme>>;
 }
 

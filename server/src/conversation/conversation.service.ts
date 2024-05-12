@@ -24,7 +24,11 @@ export class ConversationService implements IConversationService {
 
         if (isConversationExist) throw new HttpException(CONVERSATION_ALREADY_EXISTS, CONVERSATION_ALREADY_EXISTS.status);
 
-        const conversation = new this.conversationModel({ participants: _participants, creator: initiatorId, name });
+        const conversation = new this.conversationModel({ 
+            participants: _participants, 
+            creator: initiatorId, 
+            name: _participants.length > 2 ? name.trim() : null 
+        });
 
         const savedConversation = await conversation.save();
         const populatedConversation = await savedConversation.populate([
