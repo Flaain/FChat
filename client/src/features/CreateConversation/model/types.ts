@@ -1,19 +1,18 @@
-import { z } from "zod";
-import { UseFormReturn } from "react-hook-form";
-import { SearchUser } from "@/shared/model/types";
-import { createConversationSchema } from "./schemas";
+import React from 'react';
+import { z } from 'zod';
+import { SearchUser } from '@/shared/model/types';
+import { createConversationSchema } from './schemas';
 
 export type CreateConversationFormType = z.infer<typeof createConversationSchema>;
 
-export interface CreateConvFirstStepProps {
-    form: UseFormReturn<CreateConversationFormType>;
-}
-
-export interface CreateConvSecondStepProps {
+export interface CreateConversationContextProps {
+    step: number;
+    loading: boolean;
     searchedUsers: Array<SearchUser>;
     selectedUsers: Map<string, SearchUser>;
     handleSelect: (user: SearchUser) => void;
     handleRemove: (id: string) => void;
+    setSearchedUsers: React.Dispatch<React.SetStateAction<Array<SearchUser>>>;
+    setStep: React.Dispatch<React.SetStateAction<number>>;
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
-export interface CreateConvThirdStepProps extends CreateConvFirstStepProps {}

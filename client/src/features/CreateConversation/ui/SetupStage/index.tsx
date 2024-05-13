@@ -1,16 +1,22 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/Form";
-import { CreateConvThirdStepProps } from "../../model/types";
-import { Input } from "@/shared/ui/Input";
-import Typography from "@/shared/ui/Typography";
+import Typography from '@/shared/ui/Typography';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
+import { CreateConversationFormType } from '../../model/types';
+import { Input } from '@/shared/ui/Input';
+import { UseFormReturn } from 'react-hook-form';
 
-const SetupStage = ({ form }: CreateConvThirdStepProps) => {
+const SetupStage = ({ form }: { form: UseFormReturn<CreateConversationFormType> }) => {
     return (
         <FormField
             name='groupName'
             control={form.control}
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel className='text-white'>Group name <Typography weight="medium" size="md" variant='secondary'>(optional)</Typography></FormLabel>
+                    <FormLabel className='text-white'>
+                        Group name&nbsp;
+                        <Typography weight='medium' size='md' variant='secondary'>
+                            (optional)
+                        </Typography>
+                    </FormLabel>
                     <FormControl>
                         <Input
                             {...field}

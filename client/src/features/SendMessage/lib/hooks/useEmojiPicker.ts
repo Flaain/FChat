@@ -3,7 +3,7 @@ import { useConversationContainer } from '@/widgets/ConversationContainer/lib/ho
 import { ContainerConversationTypes } from '@/widgets/ConversationContainer/model/types';
 import { Emoji } from '@emoji-mart/data';
 
-export const useEmojiPicker = (textareaRef: React.MutableRefObject<HTMLTextAreaElement | null>) => {
+export const useEmojiPicker = () => {
     const {
         state: { messageInputValue },
         dispatch
@@ -17,9 +17,8 @@ export const useEmojiPicker = (textareaRef: React.MutableRefObject<HTMLTextAreaE
                 payload: { value: messageInputValue + emoji.native }
             });
 
-            // textareaRef.current?.focus();
         },
-        [dispatch, messageInputValue, textareaRef]
+        [dispatch, messageInputValue]
     );
 
     const openEmojiPicker = React.useCallback(

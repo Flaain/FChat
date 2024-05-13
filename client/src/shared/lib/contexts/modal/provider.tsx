@@ -21,14 +21,13 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         setConfig(null);
     }, []);
 
-    const onAsyncActionCall = React.useCallback(async ({ asyncAction, errorMessage }: AsyncFunctionParams) => {
+    const onAsyncActionCall = React.useCallback(async ({ asyncAction, errorMessage, closeModalOnError, closeModalOnSuccess = true }: AsyncFunctionParams) => {
         try {
             setIsAsyncActionLoading(true);
 
             await asyncAction();
 
-            closeModal();
-            setConfig(null);
+            closeModalOnSuccess && closeModal();
         } catch (error) {
             console.error(error);
             if (error instanceof Error) {
@@ -36,6 +35,7 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
 
                 toast.error(isApiError ? error.message : errorMessage ?? error.message, { position: 'top-center' });
             }
+            closeModalOnError && closeModal();
         } finally {
             setIsAsyncActionLoading(false);
         }

@@ -6,11 +6,12 @@ import { CreateConversationFormType } from '../../model/types';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { FormErrorsType, SearchUser } from '@/shared/model/types';
+import { FormErrorsType } from '@/shared/model/types';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { useNavigate } from 'react-router-dom';
 import { ApiError } from '@/shared/api/error';
+import { useCreateContext } from './useCreateContext';
 
 const MAX_CONVERSATION_SIZE = 10;
 
@@ -21,13 +22,9 @@ const steps: Record<number, { fields: Array<FieldPath<CreateConversationFormType
 
 export const useCreateConversation = () => {
     const { state: { accessToken } } = useSession();
-    const { closeModal } = useModal();
+    const { onAsyncActionCall, closeModal } = useModal();
     const { setProfile } = useProfile();
-
-    const [step, setStep] = React.useState(0);
-    const [loading, setLoading] = React.useState(false);
-    const [searchedUsers, setSearchedUsers] = React.useState<Array<SearchUser>>([]);
-    const [selectedUsers, setSelectedUsers] = React.useState<Map<string, SearchUser>>(new Map());
+    const { loading, step, setStep, setLoading, selectedUsers, setSearchedUsers } = useCreateContext();
 
     const navigate = useNavigate();
 
@@ -58,25 +55,10 @@ export const useCreateConversation = () => {
         return actions[step as keyof typeof actions];
     };
 
-    const handleSelect = React.useCallback((user: SearchUser) => {
-        setSelectedUsers((prevState) => {
-            const newState = new Map([...prevState]);
-
-            newState.has(user._id) ? newState.delete(user._id) : newState.set(user._id, user);
-
-            return newState;
-        });
-    }, []);
-
-    const handleRemove = React.useCallback((id: string) => {
-        setSelectedUsers((prevState) => {
-            const newState = new Map([...prevState]);
-
-            newState.delete(id);
-
-            return newState;
-        });
-    }, []);
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        onAsyncActionCall({ asyncAction: onSubmit, closeModalOnSuccess: false })
+    }
 
     const _createConversation = React.useCallback(async ({ groupName }: Partial<Pick<CreateConversationFormType, 'groupName'>> = {}) => {
         const { data } = await api.conversation.createConversation({
@@ -84,19 +66,17 @@ export const useCreateConversation = () => {
             body: { participants: [...selectedUsers.keys()], name: groupName }
         });
 
-        setProfile((prevState) => ({ ...prevState, conversations: [...prevState.conversations, data] }));
         closeModal();
+        setProfile((prevState) => ({ ...prevState, conversations: [...prevState.conversations, data] }));
         navigate(`/conversation/${data._id}`);
-    }, [accessToken, closeModal, navigate, selectedUsers, setProfile]);
+    }, [accessToken, navigate, closeModal, selectedUsers, setProfile]);
 
     const _displayErrorsFromAPI = React.useCallback(([key, { message }]: FormErrorsType) => {
         form.setError(key as FieldPath<CreateConversationFormType>, { message }, { shouldFocus: true });
     }, [form]);
 
-    const onSubmit = React.useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = async () => {
         try {
-            event.preventDefault();
-
             setLoading(true);
 
             const { username, groupName } = form.getValues();
@@ -139,25 +119,16 @@ export const useCreateConversation = () => {
         } finally {
             setLoading(false);
         }
-        },
-        [form, step, accessToken, selectedUsers.size, _createConversation, _displayErrorsFromAPI]
-    );
+    };
 
     const handleBack = React.useCallback(() => {
         setStep((prevState) => prevState - 1);
-    }, []);
+    }, [setStep]);
 
     return {
         form,
-        step,
-        loading,
-        searchedUsers,
         isNextButtonDisabled: _isNextButtonDisabled?.(),
-        selectedUsers,
-        setSearchedUsers,
-        handleSelect,
-        handleRemove,
         handleBack,
-        onSubmit
+        handleSubmit,
     };
 };

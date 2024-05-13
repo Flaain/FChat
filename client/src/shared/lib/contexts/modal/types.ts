@@ -13,6 +13,8 @@ export interface ModalContextProps {
 export interface AsyncFunctionParams {
     asyncAction: () => Promise<void>;
     errorMessage?: string;
+    closeModalOnError?: boolean;
+    closeModalOnSuccess?: boolean;
 }
 
 export interface ModalConfig {

@@ -1,5 +1,5 @@
-export const getRelativeTimeString = (date: Date | number, lang = navigator.language, options: Intl.RelativeTimeFormatOptions = { numeric: "auto" }) => {
-    const timeMS = typeof date === "number" ? date : date.getTime();
+export const getRelativeTimeString = (date: Date | number | string, lang = navigator.language, options: Intl.RelativeTimeFormatOptions = { numeric: "auto" }) => {
+    const timeMS = date instanceof Date ? date.getTime() : new Date(date).getTime();
     const deltaSeconds = Math.round((timeMS - Date.now()) / 1000);
 
     const cuttoffs = [60, 3600, 86400, 86400 * 7, 86400 * 30, 86400 * 365, Infinity];

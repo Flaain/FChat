@@ -1,5 +1,11 @@
 import ConversationContainer from '@/widgets/ConversationContainer/ui/ui';
+import ScreenLoader from '@/shared/ui/ScreenLoader';
+import { useConversationContext } from '../lib/hooks/useConversationContext';
 
-const Conversation = () => <ConversationContainer />;
+const Conversation = () => {
+    const { isLoading } = useConversationContext();
+
+    return isLoading ? <ScreenLoader /> : <ConversationContainer />;
+};
 
 export default Conversation;

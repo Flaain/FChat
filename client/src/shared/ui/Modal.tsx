@@ -97,9 +97,8 @@ const ModalBody = ({ children, size, className, ...rest }: Omit<ModalBodyProps, 
 
         const total = focusableElements.current.length;
         const currentIndex = activeIndex.current;
-
-        activeIndex.current = (currentIndex + (event.shiftKey ? -1 : 1) + total) % total;
-
+        activeIndex.current = total ? (currentIndex + (event.shiftKey ? -1 : 1) + total) % total : -1;
+        
         focusableElements.current[activeIndex.current]?.focus?.();
     };
 

@@ -1,8 +1,9 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/Form";
-import { Input } from "@/shared/ui/Input";
-import { CreateConvFirstStepProps } from "../../model/types";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
+import { Input } from '@/shared/ui/Input';
+import { CreateConversationFormType } from '../../model/types';
+import { UseFormReturn } from 'react-hook-form';
 
-const SearchStage = ({ form }: CreateConvFirstStepProps) => {
+const SearchStage = ({ form }: { form: UseFormReturn<CreateConversationFormType> }) => {
     return (
         <FormField
             name='username'
