@@ -111,6 +111,7 @@ export const useSendMessage = () => {
                     lastSeen: new Date().toLocaleString()
                 },
                 createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
                 hasBeenEdited: false,
                 hasBeenRead: false,
                 sendingInProgress: true

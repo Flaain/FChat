@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { JwtGuard } from 'src/utils/jwt.guard';
 import { MessageSendDTO } from './dtos/message.send.dto';
 import { UserDocumentType } from 'src/user/types';
 import { Routes } from 'src/utils/types';
 import { MessageDeleteDTO } from './dtos/message.delete.dto';
+import { MessageEditDTO } from './dtos/message.edit.dto';
 
 @Controller(Routes.MESSAGE)
 export class MessageController {
@@ -18,6 +19,12 @@ export class MessageController {
         @Param('conversationId') conversationId: string,
     ) {
         return this.messageService.send({ ...dto, conversationId, initiatorId: req.user._id });
+    }
+
+    @Patch('edit/:messageId')
+    @UseGuards(JwtGuard)
+    edit(@Body() dto: MessageEditDTO, @Param('messageId') messageId: string, @Req() req: Request & { user: UserDocumentType }) {
+        return this.messageService.edit({ ...dto, messageId, initiatorId: req.user._id });
     }
 
     @Delete('delete/:messageId')

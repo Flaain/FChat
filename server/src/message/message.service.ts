@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Message } from './schemas/message.schema';
 import { Model, Types } from 'mongoose';
 import { ConversationService } from 'src/conversation/conversation.service';
-import { DeleteMessageType, IMessageService, MessageDocumentType, SendMessageType } from './types';
+import { DeleteMessageType, EditMessageType, IMessageService, MessageDocumentType, SendMessageType } from './types';
 
 @Injectable()
 export class MessageService implements IMessageService {
@@ -23,7 +23,7 @@ export class MessageService implements IMessageService {
 
             const newMessage = new this.messageModel({
                 sender: initiatorId,
-                text: message,
+                text: message.trim(),
             });
 
             conversation.messages.push(newMessage._id);
@@ -39,6 +39,35 @@ export class MessageService implements IMessageService {
             throw new HttpException(error.response, error.status);
         }
     };
+
+    edit = async ({ conversationId, messageId, initiatorId, message: newMessage }: EditMessageType) => {
+        try {
+            const message = await this.messageModel.findOne({ _id: messageId, sender: initiatorId });
+
+            if (!message || message.text === newMessage.trim()) throw new ForbiddenException({ message: 'You are not allowed to edit this message' });
+
+            const conversation = await this.conversationService.findOneByPayload({
+                _id: conversationId,
+                participants: { $in: initiatorId },
+                messages: { $in: message._id },
+            });
+
+            if (!conversation) throw new ForbiddenException({ message: 'You are not allowed to edit this message' });
+
+            message.text = newMessage.trim();
+            message.hasBeenEdited = true;
+
+            const savedMessage = await message.save();
+            const populatedMessage = await savedMessage.populate([
+                { path: 'sender', model: 'User', select: 'name email' },
+            ]);
+
+            return populatedMessage;
+        } catch (error) {
+            console.log(error);
+            throw new HttpException(error.response, error.status);
+        }
+    }
 
     delete = async ({ conversationId, messageId, initiatorId }: DeleteMessageType) => {
         try {

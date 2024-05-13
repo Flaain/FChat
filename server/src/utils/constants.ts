@@ -3,14 +3,17 @@ import { z } from 'zod';
 
 export const nameForSchema = z
     .string()
-    .regex(
-        /^[a-zA-Z0-9\s]*$/,
-        'Name must contain only letters, numbers, and spaces',
-    )
+    .regex(/^[a-zA-Z0-9\s]*$/, 'Name must contain only letters, numbers, and spaces')
     .trim()
     .min(1, 'Name is required')
     .min(3, 'Name must be at least 3 characters long')
     .max(32, 'Name must be at most 32 characters long');
+
+export const messageForSchema = z
+    .string()
+    .trim()
+    .min(1, "Message can't be empty")
+    .max(1000, "Message can't be longer than 1000 characters");
 
 export const SOMETHING_WENT_WRONG = {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -25,7 +28,7 @@ export const INVALID_CREDENTIALS = {
 export const UNAUTHORIZED = {
     status: HttpStatus.UNAUTHORIZED,
     message: 'unauthorized',
-}
+};
 
 export const USER_NOT_FOUND = {
     status: HttpStatus.NOT_FOUND,
@@ -41,10 +44,6 @@ export const USER_NOT_FOUND = {
 export const CONVERSATION_ALREADY_EXISTS = {
     status: HttpStatus.BAD_REQUEST,
     message: 'conversation already exists',
-}
+};
 
-export const emailForSchema = z
-    .string()
-    .trim()
-    .min(1, 'Email is required')
-    .email('Invalid email address');
+export const emailForSchema = z.string().trim().min(1, 'Email is required').email('Invalid email address');

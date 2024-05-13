@@ -51,6 +51,7 @@ export interface IMessage extends HTMLAttributes<HTMLLIElement> {
     hasBeenEdited: boolean;
     text: string;
     createdAt: string;
+    updatedAt: string;
     sendingInProgress?: boolean;
 }
 
