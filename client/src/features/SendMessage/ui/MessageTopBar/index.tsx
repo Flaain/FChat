@@ -3,7 +3,7 @@ import { Button } from '@/shared/ui/Button';
 import { Edit2Icon, X } from 'lucide-react';
 import { MessageTopBarProps } from '../../model/types';
 
-const MessageTopBar = ({ onClose, title, closeIconSlot, description }: MessageTopBarProps) => {
+const MessageTopBar = ({ onClose, title, closeIconSlot, description, preventClose }: MessageTopBarProps) => {
     return (
         <div className='overscroll-contain border-b border-solid dark:border-primary-dark-50 border-primary-gray w-full flex items-center dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out py-3 px-4 gap-4 box-border'>
             <Edit2Icon className='dark:text-primary-white text-primary-gray' />
@@ -17,7 +17,7 @@ const MessageTopBar = ({ onClose, title, closeIconSlot, description }: MessageTo
                     </Typography>
                 )}
             </div>
-            <Button variant='text' className='ml-auto pr-0' onClick={onClose}>
+            <Button variant='text' className='ml-auto pr-0' onClick={onClose} disabled={preventClose}>
                 {closeIconSlot ?? <X className='w-6 h-6' />}
             </Button>
         </div>

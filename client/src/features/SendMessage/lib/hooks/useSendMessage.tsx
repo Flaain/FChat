@@ -93,6 +93,20 @@ export const useSendMessage = () => {
                 payload: { selectedMessageEdit: null, sendMessageFormStatus: 'send', value: '' }
             });
         }
+
+        const { data } = await api.message.edit({
+            body: { messageId: selectedMessageEdit!._id, message: messageInputValue.trim() },
+            token: accessToken!
+        });
+
+        setConversation((prevState) => ({ 
+            ...prevState, 
+            messages: prevState.messages.map((message) => (message._id === selectedMessageEdit!._id ? data : message)) 
+        }));
+        dispatch({ 
+            type: ContainerConversationTypes.SET_CLOSE_EDIT_FORM, 
+            payload: { selectedMessageEdit: null, sendMessageFormStatus: 'send', value: '' } 
+        });
     };
 
     const onSendMessage = async () => {

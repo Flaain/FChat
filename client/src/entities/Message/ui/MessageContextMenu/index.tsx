@@ -6,8 +6,6 @@ import { Copy, Edit2, Trash2 } from 'lucide-react';
 import { IMessage } from '@/shared/model/types';
 import { useMessage } from '../../lib/hooks/useMessage';
 
-const contextMenuStyles = 'flex items-center justify-between gap-2 dark:text-primary-white text-primary-dark-200 rounded-md dark:hover:bg-primary-dark-200 focus:bg-primary-gray dark:focus:bg-primary-dark-200 hover:bg-primary-gray';
-
 const MessageContextMenu = ({ message, isMessageFromMe }: { message: IMessage; isMessageFromMe: boolean }) => {
     const { handleCopyToClipboard, handleMessageDelete, handleMessageEdit } = useMessage(message);
     const { openModal, closeModal, onAsyncActionCall } = useModal();
@@ -52,7 +50,11 @@ const MessageContextMenu = ({ message, isMessageFromMe }: { message: IMessage; i
         <ContextMenuContent className='w-52 dark:bg-primary-dark-150 bg-primary-white border border-solid dark:border-primary-dark-200 border-primary-white rounded-md flex flex-col gap-2 p-1'>
             {contextMenu.map(({ text, icon, onClick, condition }, index) =>
                 condition ? (
-                    <ContextMenuItem key={index} className={contextMenuStyles} onClick={onClick}>
+                    <ContextMenuItem
+                        key={index}
+                        className='flex items-center justify-between gap-2 dark:text-primary-white text-primary-dark-200 rounded-md dark:hover:bg-primary-dark-200 focus:bg-primary-gray dark:focus:bg-primary-dark-200 hover:bg-primary-gray'
+                        onClick={onClick}
+                    >
                         {text}
                         {icon}
                     </ContextMenuItem>

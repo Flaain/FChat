@@ -11,13 +11,9 @@ import { useConversationContainer } from '@/widgets/ConversationContainer/lib/ho
 import { EmojiPicker } from '@/shared/model/view';
 
 const SendMessage = () => {
-    const { handleSubmitMessage, onKeyDown, handleCloseEdit, handleChange } = useSendMessage();
+    const { handleSubmitMessage, onKeyDown, handleCloseEdit, handleChange, isLoading } = useSendMessage();
     const { isOpen, onClickOutside, onEmojiSelect, openEmojiPicker } = useEmojiPicker();
-    const {
-        state: { messageInputValue, selectedMessageEdit, sendMessageFormStatus }
-    } = useConversationContainer();
-
-    const [isMessageInputFocused, setIsMessageInputFocused] = React.useState(false);
+    const { state: { messageInputValue, selectedMessageEdit, sendMessageFormStatus } } = useConversationContainer();
 
     const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
     const trimmedValue = messageInputValue.trim().length;
@@ -30,22 +26,27 @@ const SendMessage = () => {
     }, [messageInputValue]);
 
     const messageBars = {
-        edit: <MessageTopBar title='Edit message' onClose={handleCloseEdit} description={selectedMessageEdit?.text} />
+        edit: (
+            <MessageTopBar
+                title='Edit message'
+                onClose={handleCloseEdit}
+                description={selectedMessageEdit?.text}
+                preventClose={isLoading}
+            />
+        )
     };
 
     return (
         <div className='flex flex-col sticky bottom-0 w-full'>
             {messageBars[sendMessageFormStatus as keyof typeof messageBars]}
             <form
-                className={cn(
-                    'w-full max-h-[120px] overflow-hidden flex items-center dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out box-border',
-                    isMessageInputFocused && 'dark:bg-primary-dark-150 bg-primary-gray'
-                )}
+                className='w-full max-h-[120px] overflow-hidden flex items-center dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out box-border'
                 onSubmit={handleSubmitMessage}
             >
                 <Button
                     variant='text'
                     type='button'
+                    disabled={(isLoading && sendMessageFormStatus === 'edit')}
                     onClick={() => toast.info('Coming soon!', { position: 'top-center' })}
                 >
                     <Paperclip className='w-6 h-6' />
@@ -55,15 +56,15 @@ const SendMessage = () => {
                     ref={textareaRef}
                     value={messageInputValue}
                     onChange={handleChange}
+                    disabled={(isLoading && sendMessageFormStatus === 'edit')}
                     onKeyDown={onKeyDown}
-                    onFocus={() => setIsMessageInputFocused(true)}
-                    onBlur={() => setIsMessageInputFocused(false)}
                     placeholder='Write a message...'
-                    className='overscroll-contain py-[24px] leading-5 min-h-[70px] scrollbar-hide max-h-[120px] overflow-auto flex pr-11 box-border w-full transition-colors duration-200 ease-in-out resize-none appearance-none ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none focus:placeholder:opacity-0 focus:placeholder:translate-x-2 outline-none ring-0 placeholder:transition-all placeholder:duration-300 placeholder:ease-in-out dark:focus:bg-primary-dark-150 dark:bg-primary-dark-100 border-none text-white dark:placeholder:text-white placeholder:opacity-50'
+                    className='overscroll-contain py-[24px] leading-5 min-h-[70px] scrollbar-hide max-h-[120px] overflow-auto flex pr-11 box-border w-full transition-colors duration-200 ease-in-out resize-none appearance-none ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none focus:placeholder:opacity-0 focus:placeholder:translate-x-2 outline-none ring-0 placeholder:transition-all placeholder:duration-300 placeholder:ease-in-out dark:bg-primary-dark-100 border-none text-white dark:placeholder:text-white placeholder:opacity-50'
                 ></textarea>
                 <Button
                     variant='text'
                     type='button'
+                    disabled={(isLoading && sendMessageFormStatus === 'edit')}
                     className={cn('transition-transform duration-200 ease-in-out', {
                         'translate-x-14': !trimmedValue,
                         'translate-x-0': trimmedValue || sendMessageFormStatus === 'edit'
@@ -81,7 +82,7 @@ const SendMessage = () => {
                 )}
                 <Button
                     variant='text'
-                    disabled={!trimmedValue && sendMessageFormStatus === 'send'}
+                    disabled={(!trimmedValue && sendMessageFormStatus === 'send') || isLoading}
                     className={cn(
                         'opacity-0 pointer-events-none invisible scale-50 transition-all duration-100 ease-in-out',
                         (!!trimmedValue || sendMessageFormStatus === 'edit') &&

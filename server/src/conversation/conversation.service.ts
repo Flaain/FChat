@@ -5,6 +5,7 @@ import { Conversation } from './schemas/conversation.schema';
 import { CONVERSATION_ALREADY_EXISTS } from 'src/utils/constants';
 import { CreateConversationArgs, IConversationService } from './types';
 import { UserService } from 'src/user/user.service';
+import { CONVERSATION_POPULATE } from './utils/conversation.constants';
 
 @Injectable()
 export class ConversationService implements IConversationService {
@@ -27,23 +28,17 @@ export class ConversationService implements IConversationService {
         const conversation = new this.conversationModel({ 
             participants: _participants, 
             creator: initiatorId, 
-            name: _participants.length > 2 ? name.trim() : null 
+            name: _participants.length > 2 && name ? name.trim() : null 
         });
 
         const savedConversation = await conversation.save();
-        const populatedConversation = await savedConversation.populate([
-            { path: 'participants', model: 'User', select: 'name email' },
-            { path: 'messages', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name email' } },
-            { path: 'creator', model: 'User', select: 'name email' },
-        ]);
-
-        return populatedConversation;
+        
+        return savedConversation.populate(CONVERSATION_POPULATE);
     };
 
     getConversation = async (initiatorId: Types.ObjectId, conversationId: string) => {
         const conversation = await this.conversationModel
             .findOne({ _id: conversationId, participants: { $in: initiatorId } })
-            .lean()
             .populate([
                 { path: 'participants', model: 'User', select: 'name email' },
                 { path: 'messages', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name email' } },

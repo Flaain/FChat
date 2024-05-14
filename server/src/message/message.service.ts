@@ -29,65 +29,50 @@ export class MessageService implements IMessageService {
             conversation.messages.push(newMessage._id);
 
             const { 0: savedMessage } = await Promise.all([newMessage.save(), conversation.save()]);
-            const populatedMessage = await savedMessage.populate([
-                { path: 'sender', model: 'User', select: 'name email' },
-            ]);
 
-            return populatedMessage;
+            return savedMessage.populate([{ path: 'sender', model: 'User', select: 'name email' }]);
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);
         }
     };
 
-    edit = async ({ conversationId, messageId, initiatorId, message: newMessage }: EditMessageType) => {
+    edit = async ({ messageId, initiatorId, message: newMessage }: EditMessageType) => {
         try {
-            const message = await this.messageModel.findOne({ _id: messageId, sender: initiatorId });
+            const message = await this.messageModel.findOneAndUpdate(
+                { _id: messageId, sender: initiatorId, text: { $ne: newMessage.trim() } },
+                { text: newMessage.trim(), hasBeenEdited: true },
+                { runValidators: true, new: true, populate: { path: 'sender', model: 'User', select: 'name email' } },
+            );
 
-            if (!message || message.text === newMessage.trim()) throw new ForbiddenException({ message: 'You are not allowed to edit this message' });
+            if (!message) throw new ForbiddenException({ message: 'You are not allowed to edit this message' });
 
-            const conversation = await this.conversationService.findOneByPayload({
-                _id: conversationId,
-                participants: { $in: initiatorId },
-                messages: { $in: message._id },
-            });
-
-            if (!conversation) throw new ForbiddenException({ message: 'You are not allowed to edit this message' });
-
-            message.text = newMessage.trim();
-            message.hasBeenEdited = true;
-
-            const savedMessage = await message.save();
-            const populatedMessage = await savedMessage.populate([
-                { path: 'sender', model: 'User', select: 'name email' },
-            ]);
-
-            return populatedMessage;
+            return message;
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);
         }
-    }
+    };
 
     delete = async ({ conversationId, messageId, initiatorId }: DeleteMessageType) => {
         try {
             const message = await this.messageModel.findOne({ _id: messageId, sender: initiatorId });
-            
-            if (!message) throw new ForbiddenException({ message: 'You are not allowed to delete this message' });
 
+            if (!message) throw new ForbiddenException({ message: 'You are not allowed to delete this message' });
+            
             const conversation = await this.conversationService.findOneByPayload({
                 _id: conversationId,
-                participants: { $in: initiatorId },
-                messages: { $in: message._id },
+                participants: { $in: new Types.ObjectId(initiatorId) },
+                messages: { $in: new Types.ObjectId(messageId) },
             });
-
+            
             if (!conversation) throw new ForbiddenException({ message: 'You are not allowed to delete this message' });
 
-            conversation.messages = conversation.messages.filter((messageId) => messageId.toString() !== message._id.toString());
+            conversation.messages = conversation.messages.filter((id) => id.toString() !== messageId);
 
             await Promise.all([message.deleteOne(), conversation.save()]);
 
-            return { success: true };
+            return { success: true, messageId };
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);
