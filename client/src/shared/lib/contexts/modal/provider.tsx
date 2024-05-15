@@ -30,11 +30,7 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
             closeModalOnSuccess && closeModal();
         } catch (error) {
             console.error(error);
-            if (error instanceof Error) {
-                const isApiError = error instanceof ApiError;
-
-                toast.error(isApiError ? error.message : errorMessage ?? error.message, { position: 'top-center' });
-            }
+            if (error instanceof Error) throw new Error(errorMessage ?? error.message);
             closeModalOnError && closeModal();
         } finally {
             setIsAsyncActionLoading(false);

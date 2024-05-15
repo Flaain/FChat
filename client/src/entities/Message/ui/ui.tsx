@@ -38,7 +38,7 @@ const Message = React.forwardRef<HTMLLIElement, { message: IMessage }>(({ messag
                             <Typography
                                 className='self-end ml-auto cursor-default'
                                 variant='secondary'
-                                title={`${createTime.toLocaleString()}\nEdited: ${editTime.toLocaleString()}`}
+                                title={`${createTime.toLocaleString()}${hasBeenEdited ? `\nEdited: ${editTime.toLocaleString()}` : ''}`}
                             >
                                 {getRelativeTimeString(createTime, 'en-US')},&nbsp;
                                 {createTime.toLocaleTimeString(navigator.language, {

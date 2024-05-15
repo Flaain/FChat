@@ -11,7 +11,9 @@ import { ContainerConversationTypes } from '@/widgets/ConversationContainer/mode
 export const useMessage = (message: IMessage) => {
     const { dispatch } = useConversationContainer();
     const { setConversation } = useConversationContext();
-    const { state: { accessToken } } = useSession();
+    const {
+        state: { accessToken }
+    } = useSession();
     const { id: conversationId } = useParams() as { id: string };
     const { _id, text } = message;
 
@@ -29,8 +31,11 @@ export const useMessage = (message: IMessage) => {
             await api.message.delete({ body: { conversationId, messageId: _id }, token: accessToken! });
 
             setConversation((prev) => ({
-                ...prev!,
-                messages: prev!.messages.filter((message) => message._id !== _id)
+                ...prev,
+                conversation: {
+                    ...prev.conversation,
+                    messages: prev.conversation.messages.filter((message) => message._id !== _id)
+                }
             }));
             toast.success('Message deleted', { position: 'top-center' });
         } catch (error) {

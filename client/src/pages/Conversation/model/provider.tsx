@@ -3,9 +3,9 @@ import { useConversation } from "../lib/hooks/useConversation";
 import { ConversationContext } from "./context";
 
 export const ConversationProvider = ({ children }: { children: React.ReactNode }) => {
-    const { conversation, setConversation, isLoading, info } = useConversation();
+    const { data, setConversation, isLoading, info } = useConversation();
 
-    const value = React.useMemo(() => ({ conversation, setConversation, info, isLoading }), [conversation, info, setConversation, isLoading]);
+    const value = React.useMemo(() => ({ conversation: data, setConversation, info, isLoading }), [data, info, setConversation, isLoading]);
 
     return (
         <ConversationContext.Provider value={value}>

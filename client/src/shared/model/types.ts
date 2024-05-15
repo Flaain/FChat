@@ -1,23 +1,23 @@
-import { HTMLAttributes } from "react";
-import { ModalConfig } from "../lib/contexts/modal/types";
-import { Profile } from "../lib/contexts/profile/model/types";
-import { FieldError } from "react-hook-form";
+import { HTMLAttributes } from 'react';
+import { ModalConfig } from '../lib/contexts/modal/types';
+import { Profile } from '../lib/contexts/profile/model/types';
+import { FieldError } from 'react-hook-form';
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
-export type ModalSize = "default" | "sm" | "lg" | "fit"| "fitHeight" | "screen";
+export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
 
 export interface BaseAPI {
     baseUrl?: string;
     headers?: {
-        "Content-Type"?: "application/json" | (string & object);
-        Authorization?: "Bearer" | (string & object);
+        'Content-Type'?: 'application/json' | (string & object);
+        Authorization?: 'Bearer' | (string & object);
     };
 }
 
 export interface APIData<T> {
     data: T;
-    status: Response["status"];
-    statusText: Response["statusText"];
+    status: Response['status'];
+    statusText: Response['statusText'];
     headers: Record<string, string>;
     error?: unknown;
     message: string;
@@ -29,8 +29,8 @@ export interface AuthResponse extends Profile {
 }
 
 export interface APIMethodParams<T = undefined>
-    extends Partial<Omit<BaseAPI, "baseUrl">>,
-        Omit<RequestInit, "headers" | "body"> {
+    extends Partial<Omit<BaseAPI, 'baseUrl'>>,
+        Omit<RequestInit, 'headers' | 'body'> {
     endpoint?: string;
     token?: string;
     body?: T;
@@ -72,15 +72,15 @@ export interface Conversation {
     updatedAt: string;
 }
 
-export interface ModalProps extends Omit<ModalConfig, "content"> {
+export interface ModalProps extends Omit<ModalConfig, 'content'> {
     closeHandler: () => void;
     children: React.ReactNode;
 }
 
-export type TypographyVariant = "primary" | "secondary" | "commerce" | "error";
-export type TypographySize = "base" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl";
-export type TypographyWeight = "normal" | "medium" | "semibold" | "bold" | "extrabold";
-export type TypographyAlign = "left" | "center" | "right";
+export type TypographyVariant = 'primary' | 'secondary' | 'commerce' | 'error';
+export type TypographySize = 'base' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl';
+export type TypographyWeight = 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
+export type TypographyAlign = 'left' | 'center' | 'right';
 
 export interface TypographyVariants {
     variant: Record<TypographyVariant, string>;
@@ -95,18 +95,18 @@ interface BaseTypographyProps {
     align?: TypographyAlign;
 }
 
-export type PolymorphicRef<T extends React.ElementType> = React.ComponentPropsWithRef<T>["ref"];
+export type PolymorphicRef<T extends React.ElementType> = React.ComponentPropsWithRef<T>['ref'];
 
 type PropsOf<T extends React.ElementType> = React.ComponentPropsWithRef<T>;
 
 type PolymorphicProps<T extends React.ElementType = React.ElementType, TProps = object> = {
     as?: T;
 } & TProps &
-    Omit<PropsOf<T>, keyof TProps | "as" | "ref"> & { ref?: PolymorphicRef<T> };
+    Omit<PropsOf<T>, keyof TProps | 'as' | 'ref'> & { ref?: PolymorphicRef<T> };
 
-export type TypographyProps<T extends React.ElementType = "span"> = PolymorphicProps<T, BaseTypographyProps>;
+export type TypographyProps<T extends React.ElementType = 'span'> = PolymorphicProps<T, BaseTypographyProps>;
 
-export type TypographyComponent = <T extends React.ElementType = "span">(
+export type TypographyComponent = <T extends React.ElementType = 'span'>(
     props: PolymorphicProps<T, TypographyProps<T>>
 ) => React.ReactNode;
 
@@ -123,7 +123,7 @@ export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement> {
     name?: string;
-    size?: "sm" | "md" | "lg";
+    size?: 'sm' | 'md' | 'lg';
 }
 
 export type FormErrorsType = [
@@ -150,4 +150,15 @@ export interface ConfirmationProps {
     text: string;
     onConfirmText?: string;
     onCancelText?: string;
+}
+
+export interface UseInfiniteScrollOptions extends IntersectionObserverInit {
+    callback: () => Promise<void> | void;
+    deps: React.DependencyList;
+}
+
+export interface Meta {
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
 }

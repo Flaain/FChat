@@ -20,7 +20,7 @@ const ConversationContainer = () => {
                         </Typography>
                     </div>
                 </div>
-                {conversation?.messages?.length ? (
+                {conversation?.conversation.messages.length ? (
                     <MessagesList />
                 ) : (
                     <Typography

@@ -15,7 +15,10 @@ export class ConversationService implements IConversationService {
     ) {}
 
     createConversation = async ({ initiatorId, participants, name }: CreateConversationArgs) => {
-        const users = await this.userService.findManyByPayload({ _id: { $in: participants, $ne: initiatorId }, isPrivate: false })
+        const users = await this.userService.findManyByPayload({
+            _id: { $in: participants, $ne: initiatorId },
+            isPrivate: false,
+        });
 
         if (!users.length) throw new HttpException({ message: 'Users not found' }, HttpStatus.BAD_REQUEST);
 
@@ -23,34 +26,68 @@ export class ConversationService implements IConversationService {
 
         const isConversationExist = await this.conversationModel.findOne({ participants: { $all: _participants } });
 
-        if (isConversationExist) throw new HttpException(CONVERSATION_ALREADY_EXISTS, CONVERSATION_ALREADY_EXISTS.status);
+        if (isConversationExist)
+            throw new HttpException(CONVERSATION_ALREADY_EXISTS, CONVERSATION_ALREADY_EXISTS.status);
 
-        const conversation = new this.conversationModel({ 
-            participants: _participants, 
-            creator: initiatorId, 
-            name: _participants.length > 2 && name ? name.trim() : null 
+        const conversation = new this.conversationModel({
+            participants: _participants,
+            creator: initiatorId,
+            name: _participants.length > 2 && name ? name.trim() : null,
         });
 
         const savedConversation = await conversation.save();
-        
+
         return savedConversation.populate(CONVERSATION_POPULATE);
     };
 
-    getConversation = async (initiatorId: Types.ObjectId, conversationId: string) => {
-        const conversation = await this.conversationModel
-            .findOne({ _id: conversationId, participants: { $in: initiatorId } })
-            .populate([
-                { path: 'participants', model: 'User', select: 'name email' },
-                { path: 'messages', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name email' } },
-                { path: 'creator', model: 'User', select: 'name email' },
-            ]);
+    getConversation = async ({
+        initiatorId,
+        conversationId,
+        page: paramsPage,
+        limit: paramsLimit,
+    }: {
+        initiatorId: Types.ObjectId;
+        conversationId: string;
+        page?: number;
+        limit?: number;
+    }) => {
+        const page = paramsPage || 1;
+        const limit = paramsLimit || 10;
+
+        const conversation = await this.conversationModel.findOne({
+            _id: conversationId,
+            participants: { $in: initiatorId },
+        });
 
         if (!conversation) throw new HttpException({ message: 'Conversation not found' }, HttpStatus.BAD_REQUEST);
 
-        return conversation;
+        const count = conversation.messages.length;
+
+        const populated = (
+            await conversation.populate([
+                { path: 'participants', model: 'User', select: 'name email' },
+                {
+                    path: 'messages',
+                    model: 'Message',
+                    populate: { path: 'sender', model: 'User', select: 'name email' },
+                    options: { skip: (page - 1) * limit, sort: { createdAt: -1 } },
+                    perDocumentLimit: limit,
+                },
+                { path: 'creator', model: 'User', select: 'name email' },
+            ])
+        ).toObject();
+
+        return {
+            conversation: {
+                ...populated,
+                messages: populated.messages.reverse(),
+            },
+            meta: { totalItems: count, totalPages: Math.ceil(count / limit), currentPage: page },
+        };
     };
 
-    aggregate = async (pipeline?: Array<PipelineStage>, options?: AggregateOptions) => this.conversationModel.aggregate(pipeline, options);
+    aggregate = async (pipeline?: Array<PipelineStage>, options?: AggregateOptions) =>
+        this.conversationModel.aggregate(pipeline, options);
 
     findOneByPayload = async (
         payload: FilterQuery<Conversation>,

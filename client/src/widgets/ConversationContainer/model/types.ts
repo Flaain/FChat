@@ -1,15 +1,21 @@
-import { Conversation, IMessage } from "@/shared/model/types";
+import { Conversation, IMessage, Meta } from "@/shared/model/types";
+
+export interface ConversationWithMeta {
+    conversation: Conversation,
+    meta: Meta
+}
 
 export interface ConversationExtraInfo {
     filteredParticipants: Conversation["participants"];
     isGroup: boolean;
+    scrollTriggeredFromRef: React.MutableRefObject<"send" | "infiniteScroll">;
     conversationName: string;
 }
 
 export interface ConversationContextProps {
-    conversation: Conversation;
+    conversation: ConversationWithMeta;
     isLoading: boolean;
-    setConversation: React.Dispatch<React.SetStateAction<Conversation>>;
+    setConversation: React.Dispatch<React.SetStateAction<ConversationWithMeta>>;
     info: ConversationExtraInfo;
 }
 
