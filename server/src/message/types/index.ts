@@ -15,7 +15,7 @@ export interface IMessageService {
     send(dto: SendMessageType): Promise<MessageDocumentType>;
 }
 
-export type MessageDocumentType = Promise<Omit<Document<unknown, {}, Message> & Message & { _id: Types.ObjectId }, never>>;
+export type MessageDocumentType = Omit<Document<unknown, {}, Message> & Message & { _id: Types.ObjectId }, never>;
 
 export type SendMessageType = MessageSendDTO & { conversationId: string; initiatorId: Types.ObjectId };
 export type EditMessageType = MessageEditDTO & { initiatorId: Types.ObjectId, messageId: string };

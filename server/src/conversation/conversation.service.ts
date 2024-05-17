@@ -1,11 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AggregateOptions, FilterQuery, Model, PipelineStage, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { Conversation } from './schemas/conversation.schema';
-import { CONVERSATION_ALREADY_EXISTS } from 'src/utils/constants';
 import { CreateConversationArgs, IConversationService } from './types';
 import { UserService } from 'src/user/user.service';
-import { CONVERSATION_POPULATE } from './utils/conversation.constants';
+import { CONVERSATION_ALREADY_EXISTS, CONVERSATION_POPULATE } from './utils/conversation.constants';
+import { Message } from 'src/message/schemas/message.schema';
 
 @Injectable()
 export class ConversationService implements IConversationService {
@@ -26,8 +26,7 @@ export class ConversationService implements IConversationService {
 
         const isConversationExist = await this.conversationModel.findOne({ participants: { $all: _participants } });
 
-        if (isConversationExist)
-            throw new HttpException(CONVERSATION_ALREADY_EXISTS, CONVERSATION_ALREADY_EXISTS.status);
+        if (isConversationExist) throw new ConflictException(CONVERSATION_ALREADY_EXISTS);
 
         const conversation = new this.conversationModel({
             participants: _participants,
@@ -43,51 +42,46 @@ export class ConversationService implements IConversationService {
     getConversation = async ({
         initiatorId,
         conversationId,
-        page: paramsPage,
-        limit: paramsLimit,
+        cursor,
     }: {
         initiatorId: Types.ObjectId;
         conversationId: string;
-        page?: number;
-        limit?: number;
+        cursor?: string;
     }) => {
-        const page = paramsPage || 1;
-        const limit = paramsLimit || 10;
+        const MESSAGES_BATCH = 10;
+        let nextCursor: string | null = null;
 
-        const conversation = await this.conversationModel.findOne({
-            _id: conversationId,
-            participants: { $in: initiatorId },
-        });
-
-        if (!conversation) throw new HttpException({ message: 'Conversation not found' }, HttpStatus.BAD_REQUEST);
-
-        const count = conversation.messages.length;
-
-        const populated = (
-            await conversation.populate([
+        const conversation = await this.conversationModel.findOne({ _id: conversationId, participants: { $in: initiatorId } }, undefined, {
+            populate: [
                 { path: 'participants', model: 'User', select: 'name email' },
                 {
                     path: 'messages',
                     model: 'Message',
-                    populate: { path: 'sender', model: 'User', select: 'name email' },
-                    options: { skip: (page - 1) * limit, sort: { createdAt: -1 } },
-                    perDocumentLimit: limit,
+                    populate: {
+                        path: 'sender',
+                        model: 'User',
+                        select: 'name email',
+                    },
+                    options: {
+                        limit: MESSAGES_BATCH,
+                        sort: { createdAt: -1 },
+                    },
+                    ...(cursor ? { match: { createdAt: { $lt: cursor } } } : {}),
                 },
                 { path: 'creator', model: 'User', select: 'name email' },
-            ])
-        ).toObject();
+            ],
+        }).lean();
 
-        return {
-            conversation: {
-                ...populated,
-                messages: populated.messages.reverse(),
-            },
-            meta: { totalItems: count, totalPages: Math.ceil(count / limit), currentPage: page },
-        };
+        if (!conversation) throw new HttpException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
+
+        conversation.messages.length === MESSAGES_BATCH && (nextCursor = (conversation.messages[MESSAGES_BATCH - 1] as unknown as Message & { 
+            createdAt: string 
+        }).createdAt);
+
+        return { conversation: {  ...conversation, messages: conversation.messages.reverse() }, nextCursor };
     };
 
-    aggregate = async (pipeline?: Array<PipelineStage>, options?: AggregateOptions) =>
-        this.conversationModel.aggregate(pipeline, options);
+    aggregate = async (pipeline?: Array<PipelineStage>, options?: AggregateOptions) => this.conversationModel.aggregate(pipeline, options);
 
     findOneByPayload = async (
         payload: FilterQuery<Conversation>,

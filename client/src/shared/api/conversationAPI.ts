@@ -1,4 +1,4 @@
-import { APIMethodParams, Conversation, Meta, WithRequired } from '../model/types';
+import { APIMethodParams, Conversation, WithRequired } from '../model/types';
 import { API } from './API';
 
 export class ConversationAPI extends API {
@@ -19,14 +19,20 @@ export class ConversationAPI extends API {
 
     getConversation = async ({
         token,
-        body: { conversationId, page, limit },
+        body,
         ...rest
-    }: WithRequired<APIMethodParams<{ conversationId: string, page?: number, limit?: number }>, 'token' | 'body'>) => {
-        const response = await fetch(this._baseUrl + `/conversation/${conversationId}?page=${page}?limit=${limit}`, {
+    }: WithRequired<APIMethodParams<{ conversationId: string; params?: { cursor?: string } }>, 'token' | 'body'>) => {
+        const url = new URL(this._baseUrl + `/conversation/${body.conversationId}`);
+
+        body.params && Object.entries(body.params).forEach(([key, value]) => {
+            url.searchParams.append(key, value);
+        });
+
+        const response = await fetch(url, {
             headers: { ...this._headers, Authorization: `Bearer ${token}` },
             ...rest
         });
 
-        return this._checkResponse<{ conversation: Conversation, meta: Meta }>(response);
+        return this._checkResponse<{ conversation: Conversation; nextCursor: string }>(response);
     };
 }

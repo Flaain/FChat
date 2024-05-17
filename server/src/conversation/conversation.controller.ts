@@ -23,14 +23,12 @@ export class ConversationController {
     getConversation(
         @Req() req: Request & { user: UserDocumentType },
         @Param('id') id: string,
-        @Query('limit') limit?: string,
-        @Query('page') page?: string,
+        @Query('cursor') cursor?: string,
     ) {
         return this.conversationService.getConversation({
             initiatorId: req.user._id,
             conversationId: id,
-            limit: parseInt(limit),
-            page: parseInt(page),
+            cursor,
         });
     }
 }

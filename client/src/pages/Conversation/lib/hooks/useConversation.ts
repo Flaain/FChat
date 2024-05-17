@@ -7,19 +7,23 @@ import { ConversationWithMeta } from '@/widgets/ConversationContainer/model/type
 
 export const useConversation = () => {
     const { id } = useParams();
-    const { state: { accessToken, userId } } = useSession();
+    const {
+        state: { accessToken, userId }
+    } = useSession();
 
     const [data, setConversation] = React.useState<ConversationWithMeta>(null!);
     const [isLoading, setIsLoading] = React.useState(false);
 
-    const scrollTriggeredFromRef = React.useRef<"send" | "infiniteScroll">("send");
+    const scrollTriggeredFromRef = React.useRef<'send' | 'infiniteScroll'>('send');
 
     const filteredParticipants = React.useMemo(() => {
         return data ? data.conversation.participants.filter((participant) => participant._id !== userId) : [];
     }, [data, userId]);
     const isGroup = filteredParticipants.length >= 2;
     const conversationName = React.useMemo(() => {
-        return isGroup ? data.conversation?.name || filteredParticipants.map((participant) => participant.name).join(', ') : filteredParticipants[0]?.name;
+        return isGroup
+            ? data.conversation?.name || filteredParticipants.map((participant) => participant.name).join(', ')
+            : filteredParticipants[0]?.name;
     }, [data, filteredParticipants, isGroup]);
 
     const navigate = useNavigate();
@@ -36,7 +40,7 @@ export const useConversation = () => {
                     signal: controller.signal,
                     body: { conversationId: id! }
                 });
-                
+
                 setConversation(data);
             } catch (error) {
                 if (error instanceof Error && error.name !== 'AbortError') {
@@ -57,5 +61,10 @@ export const useConversation = () => {
         };
     }, [accessToken, id, navigate]);
 
-    return { data, setConversation, isLoading, info: { scrollTriggeredFromRef, filteredParticipants, isGroup, conversationName } };
+    return {
+        data,
+        setConversation,
+        isLoading,
+        info: { scrollTriggeredFromRef, filteredParticipants, isGroup, conversationName }
+    };
 };

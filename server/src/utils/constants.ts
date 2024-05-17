@@ -41,9 +41,4 @@ export const USER_NOT_FOUND = {
     },
 };
 
-export const CONVERSATION_ALREADY_EXISTS = {
-    status: HttpStatus.BAD_REQUEST,
-    message: 'conversation already exists',
-};
-
 export const emailForSchema = z.string().trim().min(1, 'Email is required').email('Invalid email address');

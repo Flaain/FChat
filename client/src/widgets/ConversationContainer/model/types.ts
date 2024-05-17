@@ -1,8 +1,8 @@
-import { Conversation, IMessage, Meta } from "@/shared/model/types";
+import { Conversation, IMessage } from "@/shared/model/types";
 
 export interface ConversationWithMeta {
     conversation: Conversation,
-    meta: Meta
+    nextCursor: string | null
 }
 
 export interface ConversationExtraInfo {

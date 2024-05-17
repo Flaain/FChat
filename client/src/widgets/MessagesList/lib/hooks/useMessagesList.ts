@@ -5,8 +5,17 @@ import { api } from '@/shared/api';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 
 export const useMessagesList = () => {
-    const { conversation: { conversation: { _id, messages }, meta }, setConversation, info: { scrollTriggeredFromRef } } = useConversationContext();
-    const { state: { accessToken } } = useSession()
+    const {
+        conversation: {
+            conversation: { _id, messages },
+            nextCursor
+        },
+        setConversation,
+        info: { scrollTriggeredFromRef }
+    } = useConversationContext();
+    const {
+        state: { accessToken }
+    } = useSession();
 
     const [isLoading, setIsLoading] = React.useState(false);
 
@@ -16,9 +25,9 @@ export const useMessagesList = () => {
         try {
             setIsLoading(true);
 
-            const { data } = await api.conversation.getConversation({ 
-                body: { conversationId: _id, page: meta.currentPage + 1 }, 
-                token: accessToken! 
+            const { data } = await api.conversation.getConversation({
+                body: { conversationId: _id, params: { cursor: nextCursor! } },
+                token: accessToken!
             });
 
             scrollTriggeredFromRef.current = 'infiniteScroll';
@@ -29,8 +38,8 @@ export const useMessagesList = () => {
                     ...prev.conversation,
                     messages: [...data.conversation.messages, ...prev.conversation.messages]
                 },
-                meta: data.meta,
-            }))
+                nextCursor: data.nextCursor
+            }));
         } catch (error) {
             console.error(error);
         } finally {
@@ -40,14 +49,14 @@ export const useMessagesList = () => {
 
     const firstMessageRef = useInfiniteScroll<HTMLLIElement>({
         callback: handleScroll,
-        deps: [!isLoading, meta.currentPage < meta.totalPages, messages.length < meta.totalItems]
+        deps: [!isLoading, nextCursor]
     });
 
     React.useEffect(() => {
         if (!lastMessageRef.current) return;
 
-        scrollTriggeredFromRef.current !== 'infiniteScroll' && lastMessageRef.current.scrollIntoView({ behavior: 'instant' });
-    }, [messages]);
+        lastMessageRef.current.scrollIntoView({ behavior: 'instant' });
+    }, []);
 
     return { lastMessageRef, firstMessageRef };
 };
