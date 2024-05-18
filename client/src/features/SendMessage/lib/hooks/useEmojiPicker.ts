@@ -3,31 +3,23 @@ import { useConversationContainer } from '@/widgets/ConversationContainer/lib/ho
 import { ContainerConversationTypes } from '@/widgets/ConversationContainer/model/types';
 import { Emoji } from '@emoji-mart/data';
 
-export const useEmojiPicker = () => {
-    const {
-        state: { messageInputValue },
-        dispatch
-    } = useConversationContainer();
+export const useEmojiPicker = (textareaRef: React.MutableRefObject<HTMLTextAreaElement | null>) => {
+    const { state: { messageInputValue }, dispatch } = useConversationContainer();
     const [isOpen, setIsOpen] = React.useState(false);
 
-    const onEmojiSelect = React.useCallback(
-        (emoji: Emoji) => {
-            dispatch({
-                type: ContainerConversationTypes.SET_MESSAGE_INPUT_VALUE,
-                payload: { value: messageInputValue + emoji.native }
-            });
+    const onEmojiSelect = React.useCallback((emoji: Emoji) => {
+        dispatch({
+            type: ContainerConversationTypes.SET_MESSAGE_INPUT_VALUE,
+            payload: { value: messageInputValue + emoji.native }
+        });
 
-        },
-        [dispatch, messageInputValue]
-    );
+        textareaRef.current?.focus();
+    }, [dispatch, messageInputValue]);
 
-    const openEmojiPicker = React.useCallback(
-        (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-            event.stopPropagation();
-            setIsOpen((prevState) => !prevState);
-        },
-        [setIsOpen]
-    );
+    const openEmojiPicker = React.useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        event.stopPropagation();
+        setIsOpen((prevState) => !prevState);
+    }, [setIsOpen]);
 
     const onClickOutside = React.useCallback(() => {
         setIsOpen(false);

@@ -11,11 +11,12 @@ import { useConversationContainer } from '@/widgets/ConversationContainer/lib/ho
 import { EmojiPicker } from '@/shared/model/view';
 
 const SendMessage = () => {
+    const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+    
     const { handleSubmitMessage, onKeyDown, handleCloseEdit, handleChange, isLoading } = useSendMessage();
-    const { isOpen, onClickOutside, onEmojiSelect, openEmojiPicker } = useEmojiPicker();
+    const { isOpen, onClickOutside, onEmojiSelect, openEmojiPicker } = useEmojiPicker(textareaRef);
     const { state: { messageInputValue, selectedMessageEdit, sendMessageFormStatus } } = useConversationContainer();
 
-    const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
     const trimmedValue = messageInputValue.trim().length;
 
     React.useEffect(() => {

@@ -4,13 +4,13 @@ import AvatarByName from '@/shared/ui/AvatarByName';
 import MessageContextMenu from './MessageContextMenu';
 import { cn } from '@/shared/lib/utils/cn';
 import { IMessage } from '@/shared/model/types';
-import { Check, CheckCheck, Clock } from 'lucide-react';
+import { Check, CheckCheck } from 'lucide-react';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
 import { ContextMenu, ContextMenuTrigger } from '@/shared/ui/context-menu';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 
 const Message = React.forwardRef<HTMLLIElement, { message: IMessage }>(({ message }, ref) => {
-    const { createdAt, updatedAt, sender, text, hasBeenRead, hasBeenEdited, sendingInProgress } = message;
+    const { createdAt, updatedAt, sender, text, hasBeenRead, hasBeenEdited } = message;
     const { state: { userId } } = useSession();
 
     const createTime = new Date(createdAt);
@@ -18,7 +18,7 @@ const Message = React.forwardRef<HTMLLIElement, { message: IMessage }>(({ messag
 
     const isMessageFromMe = sender._id === userId;
 
-    const stylesForBottomIcon = cn('w-4 h-4', {
+    const stylesForBottomIcon = cn('w-4 h-4 absolute right-5 bottom-1', {
         'dark:text-primary-white text-primary-dark-200 w-4 h-4': !isMessageFromMe,
         'dark:text-primary-dark-200 text-primary-white w-4 h-4': isMessageFromMe
     });
@@ -38,7 +38,9 @@ const Message = React.forwardRef<HTMLLIElement, { message: IMessage }>(({ messag
                             <Typography
                                 className='self-end ml-auto cursor-default'
                                 variant='secondary'
-                                title={`${createTime.toLocaleString()}${hasBeenEdited ? `\nEdited: ${editTime.toLocaleString()}` : ''}`}
+                                title={`${createTime.toLocaleString()}${
+                                    hasBeenEdited ? `\nEdited: ${editTime.toLocaleString()}` : ''
+                                }`}
                             >
                                 {getRelativeTimeString(createTime, 'en-US')},&nbsp;
                                 {createTime.toLocaleTimeString(navigator.language, {
@@ -53,7 +55,7 @@ const Message = React.forwardRef<HTMLLIElement, { message: IMessage }>(({ messag
                             </Typography>
                         </div>
                         <div
-                            className={cn('px-5 py-1 rounded-xl mt-2 max-w-[500px] flex items-end gap-3 self-start', {
+                            className={cn('pl-5 pr-12 py-1 relative rounded-xl mt-2 max-w-[500px] flex items-end gap-3 self-start', {
                                 'dark:bg-primary-dark-50 bg-primary-white': !isMessageFromMe,
                                 'dark:bg-primary-white dark:text-primary-dark-200 self-end': isMessageFromMe
                             })}
@@ -68,9 +70,7 @@ const Message = React.forwardRef<HTMLLIElement, { message: IMessage }>(({ messag
                             >
                                 {text}
                             </Typography>
-                            {sendingInProgress ? (
-                                <Clock className={stylesForBottomIcon} />
-                            ) : hasBeenRead ? (
+                            {hasBeenRead ? (
                                 <CheckCheck className={stylesForBottomIcon} />
                             ) : (
                                 <Check className={stylesForBottomIcon} />

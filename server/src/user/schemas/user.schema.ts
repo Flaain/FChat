@@ -20,6 +20,9 @@ export class User implements UserRegister {
 
     @Prop({ required: true, default: Date.now() })
     lastSeen: Date;
+
+    @Prop()
+    isVerified?: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

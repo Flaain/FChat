@@ -1,4 +1,4 @@
-import { ContainerConversationAction, ContainerConversationState, ContainerConversationTypes } from "./types";
+import { ContainerConversationAction, ContainerConversationState, ContainerConversationTypes } from './types';
 
 export const containerReducer = (state: ContainerConversationState, { type, payload }: ContainerConversationAction) => {
     switch (type) {
@@ -9,17 +9,19 @@ export const containerReducer = (state: ContainerConversationState, { type, payl
                 ...state,
                 selectedMessageEdit: payload.message,
                 messageInputValue: payload.message.text,
-                sendMessageFormStatus: payload.sendMessageFormStatus,
+                sendMessageFormStatus: payload.sendMessageFormStatus
             };
         case ContainerConversationTypes.SET_CLOSE_EDIT_FORM:
             return {
                 ...state,
                 messageInputValue: payload.value,
                 sendMessageFormStatus: payload.sendMessageFormStatus,
-                selectedMessageEdit: payload.selectedMessageEdit,
+                selectedMessageEdit: payload.selectedMessageEdit
             };
         case ContainerConversationTypes.SET_SEND_MESSAGE_FORM_STATUS:
             return { ...state, sendMessageFormStatus: payload.status };
+        case ContainerConversationTypes.SET_IS_INFINITE_SCROLL_LOADING:
+            return { ...state, isInfiniteScrollLoading: payload.isInfiniteScrollLoading };
         default:
             return state;
     }

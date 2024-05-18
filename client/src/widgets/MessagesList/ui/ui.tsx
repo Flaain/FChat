@@ -4,15 +4,15 @@ import { useMessagesList } from '../lib/hooks/useMessagesList';
 
 const MessagesList = () => {
     const { conversation: { conversation: { messages } } } = useConversationContext();
-    const { lastMessageRef, firstMessageRef } = useMessagesList();
+    const { lastMessageRef } = useMessagesList();
 
     return (
-        <ul className='flex flex-col overflow-auto h-full w-full px-5 gap-10'>
+        <ul className='flex flex-col w-full px-5 gap-10 mb-auto'>
             {messages.map((message, index, array) => (
                 <Message
                     key={message._id}
                     message={message}
-                    ref={!index ? firstMessageRef : index === array.length - 1 ? lastMessageRef : null}
+                    ref={index === array.length - 1 ? lastMessageRef : null}
                 />
             ))}
         </ul>

@@ -1,5 +1,5 @@
-import { UseInfiniteScrollOptions } from '@/shared/model/types';
 import React from 'react';
+import { UseInfiniteScrollOptions } from '@/shared/model/types';
 
 export const useInfiniteScroll = <T extends HTMLElement>({
     callback,
@@ -15,10 +15,7 @@ export const useInfiniteScroll = <T extends HTMLElement>({
             observer.current?.disconnect();
 
             observer.current = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting) {
-                    observer.current?.unobserve(entries[0].target);
-                    callback();
-                }
+                entries[0].isIntersecting && callback();
             }, { root, rootMargin, threshold });
             
             node && observer.current.observe(node);

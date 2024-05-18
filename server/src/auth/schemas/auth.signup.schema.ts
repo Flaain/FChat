@@ -1,7 +1,7 @@
 import { emailForSchema, nameForSchema } from 'src/utils/constants';
 import { z } from 'zod';
 
-export const signupSchema = z.object({
+export const signupSchema = z.strictObject({
     email: emailForSchema,
     name: nameForSchema,
     password: z
@@ -19,9 +19,7 @@ export const signupSchema = z.object({
         .min(new Date('1900-01-01'), 'Invalid birth date')
         .max(new Date(), 'Birth date cannot be in the future')
         .refine(
-            (date) =>
-                new Date().getTime() - date.getTime() >=
-                14 * 365 * 24 * 60 * 60 * 1000,
+            (date) => new Date().getTime() - date.getTime() >= 14 * 365 * 24 * 60 * 60 * 1000,
             'You must be at least 14 years old',
         ),
 });

@@ -1,62 +1,24 @@
 import React from 'react';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
-import { useInfiniteScroll } from '@/shared/lib/hooks/useInfiniteScroll';
-import { api } from '@/shared/api';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
+import { ScrollTriggeredFromTypes } from '@/pages/Conversation/model/types';
+
+const scrollOptions: Record<Exclude<ScrollTriggeredFromTypes, 'infiniteScroll'>, ScrollIntoViewOptions> = {
+    init: { behavior: 'instant' },
+    send: { behavior: 'smooth' }
+};
 
 export const useMessagesList = () => {
-    const {
-        conversation: {
-            conversation: { _id, messages },
-            nextCursor
-        },
-        setConversation,
-        info: { scrollTriggeredFromRef }
-    } = useConversationContext();
-    const {
-        state: { accessToken }
-    } = useSession();
-
-    const [isLoading, setIsLoading] = React.useState(false);
+    const { conversation: { conversation: {messages } }, info: { scrollTriggeredFromRef } } = useConversationContext();
 
     const lastMessageRef = React.useRef<HTMLLIElement | null>(null);
 
-    const handleScroll = async () => {
-        try {
-            setIsLoading(true);
-
-            const { data } = await api.conversation.getConversation({
-                body: { conversationId: _id, params: { cursor: nextCursor! } },
-                token: accessToken!
-            });
-
-            scrollTriggeredFromRef.current = 'infiniteScroll';
-
-            setConversation((prev) => ({
-                ...prev,
-                conversation: {
-                    ...prev.conversation,
-                    messages: [...data.conversation.messages, ...prev.conversation.messages]
-                },
-                nextCursor: data.nextCursor
-            }));
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const firstMessageRef = useInfiniteScroll<HTMLLIElement>({
-        callback: handleScroll,
-        deps: [!isLoading, nextCursor]
-    });
-
     React.useEffect(() => {
         if (!lastMessageRef.current) return;
+        
+        const canBeTriggered = scrollOptions[scrollTriggeredFromRef.current as keyof typeof scrollOptions];
 
-        lastMessageRef.current.scrollIntoView({ behavior: 'instant' });
-    }, []);
+        canBeTriggered && lastMessageRef.current.scrollIntoView(canBeTriggered);
+    }, [messages]);
 
-    return { lastMessageRef, firstMessageRef };
-};
+    return { lastMessageRef };
+}

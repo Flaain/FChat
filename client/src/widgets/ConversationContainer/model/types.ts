@@ -1,3 +1,4 @@
+import { ScrollTriggeredFromTypes } from "@/pages/Conversation/model/types";
 import { Conversation, IMessage } from "@/shared/model/types";
 
 export interface ConversationWithMeta {
@@ -8,7 +9,7 @@ export interface ConversationWithMeta {
 export interface ConversationExtraInfo {
     filteredParticipants: Conversation["participants"];
     isGroup: boolean;
-    scrollTriggeredFromRef: React.MutableRefObject<"send" | "infiniteScroll">;
+    scrollTriggeredFromRef: React.MutableRefObject<ScrollTriggeredFromTypes>;
     conversationName: string;
 }
 

@@ -8,7 +8,6 @@ import { compare } from 'bcrypt';
 import { IUser, UserDocumentType } from 'src/user/types';
 import { INVALID_CREDENTIALS, SOMETHING_WENT_WRONG, UNAUTHORIZED } from 'src/utils/constants';
 import { Types } from 'mongoose';
-import { ConversationService } from 'src/conversation/conversation.service';
 
 @Injectable()
 export class AuthService implements IAuthService {

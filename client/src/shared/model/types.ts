@@ -60,6 +60,7 @@ export interface Participant {
     name: string;
     email: string;
     lastSeen: string;
+    isVerified?: boolean;
 }
 
 export interface Conversation {

@@ -1,0 +1,1 @@
+export type ScrollTriggeredFromTypes = "init" | "infiniteScroll" | "send"

@@ -16,7 +16,7 @@ const Layout = () => {
 
     return (
         <ResizablePanelGroup direction='horizontal' style={{ overflow: 'unset' }}>
-            <main className='flex dark:bg-primary-dark-200 w-full'>
+            <main className='flex h-full dark:bg-primary-dark-200 w-full'>
                 <Toaster />
                 <ResizablePanel
                     defaultSize={getDataFromLocalStorage({ key: localStorageKeys.ASIDE_PANEL_SIZE, defaultData: 20 })}
