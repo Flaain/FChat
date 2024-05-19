@@ -1,11 +1,11 @@
-import { HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { SignupDTO } from 'src/auth/dtos/auth.signup.dto';
 import { Conversation } from 'src/conversation/schemas/conversation.schema';
 import { CreateUserType, UserDocumentType, UserProfileType } from './types';
-import { USER_NOT_FOUND } from 'src/utils/constants';
+import { CONVERSATION_POPULATE, USER_NOT_FOUND } from 'src/utils/constants';
 import { User } from './schemas/user.schema';
 
 @Injectable()
@@ -30,6 +30,8 @@ export class UserService {
 
     searchUser = async (initiatorId: Types.ObjectId, name: string) => {
         try {
+            if (!name) throw new HttpException('User name is required', HttpStatus.BAD_REQUEST);
+
             const users = await this.userModel.find(
                 {
                     _id: { $ne: initiatorId },
@@ -53,22 +55,7 @@ export class UserService {
             const conversations = await this.conversationModel
                 .find({ participants: { $in: _id } }, { messages: { $slice: -1 } })
                 .lean()
-                .populate([
-                    {
-                        path: 'participants',
-                        model: 'User',
-                        select: 'name email',
-                    },
-                    {
-                        path: 'messages',
-                        model: 'Message',
-                        populate: {
-                            path: 'sender',
-                            model: 'User',
-                            select: 'name email',
-                        },
-                    },
-                ]);
+                .populate(CONVERSATION_POPULATE);
             return conversations;
         } catch (error) {
             console.log(error);

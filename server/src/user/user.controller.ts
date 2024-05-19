@@ -1,9 +1,8 @@
-import { Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Routes } from 'src/utils/types';
 import { JwtGuard } from 'src/utils/jwt.guard';
 import { UserDocumentType } from './types';
-import { MergeType } from 'mongoose';
 
 @Controller(Routes.USER)
 export class UserController {

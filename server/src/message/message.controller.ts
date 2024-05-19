@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { JwtGuard } from 'src/utils/jwt.guard';
 import { MessageSendDTO } from './dtos/message.send.dto';
@@ -17,12 +17,14 @@ export class MessageController {
 
     @Post('send/:conversationId')
     @UseGuards(JwtGuard)
-    send(
+    async send(
         @Body() dto: MessageSendDTO,
         @Req() req: Request & { user: UserDocumentType },
         @Param('conversationId') conversationId: string,
     ) {
-        return this.messageService.send({ ...dto, conversationId, initiatorId: req.user._id });
+        const message = await this.messageService.send({ ...dto, conversationId, initiatorId: req.user._id });
+
+        this.eventEmitter.emit('message.created', message);
     }
 
     @Patch('edit/:messageId')
