@@ -11,6 +11,7 @@ export interface ConversationExtraInfo {
     isGroup: boolean;
     scrollTriggeredFromRef: React.MutableRefObject<ScrollTriggeredFromTypes>;
     conversationName: string;
+    isConversationVerified: boolean;
 }
 
 export interface ConversationContextProps {

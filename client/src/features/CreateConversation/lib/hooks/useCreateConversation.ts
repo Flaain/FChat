@@ -40,19 +40,16 @@ export const useCreateConversation = () => {
     });
 
     const _isNextButtonDisabled = () => {
-        const fieldsCondition =
-            !!Object.entries(form.formState.errors).some(([key]) =>
-                steps[step]?.fields.includes(key as FieldPath<CreateConversationFormType>)
-            ) ||
-            !form.getValues(steps[step]?.fields).every?.(Boolean) ||
-            loading;
+        const isFieldEmpty = !form.getValues(steps[step]?.fields).every?.(Boolean);
+        const isFieldHasErrors = !!Object.entries(form.formState.errors).some(([key]) => steps[step]?.fields.includes(key as FieldPath<CreateConversationFormType>));
 
         const actions = {
-            0: fieldsCondition,
-            1: !selectedUsers.size || selectedUsers.size >= MAX_CONVERSATION_SIZE || loading,
+            0: isFieldHasErrors || isFieldEmpty,
+            1: !selectedUsers.size || selectedUsers.size >= MAX_CONVERSATION_SIZE,
+            2: isFieldHasErrors
         };
 
-        return actions[step as keyof typeof actions];
+        return actions[step as keyof typeof actions] || loading;
     };
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -127,7 +124,7 @@ export const useCreateConversation = () => {
 
     return {
         form,
-        isNextButtonDisabled: _isNextButtonDisabled?.(),
+        isNextButtonDisabled: _isNextButtonDisabled(),
         handleBack,
         handleSubmit,
     };

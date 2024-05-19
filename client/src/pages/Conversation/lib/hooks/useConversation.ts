@@ -18,12 +18,14 @@ export const useConversation = () => {
     const filteredParticipants = React.useMemo(() => {
         return data ? data.conversation.participants.filter((participant) => participant._id !== userId) : [];
     }, [data, userId]);
-    
+
     const isGroup = filteredParticipants.length > 1;
-    
+
     const conversationName = React.useMemo(() => {
         return isGroup ? data.conversation?.name || filteredParticipants.map((participant) => participant.name).join(', ') : filteredParticipants[0]?.name;
     }, [data, filteredParticipants, isGroup]);
+
+    const isConversationVerified = isGroup ? data?.conversation.isVerified : filteredParticipants[0]?.isVerified;
 
     const navigate = useNavigate();
 
@@ -41,7 +43,7 @@ export const useConversation = () => {
                 });
 
                 scrollTriggeredFromRef.current = 'init';
-                
+
                 setConversation(data);
             } catch (error) {
                 if (error instanceof Error && error.name !== 'AbortError') {
@@ -66,6 +68,12 @@ export const useConversation = () => {
         data,
         setConversation,
         isLoading,
-        info: { scrollTriggeredFromRef, filteredParticipants, isGroup, conversationName }
+        info: {
+            scrollTriggeredFromRef,
+            filteredParticipants,
+            isGroup,
+            conversationName,
+            isConversationVerified
+        }
     };
 };

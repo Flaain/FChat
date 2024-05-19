@@ -60,14 +60,14 @@ export class ConversationService implements IConversationService {
     
             const conversation = await this.conversationModel.findOne({ _id: conversationId, participants: { $in: initiatorId } }, undefined, {
                 populate: [
-                    { path: 'participants', model: 'User', select: 'name email' },
+                    { path: 'participants', model: 'User', select: 'name email isVerified' },
                     {
                         path: 'messages',
                         model: 'Message',
                         populate: {
                             path: 'sender',
                             model: 'User',
-                            select: 'name email',
+                            select: 'name email isVerified',
                         },
                         options: {
                             limit: MESSAGES_BATCH,

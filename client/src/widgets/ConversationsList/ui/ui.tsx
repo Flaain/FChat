@@ -7,6 +7,7 @@ import { ConversationListProps } from '../model/types';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/shared/lib/utils/cn';
+import { Verified } from 'lucide-react';
 
 const ConversationsList = ({ searchValue }: ConversationListProps) => {
     const { profile: { conversations } } = useProfile();
@@ -28,8 +29,9 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
             {filteredConversations.map((conversation) => {
                 const lastMessage = conversation.messages[0];
                 const filteredParticipants = conversation.participants.filter((participant) => participant._id !== userId);
-                const isGroup = filteredParticipants.length >= 2;
+                const isGroup = filteredParticipants.length > 1;
                 const lastMessageDescription = lastMessage && `${lastMessage.sender._id === userId ? 'You: ' : isGroup ? `${lastMessage.sender.name}: ` : ''}`;
+                const isConversationVerified = isGroup ? conversation.isVerified : filteredParticipants[0]?.isVerified;
 
                 return (
                     <li key={conversation._id}>
@@ -44,8 +46,16 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
                         >
                             <AvatarByName name={isGroup ? undefined : filteredParticipants[0].name} size='lg' />
                             <div className='flex flex-col items-start w-full'>
-                                <Typography as='h2'>
-                                    {conversation.name || filteredParticipants.map((participant) => participant.name).join(', ')}
+                                <Typography as='h2' weight='medium' className={cn(isConversationVerified && 'flex items-center')}>
+                                    {isGroup
+                                        ? conversation.name ||
+                                          filteredParticipants.map((participant) => participant.name).join(', ')
+                                        : filteredParticipants[0].name}
+                                    {isConversationVerified && (
+                                        <Typography className='ml-2'>
+                                            <Verified className='w-5 h-5' />
+                                        </Typography>
+                                    )}
                                 </Typography>
                                 {!!lastMessage && (
                                     <div className='flex items-center w-full gap-5'>

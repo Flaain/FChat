@@ -66,6 +66,7 @@ export interface Participant {
 export interface Conversation {
     _id: string;
     name?: string;
+    isVerified?: boolean;
     participants: Array<Participant>;
     messages: Array<IMessage>;
     creator: Participant;

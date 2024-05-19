@@ -4,7 +4,7 @@ import { Server, Socket } from 'socket.io';
 import { Message } from 'src/message/schemas/message.schema';
 
 @WebSocketGateway({ cors: { origin: process.env.CLIENT_URL } })
-export class MessageGateway implements OnGatewayConnection{
+export class MessageGateway implements OnGatewayConnection {
     @WebSocketServer()
     server: Server;
 

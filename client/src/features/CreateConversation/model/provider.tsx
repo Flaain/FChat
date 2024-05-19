@@ -1,5 +1,5 @@
-import { SearchUser } from '@/shared/model/types';
 import React from 'react';
+import { SearchUser } from '@/shared/model/types';
 import { CreateConversationContext } from './context';
 
 export const CreateConversationProvider = ({ children }: { children: React.ReactNode }) => {
