@@ -2,7 +2,6 @@ import AvatarByName from '@/shared/ui/AvatarByName';
 import Typography from '@/shared/ui/Typography';
 import SideConversationSkeleton from './Skeletons/SideConversationSkeleton';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
-import { Conversation } from '@/shared/model/types';
 import { ConversationListProps } from '../model/types';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { NavLink } from 'react-router-dom';
@@ -15,14 +14,7 @@ const ConversationsList = ({ searchValue }: ConversationListProps) => {
 
     if (!conversations.length) return <SideConversationSkeleton />;
 
-    const filterConversationsByInput = (conversation: Conversation) => {
-        const name = conversation.name?.toLowerCase().includes(searchValue.toLowerCase());
-        const participant = conversation.participants.some((participant) => participant.name?.toLowerCase().includes(searchValue.toLowerCase()));
-
-        return name || participant;
-    };
-
-    const filteredConversations = conversations.filter(filterConversationsByInput);
+    const filteredConversations = conversations.filter((conversation) => conversation.name?.toLowerCase().includes(searchValue.toLowerCase()));
 
     return filteredConversations.length ? (
         <ul className='flex flex-col gap-5 px-3 overflow-auto'>

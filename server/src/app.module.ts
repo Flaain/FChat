@@ -8,6 +8,9 @@ import { ConversationModule } from './conversation/conversation.module';
 import { MessageModule } from './message/message.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ParticipantModule } from './participant/participant.module';
+import { GroupModule } from './group/group.module';
+import { GroupMessageModule } from './group-message/group-message.module';
 
 @Module({
     imports: [
@@ -20,6 +23,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         ConversationModule,
         MessageModule,
         GatewayModule,
+        ParticipantModule,
+        GroupModule,
+        GroupMessageModule,
     ],
     providers: [{ provide: 'APP_GUARD', useClass: ThrottlerGuard }],
 })

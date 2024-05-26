@@ -1,9 +1,9 @@
-import { emailForSchema, nameForSchema } from 'src/utils/constants';
 import { z } from 'zod';
+import { allowCyrillicRegExp, emailForSchema, nameForSchema, regExpError } from 'src/utils/constants';
 
 export const signupSchema = z.strictObject({
     email: emailForSchema,
-    name: nameForSchema,
+    name: nameForSchema.regex(allowCyrillicRegExp, regExpError),
     password: z
         .string()
         .trim()

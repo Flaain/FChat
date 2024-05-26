@@ -18,6 +18,15 @@ export class ConversationController {
         });
     }
 
+    @Post('create-group')
+    @UseGuards(JwtGuard)
+    createGroupConversation(@Req() req: Request & { user: UserDocumentType }, @Body() dto: ConversationCreateDTO) {
+        return this.conversationService.createConversation({
+            initiatorId: req.user._id,
+            ...dto,
+        });
+    }
+
     @Get(':id')
     @UseGuards(JwtGuard)
     getConversation(

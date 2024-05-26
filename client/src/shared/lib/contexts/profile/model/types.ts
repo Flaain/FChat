@@ -1,12 +1,16 @@
 import { Conversation } from "@/shared/model/types";
 
-export interface Profile {
+export interface User {
     _id: string;
-    username: string;
+    name: string;
     email: string;
-    conversations: Array<Conversation>;
+    status?: string;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface Profile extends User {
+    conversations: Array<Conversation>;
 }
 
 export interface ProfileContextProps {

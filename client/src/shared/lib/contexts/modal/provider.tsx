@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom';
 import Modal from '@/shared/ui/Modal';
 import { ModalContext } from './context';
 import { AsyncFunctionParams, ModalConfig } from './types';
-import { toast } from 'sonner';
-import { ApiError } from '@/shared/api/error';
 
 export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -14,6 +12,10 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
     const openModal = React.useCallback((config: ModalConfig) => {
         setIsModalOpen(true);
         setConfig(config);
+    }, []);
+
+    const handleChangeTitle = React.useCallback((title: string) => {
+        setConfig((prevState) => ({ ...prevState!, title }));
     }, []);
 
     const closeModal = React.useCallback(() => {
@@ -41,9 +43,11 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         () => ({
             isModalOpen,
             isAsyncActionLoading,
+            setIsAsyncActionLoading,
             onAsyncActionCall,
             setIsModalOpen,
             openModal,
+            handleChangeTitle,
             closeModal
         }),
         [closeModal, isAsyncActionLoading, isModalOpen, openModal, onAsyncActionCall]

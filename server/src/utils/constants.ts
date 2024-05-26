@@ -1,9 +1,12 @@
 import { HttpStatus } from '@nestjs/common';
 import { z } from 'zod';
 
+export const onlyLatinRegExp = /^[a-zA-Z0-9\s]*$/;
+export const allowCyrillicRegExp = /^[\p{L}0-9\s]*$/u;
+export const regExpError = 'Name must contain only letters, numbers, and spaces';
+
 export const nameForSchema = z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, 'Name must contain only letters, numbers, and spaces')
     .trim()
     .min(1, 'Name is required')
     .min(3, 'Name must be at least 3 characters long')
@@ -43,9 +46,11 @@ export const USER_NOT_FOUND = {
 
 export const CONVERSATION_POPULATE = [
     { path: 'participants', model: 'User', select: 'name email isVerified' },
-    { path: 'messages', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name email isVerified' } },
-    { path: 'creator', model: 'User', select: 'name email' },
+    {
+        path: 'messages',
+        model: 'Message',
+        populate: { path: 'sender', model: 'User', select: 'name email isVerified' },
+    },
 ];
-
 
 export const emailForSchema = z.string().trim().min(1, 'Email is required').email('Invalid email address');

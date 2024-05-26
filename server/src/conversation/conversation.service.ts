@@ -1,6 +1,6 @@
 import { ConflictException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AggregateOptions, FilterQuery, Model, PipelineStage, ProjectionType, QueryOptions, Types } from 'mongoose';
+import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { Conversation } from './schemas/conversation.schema';
 import { CreateConversationArgs, IConversationService } from './types';
 import { UserService } from 'src/user/user.service';
@@ -15,30 +15,19 @@ export class ConversationService implements IConversationService {
         private readonly userService: UserService,
     ) {}
 
-    createConversation = async ({ initiatorId, participants, name }: CreateConversationArgs) => {
+    createConversation = async ({ initiatorId, recipientId }: CreateConversationArgs) => {
         try {
-            const users = await this.userService.findManyByPayload({
-                _id: { $in: participants, $ne: initiatorId },
-                isPrivate: false,
-            });
-    
-            if (!users.length) throw new HttpException({ message: 'Users not found' }, HttpStatus.BAD_REQUEST);
-    
-            const _participants = [...users.map((user) => user._id), initiatorId];
-    
-            const isConversationExist = await this.conversationModel.findOne({ participants: { $all: _participants } });
-    
-            if (isConversationExist) throw new ConflictException(CONVERSATION_ALREADY_EXISTS);
-    
-            const conversation = new this.conversationModel({
-                participants: _participants,
-                creator: initiatorId,
-                name: _participants.length > 2 && name ? name.trim() : null,
-            });
-    
-            const savedConversation = await conversation.save();
-    
-            return savedConversation.populate(CONVERSATION_POPULATE);
+            const recipient = await this.userService.findById(recipientId);
+
+            if (!recipient) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+
+            const isConversationExists = await this.conversationModel.findOne({ participants: { $all: [initiatorId, recipient._id] } });
+            
+            if (isConversationExists) throw new ConflictException(CONVERSATION_ALREADY_EXISTS);
+
+            const conversation = await new this.conversationModel({ participants: [initiatorId, recipientId] }).save();
+            
+            return conversation.populate(CONVERSATION_POPULATE);
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);
@@ -75,7 +64,6 @@ export class ConversationService implements IConversationService {
                         },
                         ...(cursor ? { match: { createdAt: { $lt: cursor } } } : {}),
                     },
-                    { path: 'creator', model: 'User', select: 'name email' },
                 ],
             }).lean();
     
@@ -91,8 +79,6 @@ export class ConversationService implements IConversationService {
             throw new HttpException(error.response, error.status);
         }
     };
-
-    aggregate = async (pipeline?: Array<PipelineStage>, options?: AggregateOptions) => this.conversationModel.aggregate(pipeline, options);
 
     findOneByPayload = async (
         payload: FilterQuery<Conversation>,

@@ -16,15 +16,11 @@ export const useConversation = () => {
     const scrollTriggeredFromRef = React.useRef<ScrollTriggeredFromTypes>('init');
 
     const filteredParticipants = React.useMemo(() => {
-        return data ? data.conversation.participants.filter((participant) => participant._id !== userId) : [];
+        return data?.conversation.participants.filter((participant) => participant._id !== userId) ?? [];
     }, [data, userId]);
 
-    const isGroup = filteredParticipants.length > 1;
-
-    const conversationName = React.useMemo(() => {
-        return isGroup ? data.conversation?.name || filteredParticipants.map((participant) => participant.name).join(', ') : filteredParticipants[0]?.name;
-    }, [data, filteredParticipants, isGroup]);
-
+    const isGroup = data?.conversation.isGroup
+    const conversationName = isGroup ? data?.conversation.name : filteredParticipants[0]?.name;
     const isConversationVerified = isGroup ? data?.conversation.isVerified : filteredParticipants[0]?.isVerified;
 
     const navigate = useNavigate();

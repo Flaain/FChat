@@ -1,14 +1,12 @@
 import React from 'react';
-import { CreateConversationContextProps } from './types';
+import { CreateGroupContextProps } from './types';
 
-export const CreateConversationContext = React.createContext<CreateConversationContextProps>({
+export const CreateGroupContext = React.createContext<CreateGroupContextProps>({
     handleRemove: () => {},
     handleSelect: () => {},
     searchedUsers: [],
     selectedUsers: new Map(),
     setStep: () => {},
-    setLoading: () => {},
     setSearchedUsers: () => {},
     step: 0,
-    loading: false
 });

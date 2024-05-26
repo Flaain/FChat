@@ -1,11 +1,11 @@
-import { SigininSchema, SignupSchema } from "@/pages/Auth/model/types";
-import { Profile } from "../lib/contexts/profile/model/types";
-import { APIMethodParams, AuthResponse, SearchUser, WithRequired } from "../model/types";
 import { API } from "./API";
-import { CreateConversationFormType } from "@/widgets/CreateConversationForm/model/types";
+import { Profile } from "../lib/contexts/profile/model/types";
+import { SigininSchemaType, SignupSchemaType } from "@/pages/Auth/model/types";
+import { APIMethodParams, AuthResponse, SearchUser, WithRequired } from "../model/types";
+import { CreateGroupType } from "@/features/CreateGroup/model/types";
 
 export class UserAPI extends API {
-    checkEmailBeforeSignup = async ({ body }: WithRequired<APIMethodParams<Pick<SignupSchema, "email">>, "body">) => {
+    checkEmailBeforeSignup = async ({ body }: WithRequired<APIMethodParams<Pick<SignupSchemaType, "email">>, "body">) => {
         const response = await fetch(this._baseUrl + "/auth/signup/check-email", {
             method: "POST",
             headers: this._headers,
@@ -15,7 +15,7 @@ export class UserAPI extends API {
         return this._checkResponse<"success">(response);
     };
 
-    signup = async ({ body }: WithRequired<APIMethodParams<Omit<SignupSchema, "confirmPassword">>, "body">) => {
+    signup = async ({ body }: WithRequired<APIMethodParams<Omit<SignupSchemaType, "confirmPassword">>, "body">) => {
         const response = await fetch(this._baseUrl + "/auth/signup", {
             method: "POST",
             headers: this._headers,
@@ -25,7 +25,7 @@ export class UserAPI extends API {
         return this._checkResponse<AuthResponse>(response);
     };
 
-    signin = async ({ body }: WithRequired<APIMethodParams<SigininSchema>, "body">) => {
+    signin = async ({ body }: WithRequired<APIMethodParams<SigininSchemaType>, "body">) => {
         const response = await fetch(this._baseUrl + "/auth/signin", {
             method: "POST",
             headers: this._headers,
@@ -48,7 +48,7 @@ export class UserAPI extends API {
         token,
         body: { username },
         ...rest
-    }: WithRequired<APIMethodParams<CreateConversationFormType>, "token" | "body">) => {
+    }: WithRequired<APIMethodParams<Pick<CreateGroupType, "username">>, "token" | "body">) => {
         const response = await fetch(this._baseUrl + `/user?name=${username}`, {
             headers: { ...this._headers, Authorization: `Bearer ${token}` },
             ...rest,

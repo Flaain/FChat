@@ -18,11 +18,14 @@ export class User implements UserRegister {
     @Prop({ required: true, default: false })
     isPrivate: boolean;
 
+    @Prop()
+    isVerified?: boolean;
+
     @Prop({ required: true, default: Date.now() })
     lastSeen: Date;
 
     @Prop()
-    isVerified?: boolean;
+    status?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -14,7 +14,7 @@ const modalVariants = cva(
                 default: 'w-full h-full max-w-[750px] max-h-[600px] p-8',
                 sm: 'w-full h-full max-w-[550px] max-h-[400px] p-5',
                 lg: 'w-full h-full max-w-[900px] max-h-[700px] p-10',
-                fitHeight: 'max-w-[750px] w-full h-auto p-8 max-h-[600px]',
+                fitHeight: 'max-w-[750px] w-full p-8 max-h-[600px]',
                 fit: 'w-auto h-auto p-8 max-h-[600px]',
                 screen: 'w-full h-full p-8'
             }
@@ -65,15 +65,17 @@ const ModalContainer = ({ children, closeHandler }: Omit<ModalProps, 'title'>) =
             document.body.style.paddingRight = '0';
             document.removeEventListener('keyup', handleKeyUp);
         };
-    }, [isAsyncActionLoading, closeHandler]);
+    }, [isAsyncActionLoading]);
 
     const handleOverlayClick = ({ target, currentTarget }: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         !isAsyncActionLoading && target === currentTarget && closeHandler();
     };
 
     return (
-        <div className='fixed inset-0 bg-modal z-[9999] flex items-center justify-center' onClick={handleOverlayClick}>
-            {children}
+        <div className='fixed inset-0 z-[9999]'>
+            <div className='w-full h-full flex items-center justify-center p-5 bg-modal' onClick={handleOverlayClick}>
+                {children}
+            </div>
         </div>
     );
 };

@@ -4,7 +4,9 @@ import React from "react";
 export interface ModalContextProps {
     isModalOpen: boolean;
     isAsyncActionLoading: boolean;
+    handleChangeTitle: (title: string) => void;
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsAsyncActionLoading: React.Dispatch<React.SetStateAction<boolean>>;
     openModal: (config: ModalConfig) => void;
     onAsyncActionCall: (params: AsyncFunctionParams) => Promise<void>;
     closeModal: () => void;

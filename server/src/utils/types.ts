@@ -2,7 +2,13 @@ export enum Routes {
     AUTH = 'auth',
     USER = "user",
     CONVERSATION = 'conversation',
+    PARTICIPANT = 'participant',
     MESSAGE = 'message',
+}
+
+export enum ConversationType {
+    GROUP = 'group',
+    PRIVATE = 'private',
 }
 
 export interface Message {

@@ -1,10 +1,9 @@
 import React from 'react';
 import { SearchUser } from '@/shared/model/types';
-import { CreateConversationContext } from './context';
+import { CreateGroupContext } from './context';
 
-export const CreateConversationProvider = ({ children }: { children: React.ReactNode }) => {
+export const CreateGroupProvider = ({ children }: { children: React.ReactNode }) => {
     const [step, setStep] = React.useState(0);
-    const [loading, setLoading] = React.useState(false);
     const [searchedUsers, setSearchedUsers] = React.useState<Array<SearchUser>>([]);
     const [selectedUsers, setSelectedUsers] = React.useState<Map<string, SearchUser>>(new Map());
 
@@ -28,20 +27,14 @@ export const CreateConversationProvider = ({ children }: { children: React.React
         });
     }, []);
 
-    const value = React.useMemo(
-        () => ({
-            step,
-            loading,
-            searchedUsers,
-            selectedUsers,
-            handleSelect,
-            handleRemove,
-            setSearchedUsers,
-            setStep,
-            setLoading
-        }),
-        [handleRemove, handleSelect, loading, searchedUsers, selectedUsers, step]
-    );
-
-    return <CreateConversationContext.Provider value={value}>{children}</CreateConversationContext.Provider>;
+    const value = {
+        step,
+        searchedUsers,
+        selectedUsers,
+        handleSelect,
+        handleRemove,
+        setSearchedUsers,
+        setStep
+    };
+    return <CreateGroupContext.Provider value={value}>{children}</CreateGroupContext.Provider>;
 };

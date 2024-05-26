@@ -67,6 +67,7 @@ export interface Conversation {
     _id: string;
     name?: string;
     isVerified?: boolean;
+    isGroup?: boolean;
     participants: Array<Participant>;
     messages: Array<IMessage>;
     creator: Participant;
@@ -77,6 +78,14 @@ export interface Conversation {
 export interface ModalProps extends Omit<ModalConfig, 'content'> {
     closeHandler: () => void;
     children: React.ReactNode;
+}
+
+export interface SheetProps {
+    children: React.ReactNode;
+    closeHandler: () => void;
+    withHeader?: boolean;
+    direction?: 'left' | 'right';
+    title?: string;
 }
 
 export type TypographyVariant = 'primary' | 'secondary' | 'commerce' | 'error';

@@ -72,7 +72,8 @@ export const useSignup = () => {
                     setStep((prevState) => prevState + 1);
                 },
                 1: async () => {
-                    const { data: { accessToken, expiresIn, ...profile } } = await api.user.signup({ body: data });
+                    const { confirmPassword, ...rest } = data;
+                    const { data: { accessToken, expiresIn, ...profile } } = await api.user.signup({ body: rest });
 
                     setProfile(profile);
                     dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { isAuthorized: true, accessToken, userId: profile._id, expiresIn } });
