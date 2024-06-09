@@ -5,25 +5,16 @@ import { api } from '@/shared/api';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useConversationContainer } from '@/widgets/ConversationContainer/lib/hooks/useConversationContainer';
-import { ContainerConversationTypes, MessageFormStatus } from '@/widgets/ConversationContainer/model/types';
+import { ContainerConversationTypes, MessageFormState } from '@/widgets/ConversationContainer/model/types';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useParams } from 'react-router-dom';
 
 export const useSendMessage = () => {
     const { id: conversationId } = useParams() as { id: string };
-    const {
-        state: { accessToken }
-    } = useSession();
-    const { openModal, closeModal, onAsyncActionCall } = useModal();
-    const {
-        conversation,
-        setConversation,
-        info: { scrollTriggeredFromRef }
-    } = useConversationContext();
-    const {
-        state: { sendMessageFormStatus, messageInputValue, selectedMessageEdit },
-        dispatch
-    } = useConversationContainer();
+    const { state: { accessToken } } = useSession();
+    const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
+    const { setConversation, info: { scrollTriggeredFromRef, filteredParticipants } } = useConversationContext();
+    const { state: { formState, value, selectedMessage }, dispatch } = useConversationContainer();
 
     const [isLoading, setIsLoading] = React.useState(false);
 
@@ -34,57 +25,54 @@ export const useSendMessage = () => {
         }
     }, []);
 
-    const handleChange = React.useCallback(
-        ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>) => {
-            dispatch({ type: ContainerConversationTypes.SET_MESSAGE_INPUT_VALUE, payload: { value } });
-        },
-        [dispatch]
-    );
+    const handleChange = React.useCallback(({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>) => {
+        dispatch({ type: ContainerConversationTypes.SET_VALUE, payload: { value } });
+    }, []);
 
     const handleCloseEdit = React.useCallback(() => {
-        dispatch({
-            type: ContainerConversationTypes.SET_CLOSE_EDIT_FORM,
-            payload: { value: '', selectedMessageEdit: null, sendMessageFormStatus: 'send' }
-        });
-    }, [dispatch]);
+        dispatch({ type: ContainerConversationTypes.SET_CLOSE, payload: { value: '', selectedMessage: null, formState: 'send' } });
+    }, []);
 
     const handleMessageDelete = React.useCallback(async () => {
-        await api.message.delete({
-            body: { conversationId, messageId: selectedMessageEdit!._id },
-            token: accessToken!
-        });
+        try {
+            setIsAsyncActionLoading(true);
 
-        setConversation((prev) => ({
-            ...prev,
-            conversation: {
-                ...prev.conversation,
-                messages: prev.conversation.messages.filter((message) => message._id !== selectedMessageEdit!._id)
-            }
-        }));
-        handleCloseEdit();
-        toast.success('Message deleted', { position: 'top-center' });
-    }, [conversationId, selectedMessageEdit, accessToken, setConversation, handleCloseEdit]);
+            await api.message.delete({
+                body: { conversationId, messageId: selectedMessage!._id },
+                token: accessToken!
+            });
+    
+            setConversation((prev) => ({
+                ...prev,
+                conversation: {
+                    ...prev.conversation,
+                    messages: prev.conversation.messages.filter((message) => message._id !== selectedMessage!._id)
+                }
+            }));
+            
+            toast.success('Message deleted', { position: 'top-center' });
+        } catch (error) {
+            console.error(error);
+            error instanceof Error && toast.error(error.message, { position: 'top-center' });
+        } finally {
+            handleCloseEdit();
+            setIsAsyncActionLoading(false);
+        }
+    }, [conversationId, selectedMessage, accessToken, setConversation, handleCloseEdit]);
 
     const onCloseDeleteConfirmation = () => {
-        dispatch({
-            type: ContainerConversationTypes.SET_MESSAGE_INPUT_VALUE,
-            payload: { value: selectedMessageEdit!.text }
-        });
+        dispatch({ type: ContainerConversationTypes.SET_VALUE, payload: { value: selectedMessage!.text } });
         closeModal();
     };
 
     const onSendEditedMessage = async () => {
-        if (!messageInputValue.trim().length) {
+        const trimmedValue = value.trim();
+        if (!trimmedValue.length) {
             return openModal({
                 content: (
                     <Confirmation
                         onCancel={onCloseDeleteConfirmation}
-                        onConfirm={() =>
-                            onAsyncActionCall({
-                                asyncAction: handleMessageDelete,
-                                errorMessage: 'Cannot delete message'
-                            })
-                        }
+                        onConfirm={handleMessageDelete}
                         onConfirmText='Delete'
                         text='Are you sure you want to delete this message?'
                     />
@@ -94,10 +82,10 @@ export const useSendMessage = () => {
             });
         }
 
-        if (messageInputValue.trim() === selectedMessageEdit?.text) return handleCloseEdit();
+        if (trimmedValue === selectedMessage?.text) return handleCloseEdit();
 
         const { data } = await api.message.edit({
-            body: { messageId: selectedMessageEdit!._id, message: messageInputValue.trim() },
+            body: { messageId: selectedMessage!._id, message: trimmedValue },
             token: accessToken!
         });
 
@@ -105,21 +93,23 @@ export const useSendMessage = () => {
             ...prevState,
             conversation: {
                 ...prevState.conversation,
-                messages: prevState.conversation.messages.map((message) => message._id === selectedMessageEdit!._id ? data : message)
+                messages: prevState.conversation.messages.map((message) => message._id === selectedMessage!._id ? data : message)
             }
         }));
         handleCloseEdit();
     };
 
     const onSendMessage = async () => {
-        if (!messageInputValue.trim().length) return;
+        const trimmedValue = value.trim();
+        
+        if (!trimmedValue.length) return;
 
         const { data } = await api.message.send({
             token: accessToken!,
-            body: { message: messageInputValue, conversationId: conversation?.conversation._id }
+            body: { message: trimmedValue, recipientId: filteredParticipants[0]._id }
         });
 
-        dispatch({ type: ContainerConversationTypes.SET_MESSAGE_INPUT_VALUE, payload: { value: '' } });
+        dispatch({ type: ContainerConversationTypes.SET_VALUE, payload: { value: '' } });
         setConversation((prev) => ({
             ...prev,
             conversation: { ...prev.conversation, messages: [...prev.conversation.messages, data] }
@@ -136,12 +126,12 @@ export const useSendMessage = () => {
 
             scrollTriggeredFromRef.current = 'send';
             
-            const actions: Record<MessageFormStatus, () => Promise<void>> = {
+            const actions: Record<MessageFormState, () => Promise<void>> = {
                 send: onSendMessage,
                 edit: onSendEditedMessage
             };
 
-            await actions[sendMessageFormStatus]();
+            await actions[formState]();
         } catch (error) {
             console.error(error);
             error instanceof Error && toast.error(error.message, { position: 'top-center' });

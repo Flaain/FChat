@@ -4,9 +4,16 @@ import { UserService } from './user.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { Conversation, ConversationSchema } from 'src/conversation/schemas/conversation.schema';
+import { GroupModule } from 'src/group/group.module';
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }, { name: Conversation.name, schema: ConversationSchema }])],
+    imports: [
+        MongooseModule.forFeature([
+            { name: User.name, schema: UserSchema },
+            { name: Conversation.name, schema: ConversationSchema },
+        ]),
+        GroupModule,
+    ],
     controllers: [UserController],
     providers: [UserService],
     exports: [UserService],

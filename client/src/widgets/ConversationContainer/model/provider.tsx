@@ -5,9 +5,9 @@ import { containerReducer } from './reducer';
 import { useParams } from 'react-router-dom';
 
 const initialState: ContainerConversationState = {
-    messageInputValue: '',
-    selectedMessageEdit: null,
-    sendMessageFormStatus: 'send'
+    value: '',
+    selectedMessage: null,
+    formState: 'send'
 };
 
 export const ConversationContainerProvider = ({ children, defaultState }: ConversationContainerProviderProps) => {
@@ -17,9 +17,9 @@ export const ConversationContainerProvider = ({ children, defaultState }: Conver
     const value = React.useMemo(() => ({ dispatch, state }), [dispatch, state]);
 
     React.useEffect(() => {
-        dispatch({
-            type: ContainerConversationTypes.SET_CLOSE_EDIT_FORM,
-            payload: { selectedMessageEdit: null, sendMessageFormStatus: 'send', value: '' }
+        dispatch({ 
+            type: ContainerConversationTypes.SET_CLOSE, 
+            payload: { value: '', selectedMessage: null, formState: "send" } 
         });
     }, [id]);
 

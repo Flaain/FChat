@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Modal from '@/shared/ui/Modal';
 import { ModalContext } from './context';
-import { AsyncFunctionParams, ModalConfig } from './types';
+import { ModalConfig } from './types';
 
 export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -23,45 +23,25 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         setConfig(null);
     }, []);
 
-    const onAsyncActionCall = React.useCallback(async ({ asyncAction, errorMessage, closeModalOnError, closeModalOnSuccess = true }: AsyncFunctionParams) => {
-        try {
-            setIsAsyncActionLoading(true);
-
-            await asyncAction();
-
-            closeModalOnSuccess && closeModal();
-        } catch (error) {
-            console.error(error);
-            if (error instanceof Error) throw new Error(errorMessage ?? error.message);
-            closeModalOnError && closeModal();
-        } finally {
-            setIsAsyncActionLoading(false);
-        }
-    }, [closeModal]);
-
     const value = React.useMemo(
         () => ({
             isModalOpen,
             isAsyncActionLoading,
             setIsAsyncActionLoading,
-            onAsyncActionCall,
             setIsModalOpen,
             openModal,
             handleChangeTitle,
             closeModal
         }),
-        [closeModal, isAsyncActionLoading, isModalOpen, openModal, onAsyncActionCall]
+        [closeModal, isAsyncActionLoading, isModalOpen, openModal]
     );
 
     return (
         <ModalContext.Provider value={value}>
-            {isModalOpen &&
-                config?.content &&
-                ReactDOM.createPortal(
-                    <Modal size={config.size} title={config.title} closeHandler={() => setIsModalOpen(false)}>
-                        {config.content}
-                    </Modal>,
-                    document.querySelector('#modal-root')!
+            {isModalOpen && config?.content && ReactDOM.createPortal(
+                <Modal size={config.size} title={config.title} closeHandler={() => setIsModalOpen(false)}>
+                    {config.content}
+                </Modal>, document.querySelector('#modal-root')!
                 )}
             {children}
         </ModalContext.Provider>

@@ -2,11 +2,12 @@ import { ConflictException, HttpException, HttpStatus, Injectable } from '@nestj
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { Conversation } from './schemas/conversation.schema';
-import { CreateConversationArgs, IConversationService } from './types';
+import { ConversationDocument, CreateConversationArgs, IConversationService } from './types';
 import { UserService } from 'src/user/user.service';
-import { CONVERSATION_ALREADY_EXISTS } from './utils/conversation.constants';
+import { CONVERSATION_ALREADY_EXISTS, CONVERSATION_WITH_MYSELF } from './utils/conversation.constants';
 import { Message } from 'src/message/schemas/message.schema';
 import { CONVERSATION_POPULATE } from 'src/utils/constants';
+import { UserDocument } from 'src/user/types';
 
 @Injectable()
 export class ConversationService implements IConversationService {
@@ -15,18 +16,27 @@ export class ConversationService implements IConversationService {
         private readonly userService: UserService,
     ) {}
 
-    createConversation = async ({ initiatorId, recipientId }: CreateConversationArgs) => {
+    createConversation = async ({
+        initiatorId,
+        recipientId,
+    }: CreateConversationArgs): Promise<ConversationDocument> => {
         try {
-            const recipient = await this.userService.findById(recipientId);
+            if (initiatorId.toString() === recipientId) throw new HttpException(CONVERSATION_WITH_MYSELF, CONVERSATION_WITH_MYSELF.status);
+
+            const recipient = await this.userService.findOneByPayload({ _id: recipientId, isPrivate: false });
 
             if (!recipient) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
-            const isConversationExists = await this.conversationModel.findOne({ participants: { $all: [initiatorId, recipient._id] } });
-            
+            const isConversationExists = await this.conversationModel.findOne({
+                participants: { $all: [initiatorId, recipient._id] },
+            });
+
             if (isConversationExists) throw new ConflictException(CONVERSATION_ALREADY_EXISTS);
 
-            const conversation = await new this.conversationModel({ participants: [initiatorId, recipientId] }).save();
-            
+            const conversation = await new this.conversationModel({
+                participants: [initiatorId, recipient._id],
+            }).save();
+
             return conversation.populate(CONVERSATION_POPULATE);
         } catch (error) {
             console.log(error);
@@ -34,46 +44,101 @@ export class ConversationService implements IConversationService {
         }
     };
 
+    getConversations = async ({ initiatorId, cursor }: { initiatorId: Types.ObjectId; cursor?: string }) => {
+        try {
+            const CONVERSATION_BATCH = 10;
+            let nextCursor: string | null = null;
+
+            const conversations = await this.conversationModel
+                .find(
+                    { participants: { $in: initiatorId }, ...(cursor && { lastMessageSentAt: { $lt: cursor } }) },
+                    { lastMessage: 1, participants: 1, lastMessageSentAt: 1 },
+                    {
+                        limit: CONVERSATION_BATCH,
+                        populate: [
+                            { path: 'participants', model: 'User', select: 'name email isVerified' },
+                            {
+                                path: 'lastMessage',
+                                model: 'Message',
+                                populate: { path: 'sender', model: 'User', select: 'name email' },
+                            },
+                        ],
+                        sort: { lastMessageSentAt: -1 },
+                    },
+                )
+                .lean();
+
+            conversations.length === CONVERSATION_BATCH && (nextCursor = conversations[CONVERSATION_BATCH - 1].lastMessageSentAt.toISOString());
+
+            return {
+                conversations: conversations.map((conversation) => ({ ...conversation, type: 'conversation' })),
+                nextCursor,
+            };
+        } catch (error) {
+            console.log(error);
+            return { conversations: [], nextCursor: null };
+        }
+    };
+
     getConversation = async ({
-        initiatorId,
-        conversationId,
+        initiator,
+        recipientId,
         cursor,
     }: {
-        initiatorId: Types.ObjectId;
-        conversationId: string;
+        initiator: UserDocument;
+        recipientId: string;
         cursor?: string;
     }) => {
         try {
+            const recipient = await this.userService.findOneByPayload({ _id: recipientId }, { name: 1, email: 1, isVerified: 1 });
+
+            if (!recipient) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+
             const MESSAGES_BATCH = 10;
+
             let nextCursor: string | null = null;
-    
-            const conversation = await this.conversationModel.findOne({ _id: conversationId, participants: { $in: initiatorId } }, undefined, {
-                populate: [
-                    { path: 'participants', model: 'User', select: 'name email isVerified' },
+
+            const conversation = await this.conversationModel
+                .findOne(
+                    { participants: { $all: [initiator._id, recipient._id] } },
+                    { participants: 1, messages: 1 },
                     {
-                        path: 'messages',
-                        model: 'Message',
-                        populate: {
-                            path: 'sender',
-                            model: 'User',
-                            select: 'name email isVerified',
-                        },
-                        options: {
-                            limit: MESSAGES_BATCH,
-                            sort: { createdAt: -1 },
-                        },
-                        ...(cursor ? { match: { createdAt: { $lt: cursor } } } : {}),
+                        populate: [
+                            {
+                                path: 'messages',
+                                model: 'Message',
+                                populate: {
+                                    path: 'sender',
+                                    model: 'User',
+                                    select: 'name email isVerified',
+                                },
+                                options: {
+                                    limit: MESSAGES_BATCH,
+                                    sort: { createdAt: -1 },
+                                },
+                                ...(cursor && { match: { createdAt: { $lt: cursor } } }),
+                            },
+                        ],
                     },
-                ],
-            }).lean();
-    
-            if (!conversation) throw new HttpException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
-    
-            conversation.messages.length === MESSAGES_BATCH && (nextCursor = (conversation.messages[MESSAGES_BATCH - 1] as unknown as Message & { 
-                createdAt: string 
+                )
+                .lean();
+
+            if (!conversation) {
+                if (recipient.isPrivate) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+                return {
+                    conversation: {
+                        recipient,
+                        messages: [],
+                    },
+                    nextCursor,
+                };
+            };
+
+            conversation.messages.length === MESSAGES_BATCH && (nextCursor = (conversation.messages[MESSAGES_BATCH - 1] as unknown as Message & {
+                createdAt: string;
             }).createdAt);
-    
-            return { conversation: {  ...conversation, messages: conversation.messages.reverse() }, nextCursor };
+
+            return { conversation: { ...conversation, messages: conversation.messages.reverse() }, nextCursor };
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);

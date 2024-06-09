@@ -8,7 +8,7 @@ import { ZodValidationPipe } from 'nestjs-zod';
     const PORT = process.env.PORT ?? 3000;
 
     app.useGlobalPipes(new ZodValidationPipe())
-    app.enableCors();
+    app.enableCors({ origin: process.env.CLIENT_URL });
 
     await app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
   } catch (error) {

@@ -1,20 +1,17 @@
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { hash } from 'bcrypt';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { SignupDTO } from 'src/auth/dtos/auth.signup.dto';
-import { Conversation } from 'src/conversation/schemas/conversation.schema';
-import { CreateUserType, UserDocumentType, UserProfileType } from './types';
-import { CONVERSATION_POPULATE, USER_NOT_FOUND } from 'src/utils/constants';
+import { CreateUserType } from './types';
+import { USER_NOT_FOUND } from 'src/utils/constants';
 import { User } from './schemas/user.schema';
+import { userSearchSchema } from './schemas/user.search.schema';
+import { ZodError } from 'zod';
 
 @Injectable()
 export class UserService {
-    constructor(
-        @InjectModel(User.name) private readonly userModel: Model<User>,
-        @InjectModel(Conversation.name) private readonly conversationModel: Model<Conversation>, 
-        // ^^ should use conversation service instead but i got error "circular dependency" cuz i already using user service in conversation service 
-    ) {}
+    constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
 
     findOneByPayload = async (
         payload: FilterQuery<User>,
@@ -28,55 +25,40 @@ export class UserService {
         options?: QueryOptions<User>,
     ) => this.userModel.find(payload, projection, options);
 
-    searchUser = async (initiatorId: Types.ObjectId, name: string) => {
+    searchUser = async ({
+        initiatorId,
+        name,
+        page,
+        limit,
+    }: {
+        initiatorId: Types.ObjectId;
+        name: string;
+        page: number;
+        limit: number;
+    }) => {
         try {
-            if (!name) throw new HttpException('User name is required', HttpStatus.BAD_REQUEST);
+            const parsedQuery = userSearchSchema.parse(name, { path: ['name'] });
 
             const users = await this.userModel.find(
                 {
                     _id: { $ne: initiatorId },
-                    name: { $regex: name, $options: 'i' },
+                    name: { $regex: parsedQuery, $options: 'i' },
                     isPrivate: false,
                 },
                 { _id: 1, name: 1 },
-            );
+                { limit, skip: page * limit },
+            )
+            .lean();
 
             if (!users.length) throw new HttpException(USER_NOT_FOUND, USER_NOT_FOUND.status);
 
-            return users;
+            return users.map((user) => ({ ...user, type: 'user' }));
         } catch (error) {
-            console.log(error);
-            throw new HttpException(error.response, error.status);
+            throw new HttpException(error instanceof ZodError ? error.issues : error.response, error.status);
         }
     };
 
-    getConversations = async (_id: Types.ObjectId) => {
-        try {
-            const conversations = await this.conversationModel
-                .find({ participants: { $in: _id } }, { messages: { $slice: -1 } })
-                .lean()
-                .populate(CONVERSATION_POPULATE);
-            return conversations;
-        } catch (error) {
-            console.log(error);
-            return [];
-        }
-    };
-
-    findById = async (id: string | Types.ObjectId) => {
-        const candidate = await this.userModel.findById(id);
-
-        if (!candidate) throw new UnauthorizedException();
-
-        return candidate;
-    };
-
-    profile = async (user: UserDocumentType): Promise<UserProfileType> => {
-        const conversations = await this.getConversations(user._id);
-        const { password, ...rest } = user.toObject();
-
-        return { ...rest, conversations };
-    };
+    findById = async (id: string | Types.ObjectId) => this.userModel.findById(id);
 
     create = async (userDetails: SignupDTO): Promise<CreateUserType & { _id: Types.ObjectId }> => {
         const password = await hash(userDetails.password, 10);

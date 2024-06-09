@@ -3,8 +3,7 @@ import { AuthService } from './auth.service';
 import { SigninDTO } from './dtos/auth.signin.dto';
 import { SignupDTO } from './dtos/auth.signup.dto';
 import { JwtGuard } from '../utils/jwt.guard';
-import { Routes } from 'src/utils/types';
-import { UserDocumentType } from 'src/user/types';
+import { RequestWithUser, Routes } from 'src/utils/types';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CheckEmailDTO } from './dtos/auth.checkEmail.dto';
 
@@ -19,7 +18,7 @@ export class AuthController {
 
     @Post('signup/check-email')
     checkEmail(@Body() { email }: CheckEmailDTO) {
-        return this.authService._checkEmail(email);
+        return this.authService.checkEmail(email);
     }
 
     @Post('signin')
@@ -27,10 +26,10 @@ export class AuthController {
         return this.authService.signin(dto);
     }
 
-    @UseGuards(JwtGuard)
     @Get('me')
     @SkipThrottle()
-    profile(@Req() req: Request & { user: UserDocumentType }) {
+    @UseGuards(JwtGuard)
+    profile(@Req() req: RequestWithUser) {
         return this.authService.getProfile(req.user);
     }
 }

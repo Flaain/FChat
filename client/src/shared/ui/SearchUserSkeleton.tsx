@@ -4,7 +4,7 @@ const SearchUserSkeleton = () => {
             {[...new Array(2)].map((_, index, array) => (
                 <li
                     key={index}
-                    className='flex justify-between items-center py-2'
+                    className='flex justify-between items-center'
                     style={{ opacity: (array.length - index) / array.length }}
                 >
                     <div className='flex items-center gap-4 w-full'>

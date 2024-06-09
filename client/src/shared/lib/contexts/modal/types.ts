@@ -1,5 +1,5 @@
-import { ModalSize } from "@/shared/model/types";
 import React from "react";
+import { ModalSize } from "@/shared/model/types";
 
 export interface ModalContextProps {
     isModalOpen: boolean;
@@ -8,15 +8,7 @@ export interface ModalContextProps {
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setIsAsyncActionLoading: React.Dispatch<React.SetStateAction<boolean>>;
     openModal: (config: ModalConfig) => void;
-    onAsyncActionCall: (params: AsyncFunctionParams) => Promise<void>;
     closeModal: () => void;
-}
-
-export interface AsyncFunctionParams {
-    asyncAction: () => Promise<void>;
-    errorMessage?: string;
-    closeModalOnError?: boolean;
-    closeModalOnSuccess?: boolean;
 }
 
 export interface ModalConfig {

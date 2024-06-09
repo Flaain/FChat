@@ -8,10 +8,7 @@ export interface ConversationWithMeta {
 
 export interface ConversationExtraInfo {
     filteredParticipants: Conversation["participants"];
-    isGroup: boolean;
     scrollTriggeredFromRef: React.MutableRefObject<ScrollTriggeredFromTypes>;
-    conversationName: string;
-    isConversationVerified: boolean;
 }
 
 export interface ConversationContextProps {
@@ -32,28 +29,22 @@ export interface ConversationContainerContextProps {
 }
 
 export enum ContainerConversationTypes {
-    SET_CLOSE_EDIT_FORM = "SET_CLOSE_EDIT_FORM",
-    SET_MESSAGE_INPUT_VALUE = "SET_MESSAGE_INPUT_VALUE",
-    SET_SELECTED_MESSAGE_EDIT = "SET_SELECTED_MESSAGE_EDIT",
-    SET_SEND_MESSAGE_FORM_STATUS = "SET_SEND_MESSAGE_FORM_STATUS",
+    SET_CLOSE = "SET_CLOSE",
+    SET_VALUE = "SET_VALUE",
+    SET_STATE = "SET_STATE",
+    SET_SELECTED_MESSAGE = "SET_SELECTED_MESSAGE",
 }
 
-export type MessageFormStatus = "send" | "edit";
+export type MessageFormState = "send" | "edit";
 
 export interface ContainerConversationState {
-    messageInputValue: string;
-    selectedMessageEdit: IMessage | null;
-    sendMessageFormStatus: MessageFormStatus;
+    value: string;
+    selectedMessage: IMessage | null;
+    formState: MessageFormState;
 }
 
 export type ContainerConversationAction =
-    | { type: ContainerConversationTypes.SET_MESSAGE_INPUT_VALUE; payload: { value: string } }
-    | {
-          type: ContainerConversationTypes.SET_CLOSE_EDIT_FORM;
-          payload: { value: string; sendMessageFormStatus: MessageFormStatus; selectedMessageEdit: IMessage | null };
-      }
-    | {
-          type: ContainerConversationTypes.SET_SELECTED_MESSAGE_EDIT;
-          payload: { message: IMessage; sendMessageFormStatus: MessageFormStatus };
-      }
-    | { type: ContainerConversationTypes.SET_SEND_MESSAGE_FORM_STATUS; payload: { status: MessageFormStatus } };
+    | { type: ContainerConversationTypes.SET_VALUE; payload: { value: string } }
+    | { type: ContainerConversationTypes.SET_STATE; payload: { status: MessageFormState } }
+    | { type: ContainerConversationTypes.SET_CLOSE; payload: { value: string, selectedMessage: null, formState: "send" } }
+    | { type: ContainerConversationTypes.SET_SELECTED_MESSAGE; payload: { message: IMessage; formState: MessageFormState } }

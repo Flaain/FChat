@@ -1,9 +1,7 @@
-import { Document, FlattenMaps, Types } from 'mongoose';
-import { User as UserModel } from '../schemas/user.schema';
-import { Conversation } from 'src/conversation/schemas/conversation.schema';
+import { Document, FlattenMaps, SchemaTimestampsConfig, Types } from 'mongoose';
+import { User } from '../schemas/user.schema';
 
 export interface IUser {
-    conversations: Array<Omit<FlattenMaps<Conversation> & { _id: Types.ObjectId }, never>>;
     accessToken: string;
     password: string;
     expiersIn: string;
@@ -21,4 +19,4 @@ export interface UserRegister extends Pick<IUser, 'email' | 'name' | 'birthDate'
 
 export type CreateUserType = Omit<IUser, "accessToken" | "expiersIn" | "password" | "conversations">;
 export type UserProfileType = Omit<IUser, "accessToken" | "expiersIn" | "password">;
-export type UserDocumentType = Document<unknown, {}, UserModel> & UserModel & { _id: Types.ObjectId };
+export type UserDocument = User & Document & SchemaTimestampsConfig;

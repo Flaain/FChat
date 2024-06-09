@@ -47,6 +47,11 @@ export const USER_NOT_FOUND = {
 export const CONVERSATION_POPULATE = [
     { path: 'participants', model: 'User', select: 'name email isVerified' },
     {
+        path: 'lastMessage',
+        model: 'Message',
+        populate: { path: 'sender', model: 'User', select: 'name email isVerified' },
+    },
+    {
         path: 'messages',
         model: 'Message',
         populate: { path: 'sender', model: 'User', select: 'name email isVerified' },

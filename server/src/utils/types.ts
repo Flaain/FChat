@@ -1,6 +1,11 @@
+import { UserDocument } from "src/user/types";
+
+export type RequestWithUser = Request & { user: UserDocument };
+
 export enum Routes {
     AUTH = 'auth',
     USER = "user",
+    FEED = 'feed',
     CONVERSATION = 'conversation',
     PARTICIPANT = 'participant',
     MESSAGE = 'message',

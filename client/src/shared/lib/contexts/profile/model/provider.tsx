@@ -21,7 +21,6 @@ export const ProfileProvider = ({ defaultProfile, children }: ProfileProviderPro
                 dispatch({ type: SessionTypes.SET_AUTH_DONE, payload: { userId: profile._id, isAuthorized: true } });
             } catch (error) {
                 console.error(error);
-                // localStorage.removeItem(localStorageKeys.TOKEN);
             } finally {
                 dispatch({ type: SessionTypes.SET_IS_AUTH_IN_PROGRESS, payload: { isAuthInProgress: false } });
             }

@@ -1,14 +1,14 @@
 import Switch from '@/shared/ui/Switch';
 import Typography from '@/shared/ui/Typography';
 import AvatarByName from '@/shared/ui/AvatarByName';
+import CreateGroup from '@/features/CreateGroup/ui/ui';
 import { useTheme } from '@/entities/theme/lib/hooks/useTheme';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { Button } from '@/shared/ui/Button';
-import { Archive, MessageCirclePlusIcon, Moon, Settings } from 'lucide-react';
+import { Archive, MessageCirclePlusIcon, Moon, Settings, Users, Verified } from 'lucide-react';
 import { toast } from 'sonner';
-import { CreateChatContainerProvider } from '@/widgets/CreateChatContainer/model/provider';
-import CreateChatContainer from '@/widgets/CreateChatContainer/ui/ui';
+import { cn } from '@/shared/lib/utils/cn';
 
 const listIconStyle = 'dark:text-primary-white text-primary-dark-200 w-5 h-5';
 
@@ -17,15 +17,11 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
     const { openModal } = useModal();
     const { setTheme, theme } = useTheme();
 
-    const onCreateClick = () => {
+    const onCreateGroup = () => {
         setSheetOpen(false);
         openModal({
-            title: 'Choose chat mode',
-            content: (
-                <CreateChatContainerProvider>
-                    <CreateChatContainer />
-                </CreateChatContainerProvider>
-            ),
+            title: 'Create group',
+            content: <CreateGroup />,
             size: 'fitHeight'
         });
     };
@@ -37,9 +33,9 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
             action: () => toast.info('Not implemented')
         },
         {
-            title: 'Create chat',
-            icon: <MessageCirclePlusIcon className={listIconStyle} />,
-            action: onCreateClick
+            title: 'New group',
+            icon: <Users className={listIconStyle} />,
+            action: onCreateGroup
         },
         {
             title: 'Settings',
@@ -52,8 +48,13 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
         <div className='flex flex-col py-8 h-full'>
             <div className='flex flex-col gap-2 items-start px-4'>
                 <AvatarByName name={profile.name} size='lg' />
-                <Typography as='h2' size='lg' weight='medium'>
+                <Typography as='h2' size='lg' weight='medium' className={cn(profile.isVerified && 'flex items-center')}>
                     {profile.name}
+                    {profile.isVerified && (
+                        <Typography className='ml-2'>
+                            <Verified className='w-5 h-5' />
+                        </Typography>
+                    )}
                 </Typography>
             </div>
             <ul className='flex flex-col gap-2'>

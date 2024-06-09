@@ -15,7 +15,7 @@ export const useScrollContainer = () => {
         try {
             setIsLoading(true);
 
-            const { data } = await api.conversation.getConversation({
+            const { data } = await api.conversation.get({
                 body: { conversationId: conversation.conversation._id, params: { cursor: conversation.nextCursor! } },
                 token: accessToken!
             });

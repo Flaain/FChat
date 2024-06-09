@@ -1,26 +1,22 @@
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { UserDocumentType } from 'src/user/types';
 import { JwtGuard } from 'src/utils/jwt.guard';
 import { ConversationService } from './conversation.service';
 import { ConversationCreateDTO } from './dtos/conversation.create.dto';
-import { Routes } from 'src/utils/types';
+import { RequestWithUser, Routes } from 'src/utils/types';
 
 @Controller(Routes.CONVERSATION)
 export class ConversationController {
     constructor(private readonly conversationService: ConversationService) {}
 
-    @Post('create')
+    @Get()
     @UseGuards(JwtGuard)
-    createConversation(@Req() req: Request & { user: UserDocumentType }, @Body() dto: ConversationCreateDTO) {
-        return this.conversationService.createConversation({
-            initiatorId: req.user._id,
-            ...dto,
-        });
+    getConversations(@Req() req: RequestWithUser, @Query('cursor') cursor?: string) {
+        return this.conversationService.getConversations({ initiatorId: req.user._id, cursor });
     }
 
-    @Post('create-group')
+    @Post('create')
     @UseGuards(JwtGuard)
-    createGroupConversation(@Req() req: Request & { user: UserDocumentType }, @Body() dto: ConversationCreateDTO) {
+    createConversation(@Req() req: RequestWithUser, @Body() dto: ConversationCreateDTO) {
         return this.conversationService.createConversation({
             initiatorId: req.user._id,
             ...dto,
@@ -30,13 +26,13 @@ export class ConversationController {
     @Get(':id')
     @UseGuards(JwtGuard)
     getConversation(
-        @Req() req: Request & { user: UserDocumentType },
+        @Req() req: RequestWithUser,
         @Param('id') id: string,
         @Query('cursor') cursor?: string,
     ) {
         return this.conversationService.getConversation({
-            initiatorId: req.user._id,
-            conversationId: id,
+            initiator: req.user,
+            recipientId: id,
             cursor,
         });
     }

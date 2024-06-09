@@ -2,26 +2,24 @@ import { ContainerConversationAction, ContainerConversationState, ContainerConve
 
 export const containerReducer = (state: ContainerConversationState, { type, payload }: ContainerConversationAction) => {
     switch (type) {
-        case ContainerConversationTypes.SET_MESSAGE_INPUT_VALUE:
-            return { ...state, messageInputValue: payload.value };
-        case ContainerConversationTypes.SET_SELECTED_MESSAGE_EDIT:
+        case ContainerConversationTypes.SET_VALUE:
+            return { ...state, value: payload.value };
+        case ContainerConversationTypes.SET_SELECTED_MESSAGE:
             return {
                 ...state,
-                selectedMessageEdit: payload.message,
-                messageInputValue: payload.message.text,
-                sendMessageFormStatus: payload.sendMessageFormStatus
+                value: payload.message.text,
+                selectedMessage: payload.message,
+                formState: payload.formState
             };
-        case ContainerConversationTypes.SET_CLOSE_EDIT_FORM:
+        case ContainerConversationTypes.SET_CLOSE:
             return {
                 ...state,
-                messageInputValue: payload.value,
-                sendMessageFormStatus: payload.sendMessageFormStatus,
-                selectedMessageEdit: payload.selectedMessageEdit
+                value: payload.value,
+                formState: payload.formState,
+                selectedMessage: payload.selectedMessage
             };
-        case ContainerConversationTypes.SET_SEND_MESSAGE_FORM_STATUS:
-            return { ...state, sendMessageFormStatus: payload.status };
-        case ContainerConversationTypes.SET_IS_INFINITE_SCROLL_LOADING:
-            return { ...state, isInfiniteScrollLoading: payload.isInfiniteScrollLoading };
+        case ContainerConversationTypes.SET_STATE:
+            return { ...state, formState: payload.status };
         default:
             return state;
     }

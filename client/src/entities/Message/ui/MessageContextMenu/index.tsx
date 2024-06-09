@@ -8,15 +8,13 @@ import { useMessage } from '../../lib/hooks/useMessage';
 
 const MessageContextMenu = ({ message, isMessageFromMe }: { message: IMessage; isMessageFromMe: boolean }) => {
     const { handleCopyToClipboard, handleMessageDelete, handleMessageEdit } = useMessage(message);
-    const { openModal, closeModal, onAsyncActionCall } = useModal();
+    const { openModal, closeModal } = useModal();
 
     const confirmationConfig: ModalConfig = {
         content: (
             <Confirmation
                 onCancel={closeModal}
-                onConfirm={() =>
-                    onAsyncActionCall({ asyncAction: handleMessageDelete, errorMessage: 'Cannot delete message' })
-                }
+                onConfirm={handleMessageDelete}
                 onConfirmText='Delete'
                 text='Are you sure you want to delete this message?'
             />

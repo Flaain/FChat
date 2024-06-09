@@ -3,15 +3,13 @@ import { FieldErrors, FieldPath, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { FormErrorsType } from '@/shared/model/types';
+import { FormErrorsType, SearchUser } from '@/shared/model/types';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { useNavigate } from 'react-router-dom';
 import { ApiError } from '@/shared/api/error';
 import { CreateGroupType } from '../../model/types';
-import { useCreateGroupContext } from './useCreateGroupContext';
 import { debounce } from '@/shared/lib/utils/debounce';
-import { useCreateChatContainer } from '@/widgets/CreateChatContainer/lib/hooks/useCreateChatContainer';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createGroupSchema } from '../../model/schemas';
 
@@ -24,9 +22,11 @@ const steps: Record<number, { fields: Array<FieldPath<CreateGroupType>> }> = {
 export const useCreateGroup = () => {
     const { setProfile } = useProfile();
     const { state: { accessToken } } = useSession();
-    const { handleTypeChange } = useCreateChatContainer();
-    const { setIsAsyncActionLoading, isAsyncActionLoading, onAsyncActionCall, closeModal } = useModal();
-    const { step, setStep, selectedUsers, setSearchedUsers } = useCreateGroupContext();
+    const { setIsAsyncActionLoading, isAsyncActionLoading, closeModal } = useModal();
+
+    const [step, setStep] = React.useState(0);
+    const [searchedUsers, setSearchedUsers] = React.useState<Array<SearchUser>>([]);
+    const [selectedUsers, setSelectedUsers] = React.useState<Map<string, SearchUser>>(new Map());
 
     const form = useForm<CreateGroupType>({
         resolver: zodResolver(createGroupSchema),
@@ -42,6 +42,26 @@ export const useCreateGroup = () => {
 
     const navigate = useNavigate();
     
+    const handleSelect = React.useCallback((user: SearchUser) => {
+        setSelectedUsers((prevState) => {
+            const newState = new Map([...prevState]);
+
+            newState.has(user._id) ? newState.delete(user._id) : newState.set(user._id, user);
+
+            return newState;
+        });
+    }, []);
+
+    const handleRemove = React.useCallback((id: string) => {
+        setSelectedUsers((prevState) => {
+            const newState = new Map([...prevState]);
+
+            newState.delete(id);
+
+            return newState;
+        });
+    }, []);
+
     const _isNextButtonDisabled = () => {
         const isFieldEmpty = !form.getValues(steps[step]?.fields).every?.(Boolean);
         const isFieldHasErrors = !!Object.entries(form.formState.errors).some(([key]) => steps[step]?.fields.includes(key as FieldPath<CreateGroupType>));
@@ -102,9 +122,11 @@ export const useCreateGroup = () => {
     }, [form]);
 
     const handleSearchUser = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
-        if (!value || !value.trim().length) return setSearchedUsers([]);
+        const trimmedValue = value.trim();
 
-        handleSearchDelay(value)
+        if (!value || !trimmedValue.length) return setSearchedUsers([]);
+
+       trimmedValue.length > 2 && handleSearchDelay(trimmedValue)
     }
 
     const onSubmit = async () => {
@@ -116,7 +138,7 @@ export const useCreateGroup = () => {
                     setStep((prevState) => prevState + 1);
                 },
                 1: () => setStep((prevState) => prevState + 1),
-                2: async () => onAsyncActionCall({ asyncAction: createGroup, errorMessage: 'Failed to create group' })
+                2: createGroup
             };
 
             await actions[step as keyof typeof actions]();
@@ -133,15 +155,19 @@ export const useCreateGroup = () => {
     };
 
     const handleBack = React.useCallback(() => {
-        if (!step) return handleTypeChange('choose');
-
+        if (!step) return closeModal();
         setStep((prevState) => prevState - 1);
     }, [setStep, step]);
 
     return {
         form,
+        step,
+        searchedUsers,
+        selectedUsers,
         isNextButtonDisabled: _isNextButtonDisabled(),
         handleBack,
+        handleSelect,
+        handleRemove,
         handleSubmit,
         handleSearchUser
     };

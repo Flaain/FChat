@@ -3,28 +3,28 @@ import { UserRegister } from '../types';
 
 @Schema({ timestamps: true })
 export class User implements UserRegister {
-    @Prop({ required: true, unique: true })
+    @Prop({ type: String, required: true, unique: true })
     name: string;
 
-    @Prop({ required: true, unique: true })
+    @Prop({ type: String, required: true, unique: true })
     email: string;
 
-    @Prop({ required: true })
+    @Prop({ type: String, required: true })
     password: string;
 
-    @Prop({ required: true })
+    @Prop({ type: Date, required: true })
     birthDate: Date;
 
-    @Prop({ required: true, default: false })
+    @Prop({ type: Boolean, required: true, default: false })
     isPrivate: boolean;
 
-    @Prop()
+    @Prop({ type: Boolean, default: false })
     isVerified?: boolean;
 
-    @Prop({ required: true, default: Date.now() })
+    @Prop({ type: Date, required: true, default: () => new Date() })
     lastSeen: Date;
 
-    @Prop()
+    @Prop({ type: String })
     status?: string;
 }
 

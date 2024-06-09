@@ -2,15 +2,15 @@ import React from 'react';
 import { z } from 'zod';
 import { SearchUser } from '@/shared/model/types';
 import { createGroupSchema } from './schemas';
+import { UseFormReturn } from 'react-hook-form';
 
 export type CreateGroupType = z.infer<typeof createGroupSchema>;
 
-export interface CreateGroupContextProps {
-    step: number;
-    searchedUsers: Array<SearchUser>;
+export interface SelectStageProps {
+    form: UseFormReturn<CreateGroupType>;
     selectedUsers: Map<string, SearchUser>;
+    searchedUsers: Array<SearchUser>;
     handleSelect: (user: SearchUser) => void;
     handleRemove: (id: string) => void;
-    setSearchedUsers: React.Dispatch<React.SetStateAction<Array<SearchUser>>>;
-    setStep: React.Dispatch<React.SetStateAction<number>>;
+    handleSearchUser: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }

@@ -12,12 +12,9 @@ export class MessageService implements IMessageService {
         private readonly conversationService: ConversationService,
     ) {}
 
-    send = async ({ conversationId, message, initiatorId }: SendMessageType): Promise<MessageDocumentType> => {
+    send = async ({ recipientId, message, initiatorId }: SendMessageType): Promise<MessageDocumentType> => {
         try {
-            const conversation = await this.conversationService.findOneByPayload({
-                _id: conversationId,
-                participants: { $in: initiatorId },
-            });
+            const conversation = await this.conversationService.findOneByPayload({ participants: { $all: [new Types.ObjectId(recipientId), initiatorId] } });
 
             if (!conversation) throw new HttpException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
 
@@ -26,11 +23,15 @@ export class MessageService implements IMessageService {
                 text: message.trim(),
             });
 
-            conversation.messages.push(newMessage._id);
+            Object.assign(conversation, { 
+                lastMessage: newMessage._id, 
+                lastMessageSentAt: newMessage.createdAt.toISOString(), 
+                messages: [...conversation.messages, newMessage._id] 
+            });
 
             const { 0: savedMessage } = await Promise.all([newMessage.save(), conversation.save()]);
 
-            return savedMessage.populate([{ path: 'sender', model: 'User', select: 'name email' }]);
+            return savedMessage.populate([{ path: 'sender', model: 'User', select: 'name email isVerified' }]);
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);

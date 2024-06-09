@@ -15,6 +15,12 @@ export class Message implements IMessageForSchema {
 
     @Prop({ required: true, default: false })
     hasBeenEdited: boolean;
+
+    @Prop({ type: Date, default: () => new Date() })
+    createdAt: Date
+  
+    @Prop({ type: Date, default: () => new Date() })
+    updatedAt: Date
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

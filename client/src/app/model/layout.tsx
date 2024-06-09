@@ -1,12 +1,12 @@
-import Layout from "@/shared/ui/Layout";
-import GuestGuard from "@/shared/ui/GuestGuard";
-import ScreenLoader from "@/shared/ui/ScreenLoader";
-import { ModalProvider } from "@/shared/lib/contexts/modal/provider";
+import Layout from '@/shared/ui/Layout';
+import GuestGuard from '@/shared/ui/GuestGuard';
+import ScreenLoader from '@/shared/ui/ScreenLoader';
+import { LayoutProvider } from '@/shared/lib/contexts/layout/provider';
 
 export const baseLayout = (
     <GuestGuard fallback={<ScreenLoader />}>
-        <ModalProvider>
+        <LayoutProvider>
             <Layout />
-        </ModalProvider>
+        </LayoutProvider>
     </GuestGuard>
 );

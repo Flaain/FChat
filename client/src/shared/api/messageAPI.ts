@@ -6,8 +6,8 @@ export class MessageAPI extends API {
         body,
         token,
         ...rest
-    }: WithRequired<APIMethodParams<{ message: string; conversationId: string }>, 'body' | 'token'>) => {
-        const response = await fetch(this._baseUrl + `/message/send/${body.conversationId}`, {
+    }: WithRequired<APIMethodParams<{ message: string; recipientId: string }>, 'body' | 'token'>) => {
+        const response = await fetch(this._baseUrl + `/message/send/${body.recipientId}`, {
             method: 'POST',
             headers: { ...this._headers, Authorization: `Bearer ${token}` },
             body: JSON.stringify(body),

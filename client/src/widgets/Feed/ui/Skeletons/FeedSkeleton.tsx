@@ -1,8 +1,12 @@
-const SideConversationSkeleton = () => {
+const FeedSkeleton = () => {
     return (
-        <ul className="flex flex-col gap-5 overflow-auto scrollbar_type_conversation px-3">
+        <ul className='flex flex-col gap-5 overflow-auto scrollbar_type_conversation px-3'>
             {[...new Array(5)].map((_, index, array) => (
-                <li key={index} className='flex justify-between items-center' style={{ opacity: (array.length - index) / array.length }}>
+                <li
+                    key={index}
+                    className='flex justify-between items-center'
+                    style={{ opacity: (array.length - index) / array.length }}
+                >
                     <div className='flex items-center gap-5 w-full'>
                         <span className='dark:bg-primary-dark-50 min-w-[50px] h-[50px] space-y-5 rounded-full relative'></span>
                         <div className='flex flex-col gap-2 w-full'>
@@ -16,4 +20,4 @@ const SideConversationSkeleton = () => {
     );
 };
 
-export default SideConversationSkeleton;
+export default FeedSkeleton;

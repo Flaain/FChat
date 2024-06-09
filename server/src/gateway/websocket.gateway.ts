@@ -1,7 +1,7 @@
-import { OnEvent } from '@nestjs/event-emitter';
-import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { OnEvent } from '@nestjs/event-emitter';
 import { Message } from 'src/message/schemas/message.schema';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 
 @WebSocketGateway({ cors: { origin: process.env.CLIENT_URL } })
 export class MessageGateway implements OnGatewayConnection {

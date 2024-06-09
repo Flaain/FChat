@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Document, SchemaTimestampsConfig, Types } from 'mongoose';
 import { MessageSendDTO } from '../dtos/message.send.dto';
 import { Message } from '../schemas/message.schema';
 import { MessageDeleteDTO } from '../dtos/message.delete.dto';
@@ -15,8 +15,8 @@ export interface IMessageService {
     send(dto: SendMessageType): Promise<MessageDocumentType>;
 }
 
-export type MessageDocumentType = Omit<Document<unknown, {}, Message> & Message & { _id: Types.ObjectId }, never>;
+export type MessageDocumentType = Message & Document & SchemaTimestampsConfig;
 
-export type SendMessageType = MessageSendDTO & { conversationId: string; initiatorId: Types.ObjectId };
+export type SendMessageType = MessageSendDTO & { recipientId: string; initiatorId: Types.ObjectId };
 export type EditMessageType = MessageEditDTO & { initiatorId: Types.ObjectId, messageId: string };
 export type DeleteMessageType = MessageDeleteDTO & { messageId: string; initiatorId: Types.ObjectId };

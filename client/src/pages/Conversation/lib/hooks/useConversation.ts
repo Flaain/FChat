@@ -19,10 +19,6 @@ export const useConversation = () => {
         return data?.conversation.participants.filter((participant) => participant._id !== userId) ?? [];
     }, [data, userId]);
 
-    const isGroup = data?.conversation.isGroup
-    const conversationName = isGroup ? data?.conversation.name : filteredParticipants[0]?.name;
-    const isConversationVerified = isGroup ? data?.conversation.isVerified : filteredParticipants[0]?.isVerified;
-
     const navigate = useNavigate();
 
     React.useEffect(() => {
@@ -32,7 +28,7 @@ export const useConversation = () => {
             try {
                 setIsLoading(true);
 
-                const { data } = await api.conversation.getConversation({
+                const { data } = await api.conversation.get({
                     token: accessToken!,
                     signal: controller.signal,
                     body: { conversationId: id! }
@@ -67,9 +63,6 @@ export const useConversation = () => {
         info: {
             scrollTriggeredFromRef,
             filteredParticipants,
-            isGroup,
-            conversationName,
-            isConversationVerified
         }
     };
 };

@@ -19,6 +19,9 @@ export class Group implements IGroup {
     @Prop({ type: Types.ObjectId, ref: 'GroupMessage' })
     lastMessage: Types.ObjectId;
 
+    @Prop({ type: Date })
+    lastMessageSentAt: Date;
+
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     creator: Types.ObjectId;
 

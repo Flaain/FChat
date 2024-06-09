@@ -25,7 +25,7 @@ const Message = React.forwardRef<HTMLLIElement, { message: IMessage }>(({ messag
 
     return (
         <ContextMenu>
-            <li ref={ref} className={cn('flex', { 'justify-end': isMessageFromMe, 'justify-start': !isMessageFromMe })}>
+            <li ref={ref} className={cn('flex', isMessageFromMe ? 'justify-end' : 'justify-start')}>
                 <ContextMenuTrigger className='flex gap-5'>
                     {!isMessageFromMe && <AvatarByName name={sender.name} className='self-end' />}
                     <div className='flex flex-col'>

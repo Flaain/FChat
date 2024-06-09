@@ -15,23 +15,23 @@ const SendMessage = () => {
     
     const { handleSubmitMessage, onKeyDown, handleCloseEdit, handleChange, isLoading } = useSendMessage();
     const { isOpen, onClickOutside, onEmojiSelect, openEmojiPicker } = useEmojiPicker(textareaRef);
-    const { state: { messageInputValue, selectedMessageEdit, sendMessageFormStatus } } = useConversationContainer();
+    const { state: { value, selectedMessage, formState } } = useConversationContainer();
 
-    const trimmedValue = messageInputValue.trim().length;
+    const trimmedValue = value.trim().length;
 
     React.useEffect(() => {
         if (!textareaRef.current) return;
 
         textareaRef.current.style.height = 'inherit';
         textareaRef.current.style.height = `${Math.max(textareaRef.current.scrollHeight, 50)}px`;
-    }, [messageInputValue]);
+    }, [value]);
 
     const messageBars = {
         edit: (
             <MessageTopBar
                 title='Edit message'
                 onClose={handleCloseEdit}
-                description={selectedMessageEdit?.text}
+                description={selectedMessage?.text}
                 preventClose={isLoading}
             />
         )
@@ -39,7 +39,7 @@ const SendMessage = () => {
 
     return (
         <div className='flex flex-col sticky bottom-0 w-full'>
-            {messageBars[sendMessageFormStatus as keyof typeof messageBars]}
+            {messageBars[formState as keyof typeof messageBars]}
             <form
                 className='w-full max-h-[120px] overflow-hidden flex items-center dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out box-border'
                 onSubmit={handleSubmitMessage}
@@ -55,7 +55,7 @@ const SendMessage = () => {
                 <textarea
                     rows={1}
                     ref={textareaRef}
-                    value={messageInputValue}
+                    value={value}
                     onChange={handleChange}
                     disabled={isLoading}
                     onKeyDown={onKeyDown}
@@ -68,7 +68,7 @@ const SendMessage = () => {
                     disabled={isLoading}
                     className={cn('transition-transform duration-200 ease-in-out', {
                         'translate-x-14': !trimmedValue,
-                        'translate-x-0': trimmedValue || sendMessageFormStatus === 'edit'
+                        'translate-x-0': trimmedValue || formState === 'edit'
                     })}
                     onClick={openEmojiPicker}
                 >
@@ -83,11 +83,10 @@ const SendMessage = () => {
                 )}
                 <Button
                     variant='text'
-                    disabled={(!trimmedValue && sendMessageFormStatus === 'send') || isLoading}
+                    disabled={(!trimmedValue && formState === 'send') || isLoading}
                     className={cn(
                         'opacity-0 pointer-events-none invisible scale-50 transition-all duration-100 ease-in-out',
-                        (!!trimmedValue || sendMessageFormStatus === 'edit') &&
-                            'opacity-100 visible scale-100 pointer-events-auto'
+                        (!!trimmedValue || formState === 'edit') && 'opacity-100 visible scale-100 pointer-events-auto'
                     )}
                 >
                     <SendHorizonal className='w-6 h-6' />

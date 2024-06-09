@@ -1,7 +1,12 @@
-import { HTMLAttributes } from 'react';
 import { ModalConfig } from '../lib/contexts/modal/types';
 import { Profile } from '../lib/contexts/profile/model/types';
 import { FieldError } from 'react-hook-form';
+
+export enum FeedTypes {
+    CONVERSATION = 'conversation',
+    GROUP = 'group',
+    USER = 'user'
+}
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
@@ -44,7 +49,7 @@ export interface APIError<E> {
     type?: string;
 }
 
-export interface IMessage extends HTMLAttributes<HTMLLIElement> {
+export interface IMessage {
     _id: string;
     sender: Participant;
     hasBeenRead: boolean;
@@ -63,14 +68,28 @@ export interface Participant {
     isVerified?: boolean;
 }
 
+export interface GroupParticipant extends Participant {
+    joinedAt: string;
+}
+
 export interface Conversation {
     _id: string;
-    name?: string;
-    isVerified?: boolean;
-    isGroup?: boolean;
     participants: Array<Participant>;
     messages: Array<IMessage>;
-    creator: Participant;
+    lastMessage?: IMessage;
+    lastMessageSentAt: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface Group {
+    _id: string;
+    name: string;
+    participants: Array<GroupParticipant>;
+    isVerified?: boolean;
+    messages: Array<IMessage>;
+    lastMessage?: IMessage;
+    lastMessageSentAt: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -124,6 +143,8 @@ export type TypographyComponent = <T extends React.ElementType = 'span'>(
 export interface SearchUser {
     _id: string;
     name: string;
+    isVerified?: boolean;
+    type: FeedTypes.USER;
 }
 
 export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -173,3 +194,24 @@ export interface Meta {
     totalPages: number;
     currentPage: number;
 }
+
+export type Feed = Array<ConversationFeed | GroupFeed | UserFeed>;
+
+export interface SearchedUsersListProps extends React.HTMLAttributes<HTMLUListElement> {
+    onUserSelect: (user: SearchUser) => void;
+    searchedUsers: Array<SearchUser>;
+    selectedUsers: Map<string, SearchUser> | SearchUser | null;
+    title?: string;
+}
+
+export type FeedItem = ConversationFeed | GroupFeed | UserFeed;
+
+export type ConversationFeed = Pick<Conversation, '_id' | 'participants' | 'lastMessage' | 'lastMessageSentAt'> & {
+    type: FeedTypes.CONVERSATION;
+};
+
+export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'isVerified' | 'name'> & {
+    type: FeedTypes.GROUP;
+};
+
+export type UserFeed = SearchUser & { type: FeedTypes.USER };

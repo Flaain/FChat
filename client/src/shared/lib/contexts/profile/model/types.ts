@@ -1,16 +1,19 @@
-import { Conversation } from "@/shared/model/types";
-
 export interface User {
     _id: string;
     name: string;
     email: string;
     status?: string;
+    isVerified?: boolean;
     createdAt: string;
     updatedAt: string;
 }
 
+export interface DataWithCursor<T> {
+    data: T,
+    nextCursor: string | null;
+}
+
 export interface Profile extends User {
-    conversations: Array<Conversation>;
 }
 
 export interface ProfileContextProps {
