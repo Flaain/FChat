@@ -5,11 +5,11 @@ import { Input } from '@/shared/ui/Input';
 import { AlignJustifyIcon } from 'lucide-react';
 import { SidebarProps } from '../model/types';
 
-const Sidebar = ({ announcementTopSlot, announcementBottomSlot }: SidebarProps) => {
+const Sidebar = (props: SidebarProps) => {
     const { setOpenSheet, searchValue, handleSearch, searchInputRef, handleLogout } = useLayoutContext();
 
     return (
-        <aside className='flex flex-col h-screen sticky top-0 gap-5 dark:bg-primary-dark-150 bg-primary-white'>
+        <aside className='flex flex-col h-screen sticky top-0 gap-2 dark:bg-primary-dark-150 bg-primary-white'>
             <div className='flex items-center justify-between gap-5 sticky top-0 py-4 px-3'>
                 <Button variant='text' size='icon' onClick={() => setOpenSheet(true)} className='opacity-30'>
                     <AlignJustifyIcon />

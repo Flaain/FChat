@@ -2,8 +2,8 @@ import { ConversationContextProps } from "@/widgets/ConversationContainer/model/
 import React from "react";
 
 export const ConversationContext = React.createContext<ConversationContextProps>({
-    conversation: undefined!,
-    info: undefined!,
+    data: undefined!,
     isLoading: true,
     setConversation: () => {},
+    scrollTriggeredFromRef: { current: 'init' }
 });

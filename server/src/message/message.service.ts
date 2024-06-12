@@ -6,13 +6,13 @@ import { ConversationService } from 'src/conversation/conversation.service';
 import { DeleteMessageType, EditMessageType, IMessageService, MessageDocumentType, SendMessageType } from './types';
 
 @Injectable()
-export class MessageService implements IMessageService {
+export class MessageService {
     constructor(
         @InjectModel(Message.name) private readonly messageModel: Model<Message>,
         private readonly conversationService: ConversationService,
     ) {}
 
-    send = async ({ recipientId, message, initiatorId }: SendMessageType): Promise<MessageDocumentType> => {
+    send = async ({ recipientId, message, initiatorId }: SendMessageType) => {
         try {
             const conversation = await this.conversationService.findOneByPayload({ participants: { $all: [new Types.ObjectId(recipientId), initiatorId] } });
 
@@ -31,7 +31,9 @@ export class MessageService implements IMessageService {
 
             const { 0: savedMessage } = await Promise.all([newMessage.save(), conversation.save()]);
 
-            return savedMessage.populate([{ path: 'sender', model: 'User', select: 'name email isVerified' }]);
+            const populatedMessage = (await savedMessage.populate([{ path: 'sender', model: 'User', select: 'name email isVerified' }])).toObject();
+
+            return { ...populatedMessage, conversationId: conversation._id };
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);

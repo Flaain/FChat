@@ -54,6 +54,6 @@ export class ConversationAPI extends API {
             ...rest
         });
 
-        return this._checkResponse<{ conversations: Array<ConversationFeed>; nextCursor: string }>(response);
+        return this._checkResponse<{ conversations: Array<Omit<ConversationFeed, 'type'>>; nextCursor: string }>(response);
     };
 }

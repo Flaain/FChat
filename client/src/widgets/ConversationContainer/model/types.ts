@@ -6,16 +6,11 @@ export interface ConversationWithMeta {
     nextCursor: string | null
 }
 
-export interface ConversationExtraInfo {
-    filteredParticipants: Conversation["participants"];
-    scrollTriggeredFromRef: React.MutableRefObject<ScrollTriggeredFromTypes>;
-}
-
 export interface ConversationContextProps {
-    conversation: ConversationWithMeta;
+    data: ConversationWithMeta;
     isLoading: boolean;
     setConversation: React.Dispatch<React.SetStateAction<ConversationWithMeta>>;
-    info: ConversationExtraInfo;
+    scrollTriggeredFromRef: React.MutableRefObject<ScrollTriggeredFromTypes>;
 }
 
 export interface ConversationContainerProviderProps {

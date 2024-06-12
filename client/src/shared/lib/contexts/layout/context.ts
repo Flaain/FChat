@@ -4,8 +4,10 @@ import { LayoutContextProps } from './types';
 export const LayoutContext = React.createContext<LayoutContextProps>({
     openSheet: false,
     searchLoading: false,
-    feed: [],
+    globalResults: [],
+    localResults: [],
     setOpenSheet: () => {},
+    setLocalResults: () => {},
     searchValue: '',
     handleSearch: () => {},
     handleLogout: () => {},

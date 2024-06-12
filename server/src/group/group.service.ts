@@ -39,7 +39,7 @@ export class GroupService {
 
             groups.length === GROUP_BATCH && (nextCursor = groups[groups.length - 1].lastMessageSentAt.toISOString());
 
-            return { groups: groups.map((group) => ({ ...group, type: "group" })), nextCursor };
+            return { groups, nextCursor };
         } catch (error) {
             console.log(error);
             return { groups: [], nextCursor: null };

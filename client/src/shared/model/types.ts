@@ -74,7 +74,7 @@ export interface GroupParticipant extends Participant {
 
 export interface Conversation {
     _id: string;
-    participants: Array<Participant>;
+    recipient: Participant;
     messages: Array<IMessage>;
     lastMessage?: IMessage;
     lastMessageSentAt: string;
@@ -206,7 +206,8 @@ export interface SearchedUsersListProps extends React.HTMLAttributes<HTMLUListEl
 
 export type FeedItem = ConversationFeed | GroupFeed | UserFeed;
 
-export type ConversationFeed = Pick<Conversation, '_id' | 'participants' | 'lastMessage' | 'lastMessageSentAt'> & {
+export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'lastMessageSentAt'> & {
+    participants: Array<Participant>;
     type: FeedTypes.CONVERSATION;
 };
 

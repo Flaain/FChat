@@ -9,7 +9,7 @@ import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 
 const ConversationContainer = () => {
-    const { conversation } = useConversationContext();
+    const { data } = useConversationContext();
     const { conversationContainerRef, isLoading, getPreviousMessages } = useScrollContainer();
 
     return (
@@ -19,9 +19,9 @@ const ConversationContainer = () => {
                 className='flex flex-col flex-1 h-svh overflow-auto gap-5 items-center justify-start dark:bg-primary-dark-200 bg-primary-white'
             >
                 <ConversationHeader />
-                {conversation?.conversation.messages.length ? (
+                {data?.conversation.messages.length ? (
                     <>
-                        {conversation.nextCursor && (
+                        {data.nextCursor && (
                             <Button
                                 variant='text'
                                 className='p-0 dark:text-primary-white/30 text-primary-white'

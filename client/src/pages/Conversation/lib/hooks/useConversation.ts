@@ -8,16 +8,12 @@ import { ScrollTriggeredFromTypes } from '../../model/types';
 
 export const useConversation = () => {
     const { id } = useParams();
-    const { state: { accessToken, userId } } = useSession();
+    const { state: { accessToken } } = useSession();
 
     const [data, setConversation] = React.useState<ConversationWithMeta>(null!);
     const [isLoading, setIsLoading] = React.useState(false);
 
     const scrollTriggeredFromRef = React.useRef<ScrollTriggeredFromTypes>('init');
-
-    const filteredParticipants = React.useMemo(() => {
-        return data?.conversation.participants.filter((participant) => participant._id !== userId) ?? [];
-    }, [data, userId]);
 
     const navigate = useNavigate();
 
@@ -60,9 +56,6 @@ export const useConversation = () => {
         data,
         setConversation,
         isLoading,
-        info: {
-            scrollTriggeredFromRef,
-            filteredParticipants,
-        }
+        scrollTriggeredFromRef,
     };
 };

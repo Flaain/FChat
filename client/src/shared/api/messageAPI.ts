@@ -14,7 +14,7 @@ export class MessageAPI extends API {
             ...rest
         });
 
-        return this._checkResponse<IMessage>(response);
+        return this._checkResponse<IMessage & { conversationId: string }>(response);
     };
 
     edit = async ({

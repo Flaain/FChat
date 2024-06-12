@@ -6,11 +6,12 @@ import { localStorageKeys } from '@/shared/constants';
 import { useFeed } from './useFeed';
 import { debounce } from '../utils/debounce';
 import { api } from '@/shared/api';
+import { FeedTypes } from '@/shared/model/types';
 
 export const useLayout = () => {
     const { setProfile } = useProfile();
     const { state: { accessToken }, dispatch } = useSession();
-    const { feed, feedIsLoading, onScrollFeedLoading, setFeed, handleFetchFeed } = useFeed();
+    const { onScrollFeedLoading, handleFetchFeed, globalResults, localResults, setGlobalResults, setLocalResults } = useFeed();
 
     const [searchValue, setSearchValue] = React.useState('');
     const [searchLoading, setSearchLoading] = React.useState(false);
@@ -27,7 +28,7 @@ export const useLayout = () => {
     const handleSearch = React.useCallback(({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         if (!value) {
             setSearchValue('');
-            handleFetchFeed();
+            setGlobalResults([]);
             return;
         }
 
@@ -44,25 +45,25 @@ export const useLayout = () => {
 
             const { data: users } = await api.user.search({ body: { username: value }, token: accessToken! });
 
-            setFeed(users);
+            setGlobalResults(users.map((user) => ({ ...user, type: FeedTypes.USER })));
         } catch (error) {
             console.error(error);
-            setFeed([]);
+            setGlobalResults([]);
         } finally {
             setSearchLoading(false);
-        }
-    }, 500), []);
+        }}, 500), []);
 
     return {
-        feed,
-        feedIsLoading,
+        globalResults,
+        localResults,
         onScrollFeedLoading,
         searchValue,
         searchLoading,
+        openSheet,
+        searchInputRef,
         handleSearch,
         handleLogout,
         setOpenSheet,
-        openSheet,
-        searchInputRef
+        setLocalResults
     };
 };

@@ -6,7 +6,6 @@ import { ConversationDocument, CreateConversationArgs, IConversationService } fr
 import { UserService } from 'src/user/user.service';
 import { CONVERSATION_ALREADY_EXISTS, CONVERSATION_WITH_MYSELF } from './utils/conversation.constants';
 import { Message } from 'src/message/schemas/message.schema';
-import { CONVERSATION_POPULATE } from 'src/utils/constants';
 import { UserDocument } from 'src/user/types';
 
 @Injectable()
@@ -19,7 +18,7 @@ export class ConversationService implements IConversationService {
     createConversation = async ({
         initiatorId,
         recipientId,
-    }: CreateConversationArgs): Promise<ConversationDocument> => {
+    }: CreateConversationArgs): Promise<Pick<ConversationDocument, "_id" | "lastMessageSentAt">> => {
         try {
             if (initiatorId.toString() === recipientId) throw new HttpException(CONVERSATION_WITH_MYSELF, CONVERSATION_WITH_MYSELF.status);
 
@@ -27,17 +26,13 @@ export class ConversationService implements IConversationService {
 
             if (!recipient) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
-            const isConversationExists = await this.conversationModel.findOne({
-                participants: { $all: [initiatorId, recipient._id] },
-            });
+            const isConversationExists = await this.conversationModel.findOne({ participants: { $all: [initiatorId, recipient._id] } });
 
             if (isConversationExists) throw new ConflictException(CONVERSATION_ALREADY_EXISTS);
 
-            const conversation = await new this.conversationModel({
-                participants: [initiatorId, recipient._id],
-            }).save();
+            const { _id, lastMessageSentAt } = (await new this.conversationModel({ participants: [initiatorId, recipient._id] }).save()).toObject();
 
-            return conversation.populate(CONVERSATION_POPULATE);
+            return { _id, lastMessageSentAt }
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);
@@ -56,7 +51,7 @@ export class ConversationService implements IConversationService {
                     {
                         limit: CONVERSATION_BATCH,
                         populate: [
-                            { path: 'participants', model: 'User', select: 'name email isVerified' },
+                            { path: 'participants', model: 'User', select: 'name email isVerified', match: { _id: { $ne: initiatorId } } },
                             {
                                 path: 'lastMessage',
                                 model: 'Message',
@@ -70,10 +65,7 @@ export class ConversationService implements IConversationService {
 
             conversations.length === CONVERSATION_BATCH && (nextCursor = conversations[CONVERSATION_BATCH - 1].lastMessageSentAt.toISOString());
 
-            return {
-                conversations: conversations.map((conversation) => ({ ...conversation, type: 'conversation' })),
-                nextCursor,
-            };
+            return { conversations, nextCursor  };
         } catch (error) {
             console.log(error);
             return { conversations: [], nextCursor: null };
@@ -101,7 +93,7 @@ export class ConversationService implements IConversationService {
             const conversation = await this.conversationModel
                 .findOne(
                     { participants: { $all: [initiator._id, recipient._id] } },
-                    { participants: 1, messages: 1 },
+                    { messages: 1 },
                     {
                         populate: [
                             {
@@ -124,21 +116,15 @@ export class ConversationService implements IConversationService {
                 .lean();
 
             if (!conversation) {
-                if (recipient.isPrivate) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
-                return {
-                    conversation: {
-                        recipient,
-                        messages: [],
-                    },
-                    nextCursor,
-                };
+                if (recipient.isPrivate) throw new HttpException('Cannot get conversation', HttpStatus.NOT_FOUND);
+                return { conversation: { recipient, messages: [] }, nextCursor };
             };
 
             conversation.messages.length === MESSAGES_BATCH && (nextCursor = (conversation.messages[MESSAGES_BATCH - 1] as unknown as Message & {
                 createdAt: string;
             }).createdAt);
 
-            return { conversation: { ...conversation, messages: conversation.messages.reverse() }, nextCursor };
+            return { conversation: { recipient, messages: conversation.messages.reverse() }, nextCursor };
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);

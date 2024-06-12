@@ -52,7 +52,7 @@ export class UserService {
 
             if (!users.length) throw new HttpException(USER_NOT_FOUND, USER_NOT_FOUND.status);
 
-            return users.map((user) => ({ ...user, type: 'user' }));
+            return users;
         } catch (error) {
             throw new HttpException(error instanceof ZodError ? error.issues : error.response, error.status);
         }

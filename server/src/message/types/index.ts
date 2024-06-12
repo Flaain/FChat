@@ -12,7 +12,7 @@ export interface IMessageForSchema {
 }
 
 export interface IMessageService {
-    send(dto: SendMessageType): Promise<MessageDocumentType>;
+    send(dto: SendMessageType): Promise<MessageDocumentType & { conversationId: Types.ObjectId }>;
 }
 
 export type MessageDocumentType = Message & Document & SchemaTimestampsConfig;
