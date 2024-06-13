@@ -20,15 +20,22 @@ const Feed = () => {
         group: (item: FeedItem) => <div key={item._id}>{item._id}</div>
     };
 
-    const filters: Record<FeedTypes, (item: FeedItem) => boolean> = {
+    const localFilters: Record<Exclude<FeedTypes, "user">, (item: FeedItem) => boolean> = {
         conversation: (item: FeedItem) => (item as ConversationFeed).participants[0].name.toLowerCase().includes(trimmedSearchValue),
         group: (item: FeedItem) => (item as GroupFeed).name.toLowerCase().includes(trimmedSearchValue),
-        user: (item: FeedItem) => (item as UserFeed).name.toLowerCase().includes(trimmedSearchValue)
     };
 
-    const filteredLocalResults = localResults.filter((item) => filters[item.type](item));
+    const globalFilters: Record<Exclude<FeedTypes, "conversation">, (item: FeedItem) => boolean> = {
+        user: (item: FeedItem) => localResults.some((localItem) => {
+            return localItem.type === FeedTypes.CONVERSATION && localItem.participants[0]._id === (item as UserFeed)._id
+        }),
+        group: (item: FeedItem) => localResults.some((localItem) => localItem._id === (item as GroupFeed)._id),
+    };
 
-    return !searchLoading && !filteredLocalResults.length && !globalResults.length ? (
+    const filteredLocalResults = localResults.filter((item) => localFilters[item.type](item));
+    const filteredGlobalResults = globalResults.filter((item) => !globalFilters[item.type](item));
+
+    return !searchLoading && !filteredLocalResults.length && !filteredGlobalResults.length ? (
         <>
             <UserSearch className='dark:text-primary-white w-10 h-10 self-center' />
             <Typography as='p' variant='secondary' className='self-center text-center'>
@@ -39,22 +46,19 @@ const Feed = () => {
         <>
             {!!filteredLocalResults.length && (
                 <ul className='flex flex-col gap-5 px-3 overflow-auto'>
-                    {filteredLocalResults.map((item, index) => {
-                        console.log(item, index);
-                        return feedItems[item.type](item);
-                    })}
+                    {filteredLocalResults.map((item) => feedItems[item.type](item))}
                 </ul>
             )}
             {searchLoading ? (
                 <FeedSkeleton skeletonsCount={3} animate />
             ) : (
-                !!globalResults.length && (
+                !!filteredGlobalResults.length && (
                     <div className='flex flex-col gap-2'>
                         <Typography as='h3' variant='secondary' className='px-3 py-2 rounded bg-primary-dark-200'>
                             Global results
                         </Typography>
                         <ul className='flex flex-col gap-5 overflow-auto px-3'>
-                            {globalResults.map((item) => feedItems[item.type](item))}
+                            {filteredGlobalResults.map((item) => feedItems[item.type](item))}
                         </ul>
                     </div>
                 )

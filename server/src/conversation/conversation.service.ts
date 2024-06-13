@@ -124,7 +124,7 @@ export class ConversationService implements IConversationService {
                 createdAt: string;
             }).createdAt);
 
-            return { conversation: { recipient, messages: conversation.messages.reverse() }, nextCursor };
+            return { conversation: { _id: conversation._id, recipient, messages: conversation.messages.reverse() }, nextCursor };
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);
