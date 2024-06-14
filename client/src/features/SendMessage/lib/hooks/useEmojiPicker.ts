@@ -4,17 +4,17 @@ import { ContainerConversationTypes } from '@/widgets/ConversationContainer/mode
 import { Emoji } from '@emoji-mart/data';
 
 export const useEmojiPicker = (textareaRef: React.MutableRefObject<HTMLTextAreaElement | null>) => {
-    const { state: { messageInputValue }, dispatch } = useConversationContainer();
+    const { state: { value }, dispatch } = useConversationContainer();
     const [isOpen, setIsOpen] = React.useState(false);
 
     const onEmojiSelect = React.useCallback((emoji: Emoji) => {
         dispatch({
-            type: ContainerConversationTypes.SET_MESSAGE_INPUT_VALUE,
-            payload: { value: messageInputValue + emoji.native }
+            type: ContainerConversationTypes.SET_VALUE,
+            payload: { value: value + emoji.native }
         });
 
         textareaRef.current?.focus();
-    }, [dispatch, messageInputValue]);
+    }, [dispatch, value]);
 
     const openEmojiPicker = React.useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.stopPropagation();

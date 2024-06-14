@@ -2,7 +2,7 @@ import { ScrollTriggeredFromTypes } from "@/pages/Conversation/model/types";
 import { Conversation, IMessage } from "@/shared/model/types";
 
 export interface ConversationWithMeta {
-    conversation: Conversation,
+    conversation: Omit<Conversation, "lastMessage">,
     nextCursor: string | null
 }
 

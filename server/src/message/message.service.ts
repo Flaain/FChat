@@ -65,14 +65,15 @@ export class MessageService {
             
             const conversation = await this.conversationService.findOneByPayload({
                 _id: conversationId,
-                participants: { $in: new Types.ObjectId(initiatorId) },
+                participants: { $in: initiatorId },
                 messages: { $in: new Types.ObjectId(messageId) },
             });
-            
+
             if (!conversation) throw new ForbiddenException({ message: 'You are not allowed to delete this message' });
 
             conversation.messages = conversation.messages.filter((id) => id.toString() !== messageId);
-
+            messageId === conversation.lastMessage._id.toString() && (conversation.lastMessage = conversation.messages[conversation.messages.length - 1]);
+            
             await Promise.all([message.deleteOne(), conversation.save()]);
 
             return { success: true, messageId };

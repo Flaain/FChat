@@ -1,20 +1,20 @@
 import React from 'react';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
-import { useParams } from 'react-router-dom';
-import { IMessage } from '@/shared/model/types';
+import { FeedTypes, IMessage } from '@/shared/model/types';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useConversationContainer } from '@/widgets/ConversationContainer/lib/hooks/useConversationContainer';
 import { ContainerConversationTypes } from '@/widgets/ConversationContainer/model/types';
 import { useModal } from '@/shared/lib/hooks/useModal';
+import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 
 export const useMessage = (message: IMessage) => {
     const { dispatch } = useConversationContainer();
-    const { setConversation } = useConversationContext();
+    const { data, setConversation } = useConversationContext();
     const { state: { accessToken } } = useSession();
+    const { setLocalResults } = useLayoutContext();
     const { setIsAsyncActionLoading, closeModal } = useModal()
-    const { id: conversationId } = useParams() as { id: string };
     const { _id, text } = message;
 
     const handleCopyToClipboard = React.useCallback(() => {
@@ -26,15 +26,24 @@ export const useMessage = (message: IMessage) => {
         try {
             setIsAsyncActionLoading(true);
 
-            await api.message.delete({ body: { conversationId, messageId: _id }, token: accessToken! });
+            await api.message.delete({ body: { conversationId: data?.conversation._id, messageId: _id }, token: accessToken! });
 
-            setConversation((prev) => ({
-                ...prev,
-                conversation: {
-                    ...prev.conversation,
-                    messages: prev.conversation.messages.filter((message) => message._id !== _id)
+            const isLastMessage = data?.conversation.messages[data?.conversation.messages.length - 1]._id === _id;
+            const filteredMessages = data?.conversation.messages.filter((message) => message._id !== _id);
+            
+            setConversation((prev) => ({ ...prev, conversation: { ...prev.conversation, messages: filteredMessages } }));
+            
+            isLastMessage && setLocalResults((prev) => prev.map((feedItem) => {
+                if (feedItem.type === FeedTypes.CONVERSATION && data?.conversation._id === feedItem._id) {
+                    return {
+                        ...feedItem,
+                        lastMessage: filteredMessages[filteredMessages.length - 1]
+                    }
                 }
-            }));
+
+                return feedItem;
+            }))
+
             toast.success('Message deleted', { position: 'top-center' });
         } catch (error) {
             console.error(error);
@@ -43,7 +52,7 @@ export const useMessage = (message: IMessage) => {
             closeModal();
             setIsAsyncActionLoading(false);
         }
-    }, [conversationId, _id]);
+    }, [data, _id]);
 
     const handleMessageEdit = React.useCallback(async () => {
         dispatch({

@@ -38,7 +38,7 @@ const MessageContextMenu = ({ message, isMessageFromMe }: { message: IMessage; i
         },
         {
             text: 'Delete',
-            icon: <Trash2 className='w-4 h-4' />,
+            icon: <Trash2 className='w-4 h-4 text-red-400' />,
             condition: isMessageFromMe,
             onClick: () => openModal(confirmationConfig)
         }

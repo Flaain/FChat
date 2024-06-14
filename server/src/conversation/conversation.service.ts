@@ -115,10 +115,7 @@ export class ConversationService implements IConversationService {
                 )
                 .lean();
 
-            if (!conversation) {
-                if (recipient.isPrivate) throw new HttpException('Cannot get conversation', HttpStatus.NOT_FOUND);
-                return { conversation: { recipient, messages: [] }, nextCursor };
-            };
+            if (!conversation) return { conversation: { recipient, messages: [] }, nextCursor };
 
             conversation.messages.length === MESSAGES_BATCH && (nextCursor = (conversation.messages[MESSAGES_BATCH - 1] as unknown as Message & {
                 createdAt: string;

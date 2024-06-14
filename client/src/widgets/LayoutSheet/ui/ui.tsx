@@ -6,7 +6,7 @@ import { useTheme } from '@/entities/theme/lib/hooks/useTheme';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { Button } from '@/shared/ui/Button';
-import { Archive, MessageCirclePlusIcon, Moon, Settings, Users, Verified } from 'lucide-react';
+import { Archive, Moon, Settings, Users, Verified } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/shared/lib/utils/cn';
 
