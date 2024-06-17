@@ -13,6 +13,7 @@ import { localStorageKeys } from "@/shared/constants";
 import { toast } from "sonner";
 import { ApiError } from "@/shared/api/error";
 import { FormErrorsType } from "@/shared/model/types";
+import { ZodCustomIssue } from "zod";
 
 const steps: Array<{ fields: Array<FieldPath<SignupSchemaType>> }> = [
     { fields: ["email", "password", "confirmPassword"] },
@@ -49,7 +50,7 @@ export const useSignup = () => {
         );
     };
 
-    const _displayErrorsFromAPI = React.useCallback(([key, { message }]: FormErrorsType) => {
+    const displayErrorsFromAPI = React.useCallback(([key, { message }]: FormErrorsType) => {
         form.setError(key as FieldPath<SignupSchemaType>, { message }, { shouldFocus: true });
     }, [form]);
 
@@ -84,16 +85,19 @@ export const useSignup = () => {
             await actions[step as keyof typeof actions]();
         } catch (error) {
             console.error(error);
-            if (error instanceof Error) {
-                const isFormError = error instanceof ApiError && error.type === 'form';
-
-                isFormError && Object.entries(error.error as FieldErrors<SignupSchemaType>).forEach(_displayErrorsFromAPI);
-                !isFormError && toast.error(error.message);
+            if (error instanceof ApiError) {
+                const isFormError = error.type === 'form';
+                
+                isFormError && Object.entries(error.error as FieldErrors<SignupSchemaType>).forEach(displayErrorsFromAPI);
+                
+                Array.isArray(error.error) && error.error.forEach(({ path, message }: ZodCustomIssue) => displayErrorsFromAPI([path[0] as string, { 
+                    message: message! 
+                }]));
             }
         } finally {
             setLoading(false);
         }
-    }, [_displayErrorsFromAPI, dispatch, form, setProfile, step]);
+    }, [displayErrorsFromAPI, dispatch, form, setProfile, step]);
 
     const onBack = React.useCallback(() => {
         setStep((prevState) => prevState - 1);

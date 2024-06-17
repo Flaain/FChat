@@ -1,9 +1,9 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/Form";
 import { Input } from "@/shared/ui/Input";
 import { UseFormReturn } from "react-hook-form";
-import { SignupSchema } from "../../model/types";
+import { SignupSchemaType } from "../../model/types";
 
-const SecondStepSignUp = ({ form }: { form: UseFormReturn<SignupSchema> }) => {
+const SecondStepSignUp = ({ form }: { form: UseFormReturn<SignupSchemaType> }) => {
     return (
         <>
             <FormField

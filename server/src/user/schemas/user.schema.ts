@@ -26,6 +26,9 @@ export class User implements UserRegister {
 
     @Prop({ type: String })
     status?: string;
+
+    @Prop({ type: Boolean, default: false })
+    deleted?: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

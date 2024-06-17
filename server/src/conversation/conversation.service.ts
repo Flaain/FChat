@@ -5,7 +5,6 @@ import { Conversation } from './schemas/conversation.schema';
 import { ConversationDocument, CreateConversationArgs, IConversationService } from './types';
 import { UserService } from 'src/user/user.service';
 import { CONVERSATION_ALREADY_EXISTS, CONVERSATION_WITH_MYSELF } from './utils/conversation.constants';
-import { Message } from 'src/message/schemas/message.schema';
 import { UserDocument } from 'src/user/types';
 
 @Injectable()
@@ -15,10 +14,7 @@ export class ConversationService implements IConversationService {
         private readonly userService: UserService,
     ) {}
 
-    createConversation = async ({
-        initiatorId,
-        recipientId,
-    }: CreateConversationArgs): Promise<Pick<ConversationDocument, "_id" | "lastMessageSentAt">> => {
+    createConversation = async ({ initiatorId, recipientId }: CreateConversationArgs): Promise<Pick<ConversationDocument, "_id" | "lastMessageSentAt">> => {
         try {
             if (initiatorId.toString() === recipientId) throw new HttpException(CONVERSATION_WITH_MYSELF, CONVERSATION_WITH_MYSELF.status);
 
@@ -108,7 +104,7 @@ export class ConversationService implements IConversationService {
                                     limit: MESSAGES_BATCH,
                                     sort: { createdAt: -1 },
                                 },
-                                ...(cursor && { match: { createdAt: { $lt: cursor } } }),
+                                ...(cursor && { match: { _id: { $lt: cursor } } }),
                             },
                         ],
                     },
@@ -117,9 +113,7 @@ export class ConversationService implements IConversationService {
 
             if (!conversation) return { conversation: { recipient, messages: [] }, nextCursor };
 
-            conversation.messages.length === MESSAGES_BATCH && (nextCursor = (conversation.messages[MESSAGES_BATCH - 1] as unknown as Message & {
-                createdAt: string;
-            }).createdAt);
+            conversation.messages.length === MESSAGES_BATCH && (nextCursor = (conversation.messages[MESSAGES_BATCH - 1]._id.toString()));
 
             return { conversation: { _id: conversation._id, recipient, messages: conversation.messages.reverse() }, nextCursor };
         } catch (error) {

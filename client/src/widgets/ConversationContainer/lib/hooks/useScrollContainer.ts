@@ -4,7 +4,7 @@ import { useConversationContext } from "@/pages/Conversation/lib/hooks/useConver
 import { api } from "@/shared/api";
 
 export const useScrollContainer = () => {
-    const { conversation, setConversation, info } = useConversationContext();
+    const { data: conversation, scrollTriggeredFromRef, setConversation } = useConversationContext();
     const { state: { accessToken } } = useSession();
 
     const [isLoading, setIsLoading] = React.useState(false);
@@ -16,17 +16,17 @@ export const useScrollContainer = () => {
             setIsLoading(true);
 
             const { data } = await api.conversation.get({
-                body: { conversationId: conversation.conversation._id, params: { cursor: conversation.nextCursor! } },
+                body: { recipientId: conversation.conversation.recipient._id, params: { cursor: conversation.nextCursor! } },
                 token: accessToken!
             });
 
-            info.scrollTriggeredFromRef.current = 'infiniteScroll';
+            scrollTriggeredFromRef.current = 'infiniteScroll';
 
             setConversation((prev) => ({
                 ...prev,
                 conversation: {
                     ...prev.conversation,
-                    messages: [...data.conversation.messages, ...prev.conversation.messages]
+                    messages: [...data?.conversation.messages, ...prev.conversation.messages]
                 },
                 nextCursor: data.nextCursor
             }));

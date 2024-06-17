@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Message } from './schemas/message.schema';
 import { Model, Types } from 'mongoose';
 import { ConversationService } from 'src/conversation/conversation.service';
-import { DeleteMessageType, EditMessageType, IMessageService, MessageDocumentType, SendMessageType } from './types';
+import { DeleteMessageType, EditMessageType, SendMessageType } from './types';
 
 @Injectable()
 export class MessageService {
@@ -72,6 +72,7 @@ export class MessageService {
             if (!conversation) throw new ForbiddenException({ message: 'You are not allowed to delete this message' });
 
             conversation.messages = conversation.messages.filter((id) => id.toString() !== messageId);
+            
             messageId === conversation.lastMessage._id.toString() && (conversation.lastMessage = conversation.messages[conversation.messages.length - 1]);
             
             await Promise.all([message.deleteOne(), conversation.save()]);

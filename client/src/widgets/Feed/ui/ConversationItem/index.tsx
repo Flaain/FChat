@@ -9,29 +9,30 @@ import { NavLink } from 'react-router-dom';
 const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
     const { state: { userId } } = useSession();
 
-    const recipient = conversation.participants;
+    const recipient = conversation.participants[0];
     const lastMessageDescription = conversation.lastMessage && `${conversation.lastMessage.sender._id === userId ? 'You: ' : ''}`;
 
     return (
         <li>
             <NavLink
-                to={`conversation/${recipient[0]._id}`}
+                to={`conversation/${recipient._id}`}
                 className={({ isActive }) =>
                     cn(
-                        'flex items-center gap-5 p-2 rounded-lg dark:hover:bg-primary-dark-50 transition-colors duration-200 ease-in-out',
-                        isActive && 'bg-primary-dark-50'
+                        'flex items-center gap-5 p-2 rounded-lg transition-colors duration-200 ease-in-out',
+                        isActive && 'dark:bg-primary-dark-50 bg-primary-gray/10',
+                        !isActive && 'dark:hover:bg-primary-dark-50/30 hover:bg-primary-gray/5'
                     )
                 }
             >
-                <AvatarByName name={recipient[0].name} size='lg' />
+                <AvatarByName name={recipient.name} size='lg' />
                 <div className='flex flex-col items-start w-full'>
                     <Typography
                         as='h2'
                         weight='medium'
-                        className={cn(recipient[0].isVerified && 'flex items-center')}
+                        className={cn(recipient.isVerified && 'flex items-center')}
                     >
-                        {recipient[0].name}
-                        {recipient[0].isVerified && (
+                        {recipient.name}
+                        {recipient.isVerified && (
                             <Typography className='ml-2'>
                                 <Verified className='w-5 h-5' />
                             </Typography>

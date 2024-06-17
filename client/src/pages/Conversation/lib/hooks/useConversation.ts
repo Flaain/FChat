@@ -18,38 +18,29 @@ export const useConversation = () => {
     const navigate = useNavigate();
 
     React.useEffect(() => {
-        const controller = new AbortController();
-
         (async () => {
             try {
                 setIsLoading(true);
 
                 const { data } = await api.conversation.get({
                     token: accessToken!,
-                    signal: controller.signal,
-                    body: { conversationId: id! }
+                    body: { recipientId: id! }
                 });
 
                 scrollTriggeredFromRef.current = 'init';
 
                 setConversation(data);
             } catch (error) {
-                if (error instanceof Error && error.name !== 'AbortError') {
-                    console.error(error);
-                    toast.error('Cannot get conversation', {
-                        position: 'top-center',
-                        description: error.message
-                    });
-                    navigate('/');
-                }
+                console.error(error);
+                error instanceof Error && toast.error('Cannot get conversation', {
+                    position: 'top-center',
+                    description: error.message
+                });
+                navigate('/');
             } finally {
                 setIsLoading(false);
             }
         })();
-
-        return () => {
-            controller.abort();
-        };
     }, [accessToken, id, navigate]);
 
     return {

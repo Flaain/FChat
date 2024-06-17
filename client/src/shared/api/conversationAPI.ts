@@ -21,20 +21,19 @@ export class ConversationAPI extends API {
         token,
         body,
         ...rest
-    }: WithRequired<APIMethodParams<{ conversationId: string; params?: { cursor?: string } }>, 'token' | 'body'>) => {
-        const url = new URL(this._baseUrl + `/conversation/${body.conversationId}`);
+    }: WithRequired<APIMethodParams<{ recipientId: string; params?: { cursor?: string } }>, 'token' | 'body'>) => {
+        const url = new URL(this._baseUrl + `/conversation/${body.recipientId}`);
 
-        body.params &&
-            Object.entries(body.params).forEach(([key, value]) => {
-                url.searchParams.append(key, value);
-            });
+        body.params && Object.entries(body.params).forEach(([key, value]) => {
+            url.searchParams.append(key, value);
+        });
 
         const response = await fetch(url, {
             headers: { ...this._headers, Authorization: `Bearer ${token}` },
             ...rest
         });
 
-        return this._checkResponse<{ conversation: Conversation; nextCursor: string }>(response);
+        return this._checkResponse<{ conversation: Pick<Conversation, "_id" | "recipient" | "messages">; nextCursor: string }>(response);
     };
 
     getAll = async ({

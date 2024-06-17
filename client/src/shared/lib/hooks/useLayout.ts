@@ -11,7 +11,7 @@ import { FeedTypes } from '@/shared/model/types';
 export const useLayout = () => {
     const { setProfile } = useProfile();
     const { state: { accessToken }, dispatch } = useSession();
-    const { onScrollFeedLoading, handleFetchFeed, globalResults, localResults, setGlobalResults, setLocalResults } = useFeed();
+    const { onScrollFeedLoading, globalResults, localResults, setGlobalResults, setLocalResults } = useFeed();
 
     const [searchValue, setSearchValue] = React.useState('');
     const [searchLoading, setSearchLoading] = React.useState(false);

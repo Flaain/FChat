@@ -17,7 +17,7 @@ export abstract class API {
         const data = await response.json();
         const headers = Object.fromEntries([...response.headers.entries()]);
 
-        if (!response.ok) throw new ApiError({ ...data, message: data.message ?? "Something went wrong" });
+        if (!response.ok) throw new ApiError({ message: "Something went wrong", error: data.errors || data.error, ...data });
 
         return {
             data,

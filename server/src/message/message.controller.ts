@@ -16,12 +16,10 @@ export class MessageController {
 
     @Post('send/:recipientId')
     @UseGuards(JwtGuard)
-    async send(
-        @Body() dto: MessageSendDTO,
-        @Req() req: RequestWithUser,
-        @Param('recipientId') recipientId: string,
-    ) {
-        return this.messageService.send({ ...dto, recipientId, initiatorId: req.user._id });
+    async send(@Body() dto: MessageSendDTO, @Req() req: RequestWithUser, @Param('recipientId') recipientId: string) {
+        const message = await this.messageService.send({ ...dto, recipientId, initiatorId: req.user._id });
+        
+        this.eventEmitter.emit("message.created", message);
     }
 
     @Patch('edit/:messageId')

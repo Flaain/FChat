@@ -111,39 +111,44 @@ export const useSendMessage = () => {
 
         if (!trimmedValue.length) return;
 
-        if (!conversation?.conversation?._id) {
-            const { data } = await api.conversation.create({
-                body: { recipientId: conversation?.conversation.recipient._id },
-                token: accessToken!
+        try {
+            if (!conversation?.conversation?._id) {
+                const { data } = await api.conversation.create({
+                    body: { recipientId: conversation?.conversation.recipient._id },
+                    token: accessToken!
+                });
+    
+                const feedConversation: ConversationFeed = {
+                    _id: data._id,
+                    lastMessageSentAt: data.lastMessageSentAt,
+                    participants: [conversation?.conversation.recipient],
+                    type: FeedTypes.CONVERSATION
+                };
+    
+                setConversation((prevState) => ({ ...prevState, conversation: { ...prevState.conversation, ...data } }));
+                setLocalResults((prevState) => [feedConversation, ...prevState]);
+            }
+    
+            const { data } = await api.message.send({
+                token: accessToken!,
+                body: { message: trimmedValue, recipientId: conversation?.conversation.recipient._id }
             });
-
-            const feedConversation: ConversationFeed = {
-                _id: data._id,
-                lastMessageSentAt: data.lastMessageSentAt,
-                participants: [conversation?.conversation.recipient],
-                type: FeedTypes.CONVERSATION
-            };
-
-            setConversation((prevState) => ({ ...prevState, conversation: { ...prevState.conversation, ...data } }));
-            setLocalResults((prevState) => [feedConversation, ...prevState]);
+    
+            dispatch({ type: ContainerConversationTypes.SET_VALUE, payload: { value: '' } });
+    
+            setConversation((prev) => ({
+                ...prev,
+                conversation: { ...prev.conversation, messages: [...prev.conversation.messages, data] }
+            }));
+            setLocalResults((prevState) =>
+                prevState
+                    .map((item) => item._id === data.conversationId ? ({ ...item, lastMessage: data, lastMessageSentAt: data.createdAt } as ConversationFeed) : item)
+                    .sort((a, b) => new Date(b.lastMessageSentAt).getTime() - new Date(a.lastMessageSentAt).getTime())
+            );
+        } catch (error) {
+            console.error(error);
+            toast.error('Cannot send message', { position: 'top-center' });
         }
-
-        const { data } = await api.message.send({
-            token: accessToken!,
-            body: { message: trimmedValue, recipientId: conversation?.conversation.recipient._id }
-        });
-
-        dispatch({ type: ContainerConversationTypes.SET_VALUE, payload: { value: '' } });
-
-        setConversation((prev) => ({
-            ...prev,
-            conversation: { ...prev.conversation, messages: [...prev.conversation.messages, data] }
-        }));
-        setLocalResults((prevState) =>
-            prevState
-                .map((item) => item._id === data.conversationId ? ({ ...item, lastMessage: data } as ConversationFeed) : item)
-                .sort((a, b) => new Date(a.lastMessageSentAt).getTime() - new Date(b.lastMessageSentAt).getTime())
-        );
     };
 
     const handleSubmitMessage = async (event: React.FormEvent<HTMLFormElement>) => {

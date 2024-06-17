@@ -2,15 +2,13 @@ import React from 'react';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { Feed, FeedTypes } from '@/shared/model/types';
+import { ConversationFeed, FeedTypes, GroupFeed, UserFeed } from '@/shared/model/types';
 
 export const useFeed = () => {
-    const {
-        state: { accessToken }
-    } = useSession();
+    const { state: { accessToken } } = useSession();
 
-    const [globalResults, setGlobalResults] = React.useState<Feed>([]);
-    const [localResults, setLocalResults] = React.useState<Feed>([]);
+    const [globalResults, setGlobalResults] = React.useState<Array<UserFeed | GroupFeed>>([]);
+    const [localResults, setLocalResults] = React.useState<Array<ConversationFeed | GroupFeed>>([]);
     const [onScrollFeedLoading, setOnScrollFeedLoading] = React.useState(false);
 
     const cursors = React.useRef<Record<string, string | null> | null>(null);
@@ -20,9 +18,7 @@ export const useFeed = () => {
     const handleFetchFeed = React.useCallback(async () => {
         try {
             const [
-                {
-                    data: { conversations, nextCursor: nextConversationCursor }
-                }
+                { data: { conversations, nextCursor: nextConversationCursor } }
                 // { data: { groups, nextCursor: nextGroupCursor } }
             ] = await Promise.all([
                 api.conversation.getAll({ token: accessToken! })
@@ -45,9 +41,7 @@ export const useFeed = () => {
         }
     }, []);
 
-    React.useEffect(() => {
-        handleFetchFeed();
-    }, []);
+    React.useEffect(() => { handleFetchFeed() }, []);
 
     return {
         globalResults,

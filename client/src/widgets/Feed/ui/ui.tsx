@@ -29,10 +29,7 @@ const Feed = () => {
 
     const globalFilters: Record<Exclude<FeedTypes, 'conversation'>, (item: FeedItem) => boolean> = {
         user: (item: FeedItem) => localResults.some((localItem) => {
-            return (
-                localItem.type === FeedTypes.CONVERSATION &&
-                localItem.participants[0]._id === (item as UserFeed)._id
-            );
+            return localItem.type === FeedTypes.CONVERSATION && localItem.participants[0]._id === (item as UserFeed)._id;
         }),
         group: (item: FeedItem) => localResults.some((localItem) => localItem._id === (item as GroupFeed)._id)
     };
