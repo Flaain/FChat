@@ -1,10 +1,9 @@
 import React from 'react';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { api } from '@/shared/api';
-import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ConversationWithMeta } from '@/widgets/ConversationContainer/model/types';
-import { ScrollTriggeredFromTypes } from '../../model/types';
+import { useNavigate, useParams } from 'react-router-dom';
+import { api } from '@/shared/api';
+import { useSession } from '@/entities/session/lib/hooks/useSession';
+import { ConversationWithMeta, ScrollTriggeredFromTypes } from '../../model/types';
 
 export const useConversation = () => {
     const { id } = useParams();

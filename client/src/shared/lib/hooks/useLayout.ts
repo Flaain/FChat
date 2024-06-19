@@ -1,12 +1,12 @@
 import React from 'react';
+import { api } from '@/shared/api';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useProfile } from './useProfile';
 import { SessionTypes } from '@/entities/session/model/types';
 import { localStorageKeys } from '@/shared/constants';
 import { useFeed } from './useFeed';
 import { debounce } from '../utils/debounce';
-import { api } from '@/shared/api';
-import { FeedTypes } from '@/shared/model/types';
+import { ConversationDrafts, FeedTypes } from '@/shared/model/types';
 
 export const useLayout = () => {
     const { setProfile } = useProfile();
@@ -14,6 +14,7 @@ export const useLayout = () => {
     const { onScrollFeedLoading, globalResults, localResults, setGlobalResults, setLocalResults } = useFeed();
 
     const [searchValue, setSearchValue] = React.useState('');
+    const [conversationDrafts, setConversationDrafts] = React.useState<Map<string, ConversationDrafts>>(new Map())
     const [searchLoading, setSearchLoading] = React.useState(false);
     const [openSheet, setOpenSheet] = React.useState(false);
 
@@ -56,6 +57,7 @@ export const useLayout = () => {
     return {
         globalResults,
         localResults,
+        conversationDrafts,
         onScrollFeedLoading,
         searchValue,
         searchLoading,
@@ -64,6 +66,7 @@ export const useLayout = () => {
         handleSearch,
         handleLogout,
         setOpenSheet,
-        setLocalResults
+        setLocalResults,
+        setConversationDrafts
     };
 };

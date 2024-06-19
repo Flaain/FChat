@@ -7,15 +7,12 @@ import { Paperclip, SendHorizonal, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSendMessage } from '../lib/hooks/useSendMessage';
 import { useEmojiPicker } from '../lib/hooks/useEmojiPicker';
-import { useConversationContainer } from '@/widgets/ConversationContainer/lib/hooks/useConversationContainer';
 import { EmojiPicker } from '@/shared/model/view';
 
 const SendMessage = () => {
     const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
-    
-    const { handleSubmitMessage, onKeyDown, handleCloseEdit, handleChange, isLoading } = useSendMessage();
+    const { handleSubmitMessage, onKeyDown, handleCloseEdit, handleChange, isLoading, value, selectedMessage, formState } = useSendMessage();
     const { isOpen, onClickOutside, onEmojiSelect, openEmojiPicker } = useEmojiPicker(textareaRef);
-    const { state: { value, selectedMessage, formState } } = useConversationContainer();
 
     const trimmedValue = value.trim().length;
 

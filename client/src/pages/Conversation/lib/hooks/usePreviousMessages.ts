@@ -1,9 +1,10 @@
-import React from "react";
 import { useSession } from "@/entities/session/lib/hooks/useSession";
-import { useConversationContext } from "@/pages/Conversation/lib/hooks/useConversationContext";
+import { useConversationContext } from "./useConversationContext";
+import React from "react";
 import { api } from "@/shared/api";
 
-export const useScrollContainer = () => {
+
+export const usePreviousMessages = () => {
     const { data: conversation, scrollTriggeredFromRef, setConversation } = useConversationContext();
     const { state: { accessToken } } = useSession();
 

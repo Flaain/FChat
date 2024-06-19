@@ -10,6 +10,7 @@ export enum FeedTypes {
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
+export type MessageFormState = "send" | "edit";
 
 export interface BaseAPI {
     baseUrl?: string;
@@ -216,3 +217,9 @@ export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' 
 };
 
 export type UserFeed = SearchUser & { type: FeedTypes.USER };
+
+export interface ConversationDrafts {
+    value: string;
+    state: MessageFormState;
+    selectedMessage: null | IMessage;
+}

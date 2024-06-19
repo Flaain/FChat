@@ -6,6 +6,8 @@ export const LayoutContext = React.createContext<LayoutContextProps>({
     searchLoading: false,
     globalResults: [],
     localResults: [],
+    conversationDrafts: new Map(),
+    setConversationDrafts: () => {},
     setOpenSheet: () => {},
     setLocalResults: () => {},
     searchValue: '',

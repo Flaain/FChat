@@ -4,20 +4,15 @@ import { toast } from 'sonner';
 import { api } from '@/shared/api';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
-import { useConversationContainer } from '@/widgets/ConversationContainer/lib/hooks/useConversationContainer';
-import { ContainerConversationTypes, MessageFormState } from '@/widgets/ConversationContainer/model/types';
 import { useModal } from '@/shared/lib/hooks/useModal';
-import { useParams } from 'react-router-dom';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { ConversationFeed, FeedTypes } from '@/shared/model/types';
+import { ConversationFeed, FeedTypes, MessageFormState } from '@/shared/model/types';
 
 export const useSendMessage = () => {
-    const { id: conversationId } = useParams() as { id: string };
     const { state: { accessToken } } = useSession();
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
     const { setConversation, scrollTriggeredFromRef, data: conversation } = useConversationContext();
-    const { state: { formState, value, selectedMessage }, dispatch } = useConversationContainer();
-    const { setLocalResults } = useLayoutContext();
+    const { conversationDrafts, setLocalResults, setConversationDrafts } = useLayoutContext();
 
     const [isLoading, setIsLoading] = React.useState(false);
 
@@ -29,14 +24,24 @@ export const useSendMessage = () => {
     }, []);
 
     const handleChange = React.useCallback(({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>) => {
-        dispatch({ type: ContainerConversationTypes.SET_VALUE, payload: { value } });
+        setConversationDrafts((prevState) => {
+            const newState = new Map([...prevState]);
+            const currentState = newState.get(conversation.conversation._id) ?? { value: '', state: 'send', selectedMessage: null };
+
+            newState.set(conversation.conversation._id, { ...currentState, value });
+
+            return newState;
+        })
     }, []);
 
     const handleCloseEdit = React.useCallback(() => {
-        dispatch({
-            type: ContainerConversationTypes.SET_CLOSE,
-            payload: { value: '', selectedMessage: null, formState: 'send' }
-        });
+        setConversationDrafts((prevState) => {
+            const newState = new Map([...prevState]);
+
+            newState.set(conversation.conversation._id, { value: '', state: 'send', selectedMessage: null });
+
+            return newState;
+        })
     }, []);
 
     const handleMessageDelete = React.useCallback(async () => {
@@ -44,7 +49,10 @@ export const useSendMessage = () => {
             setIsAsyncActionLoading(true);
 
             await api.message.delete({
-                body: { conversationId, messageId: selectedMessage!._id },
+                body: { 
+                    conversationId: conversation.conversation._id, 
+                    messageId: conversationDrafts.get(conversation.conversation._id)!.selectedMessage!._id 
+                },
                 token: accessToken!
             });
 
@@ -52,7 +60,7 @@ export const useSendMessage = () => {
                 ...prev,
                 conversation: {
                     ...prev.conversation,
-                    messages: prev.conversation.messages.filter((message) => message._id !== selectedMessage!._id)
+                    messages: prev.conversation.messages.filter((message) => message._id !== conversationDrafts.get(conversation.conversation._id)!.selectedMessage!._id)
                 }
             }));
 
@@ -64,14 +72,22 @@ export const useSendMessage = () => {
             handleCloseEdit();
             setIsAsyncActionLoading(false);
         }
-    }, [conversationId, selectedMessage, accessToken, setConversation, handleCloseEdit]);
+    }, [conversationDrafts, accessToken, setConversation, handleCloseEdit]);
 
     const onCloseDeleteConfirmation = () => {
-        dispatch({ type: ContainerConversationTypes.SET_VALUE, payload: { value: selectedMessage!.text } });
+        setConversationDrafts((prevState) => {
+            const newState = new Map([...prevState]);
+            const current = newState.get(conversation.conversation._id)!;
+
+            newState.set(conversation.conversation._id, { ...current, value: current.selectedMessage!.text });
+
+            return newState;
+        })
         closeModal();
     };
 
     const onSendEditedMessage = async () => {
+        const { selectedMessage, value } = conversationDrafts.get(conversation.conversation._id)!;
         const trimmedValue = value.trim();
 
         if (!trimmedValue.length)
@@ -88,7 +104,7 @@ export const useSendMessage = () => {
                 size: 'fit'
             });
 
-        if (trimmedValue === selectedMessage?.text) return handleCloseEdit();
+        if (trimmedValue === selectedMessage!.text) return handleCloseEdit();
 
         const { data } = await api.message.edit({
             body: { messageId: selectedMessage!._id, message: trimmedValue },
@@ -107,6 +123,7 @@ export const useSendMessage = () => {
     };
 
     const onSendMessage = async () => {
+        const { value } = conversationDrafts.get(conversation.conversation._id)!;
         const trimmedValue = value.trim();
 
         if (!trimmedValue.length) return;
@@ -134,12 +151,15 @@ export const useSendMessage = () => {
                 body: { message: trimmedValue, recipientId: conversation?.conversation.recipient._id }
             });
     
-            dispatch({ type: ContainerConversationTypes.SET_VALUE, payload: { value: '' } });
+            setConversationDrafts((prevState) => {
+                const newState = new Map([...prevState]);
     
-            setConversation((prev) => ({
-                ...prev,
-                conversation: { ...prev.conversation, messages: [...prev.conversation.messages, data] }
-            }));
+                newState.set(conversation.conversation._id, { value: '', selectedMessage: null, state: 'send' });
+    
+                return newState;
+            });
+    
+            setConversation((prev) => ({ ...prev, conversation: { ...prev.conversation, messages: [...prev.conversation.messages, data] } }));
             setLocalResults((prevState) =>
                 prevState
                     .map((item) => item._id === data.conversationId ? ({ ...item, lastMessage: data, lastMessageSentAt: data.createdAt } as ConversationFeed) : item)
@@ -166,7 +186,7 @@ export const useSendMessage = () => {
                 edit: onSendEditedMessage
             };
 
-            await actions[formState]();
+            await actions[conversationDrafts.get(conversation.conversation._id)!.state]();
         } catch (error) {
             console.error(error);
             error instanceof Error && toast.error(error.message, { position: 'top-center' });
@@ -176,6 +196,9 @@ export const useSendMessage = () => {
     };
 
     return {
+        value: conversationDrafts.get(conversation?.conversation._id)?.value ?? '',
+        selectedMessage: conversationDrafts.get(conversation?.conversation._id)?.selectedMessage ?? null,
+        formState: conversationDrafts.get(conversation?.conversation._id)?.state ?? 'send',
         isLoading,
         onKeyDown,
         handleCloseEdit,

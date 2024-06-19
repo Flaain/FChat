@@ -4,18 +4,15 @@ import { api } from '@/shared/api';
 import { FeedTypes, IMessage } from '@/shared/model/types';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
-import { useConversationContainer } from '@/widgets/ConversationContainer/lib/hooks/useConversationContainer';
-import { ContainerConversationTypes } from '@/widgets/ConversationContainer/model/types';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 
 export const useMessage = (message: IMessage) => {
-    const { dispatch } = useConversationContainer();
+    const { _id, text } = message;
     const { data, setConversation } = useConversationContext();
     const { state: { accessToken } } = useSession();
-    const { setLocalResults } = useLayoutContext();
+    const { setLocalResults, setConversationDrafts } = useLayoutContext();
     const { setIsAsyncActionLoading, closeModal } = useModal()
-    const { _id, text } = message;
 
     const handleCopyToClipboard = React.useCallback(() => {
         navigator.clipboard.writeText(text);
@@ -55,11 +52,14 @@ export const useMessage = (message: IMessage) => {
     }, [data, _id]);
 
     const handleMessageEdit = React.useCallback(async () => {
-        dispatch({
-            type: ContainerConversationTypes.SET_SELECTED_MESSAGE,
-            payload: { message, formState: 'edit' }
-        });
-    }, [dispatch, message]);
+        setConversationDrafts((prevState) => {
+            const newState = new Map([...prevState]);
+
+            newState.set(data?.conversation._id, { value: text, state: 'edit', selectedMessage: message });
+
+            return newState;
+        })
+    }, [message]);
 
     return {
         handleCopyToClipboard,

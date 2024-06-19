@@ -1,5 +1,5 @@
-import { ConversationContextProps } from "@/widgets/ConversationContainer/model/types";
 import React from "react";
+import { ConversationContextProps } from "./types";
 
 export const ConversationContext = React.createContext<ConversationContextProps>({
     data: undefined!,
