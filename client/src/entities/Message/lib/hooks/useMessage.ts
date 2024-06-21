@@ -9,9 +9,9 @@ import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 
 export const useMessage = (message: IMessage) => {
     const { _id, text } = message;
-    const { data, setConversation } = useConversationContext();
+    const { data, setConversation, setValue } = useConversationContext();
     const { state: { accessToken } } = useSession();
-    const { setLocalResults, setConversationDrafts } = useLayoutContext();
+    const { setLocalResults, setDrafts } = useLayoutContext();
     const { setIsAsyncActionLoading, closeModal } = useModal()
 
     const handleCopyToClipboard = React.useCallback(() => {
@@ -52,13 +52,15 @@ export const useMessage = (message: IMessage) => {
     }, [data, _id]);
 
     const handleMessageEdit = React.useCallback(async () => {
-        setConversationDrafts((prevState) => {
+        setDrafts((prevState) => {
             const newState = new Map([...prevState]);
 
-            newState.set(data?.conversation._id, { value: text, state: 'edit', selectedMessage: message });
+            newState.set(data?.conversation.recipient._id, { value: text, state: 'edit', selectedMessage: message });
 
             return newState;
         })
+
+        setValue(text);
     }, [message]);
 
     return {

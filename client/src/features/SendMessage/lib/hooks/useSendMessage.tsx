@@ -8,13 +8,23 @@ import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { ConversationFeed, FeedTypes, MessageFormState } from '@/shared/model/types';
 
-export const useSendMessage = () => {
+export const useSendMessage = ({ type, queryId }: { type: 'conversation' | 'group', queryId: string }) => {
     const { state: { accessToken } } = useSession();
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
-    const { setConversation, scrollTriggeredFromRef, data: conversation } = useConversationContext();
-    const { conversationDrafts, setLocalResults, setConversationDrafts } = useLayoutContext();
+    const { setConversation, value, setValue, scrollTriggeredFromRef, data: conversation } = useConversationContext();
+    const { drafts, setLocalResults, setDrafts } = useLayoutContext();
 
     const [isLoading, setIsLoading] = React.useState(false);
+
+    const currentDraft = drafts.get(queryId);
+    const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+    
+    React.useEffect(() => {
+        if (!textareaRef.current) return;
+
+        textareaRef.current.style.height = 'inherit';
+        textareaRef.current.style.height = `${Math.max(textareaRef.current.scrollHeight, 50)}px`;
+    }, [value]);
 
     const onKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey && 'form' in event.target) {
@@ -24,24 +34,21 @@ export const useSendMessage = () => {
     }, []);
 
     const handleChange = React.useCallback(({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setConversationDrafts((prevState) => {
-            const newState = new Map([...prevState]);
-            const currentState = newState.get(conversation?.conversation.recipient._id) ?? { value: '', state: 'send', selectedMessage: null };
+        const trimmedValue = value.trim();
 
-            newState.set(conversation?.conversation.recipient._id, { ...currentState, value });
-
-            return newState;
-        })
+        setValue(!trimmedValue.length ? '' : value);
     }, []);
 
     const handleCloseEdit = React.useCallback(() => {
-        setConversationDrafts((prevState) => {
+        setDrafts((prevState) => {
             const newState = new Map([...prevState]);
 
-            newState.set(conversation?.conversation.recipient._id, { value: '', state: 'send', selectedMessage: null });
+            newState.delete(queryId)
 
             return newState;
         })
+
+        setValue('');
     }, []);
 
     const handleMessageDelete = React.useCallback(async () => {
@@ -50,8 +57,8 @@ export const useSendMessage = () => {
 
             await api.message.delete({
                 body: { 
-                    conversationId: conversation?.conversation._id, 
-                    messageId: conversationDrafts.get(conversation?.conversation.recipient._id)!.selectedMessage!._id 
+                    conversationId: queryId, 
+                    messageId: drafts.get(queryId)!.selectedMessage!._id 
                 },
                 token: accessToken!
             });
@@ -60,7 +67,7 @@ export const useSendMessage = () => {
                 ...prev,
                 conversation: {
                     ...prev.conversation,
-                    messages: prev.conversation.messages.filter((message) => message._id !== conversationDrafts.get(conversation?.conversation.recipient._id)!.selectedMessage!._id)
+                    messages: prev.conversation.messages.filter((message) => message._id !== currentDraft?.selectedMessage?._id)
                 }
             }));
 
@@ -72,22 +79,34 @@ export const useSendMessage = () => {
             handleCloseEdit();
             setIsAsyncActionLoading(false);
         }
-    }, [conversationDrafts, accessToken, setConversation, handleCloseEdit]);
+    }, [drafts, accessToken, setConversation, handleCloseEdit]);
 
     const onCloseDeleteConfirmation = () => {
-        setConversationDrafts((prevState) => {
-            const newState = new Map([...prevState]);
-            const current = newState.get(conversation?.conversation.recipient._id)!;
-
-            newState.set(conversation?.conversation.recipient._id, { ...current, value: current.selectedMessage!.text });
-
-            return newState;
-        })
+        setValue(currentDraft!.selectedMessage!.text);
         closeModal();
     };
 
+    const onBlur = ({ target: { value } }: React.FocusEvent<HTMLTextAreaElement, Element>) => {
+        const trimmedValue = value.trim();
+        
+        if (!trimmedValue.length && !currentDraft) return;
+        
+        setDrafts((prevState) => {
+            const newState = new Map([...prevState]);
+            const isEmpty = !trimmedValue.length && currentDraft?.state === "send"
+            
+            isEmpty ? newState.delete(queryId) : newState.set(queryId, currentDraft ? { ...currentDraft, value: trimmedValue } : {
+                state: 'send',
+                selectedMessage: null,
+                value: trimmedValue,
+            });
+
+            return newState;
+        })
+    }
+
     const onSendEditedMessage = async () => {
-        const { selectedMessage, value } = conversationDrafts.get(conversation?.conversation.recipient._id)!;
+        const { selectedMessage } = drafts.get(queryId)!;
         const trimmedValue = value.trim();
 
         if (!trimmedValue.length)
@@ -104,7 +123,7 @@ export const useSendMessage = () => {
                 size: 'fit'
             });
 
-        if (trimmedValue === selectedMessage!.text) return handleCloseEdit();
+        if (trimmedValue === selectedMessage!.text) return;
 
         const { data } = await api.message.edit({
             body: { messageId: selectedMessage!._id, message: trimmedValue },
@@ -118,12 +137,10 @@ export const useSendMessage = () => {
                 messages: prevState.conversation.messages.map((message) => message._id === selectedMessage!._id ? data : message)
             }
         }));
-
-        handleCloseEdit();
     };
 
     const onSendMessage = async () => {
-        const { value } = conversationDrafts.get(conversation?.conversation.recipient._id)!;
+        const { value } = drafts.get(queryId)!;
         const trimmedValue = value.trim();
 
         if (!trimmedValue.length) return;
@@ -131,7 +148,7 @@ export const useSendMessage = () => {
         try {
             if (!conversation?.conversation?._id) {
                 const { data } = await api.conversation.create({
-                    body: { recipientId: conversation?.conversation.recipient._id },
+                    body: { recipientId: queryId },
                     token: accessToken!
                 });
     
@@ -148,17 +165,9 @@ export const useSendMessage = () => {
     
             const { data } = await api.message.send({
                 token: accessToken!,
-                body: { message: trimmedValue, recipientId: conversation?.conversation.recipient._id }
+                body: { message: trimmedValue, recipientId: queryId }
             });
-    
-            setConversationDrafts((prevState) => {
-                const newState = new Map([...prevState]);
-    
-                newState.set(conversation?.conversation.recipient._id, { value: '', selectedMessage: null, state: 'send' });
-    
-                return newState;
-            });
-    
+
             setConversation((prev) => ({ ...prev, conversation: { ...prev.conversation, messages: [...prev.conversation.messages, data] } }));
             setLocalResults((prevState) =>
                 prevState
@@ -186,21 +195,30 @@ export const useSendMessage = () => {
                 edit: onSendEditedMessage
             };
 
-            await actions[conversationDrafts.get(conversation?.conversation.recipient._id)!.state]();
+            await actions[drafts.get(queryId)!.state]();
+        
+            setDrafts((prevState) => {
+                const newState = new Map([...prevState]);
+    
+                newState.delete(queryId);
+    
+                return newState;
+            });
+            setValue('');
         } catch (error) {
             console.error(error);
             error instanceof Error && toast.error(error.message, { position: 'top-center' });
         } finally {
             setIsLoading(false);
+            setTimeout(() => textareaRef.current?.focus(), 0); // kludge, .focus() doesn't work cuz of disabled textarea on loading
         }
     };
 
     return {
-        value: conversationDrafts.get(conversation?.conversation.recipient._id)?.value ?? '',
-        selectedMessage: conversationDrafts.get(conversation?.conversation.recipient._id)?.selectedMessage ?? null,
-        formState: conversationDrafts.get(conversation?.conversation.recipient._id)?.state ?? 'send',
         isLoading,
+        textareaRef,
         onKeyDown,
+        onBlur,
         handleCloseEdit,
         handleSubmitMessage,
         handleChange

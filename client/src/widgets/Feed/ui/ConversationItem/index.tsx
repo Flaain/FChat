@@ -5,12 +5,14 @@ import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { ConversationFeed } from '@/shared/model/types';
 import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 
 const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
     const { state: { userId } } = useSession();
+    const { drafts } = useLayoutContext();
 
     const recipient = conversation.participants[0];
-    const lastMessageDescription = conversation.lastMessage && `${conversation.lastMessage.sender._id === userId ? 'You: ' : ''}`;
+    const draft = drafts.get(recipient._id);
 
     return (
         <li>
@@ -26,11 +28,7 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
             >
                 <AvatarByName name={recipient.name} size='lg' />
                 <div className='flex flex-col items-start w-full'>
-                    <Typography
-                        as='h2'
-                        weight='medium'
-                        className={cn(recipient.isVerified && 'flex items-center')}
-                    >
+                    <Typography as='h2' weight='medium' className={cn(recipient.isVerified && 'flex items-center')}>
                         {recipient.name}
                         {recipient.isVerified && (
                             <Typography className='ml-2'>
@@ -38,19 +36,30 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                             </Typography>
                         )}
                     </Typography>
-                    {!!conversation.lastMessage && (
-                        <div className='flex items-center w-full gap-5'>
-                            <Typography as='p' variant='secondary' className='line-clamp-1'>
-                                {lastMessageDescription}
-                                {conversation.lastMessage.text}
+                    {draft?.state === 'send' ? (
+                        <Typography as='p' variant='secondary' className='line-clamp-1'>
+                            <Typography as='span' variant='error'>
+                                Draft:&nbsp;
                             </Typography>
-                            <Typography className='ml-auto' variant='secondary'>
-                                {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(navigator.language, {
-                                    hour: 'numeric',
-                                    minute: 'numeric'
-                                })}
-                            </Typography>
-                        </div>
+                            {draft.value}
+                        </Typography>
+                    ) : (
+                        !!conversation.lastMessage && (
+                            <div className='flex items-center w-full gap-5'>
+                                <Typography as='p' variant='secondary' className='line-clamp-1'>
+                                    {conversation.lastMessage.sender._id === userId ? `You: ${conversation.lastMessage.text}` : conversation.lastMessage.text}
+                                </Typography>
+                                <Typography className='ml-auto' variant='secondary'>
+                                    {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(
+                                        navigator.language,
+                                        {
+                                            hour: 'numeric',
+                                            minute: 'numeric'
+                                        }
+                                    )}
+                                </Typography>
+                            </div>
+                        )
                     )}
                 </div>
             </NavLink>

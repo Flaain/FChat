@@ -45,7 +45,7 @@ const Conversation = () => {
                     No messages yet
                 </Typography>
             )}
-            <SendMessage />
+            <SendMessage type='conversation' queryId={data?.conversation.recipient._id} />
         </div>
     );
 };

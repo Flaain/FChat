@@ -218,7 +218,7 @@ export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' 
 
 export type UserFeed = SearchUser & { type: FeedTypes.USER };
 
-export interface ConversationDrafts {
+export interface Drafts {
     value: string;
     state: MessageFormState;
     selectedMessage: null | IMessage;

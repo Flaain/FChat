@@ -6,7 +6,9 @@ import { SessionTypes } from '@/entities/session/model/types';
 import { localStorageKeys } from '@/shared/constants';
 import { useFeed } from './useFeed';
 import { debounce } from '../utils/debounce';
-import { ConversationDrafts, FeedTypes } from '@/shared/model/types';
+import { Drafts, FeedTypes } from '@/shared/model/types';
+
+const MIN_SEARCH_LENGTH = 3;
 
 export const useLayout = () => {
     const { setProfile } = useProfile();
@@ -14,7 +16,7 @@ export const useLayout = () => {
     const { onScrollFeedLoading, globalResults, localResults, setGlobalResults, setLocalResults } = useFeed();
 
     const [searchValue, setSearchValue] = React.useState('');
-    const [conversationDrafts, setConversationDrafts] = React.useState<Map<string, ConversationDrafts>>(new Map())
+    const [drafts, setDrafts] = React.useState<Map<string, Drafts>>(new Map())
     const [searchLoading, setSearchLoading] = React.useState(false);
     const [openSheet, setOpenSheet] = React.useState(false);
 
@@ -37,7 +39,7 @@ export const useLayout = () => {
 
         setSearchValue(!trimmedValue.length ? '' : value);
 
-        trimmedValue.length > 3 && handleSearchDelay(trimmedValue);
+        trimmedValue.length > MIN_SEARCH_LENGTH && handleSearchDelay(trimmedValue);
     }, []);
 
     const handleSearchDelay = React.useCallback(debounce(async (value: string) => {
@@ -57,7 +59,7 @@ export const useLayout = () => {
     return {
         globalResults,
         localResults,
-        conversationDrafts,
+        drafts,
         onScrollFeedLoading,
         searchValue,
         searchLoading,
@@ -67,6 +69,6 @@ export const useLayout = () => {
         handleLogout,
         setOpenSheet,
         setLocalResults,
-        setConversationDrafts
+        setDrafts
     };
 };
