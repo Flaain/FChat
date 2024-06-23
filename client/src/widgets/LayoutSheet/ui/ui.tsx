@@ -9,6 +9,7 @@ import { Button } from '@/shared/ui/Button';
 import { Archive, Moon, Settings, Users, Verified } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/shared/lib/utils/cn';
+import { ModalConfig } from '@/shared/lib/contexts/modal/types';
 
 const listIconStyle = 'dark:text-primary-white text-primary-dark-200 w-5 h-5';
 
@@ -17,14 +18,10 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
     const { openModal } = useModal();
     const { setTheme, theme } = useTheme();
 
-    const onCreateGroup = () => {
+    const onSheetAction = (modal: ModalConfig) => {
         setSheetOpen(false);
-        openModal({
-            title: 'Create group',
-            content: <CreateGroup />,
-            size: 'fitHeight'
-        });
-    };
+        openModal(modal);
+    }
 
     const sheetList: Array<{ title: string; icon: JSX.Element; action: () => void }> = [
         {
@@ -35,12 +32,12 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
         {
             title: 'New group',
             icon: <Users className={listIconStyle} />,
-            action: onCreateGroup
+            action: () => onSheetAction({ title: 'Create group', content: <CreateGroup />, size: 'fitHeight' })
         },
         {
             title: 'Settings',
             icon: <Settings className={listIconStyle} />,
-            action: () => toast.info('Settings')
+            action: () => onSheetAction({ title: 'Settings', content: <Settings />, size: 'fitHeight' })
         }
     ];
 

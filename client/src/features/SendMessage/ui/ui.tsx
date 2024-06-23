@@ -6,17 +6,26 @@ import { Button } from '@/shared/ui/Button';
 import { Paperclip, SendHorizonal, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSendMessage } from '../lib/hooks/useSendMessage';
-import { useEmojiPicker } from '../lib/hooks/useEmojiPicker';
 import { EmojiPicker } from '@/shared/model/view';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
+import { UseMessageParams } from '../model/types';
 
-const SendMessage = ({ type, queryId }: { type: 'conversation' | 'group', queryId: string }) => {
-    const { value } = useConversationContext();
+const SendMessage = ({ type, queryId }: UseMessageParams) => {
     const { drafts } = useLayoutContext();
-    const { handleSubmitMessage, onKeyDown, onBlur, handleCloseEdit, handleChange, isLoading, textareaRef } = useSendMessage({ type, queryId });
-    const { isOpen, onClickOutside, onEmojiSelect, openEmojiPicker } = useEmojiPicker(textareaRef);
-    
+    const {
+        handleSubmitMessage,
+        onKeyDown,
+        onBlur,
+        getDefaultState,
+        handleChange,
+        setIsEmojiPickerOpen,
+        onEmojiSelect,
+        isEmojiPickerOpen,
+        isLoading,
+        textareaRef,
+        value
+    } = useSendMessage({ type, queryId });
+
     const draft = drafts.get(queryId);
     const trimmedValue = value.trim().length;
 
@@ -24,7 +33,7 @@ const SendMessage = ({ type, queryId }: { type: 'conversation' | 'group', queryI
         edit: (
             <MessageTopBar
                 title='Edit message'
-                onClose={handleCloseEdit}
+                onClose={getDefaultState}
                 description={draft?.selectedMessage?.text}
                 preventClose={isLoading}
             />
@@ -65,14 +74,17 @@ const SendMessage = ({ type, queryId }: { type: 'conversation' | 'group', queryI
                         'translate-x-14': !trimmedValue,
                         'translate-x-0': trimmedValue || draft?.state === 'edit'
                     })}
-                    onClick={openEmojiPicker}
+                    onClick={() => setIsEmojiPickerOpen((prevState) => !prevState)}
                 >
                     <Smile className='w-6 h-6' />
                 </Button>
-                {isOpen && (
+                {isEmojiPickerOpen && (
                     <div className='absolute bottom-20 right-2'>
                         <React.Suspense fallback={<EmojiPickerFallback />}>
-                            <EmojiPicker onClickOutside={onClickOutside} onEmojiSelect={onEmojiSelect} />
+                            <EmojiPicker
+                                onClickOutside={() => setIsEmojiPickerOpen(false)}
+                                onEmojiSelect={onEmojiSelect}
+                            />
                         </React.Suspense>
                     </div>
                 )}
@@ -81,7 +93,8 @@ const SendMessage = ({ type, queryId }: { type: 'conversation' | 'group', queryI
                     disabled={(!trimmedValue && draft?.state === 'send') || isLoading}
                     className={cn(
                         'opacity-0 pointer-events-none invisible scale-50 transition-all duration-100 ease-in-out',
-                        (!!trimmedValue || draft?.state === 'edit') && 'opacity-100 visible scale-100 pointer-events-auto'
+                        (!!trimmedValue || draft?.state === 'edit') &&
+                            'opacity-100 visible scale-100 pointer-events-auto'
                     )}
                 >
                     <SendHorizonal className='w-6 h-6' />

@@ -5,3 +5,8 @@ export interface MessageTopBarProps {
     description?: string;
     closeIconSlot?: React.ReactNode;
 }
+
+export interface UseMessageParams {
+    type: 'conversation' | 'group';
+    queryId: string;
+}

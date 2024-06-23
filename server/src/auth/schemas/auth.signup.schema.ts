@@ -60,10 +60,7 @@ export const signupSchema = z
             .date({ required_error: 'Birth date is required' })
             .min(new Date('1900-01-01'), 'Invalid birth date')
             .max(new Date(), 'Birth date cannot be in the future')
-            .refine(
-                (date) => new Date().getTime() - date.getTime() >= 14 * 365 * 24 * 60 * 60 * 1000,
-                'You must be at least 14 years old',
-            ),
+            .refine((date) => new Date().getTime() - date.getTime() >= 14 * 365 * 24 * 60 * 60 * 1000, 'You must be at least 14 years old'),
     })
     .refine(({ name }) => !reservedUsernames.includes(name.toLowerCase()), {
         message: 'Sorry, this name is reserved',

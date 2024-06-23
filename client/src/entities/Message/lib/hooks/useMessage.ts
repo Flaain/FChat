@@ -9,7 +9,7 @@ import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 
 export const useMessage = (message: IMessage) => {
     const { _id, text } = message;
-    const { data, setConversation, setValue } = useConversationContext();
+    const { data, setConversation } = useConversationContext();
     const { state: { accessToken } } = useSession();
     const { setLocalResults, setDrafts } = useLayoutContext();
     const { setIsAsyncActionLoading, closeModal } = useModal()
@@ -59,8 +59,6 @@ export const useMessage = (message: IMessage) => {
 
             return newState;
         })
-
-        setValue(text);
     }, [message]);
 
     return {

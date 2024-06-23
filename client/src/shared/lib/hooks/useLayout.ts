@@ -16,7 +16,7 @@ export const useLayout = () => {
     const { onScrollFeedLoading, globalResults, localResults, setGlobalResults, setLocalResults } = useFeed();
 
     const [searchValue, setSearchValue] = React.useState('');
-    const [drafts, setDrafts] = React.useState<Map<string, Drafts>>(new Map())
+    const [drafts, setDrafts] = React.useState<Map<string, Drafts>>(new Map());
     const [searchLoading, setSearchLoading] = React.useState(false);
     const [openSheet, setOpenSheet] = React.useState(false);
 

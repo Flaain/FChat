@@ -221,5 +221,5 @@ export type UserFeed = SearchUser & { type: FeedTypes.USER };
 export interface Drafts {
     value: string;
     state: MessageFormState;
-    selectedMessage: null | IMessage;
+    selectedMessage?: IMessage;
 }
