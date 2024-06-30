@@ -1,7 +1,8 @@
-import { Document, FlattenMaps, SchemaTimestampsConfig, Types } from 'mongoose';
+import { Document, SchemaTimestampsConfig, Types } from 'mongoose';
 import { User } from '../schemas/user.schema';
 
 export interface IUser {
+    _id: Types.ObjectId;
     accessToken: string;
     password: string;
     expiersIn: string;
@@ -9,8 +10,7 @@ export interface IUser {
     email: string;
     birthDate: Date;
     isPrivate: boolean;
-    lastSeen: Date;
-    _id: Types.ObjectId;
+    lastSeenAt: Date;
 }
 
 export interface UserRegister extends Pick<IUser, 'email' | 'name' | 'birthDate'> {

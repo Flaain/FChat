@@ -21,7 +21,7 @@ export class MessageAPI extends API {
         body: { messageId, ...body },
         token,
         ...rest
-    }: WithRequired<APIMethodParams<{ message: string; messageId: string }>, 'body' | 'token'>) => {
+    }: WithRequired<APIMethodParams<{ message: string; messageId: string, recipientId: string }>, 'body' | 'token'>) => {
         const response = await fetch(this._baseUrl + `/message/edit/${messageId}`, {
             method: 'PATCH',
             headers: { ...this._headers, Authorization: `Bearer ${token}` },

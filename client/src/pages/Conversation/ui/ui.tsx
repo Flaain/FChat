@@ -2,11 +2,12 @@ import ConversationSkeleton from './Skeletons/ConversationSkeleton';
 import MessagesList from '@/widgets/MessagesList/ui/ui';
 import Typography from '@/shared/ui/Typography';
 import SendMessage from '@/features/SendMessage/ui/ui';
-import ConversationHeader from '../ui/ConversationHeader';
+import ChatHeader from '@/shared/ui/ChatHeader';
 import { useConversationContext } from '../lib/hooks/useConversationContext';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { usePreviousMessages } from '../lib/hooks/usePreviousMessages';
+import { FeedTypes } from '@/shared/model/types';
 
 const Conversation = () => {
     const { isLoading, data } = useConversationContext();
@@ -19,8 +20,13 @@ const Conversation = () => {
             ref={conversationContainerRef}
             className='flex flex-col flex-1 h-svh overflow-auto gap-5 items-center justify-start dark:bg-primary-dark-200 bg-primary-white'
         >
-            <ConversationHeader />
-            {data?.conversation.messages.length ? (
+            <ChatHeader
+                type={FeedTypes.CONVERSATION}
+                name={data.conversation.recipient.name}
+                isVerified={data.conversation.recipient.isVerified}
+                lastSeenAt={data.conversation.recipient.lastSeenAt}
+            />
+            {data.conversation.messages.length ? (
                 <>
                     {data.nextCursor && (
                         <Button
@@ -45,7 +51,7 @@ const Conversation = () => {
                     No messages yet
                 </Typography>
             )}
-            <SendMessage type='conversation' queryId={data?.conversation.recipient._id} />
+            <SendMessage type='conversation' queryId={data.conversation.recipient._id} />
         </div>
     );
 };

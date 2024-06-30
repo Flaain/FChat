@@ -1,11 +1,11 @@
 import Typography from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
 import { Loader2, Verified } from 'lucide-react';
-import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useSocket } from '@/shared/lib/hooks/useSocket';
+import { ChatHeaderProps, FeedTypes } from '../model/types';
+import { getRelativeTimeString } from '../lib/utils/getRelativeTimeString';
 
-const ConversationHeader = () => {
-    const { data } = useConversationContext();
+const ChatHeader = (props: ChatHeaderProps) => {
     const { isConnected } = useSocket();
 
     return (
@@ -16,10 +16,10 @@ const ConversationHeader = () => {
                     size='lg'
                     weight='medium'
                     variant='primary'
-                    className={cn(data?.conversation?.recipient.isVerified && 'flex items-center gap-2')}
+                    className={cn(props.isVerified && 'flex items-center gap-2')}
                 >
-                    {data?.conversation?.recipient.name}
-                    {data?.conversation?.recipient.isVerified && (
+                    {props.name}
+                    {props.isVerified && (
                         <Typography>
                             <Verified className='w-5 h-5' />
                         </Typography>
@@ -27,7 +27,9 @@ const ConversationHeader = () => {
                 </Typography>
                 {isConnected ? (
                     <Typography as='p' variant='secondary'>
-                        last seen yesterday at 10:00
+                        {props.type === FeedTypes.CONVERSATION
+                            ? `last seen ${getRelativeTimeString(new Date(props.lastSeenAt), 'en-US')}`
+                            : `${props.members} members`}
                     </Typography>
                 ) : (
                     <Typography size='sm' className='flex items-center gap-2'>
@@ -40,4 +42,4 @@ const ConversationHeader = () => {
     );
 };
 
-export default ConversationHeader;
+export default ChatHeader;

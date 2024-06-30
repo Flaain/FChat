@@ -78,7 +78,7 @@ export class ConversationService implements IConversationService {
         cursor?: string;
     }) => {
         try {
-            const recipient = await this.userService.findOneByPayload({ _id: recipientId }, { name: 1, email: 1, isVerified: 1 });
+            const recipient = await this.userService.findOneByPayload({ _id: recipientId }, { name: 1, email: 1, isVerified: 1, lastSeenAt: 1 });
 
             if (!recipient) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 

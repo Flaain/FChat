@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { HTMLAttributes } from 'react';
 import Typography from '@/shared/ui/Typography';
 import AvatarByName from '@/shared/ui/AvatarByName';
 import MessageContextMenu from './MessageContextMenu';
@@ -9,7 +9,7 @@ import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString'
 import { ContextMenu, ContextMenuTrigger } from '@/shared/ui/context-menu';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 
-const Message = React.forwardRef<HTMLLIElement, { message: IMessage }>(({ message }, ref) => {
+const Message = React.forwardRef<HTMLLIElement, HTMLAttributes<HTMLLIElement> & { message: IMessage }>(({ message, className, ...rest }, ref) => {
     const { createdAt, updatedAt, sender, text, hasBeenRead, hasBeenEdited } = message;
     const { state: { userId } } = useSession();
 
@@ -25,7 +25,7 @@ const Message = React.forwardRef<HTMLLIElement, { message: IMessage }>(({ messag
 
     return (
         <ContextMenu>
-            <li ref={ref} className={cn('flex', isMessageFromMe ? 'justify-end' : 'justify-start')}>
+            <li {...rest} ref={ref} className={cn('flex', isMessageFromMe ? 'justify-end' : 'justify-start', className)}>
                 <ContextMenuTrigger className='flex gap-5'>
                     {!isMessageFromMe && <AvatarByName name={sender.name} className='self-end' />}
                     <div className='flex flex-col'>

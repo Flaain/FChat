@@ -6,7 +6,7 @@ import { EMAIL_ALREADY_EXISTS, NAME_ALREADY_EXISTS } from './auth.constants';
 import { ConfigService } from '@nestjs/config';
 import { compare } from 'bcrypt';
 import { IUser, UserDocument } from 'src/user/types';
-import { INVALID_CREDENTIALS, SOMETHING_WENT_WRONG, UNAUTHORIZED } from 'src/utils/constants';
+import { INVALID_CREDENTIALS, UNAUTHORIZED } from 'src/utils/constants';
 import { Types } from 'mongoose';
 
 @Injectable()

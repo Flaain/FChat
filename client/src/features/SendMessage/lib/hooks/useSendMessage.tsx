@@ -6,15 +6,15 @@ import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { ConversationFeed, FeedTypes, MessageFormState } from '@/shared/model/types';
+import { MessageFormState } from '@/shared/model/types';
 import { UseMessageParams } from '../../model/types';
 import { Emoji } from '@emoji-mart/data';
 
 export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     const { state: { accessToken } } = useSession();
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
-    const { setConversation, scrollTriggeredFromRef, data: conversation } = useConversationContext();
-    const { drafts, setLocalResults, setDrafts } = useLayoutContext();
+    const { setConversation, scrollTriggeredFromRef } = useConversationContext();
+    const { drafts, setDrafts } = useLayoutContext();
 
     const [isLoading, setIsLoading] = React.useState(false);
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false);
@@ -116,15 +116,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     }, [queryId]);
     
     const onSendEditedConversationMessage = React.useCallback(async ({ messageId, message }: { messageId: string, message: string }) => {
-        const { data } = await api.message.edit({ body: { messageId, message }, token: accessToken! });
-
-        setConversation((prevState) => ({
-            ...prevState,
-            conversation: {
-                ...prevState.conversation,
-                messages: prevState.conversation.messages.map((message) => message._id === messageId ? data : message)
-            }
-        }));
+        await api.message.edit({ body: { messageId, message, recipientId: queryId }, token: accessToken! });
     }, [])
 
     const onSendEditedMessage = async () => {
@@ -154,27 +146,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     };
 
     const onSendConversationMessage = React.useCallback(async (message: string) => {
-        if (!conversation?.conversation?._id) {
-            const { data } = await api.conversation.create({
-                body: { recipientId: queryId },
-                token: accessToken!
-            });
-
-            setConversation((prevState) => ({ ...prevState, conversation: { ...prevState.conversation, ...data } }));
-            setLocalResults((prevState) => [{ _id: data._id, lastMessageSentAt: data.lastMessageSentAt, participants: [conversation?.conversation.recipient], type: FeedTypes.CONVERSATION }, ...prevState]);
-        }
-
-        const { data } = await api.message.send({ 
-            token: accessToken!, 
-            body: { message: message, recipientId: queryId } 
-        });
-
-        setConversation((prev) => ({ ...prev, conversation: { ...prev.conversation, messages: [...prev.conversation.messages, data] } }));
-        setLocalResults((prevState) =>
-            prevState
-                .map((item) => item._id === data.conversationId ? ({ ...item, lastMessage: data, lastMessageSentAt: data.createdAt } as ConversationFeed) : item)
-                .sort((a, b) => new Date(b.lastMessageSentAt).getTime() - new Date(a.lastMessageSentAt).getTime())
-        );
+        await api.message.send({ token: accessToken!, body: { message: message, recipientId: queryId } });
     }, [])
 
     const onSendGroupMessage = React.useCallback(async (message: string) => {
@@ -227,6 +199,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
         isLoading,
         textareaRef,
         value,
+        currentDraft,
         isEmojiPickerOpen,
         setIsEmojiPickerOpen,
         onKeyDown,

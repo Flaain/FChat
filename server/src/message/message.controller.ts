@@ -6,6 +6,7 @@ import { RequestWithUser, Routes } from 'src/utils/types';
 import { MessageDeleteDTO } from './dtos/message.delete.dto';
 import { MessageEditDTO } from './dtos/message.edit.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EVENT_EMITTER } from 'src/gateway/types';
 
 @Controller(Routes.MESSAGE)
 export class MessageController {
@@ -17,15 +18,17 @@ export class MessageController {
     @Post('send/:recipientId')
     @UseGuards(JwtGuard)
     async send(@Body() dto: MessageSendDTO, @Req() req: RequestWithUser, @Param('recipientId') recipientId: string) {
-        return this.messageService.send({ ...dto, recipientId, initiatorId: req.user._id });
+        const message = await this.messageService.send({ ...dto, recipientId, initiatorId: req.user._id });
         
-        // this.eventEmitter.emit("message.created", message);
+        return this.eventEmitter.emit(EVENT_EMITTER.CONVERSATION_SEND_MESSAGE, { message, recipientId, initiatorId: req.user._id.toString() });
     }
 
     @Patch('edit/:messageId')
     @UseGuards(JwtGuard)
-    edit(@Body() dto: MessageEditDTO, @Param('messageId') messageId: string, @Req() req: RequestWithUser) {
-        return this.messageService.edit({ ...dto, messageId, initiatorId: req.user._id });
+    async edit(@Body() dto: MessageEditDTO, @Param('messageId') messageId: string, @Req() req: RequestWithUser) {
+        const message = await this.messageService.edit({ ...dto, messageId, initiatorId: req.user._id });
+
+        return this.eventEmitter.emit(EVENT_EMITTER.CONVERSATION_EDIT_MESSAGE, { message, initiatorId: req.user._id.toString(), recipientId: dto.recipientId });
     }
 
     @Delete('delete/:messageId')

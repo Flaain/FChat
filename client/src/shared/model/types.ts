@@ -1,5 +1,5 @@
 import { ModalConfig } from '../lib/contexts/modal/types';
-import { Profile } from '../lib/contexts/profile/model/types';
+import { Profile, User } from '../lib/contexts/profile/model/types';
 import { FieldError } from 'react-hook-form';
 
 export enum FeedTypes {
@@ -10,7 +10,7 @@ export enum FeedTypes {
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
-export type MessageFormState = "send" | "edit";
+export type MessageFormState = 'send' | 'edit';
 
 export interface BaseAPI {
     baseUrl?: string;
@@ -34,9 +34,7 @@ export interface AuthResponse extends Profile {
     expiresIn: string | number;
 }
 
-export interface APIMethodParams<T = undefined>
-    extends Partial<Omit<BaseAPI, 'baseUrl'>>,
-        Omit<RequestInit, 'headers' | 'body'> {
+export interface APIMethodParams<T = undefined> extends Partial<Omit<BaseAPI, 'baseUrl'>>,  Omit<RequestInit, 'headers' | 'body'> {
     endpoint?: string;
     token?: string;
     body?: T;
@@ -52,7 +50,7 @@ export interface APIError<E> {
 
 export interface IMessage {
     _id: string;
-    sender: Participant;
+    sender: ConversationParticipant;
     hasBeenRead: boolean;
     hasBeenEdited: boolean;
     text: string;
@@ -61,21 +59,19 @@ export interface IMessage {
     sendingInProgress?: boolean;
 }
 
-export interface Participant {
+export interface GroupParticipant {
     _id: string;
     name: string;
     email: string;
-    lastSeen: string;
+    userId: string;
     isVerified?: boolean;
 }
 
-export interface GroupParticipant extends Participant {
-    joinedAt: string;
-}
+export interface ConversationParticipant extends Pick<User, '_id' | 'isVerified' | 'email' | 'name' | 'lastSeenAt'> {}
 
 export interface Conversation {
     _id: string;
-    recipient: Participant;
+    recipient: ConversationParticipant;
     messages: Array<IMessage>;
     lastMessage?: IMessage;
     lastMessageSentAt: string;
@@ -208,7 +204,7 @@ export interface SearchedUsersListProps extends React.HTMLAttributes<HTMLUListEl
 export type FeedItem = ConversationFeed | GroupFeed | UserFeed;
 
 export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'lastMessageSentAt'> & {
-    participants: Array<Participant>;
+    participants: Array<ConversationParticipant>;
     type: FeedTypes.CONVERSATION;
 };
 
@@ -223,3 +219,17 @@ export interface Drafts {
     state: MessageFormState;
     selectedMessage?: IMessage;
 }
+
+export type ChatHeaderProps =
+    | {
+          name: string;
+          isVerified?: boolean;
+          type: FeedTypes.CONVERSATION;
+          lastSeenAt: string;
+      }
+    | {
+          name: string;
+          isVerified?: boolean;
+          type: FeedTypes.GROUP;
+          members: number;
+      };

@@ -22,7 +22,7 @@ export class User implements UserRegister {
     isVerified?: boolean;
 
     @Prop({ type: Date, required: true, default: () => new Date() })
-    lastSeen: Date;
+    lastSeenAt: Date;
 
     @Prop({ type: String })
     status?: string;

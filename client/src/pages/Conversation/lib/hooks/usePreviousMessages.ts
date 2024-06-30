@@ -5,7 +5,7 @@ import { api } from "@/shared/api";
 
 
 export const usePreviousMessages = () => {
-    const { data: conversation, scrollTriggeredFromRef, setConversation } = useConversationContext();
+    const { data, scrollTriggeredFromRef, setConversation } = useConversationContext();
     const { state: { accessToken } } = useSession();
 
     const [isLoading, setIsLoading] = React.useState(false);
@@ -16,8 +16,8 @@ export const usePreviousMessages = () => {
         try {
             setIsLoading(true);
 
-            const { data } = await api.conversation.get({
-                body: { recipientId: conversation.conversation.recipient._id, params: { cursor: conversation.nextCursor! } },
+            const { data: previousMessages } = await api.conversation.get({
+                body: { recipientId: data?.conversation.recipient._id, params: { cursor: data?.nextCursor! } },
                 token: accessToken!
             });
 
@@ -27,9 +27,9 @@ export const usePreviousMessages = () => {
                 ...prev,
                 conversation: {
                     ...prev.conversation,
-                    messages: [...data?.conversation.messages, ...prev.conversation.messages]
+                    messages: [...previousMessages.conversation.messages, ...prev.conversation.messages]
                 },
-                nextCursor: data.nextCursor
+                nextCursor: previousMessages.nextCursor
             }));
         } catch (error) {
             console.error(error);
@@ -44,7 +44,7 @@ export const usePreviousMessages = () => {
         const handleScrollContainer = () => {
             const { scrollTop } = conversationContainerRef.current as HTMLDivElement;
 
-            !scrollTop && !isLoading && conversation.nextCursor && getPreviousMessages();
+            !scrollTop && !isLoading && data?.nextCursor && getPreviousMessages();
         };
 
         conversationContainerRef.current.addEventListener('scroll', handleScrollContainer);
@@ -52,7 +52,7 @@ export const usePreviousMessages = () => {
         return () => {
             conversationContainerRef.current?.removeEventListener('scroll', handleScrollContainer);
         };
-    }, [conversation, isLoading, getPreviousMessages, conversationContainerRef.current]);
+    }, [data?.conversation, isLoading, getPreviousMessages, conversationContainerRef.current]);
 
     return { conversationContainerRef, isLoading, getPreviousMessages };
 }

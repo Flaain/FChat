@@ -8,7 +8,7 @@ const scrollOptions: Record<Exclude<ScrollTriggeredFromTypes, 'infiniteScroll'>,
 };
 
 export const useMessagesList = () => {
-    const { data, scrollTriggeredFromRef } = useConversationContext();
+    const { data: { conversation }, scrollTriggeredFromRef } = useConversationContext();
 
     const lastMessageRef = React.useRef<HTMLLIElement | null>(null);
 
@@ -18,7 +18,7 @@ export const useMessagesList = () => {
         const canBeTriggered = scrollOptions[scrollTriggeredFromRef.current as keyof typeof scrollOptions];
 
         canBeTriggered && lastMessageRef.current.scrollIntoView(canBeTriggered);
-    }, [data?.conversation.messages]);
+    }, [conversation.messages]);
 
     return { lastMessageRef };
 }

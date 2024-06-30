@@ -3,15 +3,14 @@ import EmojiPickerFallback from '@emoji-mart/react';
 import MessageTopBar from './MessageTopBar';
 import { cn } from '@/shared/lib/utils/cn';
 import { Button } from '@/shared/ui/Button';
-import { Paperclip, SendHorizonal, Smile } from 'lucide-react';
+import { Edit2Icon, Paperclip, SendHorizonal, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSendMessage } from '../lib/hooks/useSendMessage';
 import { EmojiPicker } from '@/shared/model/view';
-import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { UseMessageParams } from '../model/types';
+import { MessageFormState } from '@/shared/model/types';
 
 const SendMessage = ({ type, queryId }: UseMessageParams) => {
-    const { drafts } = useLayoutContext();
     const {
         handleSubmitMessage,
         onKeyDown,
@@ -23,26 +22,27 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
         isEmojiPickerOpen,
         isLoading,
         textareaRef,
+        currentDraft,
         value
     } = useSendMessage({ type, queryId });
 
-    const draft = drafts.get(queryId);
     const trimmedValue = value.trim().length;
 
-    const messageBars = {
+    const messageBars: Record<Exclude<MessageFormState, "send">, React.ReactNode> = {
         edit: (
             <MessageTopBar
                 title='Edit message'
+                mainIconSlot={<Edit2Icon className='dark:text-primary-white text-primary-gray' />}
                 onClose={getDefaultState}
-                description={draft?.selectedMessage?.text}
+                description={currentDraft?.selectedMessage?.text}
                 preventClose={isLoading}
             />
-        )
+        ),
     };
 
     return (
         <div className='flex flex-col sticky bottom-0 w-full'>
-            {messageBars[draft?.state as keyof typeof messageBars]}
+            {messageBars[currentDraft?.state as keyof typeof messageBars]}
             <form
                 className='w-full max-h-[120px] overflow-hidden flex items-center dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out box-border'
                 onSubmit={handleSubmitMessage}
@@ -72,9 +72,9 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
                     disabled={isLoading}
                     className={cn('transition-transform duration-200 ease-in-out', {
                         'translate-x-14': !trimmedValue,
-                        'translate-x-0': trimmedValue || draft?.state === 'edit'
+                        'translate-x-0': trimmedValue || currentDraft?.state === 'edit'
                     })}
-                    onClick={() => setIsEmojiPickerOpen((prevState) => !prevState)}
+                    onClick={(e) => {e.stopPropagation(); setIsEmojiPickerOpen((prev) => !prev)}}
                 >
                     <Smile className='w-6 h-6' />
                 </Button>
@@ -90,10 +90,10 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
                 )}
                 <Button
                     variant='text'
-                    disabled={(!trimmedValue && draft?.state === 'send') || isLoading}
+                    disabled={(!trimmedValue && currentDraft?.state === 'send') || isLoading}
                     className={cn(
                         'opacity-0 pointer-events-none invisible scale-50 transition-all duration-100 ease-in-out',
-                        (!!trimmedValue || draft?.state === 'edit') &&
+                        (!!trimmedValue || currentDraft?.state === 'edit') &&
                             'opacity-100 visible scale-100 pointer-events-auto'
                     )}
                 >

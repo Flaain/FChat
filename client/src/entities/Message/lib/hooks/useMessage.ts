@@ -9,7 +9,7 @@ import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 
 export const useMessage = (message: IMessage) => {
     const { _id, text } = message;
-    const { data, setConversation } = useConversationContext();
+    const { data: { conversation }, setConversation } = useConversationContext();
     const { state: { accessToken } } = useSession();
     const { setLocalResults, setDrafts } = useLayoutContext();
     const { setIsAsyncActionLoading, closeModal } = useModal()
@@ -23,15 +23,15 @@ export const useMessage = (message: IMessage) => {
         try {
             setIsAsyncActionLoading(true);
 
-            await api.message.delete({ body: { conversationId: data?.conversation._id, messageId: _id }, token: accessToken! });
+            await api.message.delete({ body: { conversationId: conversation._id, messageId: _id }, token: accessToken! });
 
-            const isLastMessage = data?.conversation.messages[data?.conversation.messages.length - 1]._id === _id;
-            const filteredMessages = data?.conversation.messages.filter((message) => message._id !== _id);
+            const isLastMessage = conversation.messages[conversation.messages.length - 1]._id === _id;
+            const filteredMessages = conversation.messages.filter((message) => message._id !== _id);
             
             setConversation((prev) => ({ ...prev, conversation: { ...prev.conversation, messages: filteredMessages } }));
             
             isLastMessage && setLocalResults((prev) => prev.map((feedItem) => {
-                if (feedItem.type === FeedTypes.CONVERSATION && data?.conversation._id === feedItem._id) {
+                if (feedItem.type === FeedTypes.CONVERSATION && conversation._id === feedItem._id) {
                     return {
                         ...feedItem,
                         lastMessage: filteredMessages[filteredMessages.length - 1]
@@ -49,13 +49,13 @@ export const useMessage = (message: IMessage) => {
             closeModal();
             setIsAsyncActionLoading(false);
         }
-    }, [data, _id]);
+    }, [conversation, _id]);
 
     const handleMessageEdit = React.useCallback(async () => {
         setDrafts((prevState) => {
             const newState = new Map([...prevState]);
 
-            newState.set(data?.conversation.recipient._id, { value: text, state: 'edit', selectedMessage: message });
+            newState.set(conversation.recipient._id, { value: text, state: 'edit', selectedMessage: message });
 
             return newState;
         })
