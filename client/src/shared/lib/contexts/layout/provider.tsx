@@ -5,10 +5,10 @@ import { LayoutContext } from './context';
 
 export const LayoutProvider = ({ children }: { children: React.ReactNode }) => {
     return (
-        <LayoutContext.Provider value={useLayout()}>
-            <SocketProvider>
+        <SocketProvider>
+            <LayoutContext.Provider value={useLayout()}>
                 <ModalProvider>{children}</ModalProvider>
-            </SocketProvider>
-        </LayoutContext.Provider>
+            </LayoutContext.Provider>
+        </SocketProvider>
     );
 };

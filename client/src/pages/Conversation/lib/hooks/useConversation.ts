@@ -39,15 +39,15 @@ export const useConversation = () => {
         );
     }, []);
 
-    const onEditMessage = (message: IMessage & { conversationId: string }) => {
-        const isLastMessage = message._id === data?.conversation.messages[data?.conversation.messages.length - 1]?._id;
+    const onEditMessage = (editedMessage: IMessage) => {
+        const isLastMessage = editedMessage._id === data?.conversation.messages[data?.conversation.messages.length - 1]?._id;
 
         setConversation((prev) => ({
             ...prev,
-            conversation: { ...prev.conversation, messages: prev.conversation.messages.map((msg) => msg._id === message._id ? message : msg) }
+            conversation: { ...prev.conversation, messages: prev.conversation.messages.map((message) => message._id === editedMessage._id ? editedMessage : message) }
         }));
 
-        isLastMessage && setLocalResults((prevState) => prevState.map((item) => item._id === message.conversationId ? ({ ...item, lastMessage: message } as ConversationFeed) : item));
+        isLastMessage && setLocalResults((prevState) => prevState.map((item) => item._id === data.conversation._id ? ({ ...item, lastMessage: editedMessage } as ConversationFeed) : item));
     };
 
     React.useEffect(() => {

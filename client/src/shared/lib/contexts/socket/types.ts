@@ -8,4 +8,5 @@ export interface SocketContextProps {
 export enum SocketEvents {
     JOIN_CONVERSATION = "join.conversation",
     LEAVE_CONVERSATION = "leave.conversation",
+    CONVERSATION_CREATED = "conversation.created",
 }

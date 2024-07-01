@@ -16,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConversationService } from 'src/conversation/conversation.service';
 import { CONVERSATION_EVENTS } from './utils/events';
 import { EVENT_EMITTER } from './types';
+import { Conversation } from 'src/utils/types';
 
 @WebSocketGateway({ cors: { origin: 'http://localhost:5173' } })
 export class MessageGateway implements OnGatewayInit, OnGatewayConnection {
@@ -75,7 +76,7 @@ export class MessageGateway implements OnGatewayInit, OnGatewayConnection {
 
             client.join(CONVERSATION_EVENTS.ROOM(id));
         } catch (error) {
-            this.server.emit(CONVERSATION_EVENTS.JOIN_ERROR(id), { error: error.message });
+            client.emit(CONVERSATION_EVENTS.JOIN_ERROR(id), { error: error.message });
         }
     }
 
@@ -90,18 +91,14 @@ export class MessageGateway implements OnGatewayInit, OnGatewayConnection {
         })));
     }
 
-    @OnEvent(EVENT_EMITTER.CONVERSATION_SEND_MESSAGE)
-    onMessageSend({
-        message,
-        initiatorId,
-        recipientId,
-    }: {
-        message: Message;
-        recipientId: string;
-        initiatorId: string;
-    }) {
-        const id = this.getIdByParticipants({ a: recipientId, b: initiatorId });
-        this.server.to(CONVERSATION_EVENTS.ROOM(id)).emit(CONVERSATION_EVENTS.MESSAGE_SEND(id), message);
+    @SubscribeMessage(CONVERSATION_EVENTS.NEW_MESSAGE())
+    onNewMessage(@MessageBody() { message, conversationId }: { message: string; conversationId: string }, @ConnectedSocket() client: Socket) {
+        this.server.sockets.sockets.get('123').to.emit()
+    }
+
+    @SubscribeMessage('conversation.created')
+    onConversationCreated(@MessageBody() { conversation, recipientId }: { conversation: Conversation, recipientId: string }) {
+        this.server.sockets.sockets.get('123').emit('asd', { conversation, recipientId })
     }
 
     @OnEvent(EVENT_EMITTER.CONVERSATION_EDIT_MESSAGE)

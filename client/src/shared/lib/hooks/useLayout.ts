@@ -6,13 +6,16 @@ import { SessionTypes } from '@/entities/session/model/types';
 import { localStorageKeys } from '@/shared/constants';
 import { useFeed } from './useFeed';
 import { debounce } from '../utils/debounce';
-import { Drafts, FeedTypes } from '@/shared/model/types';
+import { ConversationFeed, Drafts, FeedTypes } from '@/shared/model/types';
+import { useSocket } from './useSocket';
+import { SocketEvents } from '../contexts/socket/types';
 
 const MIN_SEARCH_LENGTH = 3;
 
 export const useLayout = () => {
     const { setProfile } = useProfile();
     const { state: { accessToken }, dispatch } = useSession();
+    const { socket } = useSocket();
     const { onScrollFeedLoading, globalResults, localResults, setGlobalResults, setLocalResults } = useFeed();
 
     const [searchValue, setSearchValue] = React.useState('');
@@ -21,6 +24,16 @@ export const useLayout = () => {
     const [openSheet, setOpenSheet] = React.useState(false);
 
     const searchInputRef = React.useRef<HTMLInputElement | null>(null);
+
+    React.useEffect(() => {
+        socket?.on(SocketEvents.CONVERSATION_CREATED, (conversation: ConversationFeed) => {
+            setLocalResults((prevState) => [conversation, ...prevState]);
+        })
+
+        return () => {
+            socket?.off(SocketEvents.CONVERSATION_CREATED);
+        }
+    }, [])
 
     const handleLogout = React.useCallback(() => {
         setProfile(undefined!);
