@@ -1,24 +1,22 @@
 import React from 'react';
-import { toast } from 'sonner';
-import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '@/shared/api';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { ConversationWithMeta, ScrollTriggeredFromTypes } from '../../model/types';
-import { useSocket } from '@/shared/lib/hooks/useSocket';
-import { SocketEvents } from '@/shared/lib/contexts/socket/types';
-import { CONVERSATION_EVENTS } from '@/shared/lib/utils/events';
-import { ConversationFeed, IMessage } from '@/shared/model/types';
+import { ConversationStatuses, ConversationWithMeta, ScrollTriggeredFromTypes } from '../../model/types';
+import { Conversation, IMessage, CONVERSATION_EVENTS } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { getIdByParticipants } from '../utils/getIdByParticipants';
+import { ApiError } from '@/shared/api/error';
+import { toast } from 'sonner';
 
 export const useConversation = () => {
     const { id: recipientId } = useParams() as { id: string };
-    const { state: { userId, accessToken } } = useSession();
-    const { socket } = useSocket();
-    const { setLocalResults } = useLayoutContext();
+    const { state: { accessToken } } = useSession();
+    const { socket } = useLayoutContext();
 
     const [data, setConversation] = React.useState<ConversationWithMeta>(null!);
-    const [isLoading, setIsLoading] = React.useState(true);
+    const [status, setStatus] = React.useState<ConversationStatuses>('loading');
+    const [error, setError] = React.useState<string | null>(null);
+    const [isRefetching, setIsRefetching] = React.useState(false);
 
     const scrollTriggeredFromRef = React.useRef<ScrollTriggeredFromTypes>('init');
 
@@ -29,73 +27,80 @@ export const useConversation = () => {
             ...prev,
             conversation: { ...prev.conversation, messages: [...prev.conversation.messages, message] }
         }));
-        setLocalResults((prevState) => prevState
-            .map((item) =>  item._id === message.conversationId ? ({ 
-                ...item, 
-                lastMessage: message, 
-                lastMessageSentAt: message.createdAt 
-            } as ConversationFeed) : item)
-            .sort((a, b) => new Date(b.lastMessageSentAt).getTime() - new Date(a.lastMessageSentAt).getTime())
-        );
     }, []);
 
-    const onEditMessage = (editedMessage: IMessage) => {
-        const isLastMessage = editedMessage._id === data?.conversation.messages[data?.conversation.messages.length - 1]?._id;
-
+    const onEditMessage = React.useCallback((editedMessage: IMessage) => {
         setConversation((prev) => ({
             ...prev,
-            conversation: { ...prev.conversation, messages: prev.conversation.messages.map((message) => message._id === editedMessage._id ? editedMessage : message) }
+            conversation: {
+                ...prev.conversation,
+                messages: prev.conversation.messages.map((message) => message._id === editedMessage._id ? editedMessage : message)
+            }
         }));
+    }, []);
 
-        isLastMessage && setLocalResults((prevState) => prevState.map((item) => item._id === data.conversation._id ? ({ ...item, lastMessage: editedMessage } as ConversationFeed) : item));
-    };
+    const onCreateConversation = React.useCallback(({ _id }: Pick<Conversation, '_id' | 'lastMessageSentAt'>) => {
+        setConversation((prevState) => ({ ...prevState, conversation: { ...prevState.conversation, _id } }));
+    }, []);
+
+    const onDeleteMessage = React.useCallback(({ messageId }: { messageId: string }) => {
+        setConversation((prev) => ({
+            ...prev,
+            conversation: {
+                ...prev.conversation,
+                messages: prev.conversation.messages.filter((message) => message._id !== messageId)
+            }
+        }))
+    }, []);
+
+    const getConversation = React.useCallback(async (action: 'init' | 'refetch') => {
+        try {
+            action === 'init' ? setStatus('loading') : setIsRefetching(true);
+
+            const { data: response } = await api.conversation.get({ token: accessToken!, body: { recipientId } });
+
+            scrollTriggeredFromRef.current = 'init';
+
+            setConversation(response);
+            setStatus('idle');
+            setError(null);
+        } catch (error) {
+            console.error(error);
+            setStatus('error');
+            
+            error instanceof ApiError && (error.statusCode === 404 ? navigate('/') : setError(error.message));
+        } finally {
+            setIsRefetching(false);
+        }
+    }, [recipientId])
 
     React.useEffect(() => {
-        const roomId = getIdByParticipants({ participants: [userId!, recipientId] });
+        getConversation('init');
 
-        (async () => {
-            try {
-                setIsLoading(true);
+        socket?.emit(CONVERSATION_EVENTS.JOIN, { recipientId });
 
-                const { data } = await api.conversation.get({
-                    token: accessToken!,
-                    body: { recipientId }
-                });
-
-                scrollTriggeredFromRef.current = 'init';
-
-                setConversation(data);
-            } catch (error) {
-                console.error(error);
-
-                error instanceof Error && toast.error('Cannot get conversation', {
-                    position: 'top-center',
-                    description: error.message
-                });
-
-                navigate('/');
-            } finally {
-                setIsLoading(false);
-            }
-        })();
-
-        socket?.emit(SocketEvents.JOIN_CONVERSATION, { recipientId });
-
-        socket?.on(CONVERSATION_EVENTS.MESSAGE_SEND(roomId), onNewMessage);
-        socket?.on(CONVERSATION_EVENTS.MESSAGE_EDIT(roomId), onEditMessage);
+        socket?.on(CONVERSATION_EVENTS.MESSAGE_SEND, onNewMessage);
+        socket?.on(CONVERSATION_EVENTS.MESSAGE_EDIT, onEditMessage);
+        socket?.on(CONVERSATION_EVENTS.MESSAGE_DELETE, onDeleteMessage);
+        socket?.on(CONVERSATION_EVENTS.CREATED, onCreateConversation);
 
         return () => {
-            socket?.emit(SocketEvents.LEAVE_CONVERSATION, { recipientId });
+            socket?.emit(CONVERSATION_EVENTS.LEFT, { recipientId });
 
-            socket?.off(CONVERSATION_EVENTS.MESSAGE_SEND(roomId));
-            socket?.off(CONVERSATION_EVENTS.MESSAGE_EDIT(roomId));
+            socket?.off(CONVERSATION_EVENTS.MESSAGE_SEND);
+            socket?.off(CONVERSATION_EVENTS.MESSAGE_EDIT);
+            socket?.off(CONVERSATION_EVENTS.MESSAGE_DELETE);
+            socket?.off(CONVERSATION_EVENTS.CREATED);
         };
     }, [recipientId]);
 
     return {
         data,
-        isLoading,
+        status,
+        error,
+        isRefetching,
         scrollTriggeredFromRef,
-        setConversation
+        setConversation,
+        refetch: getConversation
     };
 };

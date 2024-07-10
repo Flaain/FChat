@@ -5,6 +5,7 @@ export interface User {
     status?: string;
     isVerified?: boolean;
     lastSeenAt: string;
+    isPrivate?: boolean;
     createdAt: string;
     updatedAt: string;
 }

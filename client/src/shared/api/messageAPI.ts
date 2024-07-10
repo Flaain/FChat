@@ -44,6 +44,6 @@ export class MessageAPI extends API {
             ...rest
         });
 
-        return this._checkResponse<{ success: boolean }>(response);
+        return this._checkResponse<{ isLastMessage: boolean; lastMessage: IMessage; lastMessageSentAt: string }>(response);
     };
 }

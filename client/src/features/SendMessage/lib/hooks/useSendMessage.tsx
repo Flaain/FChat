@@ -6,15 +6,15 @@ import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { MessageFormState } from '@/shared/model/types';
+import { FeedTypes, MessageFormState, CONVERSATION_EVENTS } from '@/shared/model/types';
 import { UseMessageParams } from '../../model/types';
 import { Emoji } from '@emoji-mart/data';
 
 export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     const { state: { accessToken } } = useSession();
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
-    const { setConversation, scrollTriggeredFromRef } = useConversationContext();
-    const { drafts, setDrafts } = useLayoutContext();
+    const { setConversation, scrollTriggeredFromRef, data: { conversation } } = useConversationContext();
+    const { drafts, socket, setDrafts, setLocalResults } = useLayoutContext();
 
     const [isLoading, setIsLoading] = React.useState(false);
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false);
@@ -30,7 +30,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
 
     React.useEffect(() => {
         setValue(drafts.get(queryId!)?.value ?? '');
-    }, [drafts])
+    }, [queryId]);
 
     React.useEffect(() => {
         if (!textareaRef.current) return;
@@ -52,47 +52,49 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
         setValue(!trimmedValue.length ? '' : value);
     }, []);
 
-    const getDefaultState = React.useCallback(() => {
+    const setDefaultState = React.useCallback(() => {
         setDrafts((prevState) => {
             const newState = new Map([...prevState]);
 
-            newState.delete(queryId)
+            newState.delete(queryId);
 
             return newState;
-        })
+        });
 
         setValue('');
     }, []);
 
     const handleDeleteConversationMessage = React.useCallback(async () => {
         try {
+            const messageId = currentDraft?.selectedMessage?._id;
+            
+            if (!messageId) throw new Error('Please select a message to delete');
+            
             setIsAsyncActionLoading(true);
-
-            await api.message.delete({
-                body: { 
-                    conversationId: queryId, 
-                    messageId: drafts.get(queryId)!.selectedMessage!._id 
-                },
-                token: accessToken!
+            
+            const { data: { isLastMessage, lastMessage, lastMessageSentAt } } = await api.message.delete({ 
+                body: { conversationId: conversation._id, messageId }, 
+                token: accessToken! 
             });
 
-            setConversation((prev) => ({
-                ...prev,
-                conversation: {
-                    ...prev.conversation,
-                    messages: prev.conversation.messages.filter((message) => message._id !== currentDraft?.selectedMessage?._id)
-                }
-            }));
-
             toast.success('Message deleted', { position: 'top-center' });
+
+            socket?.emit(CONVERSATION_EVENTS.MESSAGE_DELETE, { 
+                conversationId: conversation._id, 
+                lastMessage, 
+                lastMessageSentAt,
+                isLastMessage,
+                messageId,
+                recipientId: conversation.recipient._id 
+            });
         } catch (error) {
             console.error(error);
             error instanceof Error && toast.error(error.message, { position: 'top-center' });
         } finally {
-            getDefaultState();
+            setDefaultState();
             setIsAsyncActionLoading(false);
         }
-    }, [drafts, accessToken, setConversation]);
+    }, [currentDraft, conversation, accessToken]);
 
     const onCloseDeleteConfirmation = () => {
         setValue(currentDraft!.selectedMessage!.text);
@@ -101,57 +103,75 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
 
     const onBlur = React.useCallback(({ target: { value } }: React.FocusEvent<HTMLTextAreaElement, Element>) => {
         const trimmedValue = value.trim();
-        
-        if (!trimmedValue.length && !currentDraft || trimmedValue === currentDraft?.value) return;
+
+        if ((!trimmedValue.length && !currentDraft) || trimmedValue === currentDraft?.value) return;
 
         setDrafts((prevState) => {
             const newState = new Map([...prevState]);
             const currentDraft = newState.get(queryId);
-            const isEmpty = !trimmedValue.length && currentDraft?.state === "send"
-            
-            isEmpty ? newState.delete(queryId) : newState.set(queryId, currentDraft ? { ...currentDraft, value: trimmedValue } : { state: 'send', value: trimmedValue });
+            const isEmpty = !trimmedValue.length && currentDraft?.state === 'send';
+
+            isEmpty ? newState.delete(queryId) : newState.set(queryId, currentDraft ? { ...currentDraft, value: trimmedValue } : { 
+                state: 'send', 
+                value: trimmedValue 
+            });
 
             return newState;
-        })
+        });
     }, [queryId]);
-    
-    const onSendEditedConversationMessage = React.useCallback(async ({ messageId, message }: { messageId: string, message: string }) => {
+
+    const onSendEditedConversationMessage = React.useCallback(async ({ messageId, message }: { messageId: string; message: string }) => {
         await api.message.edit({ body: { messageId, message, recipientId: queryId }, token: accessToken! });
-    }, [])
+        
+        socket?.emit(CONVERSATION_EVENTS.MESSAGE_EDIT, { conversationId: conversation._id, messageId, message });
+    }, []);
 
     const onSendEditedMessage = async () => {
         const trimmedValue = value.trim();
 
-        if (!trimmedValue.length) return openModal({
-            content: (
-                <Confirmation
-                    onCancel={onCloseDeleteConfirmation}
-                    onConfirm={handleDeleteConversationMessage}
-                    onConfirmText='Delete'
-                    text='Are you sure you want to delete this message?'
-                />
-            ),
-            title: 'Delete message',
-            size: 'fit'
-        });
+        if (!trimmedValue.length)
+            return openModal({
+                content: (
+                    <Confirmation
+                        onCancel={onCloseDeleteConfirmation}
+                        onConfirm={handleDeleteConversationMessage}
+                        onConfirmText='Delete'
+                        text='Are you sure you want to delete this message?'
+                    />
+                ),
+                title: 'Delete message',
+                size: 'fit'
+            });
 
         if (trimmedValue === currentDraft!.selectedMessage!.text) return;
 
-        const actions: Record<typeof type, (params: { messageId: string, message: string }) => Promise<void>> = {
+        const actions: Record<typeof type, (params: { messageId: string; message: string }) => Promise<void>> = {
             conversation: onSendEditedConversationMessage,
             group: async () => {}
-        }
+        };
 
         await actions[type]({ messageId: currentDraft!.selectedMessage!._id, message: trimmedValue });
     };
 
     const onSendConversationMessage = React.useCallback(async (message: string) => {
-        await api.message.send({ token: accessToken!, body: { message: message, recipientId: queryId } });
-    }, [])
+        let conversationId = conversation._id
+
+        if (!conversationId) {
+            const { data: { _id } } = await api.conversation.create({ body: { recipientId: conversation.recipient._id }, token: accessToken! });
+
+            socket?.emit(CONVERSATION_EVENTS.CREATED, { conversationId: _id, recipientId: conversation.recipient._id });
+            
+            conversationId = _id;
+        }
+
+        const { data } = await api.message.send({ token: accessToken!, body: { message: message, recipientId: conversation.recipient._id }});
+
+        socket?.emit(CONVERSATION_EVENTS.MESSAGE_SEND, { message: data, conversationId, recipientId: conversation.recipient._id });
+    }, [conversation]);
 
     const onSendGroupMessage = React.useCallback(async (message: string) => {
         toast.info('Not implemented', { position: 'top-center', description: message });
-    }, [])
+    }, []);
 
     const onSendMessage = async () => {
         try {
@@ -160,7 +180,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             const actions: Record<typeof type, (message: string) => Promise<void>> = {
                 conversation: onSendConversationMessage,
                 group: onSendGroupMessage
-            }
+            };
 
             await actions[type](trimmedValue);
         } catch (error) {
@@ -171,20 +191,20 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
 
     const handleSubmitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        
+
         if (!value.trim().length) return;
-        
+
         try {
             setIsLoading(true);
-            
+
             const actions: Record<MessageFormState, () => Promise<void>> = {
                 send: onSendMessage,
                 edit: onSendEditedMessage
             };
-            
+
             await actions[currentDraft?.state ?? 'send']();
-            
-            getDefaultState();
+
+            setDefaultState();
             scrollTriggeredFromRef.current = 'send';
         } catch (error) {
             console.error(error);
@@ -204,9 +224,9 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
         setIsEmojiPickerOpen,
         onKeyDown,
         onBlur,
-        getDefaultState,
+        setDefaultState,
         handleSubmitMessage,
         handleChange,
-        onEmojiSelect,
+        onEmojiSelect
     };
 };

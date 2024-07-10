@@ -9,5 +9,6 @@ import { ConversationModule } from 'src/conversation/conversation.module';
     imports: [ConversationModule, MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }])],
     providers: [MessageService],
     controllers: [MessageController],
+    exports: [MessageService],
 })
 export class MessageModule {}

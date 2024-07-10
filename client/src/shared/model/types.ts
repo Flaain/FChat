@@ -1,3 +1,4 @@
+import { DependencyList } from 'react';
 import { ModalConfig } from '../lib/contexts/modal/types';
 import { Profile, User } from '../lib/contexts/profile/model/types';
 import { FieldError } from 'react-hook-form';
@@ -42,7 +43,7 @@ export interface APIMethodParams<T = undefined> extends Partial<Omit<BaseAPI, 'b
 
 export interface APIError<E> {
     error: E;
-    status: number;
+    statusCode: number;
     headers?: Record<string, string>;
     message: string;
     type?: string;
@@ -67,7 +68,7 @@ export interface GroupParticipant {
     isVerified?: boolean;
 }
 
-export interface ConversationParticipant extends Pick<User, '_id' | 'isVerified' | 'email' | 'name' | 'lastSeenAt'> {}
+export interface ConversationParticipant extends Pick<User, '_id' | 'isVerified' | 'email' | 'name' | 'lastSeenAt' | 'isPrivate'> {}
 
 export interface Conversation {
     _id: string;
@@ -203,8 +204,7 @@ export interface SearchedUsersListProps extends React.HTMLAttributes<HTMLUListEl
 
 export type FeedItem = ConversationFeed | GroupFeed | UserFeed;
 
-export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'lastMessageSentAt'> & {
-    participants: Array<ConversationParticipant>;
+export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'recipient'> & {
     type: FeedTypes.CONVERSATION;
 };
 
@@ -220,16 +220,75 @@ export interface Drafts {
     selectedMessage?: IMessage;
 }
 
-export type ChatHeaderProps =
-    | {
-          name: string;
-          isVerified?: boolean;
-          type: FeedTypes.CONVERSATION;
-          lastSeenAt: string;
-      }
-    | {
-          name: string;
-          isVerified?: boolean;
-          type: FeedTypes.GROUP;
-          members: number;
-      };
+export interface ChatHeaderProps {
+    name: string;
+    isVerified?: boolean;
+    description: string;
+}
+
+export enum CONVERSATION_EVENTS {
+    JOIN = 'conversation.join',
+    LEFT = 'conversation.left',
+    CREATED = 'conversation.created',
+    MESSAGE_SEND = 'conversation.message.send',
+    MESSAGE_EDIT = 'conversation.message.edit',
+    MESSAGE_DELETE = 'conversation.message.delete',
+}
+
+export enum FEED_EVENTS {
+    NEW_MESSAGE = 'feed.new.message',
+    EDIT_MESSAGE = 'feed.edit.message',
+    DELETE_MESSAGE = 'feed.delete.message',
+    NEW_CONVERSATION = 'feed.new.conversation'
+}
+
+export interface GetConversationsRes {
+    conversations: Array<Omit<ConversationFeed, 'type' | 'recipient'> & { participants: Array<ConversationParticipant> }>;
+    nextCursor: string;
+}
+
+export interface UseQueryOptions<T> {
+    keys?: DependencyList;
+    retry?: boolean | number;
+    refetchInterval?: number;
+    onSuccess?: (data: T) => void;
+    onError?: (error: unknown) => void;
+    // select?: (data: T) => T;
+    // placeholderData?: T | (() => T);
+}
+
+export enum UseQueryTypes {
+    LOADING = 'loading',
+    SUCCESS = 'success',
+    REFETCH = 'refetch',
+    RESET = 'reset',
+    ERROR = 'error',
+}
+
+export interface UseQueryReturn<T> {
+    data?: T;
+    isLoading: boolean;
+    isError: boolean;
+    isRefetching: boolean;
+    isSuccess: boolean;
+    error?: Error;
+    refetch: () => void;
+}
+
+export interface UseQueryReducerState<T> {
+    data?: T;
+    isLoading: boolean;
+    isSuccess: boolean;
+    isError: boolean;
+    isRefetching: boolean;
+    error?: Error;
+}
+
+export type UseQueryReducerAction<T> =
+    | { type: UseQueryTypes.LOADING; payload: { isLoading: boolean } }
+    | { type: UseQueryTypes.SUCCESS; payload: { data: T, isSuccess: true, isLoading: false, isRefetching: false } }
+    | { type: UseQueryTypes.ERROR; payload: { error: Error, isError: true } }
+    | { type: UseQueryTypes.REFETCH; payload: { isRefething: true } }
+    | { type: UseQueryTypes.RESET; payload: { isLoading: false, isRefetching: false } }
+
+export type UseRunQueryAction = 'init' | 'refetch';

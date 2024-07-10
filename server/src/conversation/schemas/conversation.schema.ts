@@ -15,6 +15,12 @@ export class Conversation implements ConversationTypeForSchema {
 
     @Prop({ type: Date, required: true, default: () => new Date() })
     lastMessageSentAt: Date;
+    
+    @Prop({ type: Date, default: () => new Date() })
+    createdAt: Date
+  
+    @Prop({ type: Date, default: () => new Date() })
+    updatedAt: Date
 }
 
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);

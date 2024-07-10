@@ -21,12 +21,12 @@ const Feed = () => {
     };
 
     const localFilters: Record<Exclude<FeedTypes, 'user'>, (item: FeedItem) => boolean> = {
-        conversation: (item: FeedItem) => (item as ConversationFeed).participants[0].name.toLowerCase().includes(trimmedSearchValue),
+        conversation: (item: FeedItem) => (item as ConversationFeed).recipient.name.toLowerCase().includes(trimmedSearchValue),
         group: (item: FeedItem) => (item as GroupFeed).name.toLowerCase().includes(trimmedSearchValue)
     };
 
     const globalFilters: Record<Exclude<FeedTypes, 'conversation'>, (item: FeedItem) => boolean> = {
-        user: (item: FeedItem) => localResults.some((localItem) => localItem.type === FeedTypes.CONVERSATION && localItem.participants[0]._id === item._id),
+        user: (item: FeedItem) => localResults.some((localItem) => localItem.type === FeedTypes.CONVERSATION && localItem.recipient._id === item._id),
         group: (item: FeedItem) => localResults.some((localItem) => localItem._id === item._id)
     };
 

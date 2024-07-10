@@ -7,19 +7,19 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ConversationModule } from './conversation/conversation.module';
 import { MessageModule } from './message/message.module';
 import { GatewayModule } from './gateway/gateway.module';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ParticipantModule } from './participant/participant.module';
 import { GroupModule } from './group/group.module';
 import { GroupMessageModule } from './group-message/group-message.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
     imports: [
         AuthModule,
         UserModule,
         ConfigModule.forRoot(),
-        EventEmitterModule.forRoot(),
         MongooseModule.forRoot(process.env.DATABASE_URI, { retryWrites: true }),
         ThrottlerModule.forRoot([{ limit: 5, ttl: 10000 }]),
+        EventEmitterModule.forRoot(),
         ConversationModule,
         MessageModule,
         GatewayModule,

@@ -15,7 +15,7 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
         handleSubmitMessage,
         onKeyDown,
         onBlur,
-        getDefaultState,
+        setDefaultState,
         handleChange,
         setIsEmojiPickerOpen,
         onEmojiSelect,
@@ -33,7 +33,7 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
             <MessageTopBar
                 title='Edit message'
                 mainIconSlot={<Edit2Icon className='dark:text-primary-white text-primary-gray' />}
-                onClose={getDefaultState}
+                onClose={setDefaultState}
                 description={currentDraft?.selectedMessage?.text}
                 preventClose={isLoading}
             />

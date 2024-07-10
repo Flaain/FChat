@@ -3,10 +3,15 @@ import { JwtGuard } from 'src/utils/jwt.guard';
 import { ConversationService } from './conversation.service';
 import { ConversationCreateDTO } from './dtos/conversation.create.dto';
 import { RequestWithUser, Routes } from 'src/utils/types';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { STATIC_CONVERSATION_EVENTS } from 'src/gateway/types';
 
 @Controller(Routes.CONVERSATION)
 export class ConversationController {
-    constructor(private readonly conversationService: ConversationService) {}
+    constructor(
+        private readonly conversationService: ConversationService, 
+        private readonly eventEmitter: EventEmitter2
+    ) {}
 
     @Get()
     @UseGuards(JwtGuard)
@@ -16,11 +21,17 @@ export class ConversationController {
 
     @Post('create')
     @UseGuards(JwtGuard)
-    createConversation(@Req() req: RequestWithUser, @Body() dto: ConversationCreateDTO) {
-        return this.conversationService.createConversation({
-            initiatorId: req.user._id,
-            ...dto,
+    async createConversation(@Req() req: RequestWithUser, @Body() dto: ConversationCreateDTO) {
+        const conversation = await this.conversationService.createConversation({ initiatorId: req.user._id, ...dto });
+
+        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.CREATED, { 
+            initiatorId: req.user._id.toString(),
+            recipientId: dto.recipientId,
+            conversationId: conversation._id,
+            lastMessageSentAt: conversation.lastMessageSentAt
         });
+
+        return conversation;
     }
 
     @Get(':id')

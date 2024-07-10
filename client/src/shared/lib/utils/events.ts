@@ -27,5 +27,9 @@ export const CONVERSATION_EVENTS = {
 
     JOIN_ERROR(id: string) {
         return `${this.JOIN}:${id}:error`;
+    },
+
+    CONVERSATION_CREATE(id: string) {
+        return `${this.conversation}:${id}:create`;
     }
 };

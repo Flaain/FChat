@@ -28,9 +28,10 @@ export const useFeed = () => {
             setLocalResults(
                 conversations
                     .sort((a, b) => new Date(b.lastMessageSentAt).getTime() - new Date(a.lastMessageSentAt).getTime())
-                    .map((conversation) => ({
-                        ...conversation,
-                        type: FeedTypes.CONVERSATION
+                    .map(({ participants, ...conversation }) => ({
+                        type: FeedTypes.CONVERSATION,
+                        recipient: participants[0],
+                        ...conversation
                     }))
             );
 

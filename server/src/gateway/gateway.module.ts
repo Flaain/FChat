@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { MessageGateway } from './websocket.gateway';
 import { UserModule } from 'src/user/user.module';
-import { ConversationModule } from 'src/conversation/conversation.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { GatewayManager } from './gateway.manager';
+import { Gateway } from './gateway';
 
 @Module({
-    imports: [UserModule, ConversationModule, ConfigModule, JwtModule],
-    providers: [MessageGateway],
+    imports: [UserModule, ConfigModule, JwtModule],
+    providers: [Gateway, GatewayManager],
 })
 export class GatewayModule {}

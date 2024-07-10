@@ -1,4 +1,34 @@
 import React from "react";
-import { SocketContext } from "../contexts/socket/context";
+import { Socket, io } from "socket.io-client";
+import { useSession } from "@/entities/session/lib/hooks/useSession";
 
-export const useSocket = () => React.useContext(SocketContext);
+export const useSocket = () => {
+    const { state: { accessToken } } = useSession();
+    
+    const [socket, setSocket] = React.useState<Socket | null>(null);
+    const [isConnected, setIsConnected] = React.useState(false);
+
+    React.useEffect(() => {
+        const socket = io(import.meta.env.VITE_BASE_URL, {
+            auth: {
+                token: accessToken 
+            }
+        });
+
+        socket.on('connect', () => {
+            setIsConnected(true);
+        });
+
+        socket.on('disconnect', () => {
+            setIsConnected(false);
+        });
+
+        setSocket(socket);
+        
+        return () => {
+            socket.disconnect();
+        };
+    }, [accessToken]);
+
+    return { socket, isConnected };
+}

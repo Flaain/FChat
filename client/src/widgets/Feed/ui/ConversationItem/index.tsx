@@ -11,13 +11,12 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
     const { state: { userId } } = useSession();
     const { drafts } = useLayoutContext();
 
-    const recipient = conversation.participants[0];
-    const draft = drafts.get(recipient._id);
+    const draft = drafts.get(conversation.recipient._id);
 
     return (
         <li>
             <NavLink
-                to={`conversation/${recipient._id}`}
+                to={`conversation/${conversation.recipient._id}`}
                 className={({ isActive }) =>
                     cn(
                         'flex items-center gap-5 p-2 rounded-lg transition-colors duration-200 ease-in-out',
@@ -26,11 +25,15 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                     )
                 }
             >
-                <AvatarByName name={recipient.name} size='lg' />
+                <AvatarByName name={conversation.recipient.name} size='lg' />
                 <div className='flex flex-col items-start w-full'>
-                    <Typography as='h2' weight='medium' className={cn(recipient.isVerified && 'flex items-center')}>
-                        {recipient.name}
-                        {recipient.isVerified && (
+                    <Typography
+                        as='h2'
+                        weight='medium'
+                        className={cn(conversation.recipient.isVerified && 'flex items-center')}
+                    >
+                        {conversation.recipient.name}
+                        {conversation.recipient.isVerified && (
                             <Typography className='ml-2'>
                                 <Verified className='w-5 h-5' />
                             </Typography>
@@ -47,7 +50,9 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                         !!conversation.lastMessage && (
                             <div className='flex items-center w-full gap-5'>
                                 <Typography as='p' variant='secondary' className='line-clamp-1'>
-                                    {conversation.lastMessage.sender._id === userId ? `You: ${conversation.lastMessage.text}` : conversation.lastMessage.text}
+                                    {conversation.lastMessage.sender._id === userId
+                                        ? `You: ${conversation.lastMessage.text}`
+                                        : conversation.lastMessage.text}
                                 </Typography>
                                 <Typography className='ml-auto' variant='secondary'>
                                     {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(

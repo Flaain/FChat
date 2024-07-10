@@ -48,11 +48,7 @@ export class ConversationService implements IConversationService {
                         limit: CONVERSATION_BATCH,
                         populate: [
                             { path: 'participants', model: 'User', select: 'name email isVerified', match: { _id: { $ne: initiatorId } } },
-                            {
-                                path: 'lastMessage',
-                                model: 'Message',
-                                populate: { path: 'sender', model: 'User', select: 'name email' },
-                            },
+                            { path: 'lastMessage', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name email' } },
                         ],
                         sort: { lastMessageSentAt: -1 },
                     },
@@ -78,7 +74,7 @@ export class ConversationService implements IConversationService {
         cursor?: string;
     }) => {
         try {
-            const recipient = await this.userService.findOneByPayload({ _id: recipientId }, { name: 1, email: 1, isVerified: 1, lastSeenAt: 1 });
+            const recipient = await this.userService.findOneByPayload({ _id: recipientId }, { name: 1, email: 1, isVerified: 1, lastSeenAt: 1, isPrivate: 1 });
 
             if (!recipient) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
@@ -111,7 +107,10 @@ export class ConversationService implements IConversationService {
                 )
                 .lean();
 
-            if (!conversation) return { conversation: { recipient, messages: [] }, nextCursor };
+            if (!conversation) {
+                if (recipient.isPrivate) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+                return { conversation: { recipient, messages: [] }, nextCursor };
+            };
 
             conversation.messages.length === MESSAGES_BATCH && (nextCursor = (conversation.messages[MESSAGES_BATCH - 1]._id.toString()));
 

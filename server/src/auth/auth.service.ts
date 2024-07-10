@@ -32,7 +32,7 @@ export class AuthService  {
 
     signin = async ({ login, password }: SigninRequest): Promise<Omit<IUser, "password">> => {
         try {
-            const candidate = await this.userService.findOneByPayload({ $or: [{ email: login }, { name: { $regex: login, $options: 'i' } }] });
+            const candidate = await this.userService.findOneByPayload({ deleted: false, $or: [{ email: login }, { name: { $regex: login, $options: 'i' } }] });
     
             if (!candidate) throw new HttpException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
 
@@ -72,7 +72,7 @@ export class AuthService  {
     };
 
     validateUser = async (id: Types.ObjectId | string) => {
-        const candidate = await this.userService.findById(id);
+        const candidate = await this.userService.findOneByPayload({ _id: id, deleted: false });
 
         if (!candidate) throw new UnauthorizedException(UNAUTHORIZED);
 
