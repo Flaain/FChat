@@ -3,7 +3,7 @@ import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { CONVERSATION_EVENTS } from './utils/events';
-import { ConversationCreateParams, FEED_EVENTS, STATIC_CONVERSATION_EVENTS } from './types';
+import { ConversationCreateParams, ConversationDeleteMessageParams, ConversationSendMessageParams, FEED_EVENTS, STATIC_CONVERSATION_EVENTS } from './types';
 import { GatewayManager } from './gateway.manager';
 import { GatewayUtils } from './gateway.utils';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -84,39 +84,51 @@ export class Gateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDis
         client.leave(CONVERSATION_EVENTS.ROOM(GatewayUtils.getRoomIdByParticipants([client.data.user._id.toString(), recipientId])));
     }
 
-    // @SubscribeMessage(STATIC_CONVERSATION_EVENTS.SEND_MESSAGE)
-    // async onNewMessage() {
-    //     const roomId = GatewayUtils.getRoomIdByParticipants([client.data.user._id.toString(), recipientId]);
+    @OnEvent(STATIC_CONVERSATION_EVENTS.SEND_MESSAGE)
+    async onNewMessage({ message, recipientId, conversationId, initiatorId }: ConversationSendMessageParams) {
+        const roomId = GatewayUtils.getRoomIdByParticipants([initiatorId, recipientId]);
+        
+        const initiatorSocket = this.gatewayManager.sockets.get(initiatorId);
+        const recipientSocket = this.gatewayManager.sockets.get(recipientId);
 
-    //     this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.SEND_MESSAGE, message);
+        this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.SEND_MESSAGE, message);
 
-    //     [this.gatewayManager.sockets.get(recipientId), client].forEach((socket) =>
-    //         socket?.emit(FEED_EVENTS.NEW_MESSAGE, { message, conversationId }),
-    //     );
-    // }
+        [initiatorSocket, recipientSocket].forEach((socket) => socket?.emit(FEED_EVENTS.NEW_MESSAGE, { message, conversationId }));
+    }
 
-    // @SubscribeMessage(STATIC_CONVERSATION_EVENTS.DELETE_MESSAGE)
-    // async handleDeleteMessage() {
-    //     try {
-    //         const roomId = GatewayUtils.getRoomIdByParticipants([client.data.user._id.toString(), recipientId]);
+    @OnEvent(STATIC_CONVERSATION_EVENTS.DELETE_MESSAGE)
+    async handleDeleteMessage({
+        initiatorId,
+        recipientId,
+        conversationId,
+        messageId,
+        lastMessage,
+        lastMessageSentAt,
+        isLastMessage,
+    }: ConversationDeleteMessageParams) {
+        try {
+            const roomId = GatewayUtils.getRoomIdByParticipants([initiatorId, recipientId]);
 
-    //         this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.DELETE_MESSAGE, messageId);
+            const initiatorSocket = this.gatewayManager.sockets.get(initiatorId);
+            const recipientSocket = this.gatewayManager.sockets.get(recipientId);
 
-    //         isLastMessage && [this.gatewayManager.sockets.get(recipientId), client].forEach((socket) => {
-    //             socket?.emit(FEED_EVENTS.DELETE_MESSAGE, { conversationId, lastMessage, lastMessageSentAt });
-    //         });
-    //     } catch (error) {
-    //         // client.emit('', { error: error.message });
-    //     }
-    // }
+            this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.DELETE_MESSAGE, messageId);
+
+            isLastMessage && [recipientSocket, initiatorSocket].forEach((socket) => {
+                socket?.emit(FEED_EVENTS.DELETE_MESSAGE, { conversationId, lastMessage, lastMessageSentAt });
+            });
+        } catch (error) {
+            // client.emit('', { error: error.message });
+        }
+    }
 
     @OnEvent(STATIC_CONVERSATION_EVENTS.CREATED)
     async onConversationCreated({ initiatorId, conversationId, recipientId, lastMessageSentAt }: ConversationCreateParams) {
-        const roomId = GatewayUtils.getRoomIdByParticipants([initiatorId, recipientId]);
+        const roomId = GatewayUtils.getRoomIdByParticipants([initiatorId, recipientId])
         const newConversation = { _id: conversationId, lastMessageSentAt };
 
         this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.CREATED, newConversation);
-        
+
         const initiatorSocket = this.gatewayManager.sockets.get(initiatorId);
         const recipientSocket = this.gatewayManager.sockets.get(recipientId);
 

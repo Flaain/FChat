@@ -9,7 +9,7 @@ const Sidebar = (props: SidebarProps) => {
     const { setOpenSheet, searchValue, handleSearch, searchInputRef, handleLogout } = useLayoutContext();
 
     return (
-        <aside className='flex flex-col h-screen sticky top-0 gap-2 dark:bg-primary-dark-150 bg-primary-white'>
+        <aside className='flex flex-col h-screen sticky top-0 gap-2 dark:bg-primary-dark-150 bg-primary-white max-w-[420px] w-full border-r-2 border-r-primary-dark-50 border-solid'>
             <div className='flex items-center justify-between gap-5 sticky top-0 py-4 px-3'>
                 <Button variant='text' size='icon' onClick={() => setOpenSheet(true)} className='opacity-30'>
                     <AlignJustifyIcon />

@@ -20,10 +20,7 @@ export class MessageService {
 
             if (!conversation) throw new HttpException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
 
-            const newMessage = new this.messageModel({
-                sender: initiatorId,
-                text: message.trim(),
-            });
+            const newMessage = new this.messageModel({ sender: initiatorId, text: message.trim() });
 
             Object.assign(conversation, {
                 lastMessage: newMessage._id,
@@ -33,11 +30,9 @@ export class MessageService {
 
             const { 0: savedMessage } = await Promise.all([newMessage.save(), conversation.save()]);
 
-            const populatedMessage = (
-                await savedMessage.populate([{ path: 'sender', model: 'User', select: 'name email isVerified' }])
-            ).toObject();
+            const populatedMessage = (await savedMessage.populate([{ path: 'sender', model: 'User', select: 'name email isVerified' }])).toObject();
 
-            return { ...populatedMessage, conversationId: conversation._id };
+            return { ...populatedMessage, conversationId: conversation._id.toString() };
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);
@@ -93,7 +88,7 @@ export class MessageService {
 
                 return {
                     isLastMessage,
-                    lastMessage,
+                    lastMessage: lastMessage?.toObject(),
                     lastMessageSentAt: conversation.lastMessageSentAt,
                 };
             }

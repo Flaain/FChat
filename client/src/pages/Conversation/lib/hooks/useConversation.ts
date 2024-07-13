@@ -6,7 +6,6 @@ import { ConversationStatuses, ConversationWithMeta, ScrollTriggeredFromTypes } 
 import { Conversation, IMessage, CONVERSATION_EVENTS } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { ApiError } from '@/shared/api/error';
-import { toast } from 'sonner';
 
 export const useConversation = () => {
     const { id: recipientId } = useParams() as { id: string };
@@ -78,7 +77,11 @@ export const useConversation = () => {
         getConversation('init');
 
         socket?.emit(CONVERSATION_EVENTS.JOIN, { recipientId });
-
+        
+        socket?.io.on('reconnect', () => {
+            socket?.emit(CONVERSATION_EVENTS.JOIN, { recipientId });
+            // getConversation('refetch');
+        })
         socket?.on(CONVERSATION_EVENTS.MESSAGE_SEND, onNewMessage);
         socket?.on(CONVERSATION_EVENTS.MESSAGE_EDIT, onEditMessage);
         socket?.on(CONVERSATION_EVENTS.MESSAGE_DELETE, onDeleteMessage);
@@ -91,6 +94,7 @@ export const useConversation = () => {
             socket?.off(CONVERSATION_EVENTS.MESSAGE_EDIT);
             socket?.off(CONVERSATION_EVENTS.MESSAGE_DELETE);
             socket?.off(CONVERSATION_EVENTS.CREATED);
+            socket?.off('reconnect');
         };
     }, [recipientId]);
 

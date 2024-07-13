@@ -6,15 +6,15 @@ import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { FeedTypes, MessageFormState, CONVERSATION_EVENTS } from '@/shared/model/types';
+import { MessageFormState, CONVERSATION_EVENTS } from '@/shared/model/types';
 import { UseMessageParams } from '../../model/types';
 import { Emoji } from '@emoji-mart/data';
 
 export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     const { state: { accessToken } } = useSession();
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
-    const { setConversation, scrollTriggeredFromRef, data: { conversation } } = useConversationContext();
-    const { drafts, socket, setDrafts, setLocalResults } = useLayoutContext();
+    const { scrollTriggeredFromRef, data: { conversation } } = useConversationContext();
+    const { drafts, socket, setDrafts } = useLayoutContext();
 
     const [isLoading, setIsLoading] = React.useState(false);
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false);

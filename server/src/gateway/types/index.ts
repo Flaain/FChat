@@ -20,6 +20,7 @@ export enum FEED_EVENTS {
 export interface ConversationDeleteMessageParams {
     messageId: string;
     conversationId: string;
+    initiatorId: string;
     recipientId: string;
     isLastMessage: boolean;
     lastMessage: Message;
@@ -29,6 +30,7 @@ export interface ConversationDeleteMessageParams {
 export interface ConversationSendMessageParams {
     message: Message & { _id: string };
     recipientId: string;
+    initiatorId: string;
     conversationId: string;
 }
 

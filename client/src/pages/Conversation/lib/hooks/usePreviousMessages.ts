@@ -10,7 +10,7 @@ export const usePreviousMessages = () => {
 
     const [isLoading, setIsLoading] = React.useState(false);
 
-    const conversationContainerRef = React.useRef<HTMLDivElement | null>(null);
+    const conversationContainerRef = React.useRef<HTMLUListElement | null>(null);
     
     const getPreviousMessages = async () => {
         try {
@@ -39,12 +39,12 @@ export const usePreviousMessages = () => {
     };
 
     React.useEffect(() => {
-        if (!conversationContainerRef.current) return;
+        if (!conversationContainerRef.current || !data?.nextCursor) return;
 
         const handleScrollContainer = () => {
-            const { scrollTop } = conversationContainerRef.current as HTMLDivElement;
+            const { scrollTop } = conversationContainerRef.current as HTMLUListElement;
 
-            !scrollTop && !isLoading && data?.nextCursor && getPreviousMessages();
+            !scrollTop && !isLoading && getPreviousMessages();
         };
 
         conversationContainerRef.current.addEventListener('scroll', handleScrollContainer);

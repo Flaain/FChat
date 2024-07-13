@@ -9,8 +9,8 @@ import { STATIC_CONVERSATION_EVENTS } from 'src/gateway/types';
 @Controller(Routes.CONVERSATION)
 export class ConversationController {
     constructor(
-        private readonly conversationService: ConversationService, 
-        private readonly eventEmitter: EventEmitter2
+        private readonly conversationService: ConversationService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     @Get()
@@ -24,11 +24,11 @@ export class ConversationController {
     async createConversation(@Req() req: RequestWithUser, @Body() dto: ConversationCreateDTO) {
         const conversation = await this.conversationService.createConversation({ initiatorId: req.user._id, ...dto });
 
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.CREATED, { 
+        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.CREATED, {
             initiatorId: req.user._id.toString(),
             recipientId: dto.recipientId,
             conversationId: conversation._id,
-            lastMessageSentAt: conversation.lastMessageSentAt
+            lastMessageSentAt: conversation.lastMessageSentAt,
         });
 
         return conversation;
@@ -36,15 +36,7 @@ export class ConversationController {
 
     @Get(':id')
     @UseGuards(JwtGuard)
-    getConversation(
-        @Req() req: RequestWithUser,
-        @Param('id') id: string,
-        @Query('cursor') cursor?: string,
-    ) {
-        return this.conversationService.getConversation({
-            initiator: req.user,
-            recipientId: id,
-            cursor,
-        });
+    getConversation(@Req() req: RequestWithUser, @Param('id') id: string, @Query('cursor') cursor?: string) {
+        return this.conversationService.getConversation({ initiator: req.user, recipientId: id, cursor });
     }
 }

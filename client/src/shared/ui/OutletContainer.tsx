@@ -4,7 +4,7 @@ const OutletContainer = React.forwardRef<HTMLDivElement, { children: React.React
     return (
         <div
             ref={ref}
-            className='flex flex-col flex-1 h-svh overflow-auto gap-5 items-center justify-start dark:bg-primary-dark-200 bg-primary-white'
+            className='flex flex-col flex-1 h-svh overflow-auto items-center justify-start dark:bg-primary-dark-200 bg-primary-white'
         >
             {children}
         </div>

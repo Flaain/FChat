@@ -8,13 +8,11 @@ import OutletError from '@/shared/ui/OutletError';
 import { useConversationContext } from '../lib/hooks/useConversationContext';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
-import { usePreviousMessages } from '../lib/hooks/usePreviousMessages';
 import { ConversationStatuses } from '../model/types';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
 
 const Conversation = () => {
     const { data, refetch, error, status, isRefetching } = useConversationContext();
-    const { conversationContainerRef, isLoading: previousMessagesLoading, getPreviousMessages } = usePreviousMessages();
 
     const components: Record<Exclude<ConversationStatuses, 'idle'>, React.ReactNode> = {
         error: (
@@ -33,29 +31,14 @@ const Conversation = () => {
 
     return (
         components[status as keyof typeof components] ?? (
-            <OutletContainer ref={conversationContainerRef}>
+            <OutletContainer>
                 <ChatHeader
                     name={data.conversation.recipient.name}
                     isVerified={data.conversation.recipient.isVerified}
                     description={`last seen at ${getRelativeTimeString(new Date(data.conversation.recipient.lastSeenAt), 'en-US')}`}
                 />
                 {data.conversation.messages.length ? (
-                    <>
-                        {data.nextCursor && (
-                            <Button
-                                variant='text'
-                                className='p-0 dark:text-primary-white/30 text-primary-white'
-                                onClick={getPreviousMessages}
-                            >
-                                {previousMessagesLoading ? (
-                                    <Loader2 className='w-6 h-6 animate-spin' />
-                                ) : (
-                                    'Load previous messages'
-                                )}
-                            </Button>
-                        )}
-                        <MessagesList />
-                    </>
+                    <MessagesList />
                 ) : (
                     <Typography
                         variant='primary'
