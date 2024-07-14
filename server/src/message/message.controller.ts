@@ -41,13 +41,7 @@ export class MessageController {
     async delete(@Body() dto: MessageDeleteDTO, @Param('messageId') messageId: string, @Req() req: RequestWithUser) {
         const message = await this.messageService.delete({ ...dto, messageId, initiatorId: req.user._id });
 
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.DELETE_MESSAGE, {
-            messageId,
-            conversationId: dto.conversationId,
-            initiatorId: req.user._id.toString(),
-            recipientId: dto.recipientId,
-            ...message
-        })
+        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.DELETE_MESSAGE, { messageId, initiatorId: req.user._id.toString(), ...dto, ...message })
 
         return message;
     }

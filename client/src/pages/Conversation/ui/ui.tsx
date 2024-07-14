@@ -2,9 +2,9 @@ import ConversationSkeleton from './Skeletons/ConversationSkeleton';
 import MessagesList from '@/widgets/MessagesList/ui/ui';
 import Typography from '@/shared/ui/Typography';
 import SendMessage from '@/features/SendMessage/ui/ui';
-import ChatHeader from '@/shared/ui/ChatHeader';
 import OutletContainer from '@/shared/ui/OutletContainer';
 import OutletError from '@/shared/ui/OutletError';
+import ChatHeader from '@/widgets/ChatHeader/ui/ui';
 import { useConversationContext } from '../lib/hooks/useConversationContext';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
@@ -12,7 +12,7 @@ import { ConversationStatuses } from '../model/types';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
 
 const Conversation = () => {
-    const { data, refetch, error, status, isRefetching } = useConversationContext();
+    const { data, refetch, error, status, isRefetching, getPreviousMessages, isPreviousMessagesLoading } = useConversationContext();
 
     const components: Record<Exclude<ConversationStatuses, 'idle'>, React.ReactNode> = {
         error: (
@@ -38,7 +38,14 @@ const Conversation = () => {
                     description={`last seen at ${getRelativeTimeString(new Date(data.conversation.recipient.lastSeenAt), 'en-US')}`}
                 />
                 {data.conversation.messages.length ? (
-                    <MessagesList />
+                    <MessagesList
+                        type='conversation'
+                        messages={data.conversation.messages}
+                        getPreviousMessages={getPreviousMessages}
+                        isFetchingPreviousMessages={isPreviousMessagesLoading}
+                        nextCursor={data.nextCursor}
+                        canFetch={!isPreviousMessagesLoading && !!data.nextCursor}
+                    />
                 ) : (
                     <Typography
                         variant='primary'

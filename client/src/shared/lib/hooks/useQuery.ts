@@ -1,5 +1,50 @@
 import React from 'react';
-import { UseQueryReducerAction, UseQueryOptions, UseQueryReducerState, UseQueryTypes, UseRunQueryAction, UseQueryReturn } from '@/shared/model/types';
+
+export interface UseQueryOptions<T> {
+    keys?: React.DependencyList;
+    retry?: boolean | number;
+    refetchInterval?: number;
+    onSuccess?: (data: T) => void;
+    onError?: (error: unknown) => void;
+    // select?: (data: T) => T;
+    // placeholderData?: T | (() => T);
+}
+
+export enum UseQueryTypes {
+    LOADING = 'loading',
+    SUCCESS = 'success',
+    REFETCH = 'refetch',
+    RESET = 'reset',
+    ERROR = 'error',
+}
+
+export interface UseQueryReturn<T> {
+    data?: T;
+    isLoading: boolean;
+    isError: boolean;
+    isRefetching: boolean;
+    isSuccess: boolean;
+    error?: Error;
+    refetch: () => void;
+}
+
+export interface UseQueryReducerState<T> {
+    data?: T;
+    isLoading: boolean;
+    isSuccess: boolean;
+    isError: boolean;
+    isRefetching: boolean;
+    error?: Error;
+}
+
+export type UseQueryReducerAction<T> =
+    | { type: UseQueryTypes.LOADING; payload: { isLoading: boolean } }
+    | { type: UseQueryTypes.SUCCESS; payload: { data: T, isSuccess: true, isLoading: false, isRefetching: false } }
+    | { type: UseQueryTypes.ERROR; payload: { error: Error, isError: true } }
+    | { type: UseQueryTypes.REFETCH; payload: { isRefething: true } }
+    | { type: UseQueryTypes.RESET; payload: { isLoading: false, isRefetching: false } }
+
+export type UseRunQueryAction = 'init' | 'refetch';
 
 const queryReducer = <T>(state: UseQueryReducerState<T>, action: UseQueryReducerAction<T>) => {
     switch (action.type) {

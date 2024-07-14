@@ -1,8 +1,8 @@
 import Typography from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
 import { Loader2, Verified } from 'lucide-react';
+import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { ChatHeaderProps } from '../model/types';
-import { useLayoutContext } from '../lib/hooks/useLayoutContext';
 
 const ChatHeader = ({ name, description, isVerified }: ChatHeaderProps) => {
     const { isConnected } = useLayoutContext();

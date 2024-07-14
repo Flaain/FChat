@@ -85,14 +85,16 @@ export class MessageService {
                 conversation.lastMessageSentAt = lastMessage?.createdAt ?? conversation.createdAt;
                 
                 await Promise.all([message.deleteOne(), conversation.save()]);
-
+                
                 return {
                     isLastMessage,
                     lastMessage: lastMessage?.toObject(),
                     lastMessageSentAt: conversation.lastMessageSentAt,
                 };
             }
-
+            
+            await Promise.all([message.deleteOne(), conversation.save()]);
+            
             return {
                 isLastMessage,
                 lastMessage: conversation.lastMessage,

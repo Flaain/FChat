@@ -1,4 +1,3 @@
-import { DependencyList } from 'react';
 import { ModalConfig } from '../lib/contexts/modal/types';
 import { Profile, User } from '../lib/contexts/profile/model/types';
 import { FieldError } from 'react-hook-form';
@@ -174,14 +173,6 @@ export type FormErrorsType = [
     )
 ];
 
-export interface ConfirmationProps {
-    onConfirm: () => Promise<void>;
-    onCancel: () => void;
-    text: string;
-    onConfirmText?: string;
-    onCancelText?: string;
-}
-
 export interface UseInfiniteScrollOptions extends IntersectionObserverInit {
     callback: () => Promise<void> | void;
     deps: React.DependencyList;
@@ -194,13 +185,6 @@ export interface Meta {
 }
 
 export type Feed = Array<ConversationFeed | GroupFeed | UserFeed>;
-
-export interface SearchedUsersListProps extends React.HTMLAttributes<HTMLUListElement> {
-    onUserSelect: (user: SearchUser) => void;
-    searchedUsers: Array<SearchUser>;
-    selectedUsers: Map<string, SearchUser> | SearchUser | null;
-    title?: string;
-}
 
 export type FeedItem = ConversationFeed | GroupFeed | UserFeed;
 
@@ -218,12 +202,6 @@ export interface Drafts {
     value: string;
     state: MessageFormState;
     selectedMessage?: IMessage;
-}
-
-export interface ChatHeaderProps {
-    name: string;
-    isVerified?: boolean;
-    description: string;
 }
 
 export enum CONVERSATION_EVENTS {
@@ -247,48 +225,4 @@ export interface GetConversationsRes {
     nextCursor: string;
 }
 
-export interface UseQueryOptions<T> {
-    keys?: DependencyList;
-    retry?: boolean | number;
-    refetchInterval?: number;
-    onSuccess?: (data: T) => void;
-    onError?: (error: unknown) => void;
-    // select?: (data: T) => T;
-    // placeholderData?: T | (() => T);
-}
-
-export enum UseQueryTypes {
-    LOADING = 'loading',
-    SUCCESS = 'success',
-    REFETCH = 'refetch',
-    RESET = 'reset',
-    ERROR = 'error',
-}
-
-export interface UseQueryReturn<T> {
-    data?: T;
-    isLoading: boolean;
-    isError: boolean;
-    isRefetching: boolean;
-    isSuccess: boolean;
-    error?: Error;
-    refetch: () => void;
-}
-
-export interface UseQueryReducerState<T> {
-    data?: T;
-    isLoading: boolean;
-    isSuccess: boolean;
-    isError: boolean;
-    isRefetching: boolean;
-    error?: Error;
-}
-
-export type UseQueryReducerAction<T> =
-    | { type: UseQueryTypes.LOADING; payload: { isLoading: boolean } }
-    | { type: UseQueryTypes.SUCCESS; payload: { data: T, isSuccess: true, isLoading: false, isRefetching: false } }
-    | { type: UseQueryTypes.ERROR; payload: { error: Error, isError: true } }
-    | { type: UseQueryTypes.REFETCH; payload: { isRefething: true } }
-    | { type: UseQueryTypes.RESET; payload: { isLoading: false, isRefetching: false } }
-
-export type UseRunQueryAction = 'init' | 'refetch';
+export type ScrollTriggeredFromTypes = "init" | "infiniteScroll" | "send"

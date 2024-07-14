@@ -33,14 +33,14 @@ export class MessageAPI extends API {
     };
 
     delete = async ({
-        body: { conversationId, messageId },
+        body: { conversationId, messageId, recipientId },
         token,
         ...rest
-    }: WithRequired<APIMethodParams<{ messageId: string; conversationId: string }>, 'body' | 'token'>) => {
+    }: WithRequired<APIMethodParams<{ messageId: string; conversationId: string, recipientId: string }>, 'body' | 'token'>) => {
         const response = await fetch(this._baseUrl + `/message/delete/${messageId}`, {
             method: 'DELETE',
             headers: { ...this._headers, Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ conversationId }),
+            body: JSON.stringify({ conversationId, recipientId }),
             ...rest
         });
 

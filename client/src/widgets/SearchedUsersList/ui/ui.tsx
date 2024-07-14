@@ -1,10 +1,11 @@
-import AvatarByName from './AvatarByName';
-import Typography from './Typography';
-import SearchUserSkeleton from './SearchUserSkeleton';
-import { Minus, Plus } from 'lucide-react';
-import { SearchedUsersListProps } from '../model/types';
-import { Button } from './Button';
-import { useModal } from '../lib/hooks/useModal';
+import Typography from "@/shared/ui/Typography";
+import AvatarByName from "@/shared/ui/AvatarByName";
+import SearchUserSkeleton from "../ui/Skeletons/SearchUserSkeleton";
+import { useModal } from "@/shared/lib/hooks/useModal";
+import { Button } from "@/shared/ui/Button";
+import { Minus, Plus } from "lucide-react";
+import { SearchedUsersListProps } from "../model/types";
+
 
 const SearchedUsersList = ({ searchedUsers, selectedUsers, onUserSelect, title, ...rest }: SearchedUsersListProps) => {
     const { isAsyncActionLoading } = useModal();
@@ -21,7 +22,7 @@ const SearchedUsersList = ({ searchedUsers, selectedUsers, onUserSelect, title, 
             ) : (
                 <ul {...rest} className='flex flex-col gap-2 overflow-auto max-h-[300px]'>
                     {searchedUsers.map((user) => {
-                        const isUserAlreadySelected = selectedUsers instanceof Map ? selectedUsers.has(user._id) : selectedUsers?._id === user._id;
+                        const isUserAlreadySelected = selectedUsers.has(user._id)
 
                         return (
                             <li

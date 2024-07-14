@@ -3,7 +3,6 @@ import React from 'react';
 export const useLocalStorage = <T>(key: string, initialValue: T) => {
     const [value, setValue] = React.useState<T | undefined>(() => initialValue);
 
-    // Gets initial value from localStorage if available
     React.useLayoutEffect(() => {
         let initialValue;
 

@@ -97,7 +97,7 @@ export class ConversationService implements IConversationService {
                                     select: 'name email isVerified',
                                 },
                                 options: {
-                                    limit: MESSAGES_BATCH,
+                                    limit: MESSAGES_BATCH + 1,
                                     sort: { createdAt: -1 },
                                 },
                                 ...(cursor && { match: { _id: { $lt: cursor } } }),
@@ -112,7 +112,7 @@ export class ConversationService implements IConversationService {
                 return { conversation: { recipient, messages: [] }, nextCursor };
             };
 
-            conversation.messages.length === MESSAGES_BATCH && (nextCursor = (conversation.messages[MESSAGES_BATCH - 1]._id.toString()));
+            conversation.messages.length > MESSAGES_BATCH && (nextCursor = (conversation.messages[MESSAGES_BATCH - 1]._id.toString()), conversation.messages.pop());
 
             return { conversation: { _id: conversation._id, recipient, messages: conversation.messages.reverse() }, nextCursor };
         } catch (error) {

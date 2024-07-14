@@ -1,9 +1,9 @@
-import Typography from './Typography';
+import Typography from '@/shared/ui/Typography';
+import { useModal } from '@/shared/lib/hooks/useModal';
+import { Button } from '@/shared/ui/Button';
 import { ConfirmationProps } from '../model/types';
-import { Button } from './Button';
-import { useModal } from '../lib/hooks/useModal';
 
-const Confirmation = ({
+const Confirm = ({
     text,
     onConfirm,
     onCancel,
@@ -29,4 +29,4 @@ const Confirmation = ({
     );
 };
 
-export default Confirmation;
+export default Confirm;

@@ -25,11 +25,7 @@ const SheetHeader = ({ title, closeHandler }: Pick<SheetProps, 'title' | 'closeH
     );
 };
 
-const SheetContainer = ({
-    children,
-    direction = 'left',
-    closeHandler
-}: Omit<SheetProps, 'title' | 'withHeader'> & { direction?: 'left' | 'right' }) => {
+const SheetContainer = ({ children, direction = 'left', closeHandler }: Omit<SheetProps, 'title' | 'withHeader'> & { direction?: 'left' | 'right' }) => {
     React.useEffect(() => {
         const handleKeyUp = ({ key }: KeyboardEvent) => {
             key === 'Escape' && closeHandler();

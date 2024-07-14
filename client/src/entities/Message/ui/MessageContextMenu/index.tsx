@@ -1,4 +1,4 @@
-import Confirmation from '@/shared/ui/Confirmation';
+import Confirm from '@/widgets/Confirm/ui/ui';
 import { ModalConfig } from '@/shared/lib/contexts/modal/types';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { ContextMenuContent, ContextMenuItem } from '@/shared/ui/context-menu';
@@ -12,7 +12,7 @@ const MessageContextMenu = ({ message, isMessageFromMe }: { message: IMessage; i
 
     const confirmationConfig: ModalConfig = {
         content: (
-            <Confirmation
+            <Confirm
                 onCancel={closeModal}
                 onConfirm={handleMessageDelete}
                 onConfirmText='Delete'

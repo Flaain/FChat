@@ -1,7 +1,7 @@
 import Typography from '@/shared/ui/Typography';
-import SearchedUsersList from '@/shared/ui/SearchedUsersList';
-import { Button } from '@/shared/ui/Button';
+import SearchedUsersList from '@/widgets/SearchedUsersList/ui/ui';
 import { X } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Input } from '@/shared/ui/Input';
 import { SelectStageProps } from '../../model/types';

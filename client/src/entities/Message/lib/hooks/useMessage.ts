@@ -24,7 +24,11 @@ export const useMessage = (message: IMessage) => {
             setIsAsyncActionLoading(true);
 
             const { data: { isLastMessage, lastMessage, lastMessageSentAt } } = await api.message.delete({ 
-                body: { conversationId: conversation._id, messageId: _id }, 
+                body: { 
+                    messageId: _id,
+                    conversationId: conversation._id, 
+                    recipientId: conversation.recipient._id 
+                }, 
                 token: accessToken! 
             });
 

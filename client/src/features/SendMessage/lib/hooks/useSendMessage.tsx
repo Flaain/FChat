@@ -1,5 +1,5 @@
 import React from 'react';
-import Confirmation from '@/shared/ui/Confirmation';
+import Confirm from '@/widgets/Confirm/ui/ui';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
@@ -73,7 +73,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             setIsAsyncActionLoading(true);
             
             const { data: { isLastMessage, lastMessage, lastMessageSentAt } } = await api.message.delete({ 
-                body: { conversationId: conversation._id, messageId }, 
+                body: { conversationId: conversation._id, messageId, recipientId: conversation.recipient._id }, 
                 token: accessToken! 
             });
 
@@ -132,7 +132,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
         if (!trimmedValue.length)
             return openModal({
                 content: (
-                    <Confirmation
+                    <Confirm
                         onCancel={onCloseDeleteConfirmation}
                         onConfirm={handleDeleteConversationMessage}
                         onConfirmText='Delete'

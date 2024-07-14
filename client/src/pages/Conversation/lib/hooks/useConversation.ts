@@ -2,7 +2,7 @@ import React from 'react';
 import { api } from '@/shared/api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { ConversationStatuses, ConversationWithMeta, ScrollTriggeredFromTypes } from '../../model/types';
+import { ConversationStatuses, ConversationWithMeta } from '../../model/types';
 import { Conversation, IMessage, CONVERSATION_EVENTS } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { ApiError } from '@/shared/api/error';
@@ -16,8 +16,31 @@ export const useConversation = () => {
     const [status, setStatus] = React.useState<ConversationStatuses>('loading');
     const [error, setError] = React.useState<string | null>(null);
     const [isRefetching, setIsRefetching] = React.useState(false);
+    const [isPreviousMessagesLoading, setIsPreviousMessagesLoading] = React.useState(false);
 
-    const scrollTriggeredFromRef = React.useRef<ScrollTriggeredFromTypes>('init');
+    const getPreviousMessages = async () => {
+        try {
+            setIsPreviousMessagesLoading(true);
+
+            const { data: previousMessages } = await api.conversation.get({
+                body: { recipientId: data?.conversation.recipient._id, params: { cursor: data?.nextCursor! } },
+                token: accessToken!
+            });
+
+            setConversation((prev) => ({
+                ...prev,
+                conversation: {
+                    ...prev.conversation,
+                    messages: [...previousMessages.conversation.messages, ...prev.conversation.messages]
+                },
+                nextCursor: previousMessages.nextCursor
+            }));
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsPreviousMessagesLoading(false);
+        }
+    };
 
     const navigate = useNavigate();
 
@@ -42,7 +65,7 @@ export const useConversation = () => {
         setConversation((prevState) => ({ ...prevState, conversation: { ...prevState.conversation, _id } }));
     }, []);
 
-    const onDeleteMessage = React.useCallback(({ messageId }: { messageId: string }) => {
+    const onDeleteMessage = React.useCallback((messageId: string) => {
         setConversation((prev) => ({
             ...prev,
             conversation: {
@@ -57,8 +80,6 @@ export const useConversation = () => {
             action === 'init' ? setStatus('loading') : setIsRefetching(true);
 
             const { data: response } = await api.conversation.get({ token: accessToken!, body: { recipientId } });
-
-            scrollTriggeredFromRef.current = 'init';
 
             setConversation(response);
             setStatus('idle');
@@ -103,8 +124,9 @@ export const useConversation = () => {
         status,
         error,
         isRefetching,
-        scrollTriggeredFromRef,
+        isPreviousMessagesLoading,
         setConversation,
+        getPreviousMessages,
         refetch: getConversation
     };
 };

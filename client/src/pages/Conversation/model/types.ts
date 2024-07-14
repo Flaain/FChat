@@ -1,6 +1,5 @@
-import { Conversation } from "@/shared/model/types";
+import { Conversation, ScrollTriggeredFromTypes } from "@/shared/model/types";
 
-export type ScrollTriggeredFromTypes = "init" | "infiniteScroll" | "send"
 export type ConversationStatuses = "idle" | "loading" | "error";
 
 export interface ConversationWithMeta {
@@ -11,6 +10,8 @@ export interface ConversationWithMeta {
 export interface ConversationContextProps {
     data: ConversationWithMeta;
     status: ConversationStatuses;
+    isPreviousMessagesLoading: boolean;
+    getPreviousMessages: () => Promise<void>;
     scrollTriggeredFromRef: React.MutableRefObject<ScrollTriggeredFromTypes>;
     error: string | null;
     isRefetching: boolean;
