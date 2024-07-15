@@ -1,4 +1,4 @@
-import { Conversation, ScrollTriggeredFromTypes } from "@/shared/model/types";
+import { Conversation } from "@/shared/model/types";
 
 export type ConversationStatuses = "idle" | "loading" | "error";
 
@@ -12,7 +12,6 @@ export interface ConversationContextProps {
     status: ConversationStatuses;
     isPreviousMessagesLoading: boolean;
     getPreviousMessages: () => Promise<void>;
-    scrollTriggeredFromRef: React.MutableRefObject<ScrollTriggeredFromTypes>;
     error: string | null;
     isRefetching: boolean;
     refetch: () => Promise<void>;

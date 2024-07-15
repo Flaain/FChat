@@ -3,7 +3,7 @@ import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { CONVERSATION_EVENTS } from './utils/events';
-import { ConversationCreateParams, ConversationDeleteMessageParams, ConversationSendMessageParams, FEED_EVENTS, STATIC_CONVERSATION_EVENTS } from './types';
+import { ConversationCreateParams, ConversationDeleteMessageParams, ConversationDeleteParams, ConversationSendMessageParams, FEED_EVENTS, STATIC_CONVERSATION_EVENTS } from './types';
 import { GatewayManager } from './gateway.manager';
 import { GatewayUtils } from './gateway.utils';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -37,12 +37,13 @@ export class Gateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDis
             if (!token) return next(new Error('invalid token'));
 
             try {
-                const user = await this.userService.findOneByPayload({
-                    _id: this.jwtService.verify<{ _id: string }>(token, {
-                        secret: this.configService.get<string>('JWT_SECRET'),
-                    })?._id,
-                    deleted: false,
-                });
+                const user = await this.userService.findOneByPayload(
+                    {
+                        _id: this.jwtService.verify<{ _id: string }>(token, { secret: this.configService.get<string>('JWT_SECRET') })?._id,
+                        deleted: false,
+                    },
+                    { password: 0, email: 0 },
+                );
 
                 if (!user) throw new Error('invalid user');
 
@@ -93,7 +94,7 @@ export class Gateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDis
 
         this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.SEND_MESSAGE, message);
 
-        [initiatorSocket, recipientSocket].forEach((socket) => socket?.emit(FEED_EVENTS.NEW_MESSAGE, { message, conversationId }));
+        [initiatorSocket, recipientSocket].forEach((socket) => socket?.emit(FEED_EVENTS.CREATE_MESSAGE, { message, conversationId }));
     }
 
     @OnEvent(STATIC_CONVERSATION_EVENTS.DELETE_MESSAGE)
@@ -123,20 +124,35 @@ export class Gateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDis
     }
 
     @OnEvent(STATIC_CONVERSATION_EVENTS.CREATED)
-    async onConversationCreated({ initiatorId, conversationId, recipientId, lastMessageSentAt }: ConversationCreateParams) {
-        const roomId = GatewayUtils.getRoomIdByParticipants([initiatorId, recipientId])
+    async onConversationCreated({ initiatorId, conversationId, recipient, lastMessageSentAt }: ConversationCreateParams) {
         const newConversation = { _id: conversationId, lastMessageSentAt };
 
+        const roomId = GatewayUtils.getRoomIdByParticipants([initiatorId, recipient._id.toString()]);
+
         this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.CREATED, newConversation);
+console.log(recipient)
+        const initiatorSocket = this.gatewayManager.sockets.get(initiatorId);
+        const recipientSocket = this.gatewayManager.sockets.get(recipient._id.toString());
+
+        [initiatorSocket, recipientSocket].forEach((socket) => {
+            socket?.emit(FEED_EVENTS.CREATE_CONVERSATION, {
+                ...newConversation,
+                recipient: socket.data.user._id.toString() === recipient._id.toString() ? initiatorSocket.data.user : recipient,
+            });
+        });
+    }
+
+    @OnEvent(STATIC_CONVERSATION_EVENTS.DELETED)
+    async onConversationDeleted({ initiatorId, recipientId, conversationId }: ConversationDeleteParams) {
+        const roomId = GatewayUtils.getRoomIdByParticipants([initiatorId, recipientId]);
+
+        this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.DELETED);
 
         const initiatorSocket = this.gatewayManager.sockets.get(initiatorId);
         const recipientSocket = this.gatewayManager.sockets.get(recipientId);
 
         [initiatorSocket, recipientSocket].forEach((socket) => {
-            socket?.emit(FEED_EVENTS.NEW_CONVERSATION, {
-                ...newConversation,
-                recipient: socket.data.user._id.toString() === recipientId ? initiatorSocket.data.user : recipientSocket.data.user,
-            });
+            socket?.emit(FEED_EVENTS.DELETE_CONVERSATION, conversationId);
         });
     }
 }

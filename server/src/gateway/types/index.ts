@@ -1,4 +1,5 @@
 import { Message } from 'src/message/schemas/message.schema';
+import { UserDocument } from 'src/user/types';
 
 export enum STATIC_CONVERSATION_EVENTS {
     JOIN = 'conversation.join',
@@ -11,10 +12,11 @@ export enum STATIC_CONVERSATION_EVENTS {
 }
 
 export enum FEED_EVENTS {
-    NEW_MESSAGE = 'feed.new.message',
+    CREATE_MESSAGE = 'feed.create.message',
     EDIT_MESSAGE = 'feed.edit.message',
     DELETE_MESSAGE = 'feed.delete.message',
-    NEW_CONVERSATION = 'feed.new.conversation',
+    CREATE_CONVERSATION = 'feed.create.conversation',
+    DELETE_CONVERSATION = 'feed.delete.conversation',
 }
 
 export interface ConversationDeleteMessageParams {
@@ -37,6 +39,12 @@ export interface ConversationSendMessageParams {
 export interface ConversationCreateParams {
     initiatorId: string;
     conversationId: string;
-    recipientId: string;
+    recipient: Pick<UserDocument, 'name' | 'email' | 'isVerified' | '_id'>;
     lastMessageSentAt: Date;
+}
+
+export interface ConversationDeleteParams {
+    initiatorId: string;
+    recipientId: string;
+    conversationId: string;
 }

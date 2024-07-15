@@ -1,7 +1,7 @@
 import React from 'react';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
-import { CONVERSATION_EVENTS, IMessage } from '@/shared/model/types';
+import { IMessage } from '@/shared/model/types';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
@@ -11,7 +11,7 @@ export const useMessage = (message: IMessage) => {
     const { _id, text } = message;
     const { data: { conversation } } = useConversationContext();
     const { state: { accessToken } } = useSession();
-    const { socket, setDrafts } = useLayoutContext();
+    const { setDrafts } = useLayoutContext();
     const { setIsAsyncActionLoading, closeModal } = useModal()
 
     const handleCopyToClipboard = React.useCallback(() => {
@@ -23,22 +23,13 @@ export const useMessage = (message: IMessage) => {
         try {
             setIsAsyncActionLoading(true);
 
-            const { data: { isLastMessage, lastMessage, lastMessageSentAt } } = await api.message.delete({ 
+            await api.message.delete({ 
                 body: { 
                     messageId: _id,
                     conversationId: conversation._id, 
                     recipientId: conversation.recipient._id 
                 }, 
                 token: accessToken! 
-            });
-
-            socket?.emit(CONVERSATION_EVENTS.MESSAGE_DELETE, { 
-                isLastMessage,
-                lastMessage,
-                lastMessageSentAt, 
-                messageId: _id, 
-                conversationId: conversation._id,
-                recipientId: conversation.recipient._id, 
             });
             
             toast.success('Message deleted', { position: 'top-center' });

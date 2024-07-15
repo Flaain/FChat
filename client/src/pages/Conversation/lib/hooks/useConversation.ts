@@ -107,6 +107,7 @@ export const useConversation = () => {
         socket?.on(CONVERSATION_EVENTS.MESSAGE_EDIT, onEditMessage);
         socket?.on(CONVERSATION_EVENTS.MESSAGE_DELETE, onDeleteMessage);
         socket?.on(CONVERSATION_EVENTS.CREATED, onCreateConversation);
+        socket?.on(CONVERSATION_EVENTS.DELETED, () => navigate('/'));
 
         return () => {
             socket?.emit(CONVERSATION_EVENTS.LEFT, { recipientId });
@@ -115,6 +116,7 @@ export const useConversation = () => {
             socket?.off(CONVERSATION_EVENTS.MESSAGE_EDIT);
             socket?.off(CONVERSATION_EVENTS.MESSAGE_DELETE);
             socket?.off(CONVERSATION_EVENTS.CREATED);
+            socket?.off(CONVERSATION_EVENTS.DELETED);
             socket?.off('reconnect');
         };
     }, [recipientId]);

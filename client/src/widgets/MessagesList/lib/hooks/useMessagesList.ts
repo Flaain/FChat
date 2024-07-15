@@ -31,10 +31,16 @@ export const useMessagesList = ({ messages, getPreviousMessages, canFetch }: Use
     }, [listRef, canFetch, getPreviousMessages]);
 
     React.useEffect(() => {
-        if (!lastMessageRef.current) return;
-
-        lastMessageRef.current.scrollIntoView({ behavior: 'instant' });
+        lastMessageRef.current?.scrollIntoView({ behavior: 'instant' });
     }, [])
+
+    React.useEffect(() => {
+        if (!listRef.current || !lastMessageRef.current) return;
+
+        const scrollBottom = listRef.current.scrollHeight - listRef.current.scrollTop - listRef.current.clientHeight;
+
+        scrollBottom <= 100 && lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
     return { lastMessageRef, listRef, groupedMessages };
 }

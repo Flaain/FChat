@@ -6,7 +6,7 @@ import { SessionTypes } from '@/entities/session/model/types';
 import { localStorageKeys } from '@/shared/constants';
 import { useFeed } from './useFeed';
 import { debounce } from '../utils/debounce';
-import { ConversationFeed, Drafts, FEED_EVENTS, FeedTypes, IMessage } from '@/shared/model/types';
+import { ConversationFeed, DeleteMessageEventParams, Drafts, FEED_EVENTS, FeedTypes, IMessage } from '@/shared/model/types';
 import { useSocket } from './useSocket';
 import { getSortedFeedByLastMessage } from '../utils/getSortedFeedByLastMessage';
 
@@ -26,21 +26,42 @@ export const useLayout = () => {
     const searchInputRef = React.useRef<HTMLInputElement | null>(null);
 
     React.useEffect(() => {
-        socket?.on(FEED_EVENTS.NEW_CONVERSATION, (conversation: ConversationFeed) => {
+        socket?.on(FEED_EVENTS.CREATE_CONVERSATION, (conversation: ConversationFeed) => {
             setLocalResults((prevState) => [{ ...conversation, type: FeedTypes.CONVERSATION }, ...prevState]);
         });
 
-        socket?.on(FEED_EVENTS.NEW_MESSAGE, ({ message, conversationId }: { message: IMessage; conversationId: string }) => {
-            setLocalResults((prevState) => prevState.map((item) => item._id === conversationId ? { ...item, lastMessage: message, lastMessageSentAt: message.createdAt } : item).sort(getSortedFeedByLastMessage));
+        socket?.on(FEED_EVENTS.CREATE_MESSAGE, ({ message, conversationId }: { message: IMessage; conversationId: string }) => {
+            setLocalResults((prevState) =>
+                prevState
+                    .map((item) =>
+                        item._id === conversationId
+                            ? { ...item, lastMessage: message, lastMessageSentAt: message.createdAt }
+                            : item
+                    )
+                    .sort(getSortedFeedByLastMessage)
+            );
         });
 
-        socket?.on(FEED_EVENTS.DELETE_MESSAGE, ({ lastMessage, lastMessageSentAt, conversationId }: { lastMessage: IMessage; lastMessageSentAt: string; conversationId: string }) => {
-            setLocalResults((prevState) => prevState.map((item) => item._id === conversationId ? { ...item, lastMessage, lastMessageSentAt } : item).sort(getSortedFeedByLastMessage));
+        socket?.on(FEED_EVENTS.DELETE_MESSAGE, ({ lastMessage, lastMessageSentAt, conversationId }: DeleteMessageEventParams) => {
+            setLocalResults((prevState) =>
+                prevState
+                    .map((item) =>
+                        item._id === conversationId ? { ...item, lastMessage, lastMessageSentAt } : item
+                    )
+                    .sort(getSortedFeedByLastMessage)
+            );
         });
+
+        socket?.on(FEED_EVENTS.DELETE_CONVERSATION, (conversationId: string) => {
+            setLocalResults((prevState) => prevState.filter((item) => item._id !== conversationId).sort(getSortedFeedByLastMessage));
+        })
 
         return () => {
-            socket?.off(FEED_EVENTS.NEW_CONVERSATION);
-            socket?.off(FEED_EVENTS.NEW_MESSAGE);
+            socket?.off(FEED_EVENTS.CREATE_CONVERSATION);
+            socket?.off(FEED_EVENTS.DELETE_CONVERSATION);
+            
+            socket?.off(FEED_EVENTS.CREATE_MESSAGE);
+            socket?.off(FEED_EVENTS.DELETE_MESSAGE);
         };
     }, [socket]);
 

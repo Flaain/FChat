@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from 'src/user/schemas/user.schema';
 import { UserModule } from 'src/user/user.module';
 import { ParticipantModule } from 'src/participant/participant.module';
+import { Message, MessageSchema } from 'src/message/schemas/message.schema';
 
 @Module({
     imports: [
@@ -13,6 +14,7 @@ import { ParticipantModule } from 'src/participant/participant.module';
         ParticipantModule,
         MongooseModule.forFeature([
             { name: Conversation.name, schema: ConversationSchema },
+            { name: Message.name, schema: MessageSchema },
             { name: User.name, schema: UserSchema },
         ]),
     ],

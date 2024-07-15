@@ -6,19 +6,22 @@ import { ConversationDocument, CreateConversationArgs, IConversationService } fr
 import { UserService } from 'src/user/user.service';
 import { CONVERSATION_ALREADY_EXISTS, CONVERSATION_WITH_MYSELF } from './utils/conversation.constants';
 import { UserDocument } from 'src/user/types';
+import { Message } from 'src/message/schemas/message.schema';
 
 @Injectable()
 export class ConversationService implements IConversationService {
     constructor(
         @InjectModel(Conversation.name) private readonly conversationModel: Model<Conversation>,
+        @InjectModel(Message.name) private readonly messageModel: Model<Message>, 
+        // ^^^ that's bad but need it for delete conversation, can't use message service because of circular dependency
         private readonly userService: UserService,
     ) {}
 
-    createConversation = async ({ initiatorId, recipientId }: CreateConversationArgs): Promise<Pick<ConversationDocument, "_id" | "lastMessageSentAt">> => {
+    createConversation = async ({ initiatorId, recipientId }: CreateConversationArgs): Promise<Pick<ConversationDocument, "_id" | "lastMessageSentAt"> & { recipient: UserDocument }> => {
         try {
             if (initiatorId.toString() === recipientId) throw new HttpException(CONVERSATION_WITH_MYSELF, CONVERSATION_WITH_MYSELF.status);
 
-            const recipient = await this.userService.findOneByPayload({ _id: recipientId, isPrivate: false });
+            const recipient = await this.userService.findOneByPayload({ _id: recipientId, isPrivate: false }, { _id: 1, name: 1, email: 1, isVerified: 1 });
 
             if (!recipient) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
@@ -27,13 +30,28 @@ export class ConversationService implements IConversationService {
             if (isConversationExists) throw new ConflictException(CONVERSATION_ALREADY_EXISTS);
 
             const { _id, lastMessageSentAt } = (await new this.conversationModel({ participants: [initiatorId, recipient._id] }).save()).toObject();
-
-            return { _id, lastMessageSentAt }
+            
+            return { _id, lastMessageSentAt, recipient: recipient.toObject() };
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response, error.status);
         }
     };
+
+    deleteConversation = async ({ initiatorId, conversationId }: { initiatorId: Types.ObjectId; conversationId: string }) => {
+        try {
+            const conversation = await this.conversationModel.findOne({ _id: conversationId, participants: { $in: initiatorId } });
+
+            if (!conversation) throw new HttpException('conversation not found', HttpStatus.NOT_FOUND);
+
+            await Promise.all([this.messageModel.deleteMany({ _id: { $in: conversation.messages } }), conversation.deleteOne()]);
+
+            return { success: true };
+        } catch (error) {
+            console.log(error);
+            throw new HttpException(error.response, error.status);
+        }
+    }
 
     getConversations = async ({ initiatorId, cursor }: { initiatorId: Types.ObjectId; cursor?: string }) => {
         try {

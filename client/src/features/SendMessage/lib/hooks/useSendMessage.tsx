@@ -6,15 +6,15 @@ import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { MessageFormState, CONVERSATION_EVENTS } from '@/shared/model/types';
+import { MessageFormState } from '@/shared/model/types';
 import { UseMessageParams } from '../../model/types';
 import { Emoji } from '@emoji-mart/data';
 
 export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     const { state: { accessToken } } = useSession();
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
-    const { scrollTriggeredFromRef, data: { conversation } } = useConversationContext();
-    const { drafts, socket, setDrafts } = useLayoutContext();
+    const { data: { conversation } } = useConversationContext();
+    const { drafts, setDrafts } = useLayoutContext();
 
     const [isLoading, setIsLoading] = React.useState(false);
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false);
@@ -72,21 +72,16 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             
             setIsAsyncActionLoading(true);
             
-            const { data: { isLastMessage, lastMessage, lastMessageSentAt } } = await api.message.delete({ 
-                body: { conversationId: conversation._id, messageId, recipientId: conversation.recipient._id }, 
+            await api.message.delete({ 
+                body: { 
+                    conversationId: conversation._id, 
+                    messageId, 
+                    recipientId: conversation.recipient._id 
+                }, 
                 token: accessToken! 
             });
 
             toast.success('Message deleted', { position: 'top-center' });
-
-            socket?.emit(CONVERSATION_EVENTS.MESSAGE_DELETE, { 
-                conversationId: conversation._id, 
-                lastMessage, 
-                lastMessageSentAt,
-                isLastMessage,
-                messageId,
-                recipientId: conversation.recipient._id 
-            });
         } catch (error) {
             console.error(error);
             error instanceof Error && toast.error(error.message, { position: 'top-center' });
@@ -122,8 +117,6 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
 
     const onSendEditedConversationMessage = React.useCallback(async ({ messageId, message }: { messageId: string; message: string }) => {
         await api.message.edit({ body: { messageId, message, recipientId: queryId }, token: accessToken! });
-        
-        socket?.emit(CONVERSATION_EVENTS.MESSAGE_EDIT, { conversationId: conversation._id, messageId, message });
     }, []);
 
     const onSendEditedMessage = async () => {
@@ -159,14 +152,10 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
         if (!conversationId) {
             const { data: { _id } } = await api.conversation.create({ body: { recipientId: conversation.recipient._id }, token: accessToken! });
 
-            socket?.emit(CONVERSATION_EVENTS.CREATED, { conversationId: _id, recipientId: conversation.recipient._id });
-            
             conversationId = _id;
         }
 
-        const { data } = await api.message.send({ token: accessToken!, body: { message: message, recipientId: conversation.recipient._id }});
-
-        socket?.emit(CONVERSATION_EVENTS.MESSAGE_SEND, { message: data, conversationId, recipientId: conversation.recipient._id });
+        await api.message.send({ token: accessToken!, body: { message: message, recipientId: conversation.recipient._id }});
     }, [conversation]);
 
     const onSendGroupMessage = React.useCallback(async (message: string) => {
@@ -205,7 +194,6 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             await actions[currentDraft?.state ?? 'send']();
 
             setDefaultState();
-            scrollTriggeredFromRef.current = 'send';
         } catch (error) {
             console.error(error);
             error instanceof Error && toast.error(error.message, { position: 'top-center' });

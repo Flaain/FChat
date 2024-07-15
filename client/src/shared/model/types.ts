@@ -34,7 +34,9 @@ export interface AuthResponse extends Profile {
     expiresIn: string | number;
 }
 
-export interface APIMethodParams<T = undefined> extends Partial<Omit<BaseAPI, 'baseUrl'>>,  Omit<RequestInit, 'headers' | 'body'> {
+export interface APIMethodParams<T = undefined>
+    extends Partial<Omit<BaseAPI, 'baseUrl'>>,
+        Omit<RequestInit, 'headers' | 'body'> {
     endpoint?: string;
     token?: string;
     body?: T;
@@ -67,7 +69,8 @@ export interface GroupParticipant {
     isVerified?: boolean;
 }
 
-export interface ConversationParticipant extends Pick<User, '_id' | 'isVerified' | 'email' | 'name' | 'lastSeenAt' | 'isPrivate'> {}
+export interface ConversationParticipant
+    extends Pick<User, '_id' | 'isVerified' | 'email' | 'name' | 'lastSeenAt' | 'isPrivate'> {}
 
 export interface Conversation {
     _id: string;
@@ -208,21 +211,29 @@ export enum CONVERSATION_EVENTS {
     JOIN = 'conversation.join',
     LEFT = 'conversation.left',
     CREATED = 'conversation.created',
+    DELETED = 'conversation.deleted',
     MESSAGE_SEND = 'conversation.message.send',
     MESSAGE_EDIT = 'conversation.message.edit',
-    MESSAGE_DELETE = 'conversation.message.delete',
+    MESSAGE_DELETE = 'conversation.message.delete'
 }
 
 export enum FEED_EVENTS {
-    NEW_MESSAGE = 'feed.new.message',
+    CREATE_MESSAGE = 'feed.create.message',
     EDIT_MESSAGE = 'feed.edit.message',
     DELETE_MESSAGE = 'feed.delete.message',
-    NEW_CONVERSATION = 'feed.new.conversation'
+    CREATE_CONVERSATION = 'feed.create.conversation',
+    DELETE_CONVERSATION = 'feed.delete.conversation'
 }
 
 export interface GetConversationsRes {
-    conversations: Array<Omit<ConversationFeed, 'type' | 'recipient'> & { participants: Array<ConversationParticipant> }>;
+    conversations: Array<
+        Omit<ConversationFeed, 'type' | 'recipient'> & { participants: Array<ConversationParticipant> }
+    >;
     nextCursor: string;
 }
 
-export type ScrollTriggeredFromTypes = "init" | "infiniteScroll" | "send"
+export interface DeleteMessageEventParams {
+    lastMessage: IMessage;
+    lastMessageSentAt: string;
+    conversationId: string;
+}
