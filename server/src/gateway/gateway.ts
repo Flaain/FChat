@@ -3,10 +3,17 @@ import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { CONVERSATION_EVENTS } from './utils/events';
-import { ConversationCreateParams, ConversationDeleteMessageParams, ConversationDeleteParams, ConversationSendMessageParams, FEED_EVENTS, STATIC_CONVERSATION_EVENTS } from './types';
 import { GatewayManager } from './gateway.manager';
 import { GatewayUtils } from './gateway.utils';
 import { OnEvent } from '@nestjs/event-emitter';
+import {
+    FEED_EVENTS,
+    ConversationCreateParams,
+    ConversationDeleteMessageParams,
+    ConversationDeleteParams,
+    ConversationSendMessageParams,
+    STATIC_CONVERSATION_EVENTS,
+} from './types';
 import {
     ConnectedSocket,
     MessageBody,
