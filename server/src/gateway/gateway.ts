@@ -137,7 +137,7 @@ export class Gateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDis
         const roomId = GatewayUtils.getRoomIdByParticipants([initiatorId, recipient._id.toString()]);
 
         this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.CREATED, newConversation);
-console.log(recipient)
+
         const initiatorSocket = this.gatewayManager.sockets.get(initiatorId);
         const recipientSocket = this.gatewayManager.sockets.get(recipient._id.toString());
 

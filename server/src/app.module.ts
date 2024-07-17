@@ -11,6 +11,8 @@ import { ParticipantModule } from './participant/participant.module';
 import { GroupModule } from './group/group.module';
 import { GroupMessageModule } from './group-message/group-message.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { SessionModule } from './session/session.module';
+import { VerificationModule } from './verification/verification.module';
 
 @Module({
     imports: [
@@ -26,6 +28,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         ParticipantModule,
         GroupModule,
         GroupMessageModule,
+        SessionModule,
+        VerificationModule,
     ],
     providers: [{ provide: 'APP_GUARD', useClass: ThrottlerGuard }],
 })

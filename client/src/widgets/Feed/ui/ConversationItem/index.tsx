@@ -30,10 +30,10 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                     <Typography
                         as='h2'
                         weight='medium'
-                        className={cn(conversation.recipient.isVerified && 'flex items-center')}
+                        className={cn(conversation.recipient.official && 'flex items-center')}
                     >
                         {conversation.recipient.name}
-                        {conversation.recipient.isVerified && (
+                        {conversation.recipient.official && (
                             <Typography className='ml-2'>
                                 <Verified className='w-5 h-5' />
                             </Typography>

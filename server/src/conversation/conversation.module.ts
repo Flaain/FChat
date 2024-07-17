@@ -3,10 +3,10 @@ import { ConversationService } from './conversation.service';
 import { ConversationController } from './conversation.controller';
 import { Conversation, ConversationSchema } from './schemas/conversation.schema';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from 'src/user/schemas/user.schema';
 import { UserModule } from 'src/user/user.module';
 import { ParticipantModule } from 'src/participant/participant.module';
 import { Message, MessageSchema } from 'src/message/schemas/message.schema';
+import { User, UserSchema } from 'src/user/schemas/user.schema';
 
 @Module({
     imports: [

@@ -48,12 +48,12 @@ export const CONVERSATION_POPULATE = [
     {
         path: 'lastMessage',
         model: 'Message',
-        populate: { path: 'sender', model: 'User', select: 'name email isVerified' },
+        populate: { path: 'sender', model: 'User', select: 'name email verified official' },
     },
     {
         path: 'messages',
         model: 'Message',
-        populate: { path: 'sender', model: 'User', select: 'name email isVerified' },
+        populate: { path: 'sender', model: 'User', select: 'name email verified official' },
     },
 ];
 

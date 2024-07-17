@@ -1,13 +1,11 @@
-import { hash } from 'bcrypt';
-import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
-import { SignupDTO } from 'src/auth/dtos/auth.signup.dto';
-import { CreateUserType } from './types';
 import { USER_NOT_FOUND } from 'src/utils/constants';
 import { User } from './schemas/user.schema';
 import { userSearchSchema } from './schemas/user.search.schema';
 import { ZodError } from 'zod';
+import { SignupRequest } from 'src/auth/types';
 
 @Injectable()
 export class UserService {
@@ -44,6 +42,7 @@ export class UserService {
                     _id: { $ne: initiatorId },
                     name: { $regex: parsedQuery, $options: 'i' },
                     isPrivate: false,
+                    deleted: false,
                 },
                 { _id: 1, name: 1 },
                 { limit, skip: page * limit },
@@ -60,10 +59,11 @@ export class UserService {
 
     findById = async (id: string | Types.ObjectId) => this.userModel.findById(id);
 
-    create = async (userDetails: SignupDTO): Promise<CreateUserType & { _id: Types.ObjectId }> => {
-        const password = await hash(userDetails.password, 10);
-        const { password: _, ...user } = (await new this.userModel({ ...userDetails, password }).save()).toObject();
-
+    create = async (userDetails: SignupRequest) => {
+        const { password: _, ...user } = (await new this.userModel(userDetails).save()).toObject();
+        
         return user;
     };
+
+    exists = async (filter: FilterQuery<User>) => this.userModel.exists(filter);
 }

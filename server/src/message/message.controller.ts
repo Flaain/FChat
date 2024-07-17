@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { MessageService } from './message.service';
-import { JwtGuard } from 'src/utils/jwt.guard';
+import { JwtGuard } from 'src/utils/guards/jwt.guard';
 import { MessageSendDTO } from './dtos/message.send.dto';
 import { RequestWithUser, Routes } from 'src/utils/types';
 import { MessageDeleteDTO } from './dtos/message.delete.dto';

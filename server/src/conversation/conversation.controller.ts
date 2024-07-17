@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { JwtGuard } from 'src/utils/jwt.guard';
+import { JwtGuard } from 'src/utils/guards/jwt.guard';
 import { ConversationService } from './conversation.service';
 import { ConversationCreateDTO } from './dtos/conversation.create.dto';
 import { RequestWithUser, Routes } from 'src/utils/types';

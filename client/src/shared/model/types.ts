@@ -66,11 +66,9 @@ export interface GroupParticipant {
     name: string;
     email: string;
     userId: string;
-    isVerified?: boolean;
 }
 
-export interface ConversationParticipant
-    extends Pick<User, '_id' | 'isVerified' | 'email' | 'name' | 'lastSeenAt' | 'isPrivate'> {}
+export interface ConversationParticipant extends Pick<User, '_id' | 'official' | 'email' | 'name' | 'lastSeenAt' | 'isPrivate'> {}
 
 export interface Conversation {
     _id: string;
@@ -86,7 +84,7 @@ export interface Group {
     _id: string;
     name: string;
     participants: Array<GroupParticipant>;
-    isVerified?: boolean;
+    official?: boolean;
     messages: Array<IMessage>;
     lastMessage?: IMessage;
     lastMessageSentAt: string;
@@ -143,7 +141,7 @@ export type TypographyComponent = <T extends React.ElementType = 'span'>(
 export interface SearchUser {
     _id: string;
     name: string;
-    isVerified?: boolean;
+    official?: boolean;
     type: FeedTypes.USER;
 }
 
@@ -195,7 +193,7 @@ export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'lastM
     type: FeedTypes.CONVERSATION;
 };
 
-export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'isVerified' | 'name'> & {
+export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'official' | 'name'> & {
     type: FeedTypes.GROUP;
 };
 

@@ -1,19 +1,25 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { Request, Response } from 'express';
+import { JwtGuard } from '../utils/guards/jwt.guard';
 import { SigninDTO } from './dtos/auth.signin.dto';
 import { SignupDTO } from './dtos/auth.signup.dto';
-import { JwtGuard } from '../utils/jwt.guard';
-import { RequestWithUser, Routes } from 'src/utils/types';
+import { AuthService } from './auth.service';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CheckEmailDTO } from './dtos/auth.checkEmail.dto';
+import { RequestWithUser, Routes } from 'src/utils/types';
+import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { setAuthCookies } from './utils/cookies';
 
 @Controller(Routes.AUTH)
 export class AuthController {
     constructor(private authService: AuthService) {}
 
     @Post('signup')
-    signup(@Body() dto: SignupDTO) {
-        return this.authService.signup(dto);
+    async signup(@Body() dto: SignupDTO, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+        const { user, accessToken, refreshToken } = await this.authService.signup({ ...dto, userAgent: req.headers['user-agent'] });
+
+        setAuthCookies({ res, accessToken, refreshToken });
+
+        return user;
     }
 
     @Post('signup/check-email')

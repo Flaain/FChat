@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RequestWithUser, Routes } from 'src/utils/types';
-import { JwtGuard } from 'src/utils/jwt.guard';
+import { JwtGuard } from 'src/utils/guards/jwt.guard';
 
 @Controller(Routes.USER)
 export class UserController {

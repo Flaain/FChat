@@ -45,9 +45,9 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
         <div className='flex flex-col py-8 h-full'>
             <div className='flex flex-col gap-2 items-start px-4'>
                 <AvatarByName name={profile.name} size='lg' />
-                <Typography as='h2' size='lg' weight='medium' className={cn(profile.isVerified && 'flex items-center')}>
+                <Typography as='h2' size='lg' weight='medium' className={cn(profile.official && 'flex items-center')}>
                     {profile.name}
-                    {profile.isVerified && (
+                    {profile.official && (
                         <Typography className='ml-2'>
                             <Verified className='w-5 h-5' />
                         </Typography>

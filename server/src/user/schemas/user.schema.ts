@@ -19,7 +19,10 @@ export class User implements UserRegister {
     isPrivate: boolean;
 
     @Prop({ type: Boolean, default: false })
-    isVerified?: boolean;
+    verified: boolean;
+
+    @Prop({ type: Boolean, default: false })
+    official: boolean;
 
     @Prop({ type: Date, required: true, default: () => new Date() })
     lastSeenAt: Date;
@@ -28,7 +31,7 @@ export class User implements UserRegister {
     status?: string;
 
     @Prop({ type: Boolean, default: false })
-    deleted?: boolean;
+    deleted: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -8,6 +8,6 @@ export interface IGroup {
     owner: Types.ObjectId;
     displayName: string;
     isPrivate?: boolean;
-    isVerified?: boolean;
+    official?: boolean;
     lastMessage: Types.ObjectId;
 }

@@ -25,7 +25,7 @@ export class GroupService {
 
             const groups = await this.groupModel.find(
                 { _id: { $in: groupIds }, ...(cursor && { lastMessageSentAt: { $lt: cursor } }) },
-                { lastMessage: 1, lastMessageSentAt: 1, displayName: 1, isVerified: 1 },
+                { lastMessage: 1, lastMessageSentAt: 1, displayName: 1, official: 1 },
                 {
                     limit: GROUP_BATCH,
                     populate: {

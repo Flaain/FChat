@@ -9,8 +9,11 @@ export interface IUser {
     name: string;
     email: string;
     birthDate: Date;
-    isPrivate: boolean;
+    private: boolean;
     lastSeenAt: Date;
+    verified: boolean;
+    deleted: boolean;
+    official: boolean;
 }
 
 export interface UserRegister extends Pick<IUser, 'email' | 'name' | 'birthDate'> {

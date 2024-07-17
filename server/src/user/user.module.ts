@@ -3,8 +3,8 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
-import { Conversation, ConversationSchema } from 'src/conversation/schemas/conversation.schema';
 import { GroupModule } from 'src/group/group.module';
+import { Conversation, ConversationSchema } from 'src/conversation/schemas/conversation.schema';
 
 @Module({
     imports: [

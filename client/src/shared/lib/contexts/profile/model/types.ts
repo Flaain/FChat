@@ -3,9 +3,10 @@ export interface User {
     name: string;
     email: string;
     status?: string;
-    isVerified?: boolean;
+    verified: boolean;
+    official: boolean;
     lastSeenAt: string;
-    isPrivate?: boolean;
+    isPrivate: boolean;
     createdAt: string;
     updatedAt: string;
 }

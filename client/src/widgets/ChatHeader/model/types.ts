@@ -1,5 +1,5 @@
 export interface ChatHeaderProps {
     name: string;
-    isVerified?: boolean;
+    isOfficial?: boolean;
     description: string;
 }
