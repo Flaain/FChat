@@ -14,7 +14,7 @@ export class Session implements SessionDocument {
     @Prop({ type: Date, required: true, default: DatesService.oneMonthFromNow })
     expiresAt?: Date;
 
-    @Prop({ type: Date })
+    @Prop({ type: Date, expires: '30d' })
     createdAt: Date;
 }
 

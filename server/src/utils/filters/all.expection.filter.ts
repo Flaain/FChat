@@ -1,6 +1,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { AppException } from '../exceptions/app.exception';
+import { ZodValidationException } from 'nestjs-zod';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
@@ -25,6 +26,15 @@ export class AllExceptionFilter implements ExceptionFilter {
             };
 
             return httpAdapter.reply(ctx.getResponse(), responseBody, exception.statusCode);
+        }
+
+        if (exception instanceof ZodValidationException) {
+            return httpAdapter.reply(ctx.getResponse(), {
+                ...defaultBody, 
+                message: exception.message, 
+                stausCode: exception.getStatus(),
+                issues: exception.getZodError().issues
+            }, exception.getStatus());
         }
 
         const responseBody = {

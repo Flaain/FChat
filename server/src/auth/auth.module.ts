@@ -6,18 +6,20 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from 'src/user/user.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { VerificationModule } from 'src/verification/verification.module';
 import { SessionModule } from 'src/session/session.module';
 import { JWT_KEYS } from 'src/utils/types';
 import { BcryptModule } from 'src/utils/bcrypt/bcrypt.module';
+import { CookiesModule } from 'src/utils/cookies/cookies.module';
+import { OTPModule } from 'src/otp/otp.module';
 
 @Module({
     imports: [
         UserModule,
         PassportModule,
         ConfigModule,
+        CookiesModule,
         BcryptModule,
-        VerificationModule,
+        OTPModule,
         SessionModule,
         PassportModule.register({ defaultStrategy: 'jwt', property: 'user' }),
         JwtModule.registerAsync({

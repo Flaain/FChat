@@ -5,7 +5,7 @@ import { meRequestSchema } from '../schemas/auth.me.schema';
 import { signupSchema } from '../schemas/auth.signup.schema';
 import { Types } from 'mongoose';
 
-export type SigninRequest = z.infer<typeof signinRequestSchema>;
+export type SigninRequest = z.infer<typeof signinRequestSchema> & { userAgent?: string };
 export type SignupRequest = z.infer<typeof signupSchema> & { userAgent?: string };
 export type MeRequest = z.infer<typeof meRequestSchema>;
 

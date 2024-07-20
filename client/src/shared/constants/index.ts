@@ -8,7 +8,6 @@ export const routerList = {
 export const localStorageKeys = {
     THEME: "theme",
     TOKEN: "token",
-    ASIDE_PANEL_SIZE: "aside-panel-size",
 };
 
 export const onlyLatinRegExp = /^[a-zA-Z0-9\s]*$/;

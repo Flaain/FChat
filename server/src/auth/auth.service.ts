@@ -5,12 +5,11 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserDocument } from 'src/user/types';
-import { VerificationService } from 'src/verification/verification.service';
-import { VerificationCodeType } from 'src/verification/types';
 import { BcryptService } from 'src/utils/bcrypt/bcrypt.service';
 import { SessionService } from 'src/session/session.service';
 import { JWT_KEYS } from 'src/utils/types';
 import { AppException } from 'src/utils/exceptions/app.exception';
+import { OTPService } from 'src/otp/otp.service';
 
 @Injectable()
 export class AuthService  {
@@ -18,7 +17,7 @@ export class AuthService  {
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
-        private readonly verificationService: VerificationService,
+        private readonly otpService: OTPService,
         private readonly sessionService: SessionService,
         private readonly bcryptService: BcryptService,
     ) {}
@@ -31,21 +30,19 @@ export class AuthService  {
         return { status: HttpStatus.OK, message: 'OK' };
     };
 
-    signin = async ({ login, password }: SigninRequest) => {
-        const candidate = await this.userService.findOneByPayload({ 
+    signin = async ({ login, password, userAgent }: SigninRequest) => {
+        const user = await this.userService.findOneByPayload({ 
             deleted: false, 
             $or: [{ email: login }, { name: { $regex: login, $options: 'i' } }] 
         });
 
-        if (!candidate) throw new AppException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+        if (!user) throw new AppException('Invalid credentials', HttpStatus.UNAUTHORIZED);
 
-        const { password: candidatePassword, ...rest } = candidate.toObject();
+        const { password: userPassword, ...rest } = user.toObject();
 
-        if (!await this.bcryptService.compareAsync(password, candidatePassword)) throw new AppException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+        if (!await this.bcryptService.compareAsync(password, userPassword)) throw new AppException('Invalid credentials', HttpStatus.UNAUTHORIZED);
 
-        // const token = this.createToken(rest._id.toString());
-
-        // return { ...rest, ...token };
+        const session = await this.sessionService.create({ userId: user._id, userAgent });
     }
 
     signup = async ({ password, ...dto }: SignupRequest) => {
@@ -54,7 +51,6 @@ export class AuthService  {
         const hashedPassword = await this.bcryptService.hashAsync(password);
         
         const { _id, deleted, ...user } = await this.userService.create({ ...dto, password: hashedPassword });
-        const verificationCode = await this.verificationService.create({ userId: _id, type: VerificationCodeType.EMAIL_VERIFICATION })
         const session = await this.sessionService.create({ userId: _id, userAgent: dto.userAgent });
 
         const refreshToken = this.jwtService.sign({ sessionId: session._id.toString() }, { 
@@ -76,7 +72,7 @@ export class AuthService  {
     };
 
     validateUser = async (id: Types.ObjectId | string) => {
-        const candidate = await this.userService.exists({ _id: id, deleted: false });
+        const candidate = await this.userService.findOneByPayload({ _id: id, deleted: false });
 
         if (!candidate) throw new AppException('unauthorized', HttpStatus.UNAUTHORIZED);
 

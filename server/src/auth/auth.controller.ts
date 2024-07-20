@@ -6,18 +6,24 @@ import { AuthService } from './auth.service';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CheckEmailDTO } from './dtos/auth.checkEmail.dto';
 import { RequestWithUser, Routes } from 'src/utils/types';
-import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { setAuthCookies } from './utils/cookies';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { CookiesService } from 'src/utils/cookies/cookies.service';
 
 @Controller(Routes.AUTH)
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(
+        private readonly authService: AuthService,
+        private readonly cookiesService: CookiesService,
+    ) {}
 
     @Post('signup')
     async signup(@Body() dto: SignupDTO, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-        const { user, accessToken, refreshToken } = await this.authService.signup({ ...dto, userAgent: req.headers['user-agent'] });
+        const { user, accessToken, refreshToken } = await this.authService.signup({
+            ...dto,
+            userAgent: req.headers['user-agent'],
+        });
 
-        setAuthCookies({ res, accessToken, refreshToken });
+        this.cookiesService.setAuthCookies({ res, accessToken, refreshToken });
 
         return user;
     }

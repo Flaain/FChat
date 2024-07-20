@@ -1,8 +1,8 @@
-import { Toaster } from "sonner";
-import { useAuth } from "../lib/hooks/useAuth";
 import SigninForm from "./SigninForm";
 import SignupForm from "./SignupForm";
 import WelcomeStage from "./WelcomeStage";
+import { Toaster } from "sonner";
+import { useAuth } from "../lib/hooks/useAuth";
 
 const stages = {
     welcome: <WelcomeStage />,

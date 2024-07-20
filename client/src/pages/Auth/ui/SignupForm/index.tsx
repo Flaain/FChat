@@ -1,34 +1,39 @@
-import React from "react";
-import FirstStepSignUp from "../FirstStepSignUp";
-import SecondStepSignUp from "../SecondStepSignUp";
-import { Form } from "@/shared/ui/Form";
-import { Button } from "@/shared/ui/Button";
-import { useSignup } from "../../lib/hooks/useSignup";
-import { LoaderCircle } from "lucide-react";
-import Typography from "@/shared/ui/Typography";
-import { AuthContainer } from "../AuthContainer";
+import React from 'react';
+import FirstStepSignUp from '../FirstStepSignUp';
+import SecondStepSignUp from '../SecondStepSignUp';
+import Typography from '@/shared/ui/Typography';
+import OTP from '@/shared/ui/OTP';
+import { Form } from '@/shared/ui/Form';
+import { Button } from '@/shared/ui/Button';
+import { useSignup } from '../../lib/hooks/useSignup';
+import { LoaderCircle } from 'lucide-react';
+import { AuthContainer } from '../AuthContainer';
 
 const SignupForm = () => {
-    const { form, loading, step, stepsLength, isLastStep, isNextButtonDisabled, onBack, onSubmit } = useSignup();
+    const { form, formRef, loading, step, stepsLength, isLastStep, isNextButtonDisabled, onBack, onSubmit } = useSignup();
 
     const forms: Record<number, React.ReactNode> = {
         0: <FirstStepSignUp form={form} />,
         1: <SecondStepSignUp form={form} />,
+        2: <OTP onComplete={onSubmit} loading={loading} form={form} />
     };
 
     return (
         <div className='flex items-center w-full h-full max-w-[1230px] mx-auto box-border'>
             <div className='flex flex-col gap-2 items-end pr-10 max-md:hidden'>
                 <Typography variant='primary' as='h1' size='6xl' weight='bold' align='right'>
-                    Create account
+                    {isLastStep ? 'Verify email' : 'Create account'}
                 </Typography>
-                <Typography as='p' size='xl' variant='secondary' align='right'>
-                    We're so excited to have you join us!
+                <Typography as='p' size='xl' variant='secondary' align='right' className='max-w-[400px]'>
+                    {isLastStep
+                        ? `We’ve sent an email to ${form.getValues('email')} with a OTP code to verify your email`
+                        : "We're so excited to have you join us!"}
                 </Typography>
             </div>
             <Form {...form}>
                 <AuthContainer>
                     <form
+                        ref={formRef}
                         onSubmit={onSubmit}
                         className='flex flex-col gap-4 h-full justify-center max-w-[560px] w-full'
                     >
@@ -46,15 +51,11 @@ const SignupForm = () => {
                             >
                                 Back
                             </Button>
-                            <Button className='w-24' disabled={isNextButtonDisabled}>
-                                {loading ? (
-                                    <LoaderCircle className='w-5 h-5 animate-loading' />
-                                ) : isLastStep ? (
-                                    "Submit"
-                                ) : (
-                                    "Next"
-                                )}
-                            </Button>
+                            {!isLastStep && (
+                                <Button className='w-24' disabled={isNextButtonDisabled}>
+                                    {loading ? <LoaderCircle className='w-5 h-5 animate-loading' /> : 'Next'}
+                                </Button>
+                            )}
                         </div>
                     </form>
                 </AuthContainer>

@@ -1,5 +1,5 @@
 import React from "react";
-import { AuthContextProps, AuthProviderProps, AuthStage } from "./types";
+import { AuthContextProps, AuthProviderProps, AuthStage } from "../../types";
 import { AuthContext } from "./context";
 
 export const AuthProvider = ({ defaultStage = "welcome", children }: AuthProviderProps) => {

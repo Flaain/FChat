@@ -10,6 +10,7 @@ export enum Routes {
     CONVERSATION = 'conversation',
     PARTICIPANT = 'participant',
     MESSAGE = 'message',
+    OTP = 'auth/otp',
 }
 
 export enum AppExceptionCode {

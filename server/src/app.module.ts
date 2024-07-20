@@ -12,7 +12,7 @@ import { GroupModule } from './group/group.module';
 import { GroupMessageModule } from './group-message/group-message.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SessionModule } from './session/session.module';
-import { VerificationModule } from './verification/verification.module';
+import { OTPModule } from './otp/otp.module';
 
 @Module({
     imports: [
@@ -29,7 +29,7 @@ import { VerificationModule } from './verification/verification.module';
         GroupModule,
         GroupMessageModule,
         SessionModule,
-        VerificationModule,
+        OTPModule,
     ],
     providers: [{ provide: 'APP_GUARD', useClass: ThrottlerGuard }],
 })

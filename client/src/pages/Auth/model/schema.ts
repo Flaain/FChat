@@ -49,4 +49,8 @@ export const secondStepSignUpSchema = z.object({
         }),
 });
 
-export const signupSchema = z.intersection(firstStepSignUpSchema, secondStepSignUpSchema);
+export const thirdStepSignUpSchema = z.object({
+    otp: z.string()
+});
+
+export const signupSchema = firstStepSignUpSchema.and(secondStepSignUpSchema).and(thirdStepSignUpSchema);
