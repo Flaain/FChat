@@ -19,9 +19,6 @@ export class User implements UserRegister {
     isPrivate: boolean;
 
     @Prop({ type: Boolean, default: false })
-    verified: boolean;
-
-    @Prop({ type: Boolean, default: false })
     official: boolean;
 
     @Prop({ type: Date, required: true, default: () => new Date() })

@@ -39,7 +39,7 @@ export interface ConversationSendMessageParams {
 export interface ConversationCreateParams {
     initiatorId: string;
     conversationId: string;
-    recipient: Pick<UserDocument, 'name' | 'email' | 'verified' | '_id'>;
+    recipient: Pick<UserDocument, 'name' | 'email' | '_id'>;
     lastMessageSentAt: Date;
 }
 

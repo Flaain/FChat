@@ -1,22 +1,15 @@
-import { APIMethodParams, GroupFeed, WithRequired } from "../model/types";
 import { API } from "./API";
+import { APIMethodParams, GroupFeed } from "../model/types";
 
 export class GroupAPI extends API {
-    getAll = async ({
-        token,
-        body,
-        ...rest
-    }: WithRequired<APIMethodParams<{ params?: { cursor?: string } }>, 'token'>) => {
+    getAll = async (config?: APIMethodParams<{ params?: { cursor?: string } }>) => {
         const url = new URL(this._baseUrl + '/group');
 
-        body?.params && Object.entries(body.params).forEach(([key, value]) => {
-                url.searchParams.append(key, value);
-            });
-
-        const response = await fetch(url, {
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
-            ...rest
+        config?.body?.params && Object.entries(config.body.params).forEach(([key, value]) => {
+            url.searchParams.append(key, value);
         });
+
+        const response = await fetch(url, { headers: this._headers, credentials: this._cretedentials });
 
         return this._checkResponse<{ groups: Array<GroupFeed>; nextCursor: string }>(response);
     };

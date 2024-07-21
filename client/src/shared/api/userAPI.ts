@@ -1,7 +1,7 @@
 import { API } from "./API";
-import { Profile } from "../lib/contexts/profile/model/types";
+import { Profile, User } from "../lib/contexts/profile/model/types";
 import { SigininSchemaType, SignupSchemaType } from "@/pages/Auth/model/types";
-import { APIMethodParams, AuthResponse, SearchUser, WithRequired } from "../model/types";
+import { APIMethodParams, SearchUser, WithRequired } from "../model/types";
 import { CreateGroupType } from "@/features/CreateGroup/model/types";
 
 export class UserAPI extends API {
@@ -33,7 +33,7 @@ export class UserAPI extends API {
             body: JSON.stringify(body),
         });
 
-        return this._checkResponse<AuthResponse>(response);
+        return this._checkResponse<User>(response);
     };
 
     signin = async ({ body }: WithRequired<APIMethodParams<SigininSchemaType>, "body">) => {
@@ -44,28 +44,22 @@ export class UserAPI extends API {
             body: JSON.stringify(body),
         });
 
-        return this._checkResponse<AuthResponse>(response);
+        return this._checkResponse<User>(response);
     };
 
-    profile = async (params?: APIMethodParams) => {
+    profile = async () => {
         const response = await fetch(this._baseUrl + "/auth/me", { 
             headers: this._headers, 
             credentials: this._cretedentials, 
-            ...params 
         });
 
         return this._checkResponse<Profile>(response);
     };
 
-    search = async ({
-        token,
-        body: { username },
-        ...rest
-    }: WithRequired<APIMethodParams<Pick<CreateGroupType, "username">>, "body">) => {
+    search = async ({ body: { username } }: WithRequired<APIMethodParams<Pick<CreateGroupType, "username">>, "body">) => {
         const response = await fetch(this._baseUrl + `/user?name=${username}`, {
             headers: this._headers,
             credentials: this._cretedentials,
-            ...rest,
         });
 
         return this._checkResponse<Array<SearchUser>>(response);

@@ -31,7 +31,7 @@ export class GroupService {
                     populate: {
                         path: 'lastMessage',
                         select: 'text sender',
-                        populate: { path: 'sender', select: 'name email' },
+                        populate: { path: 'sender', select: 'name' },
                     },
                     sort: { lastMessageSentAt: -1 },
                 },

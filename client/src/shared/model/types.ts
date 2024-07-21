@@ -34,13 +34,7 @@ export interface APIData<T> {
     message: string;
 }
 
-export interface AuthResponse extends Profile {
-    expiresIn: string | number;
-}
-
-export interface APIMethodParams<T = undefined> extends Partial<Omit<BaseAPI, 'baseUrl'>>, Omit<RequestInit, 'headers' | 'body'> {
-    endpoint?: string;
-    token?: string;
+export interface APIMethodParams<T = undefined> {
     body?: T;
 }
 

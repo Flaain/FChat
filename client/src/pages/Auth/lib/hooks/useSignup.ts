@@ -83,7 +83,7 @@ export const useSignup = () => {
                 1: async () => {
                     await api.user.checkName({ body: { name: data.name } });
 
-                    const { data: { retryDelay } } = await api.otp.create({ email: data.email, type: OtpType.EMAIL_VERIFICATION });
+                    const { data: { retryDelay } } = await api.otp.create({ body: { email: data.email, type: OtpType.EMAIL_VERIFICATION } });
 
                     setOtp({ type: OtpType.EMAIL_VERIFICATION, retryDelay });
                     setStep((prevState) => prevState + 1);

@@ -21,7 +21,7 @@ export class ConversationService implements IConversationService {
         try {
             if (initiatorId.toString() === recipientId) throw new HttpException(CONVERSATION_WITH_MYSELF, CONVERSATION_WITH_MYSELF.status);
 
-            const recipient = await this.userService.findOneByPayload({ _id: recipientId, isPrivate: false }, { _id: 1, name: 1, email: 1, verified: 1, official: 1 });
+            const recipient = await this.userService.findOneByPayload({ _id: recipientId, isPrivate: false }, { _id: 1, name: 1, email: 1, official: 1 });
 
             if (!recipient) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
@@ -65,8 +65,8 @@ export class ConversationService implements IConversationService {
                     {
                         limit: CONVERSATION_BATCH,
                         populate: [
-                            { path: 'participants', model: 'User', select: 'name email verified official', match: { _id: { $ne: initiatorId } } },
-                            { path: 'lastMessage', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name email' } },
+                            { path: 'participants', model: 'User', select: 'name email official', match: { _id: { $ne: initiatorId } } },
+                            { path: 'lastMessage', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name' } },
                         ],
                         sort: { lastMessageSentAt: -1 },
                     },
@@ -92,7 +92,7 @@ export class ConversationService implements IConversationService {
         cursor?: string;
     }) => {
         try {
-            const recipient = await this.userService.findOneByPayload({ _id: recipientId }, { name: 1, email: 1, verified: 1, lastSeenAt: 1, isPrivate: 1, official: 1 });
+            const recipient = await this.userService.findOneByPayload({ _id: recipientId }, { name: 1, email: 1, lastSeenAt: 1, isPrivate: 1, official: 1 });
 
             if (!recipient) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
@@ -112,7 +112,7 @@ export class ConversationService implements IConversationService {
                                 populate: {
                                     path: 'sender',
                                     model: 'User',
-                                    select: 'name email verified official',
+                                    select: 'name email official',
                                 },
                                 options: {
                                     limit: MESSAGES_BATCH + 1,

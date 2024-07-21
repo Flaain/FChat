@@ -30,7 +30,7 @@ export class MessageService {
 
             const { 0: savedMessage } = await Promise.all([newMessage.save(), conversation.save()]);
 
-            const populatedMessage = (await savedMessage.populate([{ path: 'sender', model: 'User', select: 'name email verified official' }])).toObject();
+            const populatedMessage = (await savedMessage.populate([{ path: 'sender', model: 'User', select: 'name email official' }])).toObject();
 
             return { ...populatedMessage, conversationId: conversation._id.toString() };
         } catch (error) {

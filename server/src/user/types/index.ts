@@ -11,7 +11,6 @@ export interface IUser {
     birthDate: Date;
     private: boolean;
     lastSeenAt: Date;
-    verified: boolean;
     deleted: boolean;
     official: boolean;
 }

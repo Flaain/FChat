@@ -3,7 +3,6 @@ export interface User {
     name: string;
     email: string;
     status?: string;
-    verified: boolean;
     official: boolean;
     lastSeenAt: string;
     isPrivate: boolean;
@@ -16,8 +15,7 @@ export interface DataWithCursor<T> {
     nextCursor: string | null;
 }
 
-export interface Profile extends User {
-}
+export interface Profile extends User {}
 
 export interface ProfileContextProps {
     profile: Profile;

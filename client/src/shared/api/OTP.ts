@@ -1,12 +1,12 @@
 import { API } from './API';
-import { OtpType } from '../model/types';
+import { APIMethodParams, OtpType, WithRequired } from '../model/types';
 
 export class OTP extends API {
-    create = async ({ email, type }: { email: string; type: OtpType }) => {
+    create = async ({ body }: WithRequired<APIMethodParams<{ email: string; type: OtpType }>, 'body'>) => {
         const response = await fetch(this._baseUrl + '/auth/otp', {
             method: 'POST',
             headers: this._headers,
-            body: JSON.stringify({ email, type })
+            body: JSON.stringify(body)
         });
 
         return this._checkResponse<{ retryDelay: number }>(response);
