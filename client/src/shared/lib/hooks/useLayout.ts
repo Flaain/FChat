@@ -14,7 +14,7 @@ const MIN_SEARCH_LENGTH = 3;
 
 export const useLayout = () => {
     const { setProfile } = useProfile();
-    const { state: { accessToken }, dispatch } = useSession();
+    const { dispatch } = useSession();
     const { socket, isConnected } = useSocket();
     const { onScrollFeedLoading, globalResults, localResults, setGlobalResults, setLocalResults } = useFeed();
 
@@ -90,7 +90,7 @@ export const useLayout = () => {
             try {
                 setSearchLoading(true);
 
-                const { data: users } = await api.user.search({ body: { username: value }, token: accessToken! });
+                const { data: users } = await api.user.search({ body: { username: value } });
 
                 setGlobalResults(users.map((user) => ({ ...user, type: FeedTypes.USER })));
             } catch (error) {

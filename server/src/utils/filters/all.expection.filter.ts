@@ -13,7 +13,7 @@ export class AllExceptionFilter implements ExceptionFilter {
         const ctx = host.switchToHttp();
 
         const defaultBody = {
-            path: ctx.getRequest().url,
+            url: ctx.getRequest().url,
             timestamp: new Date().toISOString(),
         };
 
@@ -23,6 +23,7 @@ export class AllExceptionFilter implements ExceptionFilter {
                 message: exception.message,
                 errorCode: exception.errorCode,
                 statusCode: exception.statusCode,
+                errors: exception.errors
             };
 
             return httpAdapter.reply(ctx.getResponse(), responseBody, exception.statusCode);

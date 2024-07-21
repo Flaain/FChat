@@ -10,7 +10,8 @@ import { SessionModule } from 'src/session/session.module';
 import { JWT_KEYS } from 'src/utils/types';
 import { BcryptModule } from 'src/utils/bcrypt/bcrypt.module';
 import { CookiesModule } from 'src/utils/cookies/cookies.module';
-import { OTPModule } from 'src/otp/otp.module';
+import { OtpModule } from 'src/otp/otp.module';
+import { AuthUtils } from './auth.utils';
 
 @Module({
     imports: [
@@ -19,7 +20,7 @@ import { OTPModule } from 'src/otp/otp.module';
         ConfigModule,
         CookiesModule,
         BcryptModule,
-        OTPModule,
+        OtpModule,
         SessionModule,
         PassportModule.register({ defaultStrategy: 'jwt', property: 'user' }),
         JwtModule.registerAsync({
@@ -37,6 +38,6 @@ import { OTPModule } from 'src/otp/otp.module';
         }),
     ],
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy],
+    providers: [AuthService, AuthUtils, JwtStrategy],
 })
 export class AuthModule {}

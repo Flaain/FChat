@@ -2,7 +2,6 @@ import React from 'react';
 import Confirm from '@/widgets/Confirm/ui/ui';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
@@ -11,7 +10,6 @@ import { UseMessageParams } from '../../model/types';
 import { Emoji } from '@emoji-mart/data';
 
 export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
-    const { state: { accessToken } } = useSession();
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
     const { data: { conversation } } = useConversationContext();
     const { drafts, setDrafts } = useLayoutContext();
@@ -78,7 +76,6 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
                     messageId, 
                     recipientId: conversation.recipient._id 
                 }, 
-                token: accessToken! 
             });
 
             toast.success('Message deleted', { position: 'top-center' });
@@ -89,7 +86,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             setDefaultState();
             setIsAsyncActionLoading(false);
         }
-    }, [currentDraft, conversation, accessToken]);
+    }, [currentDraft, conversation]);
 
     const onCloseDeleteConfirmation = () => {
         setValue(currentDraft!.selectedMessage!.text);
@@ -116,7 +113,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     }, [queryId]);
 
     const onSendEditedConversationMessage = React.useCallback(async ({ messageId, message }: { messageId: string; message: string }) => {
-        await api.message.edit({ body: { messageId, message, recipientId: queryId }, token: accessToken! });
+        await api.message.edit({ body: { messageId, message, recipientId: queryId } });
     }, []);
 
     const onSendEditedMessage = async () => {
@@ -150,12 +147,12 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
         let conversationId = conversation._id
 
         if (!conversationId) {
-            const { data: { _id } } = await api.conversation.create({ body: { recipientId: conversation.recipient._id }, token: accessToken! });
+            const { data: { _id } } = await api.conversation.create({ body: { recipientId: conversation.recipient._id } });
 
             conversationId = _id;
         }
 
-        await api.message.send({ token: accessToken!, body: { message: message, recipientId: conversation.recipient._id }});
+        await api.message.send({ body: { message: message, recipientId: conversation.recipient._id }});
     }, [conversation]);
 
     const onSendGroupMessage = React.useCallback(async (message: string) => {

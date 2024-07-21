@@ -64,6 +64,7 @@ export const signupSchema = z
                 (date) => new Date().getTime() - date.getTime() >= 14 * 365 * 24 * 60 * 60 * 1000,
                 'You must be at least 14 years old',
             ),
+        otp: z.string().trim().min(1, 'OTP is required').min(6, 'OTP must be 6 characters long').max(6, 'OTP must be 6 characters long'),
     })
     .refine(({ name }) => !reservedUsernames.includes(name.toLowerCase()), {
         message: 'Sorry, this name is reserved',

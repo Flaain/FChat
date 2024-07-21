@@ -5,7 +5,6 @@ import { OTPContext } from './context';
 export const OtpProvider = ({ children }: { children: React.ReactNode }) => {
     const [otp, setOtp] = React.useState<OtpState>({
         retryDelay: 0,
-        resource: null!,
         type: null!
     });
 

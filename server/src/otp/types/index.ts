@@ -1,12 +1,12 @@
-export enum OTPType {
+export enum OtpType {
     EMAIL_VERIFICATION = 'email_verification',
     PASSWORD_RESET = 'password_reset',
 }
 
-export interface OTPDocument {
+export interface OtpDocument {
     email: string;
     otp: string;
-    type: OTPType;
+    type: OtpType;
     expiresAt?: Date;
     createdAt?: Date;
 }

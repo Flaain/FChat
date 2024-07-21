@@ -57,4 +57,4 @@ export const CONVERSATION_POPULATE = [
     },
 ];
 
-export const emailForSchema = z.string().trim().min(1, 'Email is required').email('Invalid email address');
+export const emailForSchema = z.string().trim().min(1, 'Email is required').email('Invalid email address').toLowerCase();

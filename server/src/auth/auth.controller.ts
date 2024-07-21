@@ -8,10 +8,13 @@ import { CheckEmailDTO } from './dtos/auth.checkEmail.dto';
 import { RequestWithUser, Routes } from 'src/utils/types';
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { CookiesService } from 'src/utils/cookies/cookies.service';
+import { AuthUtils } from './auth.utils';
+import { CheckNameDTO } from './dtos/auth.checkName.dto';
 
 @Controller(Routes.AUTH)
 export class AuthController {
     constructor(
+        private readonly authUtils: AuthUtils,
         private readonly authService: AuthService,
         private readonly cookiesService: CookiesService,
     ) {}
@@ -30,7 +33,12 @@ export class AuthController {
 
     @Post('signup/check-email')
     checkEmail(@Body() { email }: CheckEmailDTO) {
-        return this.authService.checkEmail(email);
+        return this.authUtils.checkEmail(email);
+    }
+
+    @Post('signup/check-name')
+    checkName(@Body() { name }: CheckNameDTO) {
+        return this.authUtils.checkName(name);
     }
 
     @Post('signin')
@@ -42,6 +50,6 @@ export class AuthController {
     @SkipThrottle()
     @UseGuards(JwtGuard)
     profile(@Req() req: RequestWithUser) {
-        return this.authService.getProfile(req.user);
+        return this.authService.profile(req.user);
     }
 }

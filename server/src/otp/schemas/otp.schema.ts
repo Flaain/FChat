@@ -1,23 +1,23 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { DatesService } from 'src/utils/dates/dates.service';
-import { OTPDocument, OTPType } from '../types';
+import { OtpDocument, OtpType } from '../types';
 
-@Schema({ collection: 'verification_codes', timestamps: true })
-export class OTP implements OTPDocument {
+@Schema({ collection: 'otp_codes', timestamps: true })
+export class OTP implements OtpDocument {
     @Prop({ type: String, required: true })
     email: string;
 
     @Prop({ type: String, required: true })
     otp: string;
 
-    @Prop({ type: String, enum: OTPType, required: true })
-    type: OTPType;
+    @Prop({ type: String, enum: OtpType, required: true })
+    type: OtpType;
 
-    @Prop({ type: Date, expires: '2m' }) // change to 7d after tests completed
+    @Prop({ type: Date, expires: '2m' })
     createdAt?: Date;
 
-    @Prop({ type: Date, required: true, default: DatesService.oneWeekFromNow })
+    @Prop({ type: Date, required: true, default: DatesService.twoMinutesFromNow })
     expiresAt?: Date;
 }
 
-export const OTPSchema = SchemaFactory.createForClass(OTP);
+export const OtpSchema = SchemaFactory.createForClass(OTP);

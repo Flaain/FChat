@@ -8,12 +8,18 @@ export enum FeedTypes {
     USER = 'user'
 }
 
+export enum OtpType {
+    EMAIL_VERIFICATION = 'email_verification',
+    PASSWORD_RESET = 'password_reset'
+}
+
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
 export type MessageFormState = 'send' | 'edit';
 
 export interface BaseAPI {
     baseUrl?: string;
+    credentials?: RequestCredentials  
     headers?: {
         'Content-Type'?: 'application/json' | (string & object);
         Authorization?: 'Bearer' | (string & object);
@@ -25,29 +31,32 @@ export interface APIData<T> {
     status: Response['status'];
     statusText: Response['statusText'];
     headers: Record<string, string>;
-    error?: unknown;
     message: string;
 }
 
 export interface AuthResponse extends Profile {
-    accessToken: string;
     expiresIn: string | number;
 }
 
-export interface APIMethodParams<T = undefined>
-    extends Partial<Omit<BaseAPI, 'baseUrl'>>,
-        Omit<RequestInit, 'headers' | 'body'> {
+export interface APIMethodParams<T = undefined> extends Partial<Omit<BaseAPI, 'baseUrl'>>, Omit<RequestInit, 'headers' | 'body'> {
     endpoint?: string;
     token?: string;
     body?: T;
 }
 
-export interface APIError<E> {
-    error: E;
-    statusCode: number;
-    headers?: Record<string, string>;
+export enum AppExceptionCode {
+    INVALID_ACCESS_TOKEN = 'INVALID_ACCESS_TOKEN',
+    FORM = "FORM"
+}
+
+export interface IAppException {
     message: string;
-    type?: string;
+    url: string;
+    statusCode: number;
+    timestamp: Date;
+    headers: Record<string, string>;
+    errors?: Array<{ path: string, message: string }>;
+    errorCode?: AppExceptionCode;
 }
 
 export interface IMessage {

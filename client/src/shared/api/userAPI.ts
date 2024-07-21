@@ -5,8 +5,18 @@ import { APIMethodParams, AuthResponse, SearchUser, WithRequired } from "../mode
 import { CreateGroupType } from "@/features/CreateGroup/model/types";
 
 export class UserAPI extends API {
-    checkEmailBeforeSignup = async ({ body }: WithRequired<APIMethodParams<Pick<SignupSchemaType, "email">>, "body">) => {
+    checkEmail = async ({ body }: WithRequired<APIMethodParams<Pick<SignupSchemaType, "email">>, "body">) => {
         const response = await fetch(this._baseUrl + "/auth/signup/check-email", {
+            method: "POST",
+            headers: this._headers,
+            body: JSON.stringify(body),
+        });
+
+        return this._checkResponse<"success">(response);
+    };
+
+    checkName = async ({ body }: WithRequired<APIMethodParams<Pick<SignupSchemaType, "name">>, "body">) => {
+        const response = await fetch(this._baseUrl + "/auth/signup/check-name", {
             method: "POST",
             headers: this._headers,
             body: JSON.stringify(body),
@@ -19,6 +29,7 @@ export class UserAPI extends API {
         const response = await fetch(this._baseUrl + "/auth/signup", {
             method: "POST",
             headers: this._headers,
+            credentials: this._cretedentials,
             body: JSON.stringify(body),
         });
 
@@ -29,16 +40,18 @@ export class UserAPI extends API {
         const response = await fetch(this._baseUrl + "/auth/signin", {
             method: "POST",
             headers: this._headers,
+            credentials: this._cretedentials,
             body: JSON.stringify(body),
         });
 
         return this._checkResponse<AuthResponse>(response);
     };
 
-    profile = async ({ token, ...rest }: WithRequired<APIMethodParams, "token">) => {
-        const response = await fetch(this._baseUrl + "/auth/me", {
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
-            ...rest,
+    profile = async (params?: APIMethodParams) => {
+        const response = await fetch(this._baseUrl + "/auth/me", { 
+            headers: this._headers, 
+            credentials: this._cretedentials, 
+            ...params 
         });
 
         return this._checkResponse<Profile>(response);
@@ -48,9 +61,10 @@ export class UserAPI extends API {
         token,
         body: { username },
         ...rest
-    }: WithRequired<APIMethodParams<Pick<CreateGroupType, "username">>, "token" | "body">) => {
+    }: WithRequired<APIMethodParams<Pick<CreateGroupType, "username">>, "body">) => {
         const response = await fetch(this._baseUrl + `/user?name=${username}`, {
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
+            headers: this._headers,
+            credentials: this._cretedentials,
             ...rest,
         });
 

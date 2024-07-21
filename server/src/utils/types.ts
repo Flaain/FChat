@@ -15,6 +15,15 @@ export enum Routes {
 
 export enum AppExceptionCode {
     INVALID_ACCESS_TOKEN = 'INVALID_ACCESS_TOKEN',
+    FORM = "FORM"
+}
+
+export interface IAppException {
+    message: string;
+    url?: string;
+    timestamp?: Date;
+    errors?: Array<{ path: string, message: string }>;
+    errorCode?: AppExceptionCode;
 }
 
 export enum JWT_KEYS {

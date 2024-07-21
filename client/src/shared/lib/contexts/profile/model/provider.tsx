@@ -6,16 +6,14 @@ import { SessionTypes } from "@/entities/session/model/types";
 import { api } from "@/shared/api";
 
 export const ProfileProvider = ({ defaultProfile, children }: ProfileProviderProps) => {
-    const { state: { accessToken }, dispatch } = useSession();
+    const { dispatch } = useSession();
 
     const [profile, setProfile] = React.useState<Profile>(defaultProfile!);
 
     React.useEffect(() => {
         (async () => {
             try {
-                if (!accessToken) return;
-
-                const { data: profile } = await api.user.profile({ token: accessToken });
+                const { data: profile } = await api.user.profile();
 
                 setProfile(profile);
                 dispatch({ type: SessionTypes.SET_AUTH_DONE, payload: { userId: profile._id, isAuthorized: true } });

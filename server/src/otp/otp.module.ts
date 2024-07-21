@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { OTP, OTPSchema } from './schemas/otp.schema';
-import { OTPController } from './otp.controller';
-import { OTPService } from './otp.service';
+import { OTP, OtpSchema } from './schemas/otp.schema';
+import { OtpService } from './otp.service';
+import { OtpController } from './otp.controller';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: OTP.name, schema: OTPSchema }])],
-    controllers: [OTPController],
-    providers: [OTPService],
-    exports: [OTPService],
+    imports: [MongooseModule.forFeature([{ name: OTP.name, schema: OtpSchema }]), UserModule],
+    controllers: [OtpController],
+    providers: [OtpService],
+    exports: [OtpService],
 })
-export class OTPModule {}
+export class OtpModule {}

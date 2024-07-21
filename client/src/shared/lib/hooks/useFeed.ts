@@ -1,12 +1,9 @@
 import React from 'react';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { ConversationFeed, FeedTypes, GroupFeed, UserFeed } from '@/shared/model/types';
 
 export const useFeed = () => {
-    const { state: { accessToken } } = useSession();
-
     const [globalResults, setGlobalResults] = React.useState<Array<UserFeed | GroupFeed>>([]);
     const [localResults, setLocalResults] = React.useState<Array<ConversationFeed | GroupFeed>>([]);
     const [onScrollFeedLoading, setOnScrollFeedLoading] = React.useState(false);
@@ -21,7 +18,7 @@ export const useFeed = () => {
                 { data: { conversations, nextCursor: nextConversationCursor } }
                 // { data: { groups, nextCursor: nextGroupCursor } }
             ] = await Promise.all([
-                api.conversation.getAll({ token: accessToken! })
+                api.conversation.getAll()
                 // api.group.getAll({ token: accessToken! })
             ]);
 

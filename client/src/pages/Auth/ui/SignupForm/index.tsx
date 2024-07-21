@@ -2,7 +2,7 @@ import React from 'react';
 import FirstStepSignUp from '../FirstStepSignUp';
 import SecondStepSignUp from '../SecondStepSignUp';
 import Typography from '@/shared/ui/Typography';
-import OTP from '@/shared/ui/OTP';
+import OTP from '@/pages/Auth/ui/OTP';
 import { Form } from '@/shared/ui/Form';
 import { Button } from '@/shared/ui/Button';
 import { useSignup } from '../../lib/hooks/useSignup';

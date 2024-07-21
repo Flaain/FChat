@@ -11,8 +11,8 @@ import { SessionTypes } from "@/entities/session/model/types";
 import { saveDataToLocalStorage } from "@/shared/lib/utils/saveDataToLocalStorage";
 import { localStorageKeys } from "@/shared/constants";
 import { toast } from "sonner";
-import { ApiError } from "@/shared/api/error";
-import { FormErrorsType } from "@/shared/model/types";
+import { AppException } from "@/shared/api/error";
+import { FormErrorsType, OtpType } from "@/shared/model/types";
 import { ZodCustomIssue } from "zod";
 import { useOtp } from "./useOtp";
 
@@ -56,10 +56,6 @@ export const useSignup = () => {
         );
     };
 
-    const displayErrorsFromAPI = React.useCallback(([key, { message }]: FormErrorsType) => {
-        form.setError(key as FieldPath<SignupSchemaType>, { message }, { shouldFocus: true });
-    }, [form]);
-
     const onSubmit = React.useCallback(async (event?: React.FormEvent<HTMLFormElement>) => {
         try {
             event?.preventDefault?.();
@@ -80,46 +76,37 @@ export const useSignup = () => {
 
             const actions = {
                 0: async () => {
-                    await api.user.checkEmailBeforeSignup({ body: { email: data.email } });
+                    await api.user.checkEmail({ body: { email: data.email } });
 
                     setStep((prevState) => prevState + 1);
                 },
                 1: async () => {
-                    const prom = await new Promise((resolve) => {
-                        setTimeout(() => {
-                            resolve(true);
-                        }, 2000);
-                    })
+                    await api.user.checkName({ body: { name: data.name } });
 
-                    setOtp({ resource: 'signup', type: 'email_verification', retryDelay: 120000 });
+                    const { data: { retryDelay } } = await api.otp.create({ email: data.email, type: OtpType.EMAIL_VERIFICATION });
+
+                    setOtp({ type: OtpType.EMAIL_VERIFICATION, retryDelay });
                     setStep((prevState) => prevState + 1);
                 },
                 2: async () => {
                     const { confirmPassword, ...rest } = data;
                     
-                    const prom = await new Promise((resolve, reject) => {
-                        setTimeout(() => {
-                            reject('Invalid verification code');
-                        }, 2000);
-                    })
-
-                    console.log(rest);
-                    // const { data: { accessToken, expiresIn, ...profile } } = await api.user.signup({ body: rest });
-
-                    // setProfile(profile);
-                    // dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { isAuthorized: true, accessToken, userId: profile._id, expiresIn } });
-                    // saveDataToLocalStorage({ key: localStorageKeys.TOKEN, data: accessToken });
+                    await api.user.signup({ body: rest })
                 }
             };
 
             await actions[step as keyof typeof actions]();
         } catch (error) {
             console.error(error);
-            form.setError('otp', { message: error }, { shouldFocus: true });
+            if (error instanceof AppException) {
+                error.errors?.forEach(({ path, message }) => {
+                    form.setError(path as FieldPath<SignupSchemaType>, { message }, { shouldFocus: true });
+                })
+            }
         } finally {
             setLoading(false);
         }
-    }, [displayErrorsFromAPI, dispatch, form, setProfile, step]);
+    }, [dispatch, form, setProfile, step]);
 
     const onBack = React.useCallback(() => {
         setStep((prevState) => prevState - 1);

@@ -6,10 +6,10 @@ export class MessageAPI extends API {
         body,
         token,
         ...rest
-    }: WithRequired<APIMethodParams<{ message: string; recipientId: string }>, 'body' | 'token'>) => {
+    }: WithRequired<APIMethodParams<{ message: string; recipientId: string }>, 'body'>) => {
         const response = await fetch(this._baseUrl + `/message/send/${body.recipientId}`, {
             method: 'POST',
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
+            headers: this._headers,
             body: JSON.stringify(body),
             ...rest
         });
@@ -21,10 +21,10 @@ export class MessageAPI extends API {
         body: { messageId, ...body },
         token,
         ...rest
-    }: WithRequired<APIMethodParams<{ message: string; messageId: string, recipientId: string }>, 'body' | 'token'>) => {
+    }: WithRequired<APIMethodParams<{ message: string; messageId: string, recipientId: string }>, 'body'>) => {
         const response = await fetch(this._baseUrl + `/message/edit/${messageId}`, {
             method: 'PATCH',
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
+            headers: this._headers,
             body: JSON.stringify(body),
             ...rest
         });
@@ -36,10 +36,10 @@ export class MessageAPI extends API {
         body: { conversationId, messageId, recipientId },
         token,
         ...rest
-    }: WithRequired<APIMethodParams<{ messageId: string; conversationId: string, recipientId: string }>, 'body' | 'token'>) => {
+    }: WithRequired<APIMethodParams<{ messageId: string; conversationId: string, recipientId: string }>, 'body'>) => {
         const response = await fetch(this._baseUrl + `/message/delete/${messageId}`, {
             method: 'DELETE',
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
+            headers: this._headers,
             body: JSON.stringify({ conversationId, recipientId }),
             ...rest
         });
