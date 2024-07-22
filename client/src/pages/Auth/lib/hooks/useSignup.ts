@@ -12,7 +12,7 @@ import { saveDataToLocalStorage } from "@/shared/lib/utils/saveDataToLocalStorag
 import { localStorageKeys } from "@/shared/constants";
 import { toast } from "sonner";
 import { AppException } from "@/shared/api/error";
-import { FormErrorsType, OtpType } from "@/shared/model/types";
+import { OtpType } from "@/shared/model/types";
 import { ZodCustomIssue } from "zod";
 import { useOtp } from "./useOtp";
 
@@ -76,14 +76,14 @@ export const useSignup = () => {
 
             const actions = {
                 0: async () => {
-                    await api.user.checkEmail({ body: { email: data.email } });
+                    await api.user.checkEmail({ email: data.email });
 
                     setStep((prevState) => prevState + 1);
                 },
                 1: async () => {
-                    await api.user.checkName({ body: { name: data.name } });
+                    await api.user.checkName({ name: data.name });
 
-                    const { data: { retryDelay } } = await api.otp.create({ body: { email: data.email, type: OtpType.EMAIL_VERIFICATION } });
+                    const { data: { retryDelay } } = await api.otp.create({ email: data.email, type: OtpType.EMAIL_VERIFICATION });
 
                     setOtp({ type: OtpType.EMAIL_VERIFICATION, retryDelay });
                     setStep((prevState) => prevState + 1);
@@ -91,7 +91,7 @@ export const useSignup = () => {
                 2: async () => {
                     const { confirmPassword, ...rest } = data;
                     
-                    await api.user.signup({ body: rest })
+                    await api.user.signup(rest)
                 }
             };
 
@@ -102,6 +102,8 @@ export const useSignup = () => {
                 error.errors?.forEach(({ path, message }) => {
                     form.setError(path as FieldPath<SignupSchemaType>, { message }, { shouldFocus: true });
                 })
+
+                !error.errors && toast.error(error.message, { position: "bottom-right" });
             }
         } finally {
             setLoading(false);

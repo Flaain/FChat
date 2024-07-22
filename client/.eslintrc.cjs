@@ -11,6 +11,8 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     plugins: ['react-refresh', '@tanstack/query'],
     rules: {
-        'react-refresh/only-export-components': ['warn', { allowConstantExport: true }]
+        'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+        'no-console': 'error',
+        'unused-imports/no-unused-imports': 'warn'
     }
 };

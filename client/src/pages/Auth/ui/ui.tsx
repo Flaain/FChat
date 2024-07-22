@@ -14,7 +14,7 @@ const Auth = () => {
     const { authStage } = useAuth();
 
     return (
-        <section className='w-full h-screen flex items-center justify-center bg-primary-dark-200'>
+        <section className='w-full h-screen flex items-center px-5 justify-center bg-primary-dark-200'>
             <Toaster />
             {stages[authStage as keyof typeof stages]}
         </section>

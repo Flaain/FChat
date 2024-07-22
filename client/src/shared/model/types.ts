@@ -1,6 +1,5 @@
 import { ModalConfig } from '../lib/contexts/modal/types';
-import { Profile, User } from '../lib/contexts/profile/model/types';
-import { FieldError } from 'react-hook-form';
+import { User } from '../lib/contexts/profile/model/types';
 
 export enum FeedTypes {
     CONVERSATION = 'conversation',
@@ -14,8 +13,13 @@ export enum OtpType {
 }
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams };
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
 export type MessageFormState = 'send' | 'edit';
+
+export interface RequestParams {
+    cursor: string;
+}
 
 export interface BaseAPI {
     baseUrl?: string;
@@ -28,14 +32,9 @@ export interface BaseAPI {
 
 export interface APIData<T> {
     data: T;
-    status: Response['status'];
-    statusText: Response['statusText'];
+    statusCode: Response['status'];
     headers: Record<string, string>;
     message: string;
-}
-
-export interface APIMethodParams<T = undefined> {
-    body?: T;
 }
 
 export enum AppExceptionCode {
@@ -159,24 +158,6 @@ export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement>
     size?: 'sm' | 'md' | 'lg';
 }
 
-export type FormErrorsType = [
-    string,
-    (
-        | FieldError
-        | (Record<
-              string,
-              Partial<{
-                  type: string | number;
-                  message: string;
-              }>
-          > &
-              Partial<{
-                  type: string | number;
-                  message: string;
-              }>)
-    )
-];
-
 export interface UseInfiniteScrollOptions extends IntersectionObserverInit {
     callback: () => Promise<void> | void;
     deps: React.DependencyList;
@@ -227,9 +208,7 @@ export enum FEED_EVENTS {
 }
 
 export interface GetConversationsRes {
-    conversations: Array<
-        Omit<ConversationFeed, 'type' | 'recipient'> & { participants: Array<ConversationParticipant> }
-    >;
+    conversations: Array<Omit<ConversationFeed, 'type' | 'recipient'> & { participants: Array<ConversationParticipant> }>;
     nextCursor: string;
 }
 

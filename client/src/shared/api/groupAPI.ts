@@ -1,11 +1,11 @@
-import { API } from "./API";
-import { APIMethodParams, GroupFeed } from "../model/types";
+import { API } from './API';
+import { GroupFeed, WithParams } from '../model/types';
 
 export class GroupAPI extends API {
-    getAll = async (config?: APIMethodParams<{ params?: { cursor?: string } }>) => {
+    getAll = async (body?: WithParams) => {
         const url = new URL(this._baseUrl + '/group');
 
-        config?.body?.params && Object.entries(config.body.params).forEach(([key, value]) => {
+        body?.params && Object.entries(body.params).forEach(([key, value]) => {
             url.searchParams.append(key, value);
         });
 

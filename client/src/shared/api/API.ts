@@ -25,8 +25,7 @@ export abstract class API {
         return {
             data,
             headers,
-            status: response.status,
-            statusText: response.statusText,
+            statusCode: response.status,
             message: data.message ?? 'success'
         };
     }

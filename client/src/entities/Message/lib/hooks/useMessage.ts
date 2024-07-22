@@ -21,12 +21,10 @@ export const useMessage = (message: IMessage) => {
         try {
             setIsAsyncActionLoading(true);
 
-            await api.message.delete({ 
-                body: { 
-                    messageId: _id,
-                    conversationId: conversation._id, 
-                    recipientId: conversation.recipient._id 
-                }, 
+            await api.message.delete({
+                messageId: _id,
+                conversationId: conversation._id,
+                recipientId: conversation.recipient._id
             });
             
             toast.success('Message deleted', { position: 'top-center' });

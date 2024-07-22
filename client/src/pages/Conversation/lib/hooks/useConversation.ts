@@ -21,7 +21,8 @@ export const useConversation = () => {
             setIsPreviousMessagesLoading(true);
 
             const { data: previousMessages } = await api.conversation.get({
-                body: { recipientId: data?.conversation.recipient._id, params: { cursor: data?.nextCursor! } },
+                recipientId: data?.conversation.recipient._id, 
+                params: { cursor: data?.nextCursor! }
             });
 
             setConversation((prev) => ({
@@ -76,7 +77,7 @@ export const useConversation = () => {
         try {
             action === 'init' ? setStatus('loading') : setIsRefetching(true);
 
-            const { data: response } = await api.conversation.get({ body: { recipientId } });
+            const { data: response } = await api.conversation.get({ recipientId });
 
             setConversation(response);
             setStatus('idle');

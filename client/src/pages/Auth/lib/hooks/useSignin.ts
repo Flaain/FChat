@@ -33,7 +33,7 @@ export const useSignin = () => {
         try {
             setLoading(true);
 
-            const { data: { expiresIn, ...profile } } = await api.user.signin({ body: data });
+            const { data: profile } = await api.user.signin(data);
 
             setProfile(profile);
             dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { isAuthorized: true, userId: profile._id } });

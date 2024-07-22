@@ -70,12 +70,10 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             
             setIsAsyncActionLoading(true);
             
-            await api.message.delete({ 
-                body: { 
-                    conversationId: conversation._id, 
-                    messageId, 
-                    recipientId: conversation.recipient._id 
-                }, 
+            await api.message.delete({
+                conversationId: conversation._id,
+                messageId,
+                recipientId: conversation.recipient._id
             });
 
             toast.success('Message deleted', { position: 'top-center' });
@@ -113,7 +111,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     }, [queryId]);
 
     const onSendEditedConversationMessage = React.useCallback(async ({ messageId, message }: { messageId: string; message: string }) => {
-        await api.message.edit({ body: { messageId, message, recipientId: queryId } });
+        await api.message.edit({ messageId, message, recipientId: queryId });
     }, []);
 
     const onSendEditedMessage = async () => {
@@ -147,12 +145,12 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
         let conversationId = conversation._id
 
         if (!conversationId) {
-            const { data: { _id } } = await api.conversation.create({ body: { recipientId: conversation.recipient._id } });
+            const { data: { _id } } = await api.conversation.create({ recipientId: conversation.recipient._id });
 
             conversationId = _id;
         }
 
-        await api.message.send({ body: { message: message, recipientId: conversation.recipient._id }});
+        await api.message.send({ message: message, recipientId: conversation.recipient._id });
     }, [conversation]);
 
     const onSendGroupMessage = React.useCallback(async (message: string) => {

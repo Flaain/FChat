@@ -1,7 +1,7 @@
 import React from 'react';
 import { FieldPath, useForm } from 'react-hook-form';
 import { api } from '@/shared/api';
-import { FormErrorsType, SearchUser } from '@/shared/model/types';
+import { SearchUser } from '@/shared/model/types';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { useNavigate } from 'react-router-dom';
@@ -81,7 +81,7 @@ export const useCreateGroup = () => {
         try {
             setIsAsyncActionLoading(true);
 
-            const { data } = await api.user.search({ body: { username: value } });
+            const { data } = await api.user.search({ username: value });
 
             setSearchedUsers(data);
         } catch (error) {
@@ -105,10 +105,6 @@ export const useCreateGroup = () => {
 
         console.log(selectedUsers, displayName, groupName);
     }, [navigate, closeModal, selectedUsers, setProfile]);
-
-    const _displayErrorsFromAPI = React.useCallback(([key, { message }]: FormErrorsType) => {
-        form.setError(key as FieldPath<CreateGroupType>, { message }, { shouldFocus: true });
-    }, [form]);
 
     const handleSearchUser = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         const trimmedValue = value.trim();
