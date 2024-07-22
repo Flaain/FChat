@@ -34,7 +34,7 @@ export class AllExceptionFilter implements ExceptionFilter {
                 ...defaultBody, 
                 message: exception.message, 
                 stausCode: exception.getStatus(),
-                issues: exception.getZodError().issues
+                errors: exception.getZodError().issues.map(({ path, message }) => ({ path: path[0], message })),
             }, exception.getStatus());
         }
 

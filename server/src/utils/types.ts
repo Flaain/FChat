@@ -1,10 +1,11 @@
-import { UserDocument } from "src/user/types";
+import { UserDocument } from "src/modules/user/types";
 
 export type RequestWithUser = Request & { user: UserDocument };
 
 export enum Routes {
     AUTH = 'auth',
     USER = "user",
+    GROUP = "group",
     FEED = 'feed',
     SESSION = 'session',
     CONVERSATION = 'conversation',
@@ -41,7 +42,6 @@ export enum ConversationType {
 export interface Message {
     id: string;
     sender: Participant;
-    // receiver: Participant;
     conversationId: string;
     hasBeenRead: boolean;
     text: string;
