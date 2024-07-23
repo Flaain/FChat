@@ -3,9 +3,8 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { SigninRequest, SignupRequest } from './types';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { AppExceptionCode, JWT_KEYS } from 'src/utils/types';
+import { JWT_KEYS } from 'src/utils/types';
 import { AppException } from 'src/utils/exceptions/app.exception';
-import { AuthUtils } from './auth.utils';
 import { UserService } from '../user/user.service';
 import { OtpService } from '../otp/otp.service';
 import { SessionService } from '../session/session.service';
@@ -13,6 +12,7 @@ import { BcryptService } from 'src/utils/services/bcrypt/bcrypt.service';
 import { OtpType } from '../otp/types';
 import { UserDocument } from '../user/types';
 import { User } from '../user/schemas/user.schema';
+import { otpError } from './constants';
 
 @Injectable()
 export class AuthService  {
@@ -23,8 +23,18 @@ export class AuthService  {
         private readonly otpService: OtpService,
         private readonly sessionService: SessionService,
         private readonly bcryptService: BcryptService,
-        private readonly authUtils: AuthUtils,
     ) {}
+    
+    private signAuth = ({ sessionId, userId }: { sessionId: string; userId: string }) => {
+        const refreshToken = this.jwtService.sign({ sessionId }, { 
+            secret: this.configService.get<string>(JWT_KEYS.REFRESH_TOKEN_SECRET),
+            expiresIn: this.configService.get<string>(JWT_KEYS.REFRESH_TOKEN_EXPIRESIN),
+        });
+
+        const accessToken = this.jwtService.sign({ userId, sessionId });
+
+        return { accessToken, refreshToken };
+    }
 
     signin = async ({ login, password, userAgent }: SigninRequest) => {
         const user = await this.userService.findOneByPayload({ 
@@ -34,39 +44,32 @@ export class AuthService  {
 
         if (!user) throw new AppException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
 
-        const { password: userPassword, ...rest } = user.toObject();
+        const { password: hashedPassword, ...rest } = user.toObject();
 
-        if (!await this.bcryptService.compareAsync(password, userPassword)) {
+        if (!await this.bcryptService.compareAsync(password, hashedPassword)) {
             throw new AppException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
         }
 
         const session = await this.sessionService.create({ userId: user._id, userAgent });
+
+        return { user: rest, ...this.signAuth({ sessionId: session._id.toString(), userId: user._id.toString() }) };
     }
 
-    signup = async ({ password, otp, ...dto }: SignupRequest) => {        
-        if (!await this.otpService.findOneAndDelete({ otp, email: dto.email, type: OtpType.EMAIL_VERIFICATION })) {
-            throw new AppException({ 
-                message: "Invalid OTP code", 
-                errors: [{ message: 'Invalid OTP code', path: 'otp' }], 
-                errorCode: AppExceptionCode.FORM 
-            }, HttpStatus.BAD_REQUEST);
+    signup = async ({ password, otp, ...dto }: SignupRequest) => {     
+        if (await this.userService.findOneByPayload({$or: [{ email: dto.email }, { name: { $regex: dto.name, $options: 'i' } }]})) {
+            throw new AppException({ message: 'User already exists' }, HttpStatus.BAD_REQUEST);
         }
 
-        await Promise.all([this.authUtils.checkEmail(dto.email), this.authUtils.checkName(dto.name)]);
+        if (!await this.otpService.findOneAndDelete({ otp, email: dto.email, type: OtpType.EMAIL_VERIFICATION })) {
+            throw new AppException(otpError, HttpStatus.BAD_REQUEST);
+        }
 
         const hashedPassword = await this.bcryptService.hashAsync(password);
         
         const { _id, deleted, ...user } = await this.userService.create({ ...dto, password: hashedPassword });
         const session = await this.sessionService.create({ userId: _id, userAgent: dto.userAgent });
 
-        const refreshToken = this.jwtService.sign({ sessionId: session._id.toString() }, { 
-            secret: this.configService.get<string>(JWT_KEYS.REFRESH_TOKEN_SECRET),
-            expiresIn: this.configService.get<string>(JWT_KEYS.REFRESH_TOKEN_EXPIRESIN),
-        });
-
-        const accessToken = this.jwtService.sign({ userId: _id.toString(), sessionId: session._id.toString() });
-
-        return { user, accessToken, refreshToken };
+        return { user, ...this.signAuth({ sessionId: session._id.toString(), userId: _id.toString() }) };
     };
 
     validate = async (id: Types.ObjectId | string) => {

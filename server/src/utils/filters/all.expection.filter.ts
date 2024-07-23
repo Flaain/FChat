@@ -1,49 +1,64 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { AppException } from '../exceptions/app.exception';
 import { ZodValidationException } from 'nestjs-zod';
+import { ZodError } from 'zod';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
     constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
-    catch(exception: unknown, host: ArgumentsHost): void {
+    private readonly exceptionHandlers = {
+        [AppException.name]: this.handleAppException.bind(this),
+        [ZodValidationException.name]: this.handleZodValidationException.bind(this),
+        [ZodError.name]: this.handleZodError.bind(this),
+        [UnauthorizedException.name]: this.handleUnauthorizedException.bind(this)
+    };
+
+    private handleAppException(exception: AppException) {
+        return {
+            message: exception.message,
+            errorCode: exception.errorCode,
+            statusCode: exception.statusCode,
+            errors: exception.errors
+        };
+    }
+
+    private handleUnauthorizedException(exception: UnauthorizedException) {
+        return {
+            message: exception.message,
+            statusCode: exception.getStatus(),
+        };
+    }
+
+    private handleZodValidationException(exception: ZodValidationException) {
+        return {
+            message: exception.message,
+            statusCode: exception.getStatus(),
+            errors: exception.getZodError().issues.map(({ path: [path], message }) => ({ path, message }))
+        };
+    }
+
+    private handleZodError(exception: ZodError) {
+        return {
+            message: 'Bad request',
+            errors: exception.issues.map(({ path: [path], message }) => ({ path, message })),
+            statusCode: HttpStatus.INTERNAL_SERVER_ERROR
+        };
+    }
+
+    catch(exception: unknown, host: ArgumentsHost) {
         const { httpAdapter } = this.httpAdapterHost;
 
         const ctx = host.switchToHttp();
-
-        const defaultBody = {
+        const handlerReturn = this.exceptionHandlers[exception.constructor.name]?.(exception);
+        
+        return httpAdapter.reply(ctx.getResponse(), {
             url: ctx.getRequest().url,
             timestamp: new Date().toISOString(),
-        };
-
-        if (exception instanceof AppException) {
-            const responseBody = {
-                ...defaultBody,
-                message: exception.message,
-                errorCode: exception.errorCode,
-                statusCode: exception.statusCode,
-                errors: exception.errors
-            };
-
-            return httpAdapter.reply(ctx.getResponse(), responseBody, exception.statusCode);
-        }
-
-        if (exception instanceof ZodValidationException) {
-            return httpAdapter.reply(ctx.getResponse(), {
-                ...defaultBody, 
-                message: exception.message, 
-                stausCode: exception.getStatus(),
-                errors: exception.getZodError().issues.map(({ path, message }) => ({ path: path[0], message })),
-            }, exception.getStatus());
-        }
-
-        const responseBody = {
-            ...defaultBody,
-            message: typeof exception === 'object' && 'message' in exception ? exception.message : 'Internal server error',
+            message: 'Internal server error',
             statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        };
-
-        httpAdapter.reply(ctx.getResponse(), responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
+            ...(handlerReturn && handlerReturn)
+        }, handlerReturn?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

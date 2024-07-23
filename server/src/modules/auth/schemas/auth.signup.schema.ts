@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { allowCyrillicRegExp, emailForSchema, nameForSchema, regExpError } from 'src/utils/constants';
-import { reservedUsernames } from '../constants';
+import { reservedUsernames } from 'src/modules/user/constants';
 
 export const signupSchema = z
     .strictObject({

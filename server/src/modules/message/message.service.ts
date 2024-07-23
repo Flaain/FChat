@@ -6,7 +6,6 @@ import { DeleteMessageType, EditMessageType, SendMessageType } from './types';
 import { ConversationService } from '../conversation/conversation.service';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { conversationNotFoundError } from '../conversation/constants';
-import { errorMessages } from 'src/utils/constants';
 
 @Injectable()
 export class MessageService {
@@ -50,7 +49,7 @@ export class MessageService {
                 { runValidators: true, new: true, populate: { path: 'sender', model: 'User', select: 'name email' } },
             );
 
-            if (!message) throw new AppException({ message: errorMessages.forbidden }, HttpStatus.FORBIDDEN);
+            if (!message) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
 
             return message;
         } catch (error) {
@@ -63,7 +62,7 @@ export class MessageService {
         try {
             const message = await this.messageModel.findOne({ _id: messageId, sender: initiatorId });
 
-            if (!message) throw new AppException({ message: errorMessages.forbidden }, HttpStatus.FORBIDDEN);
+            if (!message) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
 
             const conversation = await this.conversationService.findOneByPayload(
                 { _id: conversationId, participants: { $in: initiatorId }, messages: { $in: message._id } },
@@ -71,7 +70,7 @@ export class MessageService {
                 { populate: { path: 'lastMessage', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name' } } },
             );
 
-            if (!conversation) throw new AppException({ message: errorMessages.forbidden }, HttpStatus.FORBIDDEN);
+            if (!conversation) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
             
             conversation.messages = conversation.messages.filter((id) => id.toString() !== messageId);
             

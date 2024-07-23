@@ -19,6 +19,8 @@ export interface UserRegister extends Pick<IUser, 'email' | 'name' | 'birthDate'
     password: string;
 }
 
-export type CreateUserType = Omit<IUser, "accessToken" | "expiersIn" | "password" | "conversations">;
-export type UserProfileType = Omit<IUser, "accessToken" | "expiersIn" | "password">;
+export type CheckType = 'email' | 'name';
+
+export type CreateUserType = Omit<IUser, 'accessToken' | 'expiersIn' | 'password' | 'conversations'>;
+export type UserProfileType = Omit<IUser, 'accessToken' | 'expiersIn' | 'password'>;
 export type UserDocument = User & Document & SchemaTimestampsConfig;

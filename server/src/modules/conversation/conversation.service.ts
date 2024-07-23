@@ -7,7 +7,6 @@ import { Message } from '../message/schemas/message.schema';
 import { UserService } from '../user/user.service';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { conversationAlreadyExistsError, conversationNotFoundError, createConversationWithMySelfError } from './constants';
-import { errorMessages } from 'src/utils/constants';
 import { UserDocument } from '../user/types';
 
 @Injectable()
@@ -25,7 +24,7 @@ export class ConversationService implements IConversationService {
 
             const recipient = await this.userService.findOneByPayload({ _id: recipientId, isPrivate: false }, { _id: 1, name: 1, email: 1, official: 1 });
 
-            if (!recipient) throw new AppException({ message: errorMessages.userNotFound }, HttpStatus.NOT_FOUND);
+            if (!recipient) throw new AppException({ message: "User not found" }, HttpStatus.NOT_FOUND);
 
             const isConversationExists = await this.conversationModel.findOne({ participants: { $all: [initiatorId, recipient._id] } });
 
@@ -128,7 +127,7 @@ export class ConversationService implements IConversationService {
                 .lean();
 
             if (!conversation) {
-                if (recipient.isPrivate) throw new AppException({ message: errorMessages.userNotFound }, HttpStatus.NOT_FOUND);
+                if (recipient.isPrivate) throw new AppException({ message: "User not found" }, HttpStatus.NOT_FOUND);
                 return { conversation: { recipient, messages: [] }, nextCursor };
             };
 
