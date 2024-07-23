@@ -217,3 +217,10 @@ export interface DeleteMessageEventParams {
     lastMessageSentAt: string;
     conversationId: string;
 }
+
+export enum UserCheckType {
+    EMAIL = 'email',
+    NAME = 'name'
+}
+
+export type UserCheckParams = { type: UserCheckType.EMAIL, email: string } | { type: UserCheckType.NAME, name: string }

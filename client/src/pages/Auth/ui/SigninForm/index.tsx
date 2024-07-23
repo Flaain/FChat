@@ -11,12 +11,12 @@ const SigninForm = () => {
     const { form, isSubmitButtonDisabled, onSubmit, onBack, loading } = useSignin();
 
     return (
-        <div className='flex items-center w-full h-full max-w-[1230px] mx-auto box-border'>
-            <div className='flex flex-col gap-3 items-end px-10 max-lg:px-5 max-md:hidden'>
-                <Typography variant='primary' as='h1' size='6xl' weight='bold' align='right'>
+        <div className='flex items-center w-full h-full max-w-[1230px] box-border gap-5'>
+            <div className='flex flex-col gap-2 items-end max-md:hidden max-w-[450px] w-full'>
+                <Typography variant='primary' as='h1' size='6xl' weight='bold' align='right' className='max-lg:text-6xl'>
                     Sign in
                 </Typography>
-                <Typography as='p' size='xl' variant='secondary' align='right'>
+                <Typography as='p' size='xl' variant='secondary' align='right' className='max-lg:text-xl'>
                     Enter your email or username and password
                 </Typography>
             </div>
@@ -24,14 +24,14 @@ const SigninForm = () => {
                 <AuthContainer>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className='flex flex-col gap-4 h-full justify-center max-w-[560px] w-full'
+                        className='flex flex-col gap-4 h-full justify-center md:min-w-[400px] max-w-[560px] w-full'
                     >
                         <FormField
                             name='login'
                             control={form.control}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className='text-white'>Email or Name</FormLabel>
+                                    <FormLabel className='text-white'>Login</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}

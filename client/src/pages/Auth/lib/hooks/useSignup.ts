@@ -1,5 +1,5 @@
 import React from "react";
-import { FieldErrors, FieldPath, useForm } from "react-hook-form";
+import { FieldPath, useForm } from "react-hook-form";
 import { useAuth } from "./useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/shared/api";
@@ -8,12 +8,9 @@ import { signupSchema } from "../../model/schema";
 import { useProfile } from "@/shared/lib/hooks/useProfile";
 import { useSession } from "@/entities/session/lib/hooks/useSession";
 import { SessionTypes } from "@/entities/session/model/types";
-import { saveDataToLocalStorage } from "@/shared/lib/utils/saveDataToLocalStorage";
-import { localStorageKeys } from "@/shared/constants";
 import { toast } from "sonner";
 import { AppException } from "@/shared/api/error";
-import { OtpType } from "@/shared/model/types";
-import { ZodCustomIssue } from "zod";
+import { OtpType, UserCheckType } from "@/shared/model/types";
 import { useOtp } from "./useOtp";
 
 const steps: Array<{ fields: Array<FieldPath<SignupSchemaType>> }> = [
@@ -46,8 +43,6 @@ export const useSignup = () => {
         shouldFocusError: true,
     });
 
-    const formRef = React.useRef<HTMLFormElement>(null);
-
     const checkNextAvailability = () => {
         return (
             !form.getValues(steps[step].fields).every(Boolean) ||
@@ -76,12 +71,12 @@ export const useSignup = () => {
 
             const actions = {
                 0: async () => {
-                    await api.user.checkEmail({ email: data.email });
+                    await api.user.check({ type: UserCheckType.EMAIL, email: data.email });
 
                     setStep((prevState) => prevState + 1);
                 },
                 1: async () => {
-                    await api.user.checkName({ name: data.name });
+                    await api.user.check({ type: UserCheckType.NAME, name: data.name });
 
                     const { data: { retryDelay } } = await api.otp.create({ email: data.email, type: OtpType.EMAIL_VERIFICATION });
 
@@ -91,7 +86,10 @@ export const useSignup = () => {
                 2: async () => {
                     const { confirmPassword, ...rest } = data;
                     
-                    await api.user.signup(rest)
+                    const { data: profile } = await api.user.signup(rest);
+
+                    setProfile(profile);
+                    dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { isAuthorized: true, userId: profile._id } });
                 }
             };
 
@@ -103,7 +101,7 @@ export const useSignup = () => {
                     form.setError(path as FieldPath<SignupSchemaType>, { message }, { shouldFocus: true });
                 })
 
-                !error.errors && toast.error(error.message, { position: "bottom-right" });
+                !error.errors && toast.error(error.message ?? "Something went wrong", { position: "bottom-right" });
             }
         } finally {
             setLoading(false);
@@ -118,7 +116,6 @@ export const useSignup = () => {
 
     return {
         form,
-        formRef,
         step,
         loading,
         stepsLength: steps.length,
