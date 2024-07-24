@@ -1,9 +1,9 @@
-import { IUser } from 'src/modules/user/types';
 import { Message } from "../schemas/message.schema"
 import { Document, SchemaTimestampsConfig, Types } from 'mongoose';
 import { MessageSendDTO } from '../dtos/message.send.dto';
 import { MessageDeleteDTO } from '../dtos/message.delete.dto';
 import { MessageEditDTO } from '../dtos/message.edit.dto';
+import { RequestWithUser } from "src/utils/types";
 
 export interface IMessage {
     _id: Types.ObjectId;
@@ -16,11 +16,21 @@ export interface IMessage {
 }
 
 export interface IMessageService {
-    send(dto: SendMessageType): Promise<Message & { conversationId: Types.ObjectId }>;
+    send(params: SendMessageParams): Promise<Message & { conversationId: Types.ObjectId }>;
+}
+
+export interface IMessageController {
+    send(req: RequestWithUser, dto: MessageSendDTO, recipientId: string): Promise<Message>;
+    edit(req: RequestWithUser, dto: MessageEditDTO, messageId: string): Promise<Message>;
+    delete(req: RequestWithUser, dto: MessageDeleteDTO, messageId: string): Promise<{
+        isLastMessage: boolean;
+        lastMessage?: Message;
+        lastMessageSentAt: Date;
+    }>;
 }
 
 export type MessageDocument = Message & Document & SchemaTimestampsConfig;
 
-export type SendMessageType = MessageSendDTO & { recipientId: string; initiatorId: Types.ObjectId };
-export type EditMessageType = MessageEditDTO & { initiatorId: Types.ObjectId, messageId: string };
+export type SendMessageParams = MessageSendDTO & { recipientId: string; initiatorId: Types.ObjectId };
+export type EditMessageParams = MessageEditDTO & { initiatorId: Types.ObjectId, messageId: string };
 export type DeleteMessageType = MessageDeleteDTO & { messageId: string; initiatorId: Types.ObjectId };
