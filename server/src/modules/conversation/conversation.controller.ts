@@ -4,8 +4,8 @@ import { ConversationService } from './conversation.service';
 import { ConversationCreateDTO } from './dtos/conversation.create.dto';
 import { RequestWithUser, Routes } from 'src/utils/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { STATIC_CONVERSATION_EVENTS } from '../gateway/types';
 import { IConversationController } from './types';
+import { STATIC_CONVERSATION_EVENTS } from '../gateway/types';
 
 @Controller(Routes.CONVERSATION)
 export class ConversationController implements IConversationController {

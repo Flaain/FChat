@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IMessageForSchema } from '../types';
+import { IMessage } from '../types';
 
 @Schema({ timestamps: true })
-export class Message implements IMessageForSchema {
+export class Message implements Omit<IMessage, '_id'> {
     @Prop({ type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' })
     sender: mongoose.Types.ObjectId;
 

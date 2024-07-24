@@ -1,6 +1,6 @@
-import { FilterQuery, Types } from 'mongoose';
-import { OTP } from '../schemas/otp.schema';
 import { z } from 'zod';
+import { OTP } from '../schemas/otp.schema';
+import { FilterQuery, Types } from 'mongoose';
 import { OtpCreateSchema } from '../schemas/otp.create.schema';
 
 export enum OtpType {

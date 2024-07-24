@@ -6,9 +6,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JWT_KEYS } from 'src/utils/types';
-import { UserModule } from '../user/user.module';
 import { CookiesModule } from 'src/utils/services/cookies/cookies.module';
 import { BcryptModule } from 'src/utils/services/bcrypt/bcrypt.module';
+import { UserModule } from '../user/user.module';
 import { OtpModule } from '../otp/otp.module';
 import { SessionModule } from '../session/session.module';
 

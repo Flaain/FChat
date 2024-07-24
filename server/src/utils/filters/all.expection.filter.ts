@@ -1,4 +1,4 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { AppException } from '../exceptions/app.exception';
 import { ZodValidationException } from 'nestjs-zod';
@@ -12,7 +12,8 @@ export class AllExceptionFilter implements ExceptionFilter {
         [AppException.name]: this.handleAppException.bind(this),
         [ZodValidationException.name]: this.handleZodValidationException.bind(this),
         [ZodError.name]: this.handleZodError.bind(this),
-        [UnauthorizedException.name]: this.handleUnauthorizedException.bind(this)
+        [UnauthorizedException.name]: this.handleUnauthorizedException.bind(this),
+        [NotFoundException.name]: this.handleNotFoundException.bind(this),
     };
 
     private handleAppException(exception: AppException) {
@@ -21,6 +22,13 @@ export class AllExceptionFilter implements ExceptionFilter {
             errorCode: exception.errorCode,
             statusCode: exception.statusCode,
             errors: exception.errors
+        };
+    }
+
+    private handleNotFoundException(exception: NotFoundException) {
+        return {
+            message: exception.message,
+            statusCode: exception.getStatus(),
         };
     }
 
@@ -52,13 +60,13 @@ export class AllExceptionFilter implements ExceptionFilter {
 
         const ctx = host.switchToHttp();
         const handlerReturn = this.exceptionHandlers[exception.constructor.name]?.(exception);
-        
+
         return httpAdapter.reply(ctx.getResponse(), {
             url: ctx.getRequest().url,
             timestamp: new Date().toISOString(),
             message: 'Internal server error',
             statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            ...(handlerReturn && handlerReturn)
+            ...(handlerReturn ? handlerReturn : {})
         }, handlerReturn?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

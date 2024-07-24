@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './modules/auth/auth.module';
-import { UserModule } from './modules/user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 import { ConversationModule } from './modules/conversation/conversation.module';
 import { MessageModule } from './modules/message/message.module';
 import { GatewayModule } from './modules/gateway/gateway.module';

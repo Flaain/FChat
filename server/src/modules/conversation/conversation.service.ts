@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { Conversation } from './schemas/conversation.schema';
 import { IConversationService } from './types';
+import { AppException } from 'src/utils/exceptions/app.exception';
 import { Message } from '../message/schemas/message.schema';
 import { UserService } from '../user/user.service';
-import { AppException } from 'src/utils/exceptions/app.exception';
 import { UserDocument } from '../user/types';
 
 @Injectable()

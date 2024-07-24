@@ -1,15 +1,15 @@
 import { z } from 'zod';
 import { User } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { IAppException } from 'src/utils/types';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { userCheckSchema } from './schemas/user.check.schema';
 import { userSearchSchema } from './schemas/user.search.schema';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { emailExistError, nameExistError } from '../auth/constants';
 import { IUserService, UserSearchParams } from './types';
-import { SignupDTO } from '../auth/dtos/auth.signup.dto';
 import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
+import { IAppException } from 'src/utils/types';
+import { SignupDTO } from '../auth/dtos/auth.signup.dto';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -70,7 +70,7 @@ export class UserService implements IUserService {
         return { status: HttpStatus.OK, message: 'OK' };
     }
 
-    create = async (dto: SignupDTO) => {
+    create = async (dto: Omit<SignupDTO, 'otp'>) => {
         const { password, ...user } = (await new this.userModel(dto).save()).toObject();
         
         return user;

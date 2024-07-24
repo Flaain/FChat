@@ -1,9 +1,9 @@
 import { Types } from 'mongoose';
-import { UserDocument, UserWithoutPassword } from 'src/modules/user/types';
 import { SigninDTO } from '../dtos/auth.signin.dto';
 import { SignupDTO } from '../dtos/auth.signup.dto';
 import { Request, Response } from 'express';
 import { RequestWithUser } from 'src/utils/types';
+import { UserDocument, UserWithoutPassword } from 'src/modules/user/types';
 
 export type WithAuthTokens<T, K extends string> = {
     [key in K]: T;

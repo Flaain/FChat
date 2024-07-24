@@ -26,7 +26,7 @@ import { UserService } from '../user/user.service';
 import { CONVERSATION_EVENTS } from './constants';
 
 @WebSocketGateway({ cors: { origin: 'http://localhost:5173' } })
-export class Gateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     private server: Server;
 

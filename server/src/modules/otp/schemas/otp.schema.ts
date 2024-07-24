@@ -14,10 +14,10 @@ export class OTP implements OtpDocument {
     type: OtpType;
 
     @Prop({ type: Date, expires: '2m' })
-    createdAt?: Date;
+    createdAt: Date;
 
     @Prop({ type: Date, required: true, default: DatesService.twoMinutesFromNow })
-    expiresAt?: Date;
+    expiresAt: Date;
 }
 
 export const OtpSchema = SchemaFactory.createForClass(OTP);

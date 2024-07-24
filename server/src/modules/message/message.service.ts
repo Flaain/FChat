@@ -5,7 +5,6 @@ import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoos
 import { DeleteMessageType, EditMessageType, SendMessageType } from './types';
 import { ConversationService } from '../conversation/conversation.service';
 import { AppException } from 'src/utils/exceptions/app.exception';
-import { conversationNotFoundError } from '../conversation/constants';
 
 @Injectable()
 export class MessageService {
@@ -20,7 +19,7 @@ export class MessageService {
                 participants: { $all: [new Types.ObjectId(recipientId), initiatorId] },
             });
 
-            if (!conversation) throw new AppException(conversationNotFoundError, HttpStatus.NOT_FOUND);
+            if (!conversation) throw new AppException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
 
             const newMessage = new this.messageModel({ sender: initiatorId, text: message.trim() });
 

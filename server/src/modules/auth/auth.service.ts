@@ -5,16 +5,16 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JWT_KEYS } from 'src/utils/types';
 import { AppException } from 'src/utils/exceptions/app.exception';
-import { UserService } from '../user/user.service';
-import { OtpService } from '../otp/otp.service';
-import { SessionService } from '../session/session.service';
 import { BcryptService } from 'src/utils/services/bcrypt/bcrypt.service';
-import { OtpType } from '../otp/types';
-import { UserDocument } from '../user/types';
-import { User } from '../user/schemas/user.schema';
 import { otpError } from './constants';
 import { SigninDTO } from './dtos/auth.signin.dto';
 import { SignupDTO } from './dtos/auth.signup.dto';
+import { UserService } from '../user/user.service';
+import { OtpService } from '../otp/otp.service';
+import { SessionService } from '../session/session.service';
+import { OtpType } from '../otp/types';
+import { UserDocument } from '../user/types';
+import { User } from '../user/schemas/user.schema';
 
 @Injectable()
 export class AuthService implements IAuthService {
