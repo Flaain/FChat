@@ -54,9 +54,11 @@ export class AuthService implements IAuthService {
         return { user: rest, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
     }
 
-    signup = async ({ password, otp, ...dto }: WithUserAgent<SignupDTO>) => {     
+    signup = async ({ password, otp, userAgent, ...dto }: WithUserAgent<SignupDTO>) => {     
         if (await this.userService.findOneByPayload({$or: [{ email: dto.email }, { login: dto.login }] })) {
-            throw new AppException({ message: 'User already exists' }, HttpStatus.BAD_REQUEST);
+            throw new AppException({ 
+                message: 'An error occurred during the registration process. Please try again.'
+            }, HttpStatus.BAD_REQUEST);
         }
 
         if (!await this.otpService.findOneAndDelete({ otp, email: dto.email, type: OtpType.EMAIL_VERIFICATION })) {
@@ -64,9 +66,8 @@ export class AuthService implements IAuthService {
         }
 
         const hashedPassword = await this.bcryptService.hashAsync(password);
-        
         const user = await this.userService.create({ ...dto, password: hashedPassword });
-        const session = await this.sessionService.create({ userId: user._id, userAgent: dto.userAgent });
+        const session = await this.sessionService.create({ userId: user._id, userAgent });
 
         return { user, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
     };
