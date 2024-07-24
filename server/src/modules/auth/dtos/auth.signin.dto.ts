@@ -1,4 +1,4 @@
 import { createZodDto } from 'nestjs-zod';
-import { signinRequestSchema } from '../schemas/auth.signin.schema';
+import { signinSchema } from '../schemas/auth.signin.schema';
 
-export class SigninDTO extends createZodDto(signinRequestSchema) {}
+export class SigninDTO extends createZodDto(signinSchema) {}

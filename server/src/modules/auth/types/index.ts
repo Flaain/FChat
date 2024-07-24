@@ -1,20 +1,29 @@
-import { z } from 'zod';
 import { Types } from 'mongoose';
-import { signinRequestSchema } from '../schemas/auth.signin.schema';
-import { signupSchema } from '../schemas/auth.signup.schema';
-import { IUser, UserDocument, UserProfileType } from 'src/modules/user/types';
+import { UserDocument, UserWithoutPassword } from 'src/modules/user/types';
+import { SigninDTO } from '../dtos/auth.signin.dto';
+import { SignupDTO } from '../dtos/auth.signup.dto';
+import { Request, Response } from 'express';
+import { RequestWithUser } from 'src/utils/types';
 
-export type SigninRequest = z.infer<typeof signinRequestSchema> & { userAgent?: string };
-export type SignupRequest = z.infer<typeof signupSchema> & { userAgent?: string };
+export type WithAuthTokens<T, K extends string> = {
+    [key in K]: T;
+} & {
+    accessToken: string;
+    refreshToken: string;
+};
+
+export type WithUserAgent<T> = T & { userAgent?: string };
+
+export interface IAuthController {
+    signin(dto: SigninDTO, req: Request, res: Response): Promise<UserWithoutPassword>;
+    signup(dto: SignupDTO, req: Request, res: Response): Promise<UserWithoutPassword>;
+    profile(req: RequestWithUser): Promise<UserWithoutPassword>;
+    refresh(req: Request, res: Response): Promise<void>;
+}
 
 export interface IAuthService {
-    signin(dto: SigninRequest): Promise<Omit<IUser, 'password'>>;
-    signup(dto: SignupRequest): Promise<Omit<IUser, 'password'>>;
-    getProfile(user: UserDocument): Promise<UserProfileType>;
-    validateUser(_id: Types.ObjectId | string): Promise<UserDocument>;
-    getProfile(user: UserDocument): Promise<Omit<IUser, 'accessToken' | 'expiersIn' | 'password'>>;
-    _checkEmail(email: string): Promise<{ status: number; message: string }>;
-    _checkName(name: string): Promise<{ status: number; message: string }>;
-    _createToken(_id: string): { accessToken: string; expiersIn: string };
-    _validateUserBeforeSignup(dto: SignupRequest): Promise<void>;
+    signin(dto: WithUserAgent<SigninDTO>): Promise<WithAuthTokens<UserWithoutPassword, 'user'>>;
+    signup(dto: WithUserAgent<SignupDTO>): Promise<WithAuthTokens<UserWithoutPassword, 'user'>>;
+    profile(user: UserDocument): Promise<UserWithoutPassword>;
+    validate(_id: Types.ObjectId | string): Promise<UserDocument>;
 }

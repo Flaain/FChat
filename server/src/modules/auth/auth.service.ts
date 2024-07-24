@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { SigninRequest, SignupRequest } from './types';
+import { IAuthService, WithUserAgent } from './types';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JWT_KEYS } from 'src/utils/types';
@@ -13,9 +13,11 @@ import { OtpType } from '../otp/types';
 import { UserDocument } from '../user/types';
 import { User } from '../user/schemas/user.schema';
 import { otpError } from './constants';
+import { SigninDTO } from './dtos/auth.signin.dto';
+import { SignupDTO } from './dtos/auth.signup.dto';
 
 @Injectable()
-export class AuthService  {
+export class AuthService implements IAuthService {
     constructor(
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
@@ -25,7 +27,7 @@ export class AuthService  {
         private readonly bcryptService: BcryptService,
     ) {}
     
-    private signAuth = ({ sessionId, userId }: { sessionId: string; userId: string }) => {
+    private signAuthTokens = ({ sessionId, userId }: { sessionId: string; userId: string }) => {
         const refreshToken = this.jwtService.sign({ sessionId }, { 
             secret: this.configService.get<string>(JWT_KEYS.REFRESH_TOKEN_SECRET),
             expiresIn: this.configService.get<string>(JWT_KEYS.REFRESH_TOKEN_EXPIRESIN),
@@ -36,11 +38,8 @@ export class AuthService  {
         return { accessToken, refreshToken };
     }
 
-    signin = async ({ login, password, userAgent }: SigninRequest) => {
-        const user = await this.userService.findOneByPayload({ 
-            deleted: false, 
-            $or: [{ email: login }, { name: { $regex: login, $options: 'i' } }] 
-        });
+    signin = async ({ login, password, userAgent }: WithUserAgent<SigninDTO>) => {
+        const user = await this.userService.findOneByPayload({ isDeleted: false, $or: [{ email: login }, { login }] });
 
         if (!user) throw new AppException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
 
@@ -52,11 +51,11 @@ export class AuthService  {
 
         const session = await this.sessionService.create({ userId: user._id, userAgent });
 
-        return { user: rest, ...this.signAuth({ sessionId: session._id.toString(), userId: user._id.toString() }) };
+        return { user: rest, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
     }
 
-    signup = async ({ password, otp, ...dto }: SignupRequest) => {     
-        if (await this.userService.findOneByPayload({$or: [{ email: dto.email }, { name: { $regex: dto.name, $options: 'i' } }]})) {
+    signup = async ({ password, otp, ...dto }: WithUserAgent<SignupDTO>) => {     
+        if (await this.userService.findOneByPayload({$or: [{ email: dto.email }, { login: dto.login }] })) {
             throw new AppException({ message: 'User already exists' }, HttpStatus.BAD_REQUEST);
         }
 
@@ -66,14 +65,14 @@ export class AuthService  {
 
         const hashedPassword = await this.bcryptService.hashAsync(password);
         
-        const { _id, deleted, ...user } = await this.userService.create({ ...dto, password: hashedPassword });
-        const session = await this.sessionService.create({ userId: _id, userAgent: dto.userAgent });
+        const user = await this.userService.create({ ...dto, password: hashedPassword });
+        const session = await this.sessionService.create({ userId: user._id, userAgent: dto.userAgent });
 
-        return { user, ...this.signAuth({ sessionId: session._id.toString(), userId: _id.toString() }) };
+        return { user, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
     };
 
     validate = async (id: Types.ObjectId | string) => {
-        const candidate = await this.userService.findOneByPayload({ _id: id, deleted: false });
+        const candidate = await this.userService.findOneByPayload({ _id: id, isDeleted: false });
 
         if (!candidate) throw new AppException({ message: "Unauthorized" }, HttpStatus.UNAUTHORIZED);
 

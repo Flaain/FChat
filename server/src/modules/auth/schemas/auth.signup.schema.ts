@@ -1,15 +1,14 @@
 import { z } from 'zod';
-import { allowCyrillicRegExp, emailForSchema, nameForSchema, regExpError } from 'src/utils/constants';
-import { reservedUsernames } from 'src/modules/user/constants';
+import { emailForSchema, loginForSchema, nameForSchema, reservedLogins } from 'src/utils/constants';
 
 export const signupSchema = z
     .strictObject({
         email: emailForSchema,
-        name: nameForSchema.regex(allowCyrillicRegExp, regExpError),
+        login: loginForSchema,
+        name: nameForSchema,
         password: z
             .string()
             .trim()
-            .min(1, 'Password is required')
             .min(6, 'Password must be at least 6 characters long')
             .max(32, 'Password must be at most 32 characters long')
             .regex(
@@ -24,9 +23,9 @@ export const signupSchema = z
                 (date) => new Date().getTime() - date.getTime() >= 14 * 365 * 24 * 60 * 60 * 1000,
                 'You must be at least 14 years old',
             ),
-        otp: z.string().trim().min(1, 'OTP is required').min(6, 'OTP must be 6 characters long').max(6, 'OTP must be 6 characters long'),
+        otp: z.string().trim().min(6, 'OTP must be 6 characters long').max(6, 'OTP must be 6 characters long'),
     })
-    .refine(({ name }) => !reservedUsernames.includes(name.toLowerCase()), {
-        message: 'Sorry, this name is reserved',
-        path: ['name'],
+    .refine(({ login }) => !reservedLogins.includes(login), {
+        message: 'Sorry, this login is reserved',
+        path: ['login'],
     });

@@ -7,9 +7,10 @@ import { RequestWithUser, Routes } from 'src/utils/types';
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { CookiesService } from 'src/utils/services/cookies/cookies.service';
 import { JwtGuard } from 'src/utils/guards/jwt.guard';
+import { IAuthController } from './types';
 
 @Controller(Routes.AUTH)
-export class AuthController {
+export class AuthController implements IAuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly cookiesService: CookiesService,
@@ -29,20 +30,18 @@ export class AuthController {
 
     @Post('signin')
     async signin(@Body() dto: SigninDTO, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-        const { user, accessToken, refreshToken } = await this.authService.signin({ 
-            ...dto, 
-            userAgent: req.headers['user-agent'] 
+        const { user, accessToken, refreshToken } = await this.authService.signin({
+            ...dto,
+            userAgent: req.headers['user-agent'],
         });
-        
+
         this.cookiesService.setAuthCookies({ res, accessToken, refreshToken });
 
         return user;
     }
 
     @Post('refresh')
-    async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-        
-    }
+    async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {}
 
     @Get('me')
     @SkipThrottle()

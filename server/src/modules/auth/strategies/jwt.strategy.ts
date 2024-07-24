@@ -19,12 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    private static extractJWT = (req: Request) => {
-        if (req && req.cookies && 'accessToken' in req.cookies) {
-            return req.cookies.accessToken;
-        }
-        return null;
-    }
+    private static extractJWT = (req: Request) => (req && req.cookies && 'accessToken' in req.cookies) ? req.cookies.accessToken : null;
 
     validate = async ({ userId }: { userId: string; sessionId: string }) => this.authService.validate(userId);
 }
