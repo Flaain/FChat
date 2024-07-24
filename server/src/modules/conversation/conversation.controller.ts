@@ -5,9 +5,10 @@ import { ConversationCreateDTO } from './dtos/conversation.create.dto';
 import { RequestWithUser, Routes } from 'src/utils/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { STATIC_CONVERSATION_EVENTS } from '../gateway/types';
+import { IConversationController } from './types';
 
 @Controller(Routes.CONVERSATION)
-export class ConversationController {
+export class ConversationController implements IConversationController {
     constructor(
         private readonly conversationService: ConversationService,
         private readonly eventEmitter: EventEmitter2,
@@ -21,8 +22,11 @@ export class ConversationController {
 
     @Post('create')
     @UseGuards(JwtGuard)
-    async createConversation(@Req() req: RequestWithUser, @Body() dto: ConversationCreateDTO) {
-        const conversation = await this.conversationService.createConversation({ initiatorId: req.user._id, ...dto });
+    async create(@Req() req: RequestWithUser, @Body() dto: ConversationCreateDTO) {
+        const conversation = await this.conversationService.createConversation({ 
+            initiatorId: req.user._id, 
+            recipientId: dto.recipientId 
+        });
 
         this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.CREATED, {
             initiatorId: req.user._id.toString(),
@@ -36,7 +40,7 @@ export class ConversationController {
 
     @Delete('/delete/:id')
     @UseGuards(JwtGuard)
-    async deleteConversation(@Req() req: RequestWithUser, @Param('id') id: string) {
+    async delete(@Req() req: RequestWithUser, @Param('id') id: string) {
         return this.conversationService.deleteConversation({ initiatorId: req.user._id, conversationId: id });
     }
 
