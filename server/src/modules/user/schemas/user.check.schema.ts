@@ -1,34 +1,37 @@
 import { z } from 'zod';
-import { allowCyrillicRegExp, emailForSchema, nameForSchema } from 'src/utils/constants';
-import { reservedUsernames } from '../constants';
+import { emailForSchema, loginForSchema, reservedLogins } from 'src/utils/constants';
 
 export const userCheckSchema = z
     .strictObject({
-        type: z.enum(['email', 'name']),
+        type: z.enum(['email', 'login']),
         email: emailForSchema.optional(),
-        name: nameForSchema.regex(allowCyrillicRegExp).optional(),
+        login: loginForSchema.optional(),
     })
-    .superRefine(({ type, email, name }, ctx) => {
+    .superRefine(({ type, email, login }, ctx) => {
         const actions: Record<typeof type, () => void> = {
             email: () => {
-                !email && ctx.addIssue({ code: 'custom', message: 'Please provide email', path: ['email'] });
+                !email && ctx.addIssue({
+                    code: 'custom',
+                    message: 'Please provide email',
+                    path: ['email'],
+                });
             },
-            name: () => {
-                if (!name) {
+            login: () => {
+                if (!login) {
                     ctx.addIssue({
                         code: 'custom',
-                        message: 'Please provide name',
-                        path: ['name'],
-                        fatal: true
+                        message: 'Please provide login',
+                        path: ['login'],
+                        fatal: true,
                     });
 
                     return z.NEVER;
                 }
 
-                reservedUsernames.includes(name.toLowerCase()) && ctx.addIssue({
+                reservedLogins.includes(login) && ctx.addIssue({
                     code: 'custom',
-                    message: 'Sorry this name is reserved',
-                    path: ['name'],
+                    message: 'Sorry this login is reserved',
+                    path: ['login'],
                 });
             },
         };

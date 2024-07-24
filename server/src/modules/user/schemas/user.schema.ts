@@ -1,9 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { UserRegister } from '../types';
+import { IUser } from '../types';
 
 @Schema({ timestamps: true })
-export class User implements UserRegister {
+export class User implements Omit<IUser, '_id'> {
     @Prop({ type: String, required: true, unique: true })
+    login: string;
+
+    @Prop({ type: String, required: true })
     name: string;
 
     @Prop({ type: String, required: true, unique: true })
@@ -19,16 +22,13 @@ export class User implements UserRegister {
     isPrivate: boolean;
 
     @Prop({ type: Boolean, default: false })
-    official: boolean;
+    isOfficial: boolean;
 
     @Prop({ type: Date, required: true, default: () => new Date() })
     lastSeenAt: Date;
 
-    @Prop({ type: String })
-    status?: string;
-
     @Prop({ type: Boolean, default: false })
-    deleted: boolean;
+    isDeleted: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

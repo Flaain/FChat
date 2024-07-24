@@ -1,17 +1,18 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
+import { z } from 'zod';
 import { User } from './schemas/user.schema';
-import { userSearchSchema } from './schemas/user.search.schema';
-import { ZodError } from 'zod';
-import { AppException } from 'src/utils/exceptions/app.exception';
-import { SignupRequest } from '../auth/types';
-import { userCheckSchema } from './schemas/user.check.schema';
-import { emailExistError, nameExistError } from '../auth/constants';
+import { InjectModel } from '@nestjs/mongoose';
 import { IAppException } from 'src/utils/types';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { userCheckSchema } from './schemas/user.check.schema';
+import { userSearchSchema } from './schemas/user.search.schema';
+import { AppException } from 'src/utils/exceptions/app.exception';
+import { emailExistError, nameExistError } from '../auth/constants';
+import { IUserService, UserSearchParams } from './types';
+import { SignupDTO } from '../auth/dtos/auth.signup.dto';
+import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 
 @Injectable()
-export class UserService {
+export class UserService implements IUserService {
     constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
 
     findOneByPayload = async (
@@ -26,53 +27,42 @@ export class UserService {
         options?: QueryOptions<User>,
     ) => this.userModel.find(payload, projection, options);
 
-    searchUser = async ({
-        initiatorId,
-        name,
-        page,
-        limit,
-    }: {
-        initiatorId: Types.ObjectId;
-        name: string;
-        page: number;
-        limit: number;
-    }) => {
-        try {
-            const parsedQuery = userSearchSchema.parse({ name, page, limit }, { path: ['name'] });
+    search = async ({ initiatorId, query, page, limit }: UserSearchParams) => {
+        const parsedQuery = userSearchSchema.parse({ query, page, limit }, { path: ['query'] });
 
-            const users = await this.userModel.find(
-                {
-                    _id: { $ne: initiatorId },
-                    name: { $regex: parsedQuery.name, $options: 'i' },
-                    isPrivate: false,
-                    deleted: false,
-                },
-                { _id: 1, name: 1 },
-                { limit, skip: page * limit },
-            )
-            .lean();
+        const users = await this.userModel.find(
+            {
+                _id: { $ne: initiatorId },
+                $or: [
+                    { name: { $regex: parsedQuery.query, $options: 'i' } }, 
+                    { login: { $regex: parsedQuery.query, $options: 'i' } }
+                ],
+                isPrivate: false,
+                isDeleted: false,
+            },
+            { _id: 1, name: 1, login: 1 },
+            { limit, skip: page * limit },
+        )
+        .lean();
 
-            if (!users.length) throw new AppException({ message: "User not found" }, HttpStatus.NOT_FOUND);
+        if (!users.length) throw new AppException({ message: "No results were found for your search" }, HttpStatus.NOT_FOUND);
 
-            return users;
-        } catch (error) {
-            throw new HttpException(error instanceof ZodError ? error.issues : error.response, error.status);
-        }
+        return users;
     };
 
     findById = async (id: string | Types.ObjectId) => this.userModel.findById(id);
 
-    check = async ({ type, email, name }: { type: 'email' | 'name'; email?: string; name?: string }) => {
-        const parsedQuery = userCheckSchema.parse({ type, email, name });
+    check = async ({ type, email, login }: z.infer<typeof userCheckSchema>) => {
+        const parsedQuery = userCheckSchema.parse({ type, email, login });
 
         const errors: Record<typeof type, Pick<IAppException, 'message' | 'errors'>> = {
             email: emailExistError,
-            name: nameExistError,
+            login: nameExistError,
         }
 
         const user = await this.userModel.exists({ 
             [parsedQuery.type]: { $regex: parsedQuery[parsedQuery.type], $options: 'i' }, 
-            deleted: false 
+            isDeleted: false 
         });
 
         if (user) throw new AppException(errors[type], HttpStatus.CONFLICT);
@@ -80,8 +70,8 @@ export class UserService {
         return { status: HttpStatus.OK, message: 'OK' };
     }
 
-    create = async (userDetails: SignupRequest) => {
-        const { password: _, ...user } = (await new this.userModel(userDetails).save()).toObject();
+    create = async (dto: SignupDTO) => {
+        const { password, ...user } = (await new this.userModel(dto).save()).toObject();
         
         return user;
     };
