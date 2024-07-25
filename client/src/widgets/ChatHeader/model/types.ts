@@ -1,5 +1,5 @@
 export interface ChatHeaderProps {
     name: string;
-    isOfficial?: boolean;
+    isOfficial: boolean;
     description: string;
 }

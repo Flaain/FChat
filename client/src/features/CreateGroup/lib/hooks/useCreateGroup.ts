@@ -81,7 +81,7 @@ export const useCreateGroup = () => {
         try {
             setIsAsyncActionLoading(true);
 
-            const { data } = await api.user.search({ username: value });
+            const { data } = await api.user.search({ query: value });
 
             setSearchedUsers(data);
         } catch (error) {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { allowCyrillicRegExp, emailForSchema, nameForSchema, passwordForSchema, passwordRules, regExpError } from "@/shared/constants";
+import { allowCyrillicRegExp, emailForSchema, loginForSchema, nameForSchema, passwordForSchema, passwordRules, regExpError } from "@/shared/constants";
 
 export const signinSchema = z.strictObject({
     login: z
@@ -34,6 +34,7 @@ export const firstStepSignUpSchema = z
 
 export const secondStepSignUpSchema = z.object({
     name: nameForSchema.regex(allowCyrillicRegExp, regExpError),
+    login: loginForSchema,
     birthDate: z.coerce
         .date({ required_error: "Birth date is required" })
         .min(new Date("1900-01-01"), "Invalid birth date")

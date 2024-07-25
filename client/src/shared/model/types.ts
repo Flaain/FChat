@@ -70,7 +70,7 @@ export interface GroupParticipant {
     userId: string;
 }
 
-export interface ConversationParticipant extends Pick<User, '_id' | 'official' | 'email' | 'name' | 'lastSeenAt' | 'isPrivate'> {}
+export interface ConversationParticipant extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate'> {}
 
 export interface Conversation {
     _id: string;
@@ -86,7 +86,7 @@ export interface Group {
     _id: string;
     name: string;
     participants: Array<GroupParticipant>;
-    official?: boolean;
+    isOfficial?: boolean;
     messages: Array<IMessage>;
     lastMessage?: IMessage;
     lastMessageSentAt: string;
@@ -143,7 +143,8 @@ export type TypographyComponent = <T extends React.ElementType = 'span'>(
 export interface SearchUser {
     _id: string;
     name: string;
-    official?: boolean;
+    isOfficial: boolean;
+    login: string;
     type: FeedTypes.USER;
 }
 
@@ -177,7 +178,7 @@ export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'lastM
     type: FeedTypes.CONVERSATION;
 };
 
-export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'official' | 'name'> & {
+export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'isOfficial' | 'name'> & {
     type: FeedTypes.GROUP;
 };
 
@@ -220,7 +221,7 @@ export interface DeleteMessageEventParams {
 
 export enum UserCheckType {
     EMAIL = 'email',
-    NAME = 'name'
+    LOGIN = 'login'
 }
 
-export type UserCheckParams = { type: UserCheckType.EMAIL, email: string } | { type: UserCheckType.NAME, name: string }
+export type UserCheckParams = { type: UserCheckType.EMAIL, email: string } | { type: UserCheckType.LOGIN, login: string }

@@ -1,11 +1,13 @@
 export interface User {
     _id: string;
     name: string;
+    login: string;
     email: string;
     status?: string;
-    official: boolean;
     lastSeenAt: string;
+    isOfficial: boolean;
     isPrivate: boolean;
+    isDeleted: boolean;
     createdAt: string;
     updatedAt: string;
 }

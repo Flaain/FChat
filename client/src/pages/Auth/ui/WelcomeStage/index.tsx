@@ -1,6 +1,6 @@
+import Typography from "@/shared/ui/Typography";
 import { Button } from "@/shared/ui/Button";
 import { useAuth } from "../../lib/hooks/useAuth";
-import Typography from "@/shared/ui/Typography";
 
 const WelcomeStage = () => {
     const { setAuthStage } = useAuth();

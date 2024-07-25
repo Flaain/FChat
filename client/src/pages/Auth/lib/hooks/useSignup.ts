@@ -15,7 +15,7 @@ import { useOtp } from "./useOtp";
 
 const steps: Array<{ fields: Array<FieldPath<SignupSchemaType>> }> = [
     { fields: ["email", "password", "confirmPassword"] },
-    { fields: ["name", "birthDate"] },
+    { fields: ["name", 'login', "birthDate"] },
     { fields: ["otp"] }
 ];
 
@@ -35,6 +35,7 @@ export const useSignup = () => {
             password: "",
             confirmPassword: "",
             name: "",
+            login: "",
             birthDate: "",
             otp: "",
         },
@@ -71,12 +72,12 @@ export const useSignup = () => {
 
             const actions = {
                 0: async () => {
-                    await api.user.check({ type: UserCheckType.EMAIL, email: data.email });
+                    await api.user.check({ type: UserCheckType.EMAIL, email: data.email.toLowerCase().trim() });
 
                     setStep((prevState) => prevState + 1);
                 },
                 1: async () => {
-                    await api.user.check({ type: UserCheckType.NAME, name: data.name });
+                    await api.user.check({ type: UserCheckType.LOGIN, login: data.login.toLowerCase().trim() });
 
                     const { data: { retryDelay } } = await api.otp.create({ email: data.email, type: OtpType.EMAIL_VERIFICATION });
 

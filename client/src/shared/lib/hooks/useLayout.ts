@@ -90,7 +90,7 @@ export const useLayout = () => {
             try {
                 setSearchLoading(true);
 
-                const { data: users } = await api.user.search({ username: value });
+                const { data: users } = await api.user.search({ query: value });
 
                 setGlobalResults(users.map((user) => ({ ...user, type: FeedTypes.USER })));
             } catch (error) {
