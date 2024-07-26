@@ -4,13 +4,14 @@ import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtStrategy } from './strategies/jwt.strategy';
 import { JWT_KEYS } from 'src/utils/types';
 import { CookiesModule } from 'src/utils/services/cookies/cookies.module';
 import { BcryptModule } from 'src/utils/services/bcrypt/bcrypt.module';
 import { UserModule } from '../user/user.module';
 import { OtpModule } from '../otp/otp.module';
 import { SessionModule } from '../session/session.module';
+import { AuthAccessStrategy } from './strategies/auth.access.strategy';
+import { AuthRefreshStrategy } from './strategies/auth.refresh.strategy';
 
 @Module({
     imports: [
@@ -37,6 +38,6 @@ import { SessionModule } from '../session/session.module';
         }),
     ],
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy],
+    providers: [AuthService, AuthAccessStrategy, AuthRefreshStrategy],
 })
 export class AuthModule {}

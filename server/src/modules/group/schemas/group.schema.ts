@@ -4,8 +4,11 @@ import { IGroup } from '../types';
 
 @Schema({ timestamps: true })
 export class Group implements IGroup {
-    @Prop({ type: String, required: true, unique: true })
+    @Prop({ type: String })
     name: string;
+
+    @Prop({ type: String, required: true, unique: true })
+    login: string;
 
     @Prop({ type: String, required: true })
     displayName: string;
@@ -26,10 +29,10 @@ export class Group implements IGroup {
     owner: mongoose.Types.ObjectId;
 
     @Prop({ type: Boolean, default: false })
-    isPrivate?: boolean;
+    isPrivate: boolean;
 
     @Prop({ type: Boolean, default: false })
-    official?: boolean;
+    isOfficial: boolean;
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);

@@ -1,12 +1,24 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { AppException } from '../exceptions/app.exception';
 import { ZodValidationException } from 'nestjs-zod';
 import { ZodError } from 'zod';
+import { Request, Response } from 'express';
+import { CookiesService, REFRESH_PATH } from '../services/cookies/cookies.service';
+import {
+    ExceptionFilter,
+    Catch,
+    ArgumentsHost,
+    HttpStatus,
+    UnauthorizedException,
+    NotFoundException,
+} from '@nestjs/common';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
-    constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
+    constructor(
+        private readonly httpAdapterHost: HttpAdapterHost,
+        private readonly cookiesService: CookiesService,
+    ) {}
 
     private readonly exceptionHandlers = {
         [AppException.name]: this.handleAppException.bind(this),
@@ -16,12 +28,18 @@ export class AllExceptionFilter implements ExceptionFilter {
         [NotFoundException.name]: this.handleNotFoundException.bind(this),
     };
 
+    private readonly specificUrlActions: Record<string, (request: Request, response: Response) => void> = {
+        [REFRESH_PATH]: (_, response) => {
+            this.cookiesService.removeAuthCookies(response);
+        },
+    };
+
     private handleAppException(exception: AppException) {
         return {
             message: exception.message,
             errorCode: exception.errorCode,
             statusCode: exception.statusCode,
-            errors: exception.errors
+            errors: exception.errors,
         };
     }
 
@@ -43,7 +61,7 @@ export class AllExceptionFilter implements ExceptionFilter {
         return {
             message: exception.message,
             statusCode: exception.getStatus(),
-            errors: exception.getZodError().issues.map(({ path: [path], message }) => ({ path, message }))
+            errors: exception.getZodError().issues.map(({ path: [path], message }) => ({ path, message })),
         };
     }
 
@@ -51,7 +69,7 @@ export class AllExceptionFilter implements ExceptionFilter {
         return {
             message: 'Bad request',
             errors: exception.issues.map(({ path: [path], message }) => ({ path, message })),
-            statusCode: HttpStatus.INTERNAL_SERVER_ERROR
+            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         };
     }
 
@@ -59,14 +77,20 @@ export class AllExceptionFilter implements ExceptionFilter {
         const { httpAdapter } = this.httpAdapterHost;
 
         const ctx = host.switchToHttp();
+
+        const request = ctx.getRequest<Request>();
+        const response = ctx.getResponse<Response>();
+
         const handlerReturn = this.exceptionHandlers[exception.constructor.name]?.(exception);
 
-        return httpAdapter.reply(ctx.getResponse(), {
-            url: ctx.getRequest().url,
+        this.specificUrlActions[request.url]?.(request, response);
+
+        return httpAdapter.reply(response, {
+            url: request.url,
             timestamp: new Date().toISOString(),
             message: 'Internal server error',
             statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            ...(handlerReturn ? handlerReturn : {})
+            ...(handlerReturn ? handlerReturn : {}),
         }, handlerReturn?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

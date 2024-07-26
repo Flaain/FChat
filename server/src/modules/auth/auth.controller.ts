@@ -2,12 +2,12 @@ import { Request, Response } from 'express';
 import { SigninDTO } from './dtos/auth.signin.dto';
 import { SignupDTO } from './dtos/auth.signup.dto';
 import { AuthService } from './auth.service';
-import { SkipThrottle } from '@nestjs/throttler';
-import { RequestWithUser, Routes } from 'src/utils/types';
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { RequestWithSession, RequestWithUser, Routes } from 'src/utils/types';
+import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { CookiesService } from 'src/utils/services/cookies/cookies.service';
-import { JwtGuard } from 'src/utils/guards/jwt.guard';
 import { IAuthController } from './types';
+import { AccessGuard } from 'src/utils/guards/access.guard';
+import { RefreshGuard } from 'src/utils/guards/refresh.guard';
 
 @Controller(Routes.AUTH)
 export class AuthController implements IAuthController {
@@ -40,13 +40,29 @@ export class AuthController implements IAuthController {
         return user;
     }
 
-    @Post('refresh')
-    async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {}
+    @Get('refresh')
+    @UseGuards(RefreshGuard)
+    async refresh(@Req() req: RequestWithSession, @Res({ passthrough: true }) res: Response) {
+       const { accessToken } = await this.authService.refresh(req.user.session);
+
+       this.cookiesService.setAccessToken(res, accessToken);
+
+       return { message: 'refresh success', statusCode: HttpStatus.OK };
+    }
+
+    @Get('logout')
+    @UseGuards(AccessGuard)
+    async logout(@Req() req: RequestWithUser, @Res({ passthrough: true }) res: Response) {
+        const status = await this.authService.logout({ user: req.user.doc, sessionId: req.user.sessionId });
+
+        this.cookiesService.removeAuthCookies(res);
+
+        return status;
+    }
 
     @Get('me')
-    @SkipThrottle()
-    @UseGuards(JwtGuard)
+    @UseGuards(AccessGuard)
     profile(@Req() req: RequestWithUser) {
-        return this.authService.profile(req.user);
+        return this.authService.profile(req.user.doc);
     }
 }

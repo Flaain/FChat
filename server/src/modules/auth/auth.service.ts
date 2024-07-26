@@ -15,6 +15,7 @@ import { SessionService } from '../session/session.service';
 import { OtpType } from '../otp/types';
 import { UserDocument } from '../user/types';
 import { User } from '../user/schemas/user.schema';
+import { SessionDocument } from '../session/types';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -71,6 +72,23 @@ export class AuthService implements IAuthService {
 
         return { user, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
     };
+
+    refresh = async (session: SessionDocument) => ({
+        accessToken: this.jwtService.sign({ 
+            userId: session.userId.toString(), 
+            sessionId: session._id.toString() 
+        }),
+    });
+
+    logout = async ({ user, sessionId }: { user: UserDocument; sessionId: string }) => {
+        const session = await this.sessionService.findOneByPayload({ _id: sessionId, userId: user._id });
+
+        if (!session) throw new AppException({ message: "Cannot find current session" }, HttpStatus.UNAUTHORIZED);
+
+        await session.deleteOne()
+
+        return { status: HttpStatus.OK, message: 'OK' };
+    }
 
     validate = async (id: Types.ObjectId | string) => {
         const candidate = await this.userService.findOneByPayload({ _id: id, isDeleted: false });

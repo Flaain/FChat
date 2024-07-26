@@ -4,6 +4,7 @@ import { SignupDTO } from '../dtos/auth.signup.dto';
 import { Request, Response } from 'express';
 import { RequestWithUser } from 'src/utils/types';
 import { UserDocument, UserWithoutPassword } from 'src/modules/user/types';
+import { HttpStatus } from '@nestjs/common';
 
 export type WithAuthTokens<T, K extends string> = {
     [key in K]: T;
@@ -18,7 +19,8 @@ export interface IAuthController {
     signin(dto: SigninDTO, req: Request, res: Response): Promise<UserWithoutPassword>;
     signup(dto: SignupDTO, req: Request, res: Response): Promise<UserWithoutPassword>;
     profile(req: RequestWithUser): Promise<UserWithoutPassword>;
-    refresh(req: Request, res: Response): Promise<void>;
+    // refresh(req: Request, res: Response): Promise<void>;
+    logout(req: RequestWithUser, res: Response): Promise<{ status: HttpStatus; message: string }>;
 }
 
 export interface IAuthService {

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CookieOptions, Response } from 'express';
 import { DatesService } from '../dates/dates.service';
+import { AuthCookiesName } from 'src/utils/types';
+
+export const REFRESH_PATH = '/auth/refresh';
 
 @Injectable()
 export class CookiesService {
@@ -10,8 +13,9 @@ export class CookiesService {
         secure: process.env.NODE_ENV === 'production',
     };
 
+
     setAccessToken(res: Response, accessToken: string) {
-        res.cookie('accessToken', accessToken, {
+        res.cookie(AuthCookiesName.ACCESS_TOKEN, accessToken, {
             ...this.cookieDefault,
             expires: DatesService.fifteenMinutesFromNow(),
         });
@@ -20,10 +24,10 @@ export class CookiesService {
     }
 
     setRefreshToken(res: Response, refreshToken: string) {
-        res.cookie('refreshToken', refreshToken, {
+        res.cookie(AuthCookiesName.REFRESH_TOKEN, refreshToken, {
             ...this.cookieDefault,
             expires: DatesService.oneMonthFromNow(),
-            path: '/auth/refresh',
+            path: REFRESH_PATH,
         });
 
         return this;
@@ -31,5 +35,15 @@ export class CookiesService {
 
     setAuthCookies({ res, accessToken, refreshToken }: { res: Response; accessToken: string; refreshToken: string }) {
         this.setAccessToken(res, accessToken).setRefreshToken(res, refreshToken);
+
+        return this;
+    }
+
+    removeAuthCookies(res: Response) {
+        res.clearCookie(AuthCookiesName.ACCESS_TOKEN).clearCookie(AuthCookiesName.REFRESH_TOKEN, {
+            path: REFRESH_PATH,
+        });
+
+        return this;
     }
 }

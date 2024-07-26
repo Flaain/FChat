@@ -36,11 +36,14 @@ export class MessageService {
     };
 
     edit = async ({ messageId, initiatorId, message: newMessage, conversationId, recipientId }: EditMessageParams) => {
-        const conversation = await this.conversationService.findOneByPayload({ 
-            _id: conversationId, 
-            participants: { $all: [initiatorId, new Types.ObjectId(recipientId)] },
-            messages: { $in: new Types.ObjectId(messageId) }
-        });
+        const conversation = await this.conversationService.findOneByPayload(
+            {
+                _id: conversationId,
+                participants: { $all: [initiatorId, new Types.ObjectId(recipientId)] },
+                messages: { $in: new Types.ObjectId(messageId) },
+            },
+            { messages: { $slice: -1 } },
+        );
 
         if (!conversation) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
 
@@ -52,7 +55,11 @@ export class MessageService {
 
         if (!message) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
 
-        return { message: message.toObject(), conversationId: conversation._id.toString() };
+        return { 
+            message: message.toObject(), 
+            conversationId: conversation._id.toString(), 
+            isLastMessage: message._id.toString() === conversation.messages[0]?._id.toString() 
+        };
     };
 
     delete = async ({ conversationId, messageId, initiatorId }: DeleteMessageType) => {

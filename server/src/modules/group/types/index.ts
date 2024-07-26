@@ -6,7 +6,7 @@ export interface IGroup {
     messages: Array<Types.ObjectId>;
     owner: Types.ObjectId;
     displayName: string;
-    isPrivate?: boolean;
-    official?: boolean;
+    isPrivate: boolean;
+    isOfficial: boolean;
     lastMessage: Types.ObjectId;
 }

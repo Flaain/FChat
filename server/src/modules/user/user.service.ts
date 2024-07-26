@@ -5,7 +5,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { userCheckSchema } from './schemas/user.check.schema';
 import { userSearchSchema } from './schemas/user.search.schema';
 import { AppException } from 'src/utils/exceptions/app.exception';
-import { emailExistError, nameExistError } from '../auth/constants';
+import { emailExistError, loginExistError } from '../auth/constants';
 import { IUserService, UserSearchParams } from './types';
 import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { IAppException } from 'src/utils/types';
@@ -57,7 +57,7 @@ export class UserService implements IUserService {
 
         const errors: Record<typeof type, Pick<IAppException, 'message' | 'errors'>> = {
             email: emailExistError,
-            login: nameExistError,
+            login: loginExistError,
         }
 
         const user = await this.userModel.exists({ 

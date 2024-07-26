@@ -1,8 +1,8 @@
 import { IAppException } from 'src/utils/types';
 
-export const nameExistError: Pick<IAppException, 'message' | 'errors'> = {
-    message: 'Name already exists',
-    errors: [{ message: 'Name already exists', path: 'name' }],
+export const loginExistError: Pick<IAppException, 'message' | 'errors'> = {
+    message: 'Login already exists',
+    errors: [{ message: 'Login already exists', path: 'login' }],
 };
 
 export const emailExistError: Pick<IAppException, 'message' | 'errors'> = {
