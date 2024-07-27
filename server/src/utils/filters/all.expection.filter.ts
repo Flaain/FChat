@@ -28,12 +28,6 @@ export class AllExceptionFilter implements ExceptionFilter {
         [NotFoundException.name]: this.handleNotFoundException.bind(this),
     };
 
-    private readonly specificUrlActions: Record<string, (request: Request, response: Response) => void> = {
-        [REFRESH_PATH]: (_, response) => {
-            this.cookiesService.removeAuthCookies(response);
-        },
-    };
-
     private handleAppException(exception: AppException) {
         return {
             message: exception.message,
@@ -50,7 +44,9 @@ export class AllExceptionFilter implements ExceptionFilter {
         };
     }
 
-    private handleUnauthorizedException(exception: UnauthorizedException) {
+    private handleUnauthorizedException(exception: UnauthorizedException, request: Request, response: Response) {
+        request.url === REFRESH_PATH && this.cookiesService.removeAuthCookies(response);
+
         return {
             message: exception.message,
             statusCode: exception.getStatus(),
@@ -81,9 +77,7 @@ export class AllExceptionFilter implements ExceptionFilter {
         const request = ctx.getRequest<Request>();
         const response = ctx.getResponse<Response>();
 
-        const handlerReturn = this.exceptionHandlers[exception.constructor.name]?.(exception);
-
-        this.specificUrlActions[request.url]?.(request, response);
+        const handlerReturn = this.exceptionHandlers[exception.constructor.name]?.(exception, request, response);
 
         return httpAdapter.reply(response, {
             url: request.url,
