@@ -22,5 +22,5 @@ export interface SessionState {
 
 export type SessionAction =
     | { type: SessionTypes.SET_IS_AUTH_IN_PROGRESS; payload: { isAuthInProgress: boolean } }
-    | { type: SessionTypes.SET_ON_AUTH; payload: { isAuthorized: boolean; userId: string } }
-    | { type: SessionTypes.SET_ON_LOGOUT; payload: { isAuthorized: boolean } }
+    | { type: SessionTypes.SET_ON_AUTH; payload: { userId: string } }
+    | { type: SessionTypes.SET_ON_LOGOUT; }

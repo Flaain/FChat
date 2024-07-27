@@ -23,7 +23,7 @@ const SignupForm = () => {
                 title={isLastStep ? 'Verify your email' : 'Sign up'}
                 description={
                     isLastStep
-                        ? `We’ve sent an email to ${form.getValues('email')?.toLowerCase()} with a OTP code to verify your email`
+                        ? `We’ve sent an email to ${form.getValues('email').toLowerCase()} with a OTP code to verify your email`
                         : "We're so excited to have you join us!"
                 }
             />

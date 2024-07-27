@@ -11,40 +11,49 @@ export class UserAPI extends API {
             url.searchParams.append(key, value.trim());
         });
 
-        const response = await fetch(url, { headers: this._headers });
+        const request: RequestInit = { headers: this._headers };
 
-        return this._checkResponse<{ status: number; message: string }>(response);
+        return this._checkResponse<{ status: number; message: string }>(await fetch(url, request), request);
     };
 
     signup = async (body: Omit<SignupSchemaType, 'confirmPassword'>) => {
-        const response = await fetch(this._baseUrl + '/auth/signup', {
+        const request: RequestInit = {
             method: 'POST',
             headers: this._headers,
             credentials: this._cretedentials,
             body: JSON.stringify(body)
-        });
+        };
 
-        return this._checkResponse<User>(response);
+        return this._checkResponse<User>(await fetch(this._baseUrl + '/auth/signup', request), request);
     };
 
     signin = async (body: SigininSchemaType) => {
-        const response = await fetch(this._baseUrl + '/auth/signin', {
+        const request: RequestInit = {
             method: 'POST',
             headers: this._headers,
             credentials: this._cretedentials,
             body: JSON.stringify(body)
-        });
+        };
 
-        return this._checkResponse<User>(response);
+        return this._checkResponse<User>(await fetch(this._baseUrl + '/auth/signin', request));
     };
 
     profile = async () => {
-        const response = await fetch(this._baseUrl + '/auth/me', {
+        const request: RequestInit = {
             headers: this._headers,
             credentials: this._cretedentials
-        });
+        };
 
-        return this._checkResponse<Profile>(response);
+        return this._checkResponse<Profile>(await fetch(this._baseUrl + '/auth/me', request), request);
+    };
+
+    logout = async () => {
+        const request: RequestInit = {
+            headers: this._headers,
+            credentials: this._cretedentials
+        };
+
+        return this._checkResponse<{ status: number; message: string }>(await fetch(this._baseUrl + '/auth/logout', request), request);
     };
 
     search = async ({ query, page = 0, limit = 10 }: { query: string; page?: number; limit?: number }) => {
@@ -54,8 +63,8 @@ export class UserAPI extends API {
         url.searchParams.append('page', page.toString());
         url.searchParams.append('limit', limit.toString());
 
-        const response = await fetch(url, { headers: this._headers, credentials: this._cretedentials });
+        const request: RequestInit = { headers: this._headers, credentials: this._cretedentials };
 
-        return this._checkResponse<Array<SearchUser>>(response);
+        return this._checkResponse<Array<SearchUser>>(await fetch(url, request), request);
     };
 }

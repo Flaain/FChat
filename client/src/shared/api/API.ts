@@ -16,11 +16,34 @@ export abstract class API {
         this._cretedentials = credentials;
     }
 
-    protected async _checkResponse<T>(response: Response): Promise<APIData<T>> {
+    private _refreshToken = async () => {
+        const refreshResponse = await fetch(this._baseUrl + '/auth/refresh', {
+            headers: this._headers,
+            credentials: this._cretedentials
+        });
+        
+        const refreshData = await refreshResponse.json();
+
+        if (!refreshResponse.ok) {
+            throw new AppException({ ...refreshData, headers: Object.fromEntries([...refreshResponse.headers.entries()]) });
+        }
+
+        return refreshData;
+    }
+
+    protected _checkResponse = async <T>(response: Response, requestInit?: RequestInit): Promise<APIData<T>> => {
         const data = await response.json();
         const headers = Object.fromEntries([...response.headers.entries()]);
+        
+        if (!response.ok) {
+            if (response.status === 401) {
+                await this._refreshToken();
 
-        if (!response.ok) throw new AppException({ ...data, headers });
+                return this._checkResponse<T>(await fetch(response.url, requestInit), requestInit);
+            } else {
+                throw new AppException({ ...data, headers });
+            }
+        }
 
         return {
             data,

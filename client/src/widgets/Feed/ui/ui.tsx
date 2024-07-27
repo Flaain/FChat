@@ -2,17 +2,15 @@ import UserItem from './UserItem';
 import Typography from '@/shared/ui/Typography';
 import FeedSkeleton from './Skeletons/FeedSkeleton';
 import ConversationItem from './ConversationItem';
-import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { ConversationFeed, FeedItem, FeedTypes, GroupFeed, UserFeed } from '@/shared/model/types';
+import { ConversationFeed, FeedItem, FeedTypes, UserFeed } from '@/shared/model/types';
 import { ReactNode } from 'react';
 import { UserSearch } from 'lucide-react';
+import { FeedProps } from '../model/types';
 
-const Feed = () => {
-    const { searchLoading, searchValue, globalResults, localResults } = useLayoutContext();
+const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, searchLoading, searchValue }: FeedProps) => {
+    if (isFeedEmpty) return <FeedSkeleton skeletonsCount={3} />;
 
-    if (!searchValue.trim().length && !globalResults.length && !localResults.length) return <FeedSkeleton skeletonsCount={3} />;
-
-    const trimmedSearchValue = searchValue.trim().toLowerCase();
+    const trimmedSearchValue = searchValue.trim();
 
     const feedItems: Record<FeedTypes, (item: FeedItem) => ReactNode> = {
         conversation: (item: FeedItem) => <ConversationItem key={item._id} conversation={item as ConversationFeed} />,
@@ -20,24 +18,11 @@ const Feed = () => {
         group: (item: FeedItem) => <div key={item._id}>{item._id}</div>
     };
 
-    const localFilters: Record<Exclude<FeedTypes, 'user'>, (item: FeedItem) => boolean> = {
-        conversation: (item: FeedItem) => (item as ConversationFeed).recipient.name.toLowerCase().includes(trimmedSearchValue),
-        group: (item: FeedItem) => (item as GroupFeed).name.toLowerCase().includes(trimmedSearchValue)
-    };
-
-    const globalFilters: Record<Exclude<FeedTypes, 'conversation'>, (item: FeedItem) => boolean> = {
-        user: (item: FeedItem) => localResults.some((localItem) => localItem.type === FeedTypes.CONVERSATION && localItem.recipient._id === item._id),
-        group: (item: FeedItem) => localResults.some((localItem) => localItem._id === item._id)
-    };
-
-    const filteredLocalResults = localResults.filter((item) => localFilters[item.type](item));
-    const filteredGlobalResults = globalResults.filter((item) => !globalFilters[item.type](item));
-
     return !searchLoading && !filteredLocalResults.length && !filteredGlobalResults.length ? (
         <>
             <UserSearch className='dark:text-primary-white w-10 h-10 self-center' />
             <Typography as='p' variant='secondary' className='self-center text-center'>
-                There were no results for "{searchValue.trim()}".
+                There were no results for "{trimmedSearchValue}".
             </Typography>
         </>
     ) : (
@@ -48,7 +33,7 @@ const Feed = () => {
                 </ul>
             )}
             {searchLoading ? (
-                <FeedSkeleton skeletonsCount={3} />
+                <FeedSkeleton skeletonsCount={3} animate />
             ) : (
                 !!filteredGlobalResults.length && (
                     <div className='flex flex-col gap-2'>

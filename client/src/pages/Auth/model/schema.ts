@@ -4,10 +4,11 @@ import { allowCyrillicRegExp, emailForSchema, loginForSchema, nameForSchema, pas
 export const signinSchema = z.strictObject({
     login: z
         .string()
-        .min(1, "Field is required")
-        .min(3, "Field must be at least 3 characters long")
-        .max(32, "Field must be at most 32 characters long"),
-    password: passwordForSchema,
+        .trim()
+        .toLowerCase()
+        .min(3, 'Field must be at least 3 characters long')
+        .max(32, 'Field must be at most 32 characters long'),
+    password: passwordForSchema
 });
 
 export const firstStepSignUpSchema = z
