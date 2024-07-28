@@ -36,7 +36,7 @@ export const useSignin = () => {
             const { data: profile } = await api.user.signin(data);
 
             setProfile(profile);
-            dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { isAuthorized: true, userId: profile._id } });
+            dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { userId: profile._id } });
         } catch (error) {
             console.error(error);
             error instanceof AppException && toast.error(error.message);

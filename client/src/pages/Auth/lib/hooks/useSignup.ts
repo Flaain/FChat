@@ -90,7 +90,7 @@ export const useSignup = () => {
                     const { data: profile } = await api.user.signup(rest);
 
                     setProfile(profile);
-                    dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { isAuthorized: true, userId: profile._id } });
+                    dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { userId: profile._id } });
                 }
             };
 

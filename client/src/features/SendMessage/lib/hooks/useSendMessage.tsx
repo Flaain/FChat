@@ -8,9 +8,13 @@ import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { MessageFormState } from '@/shared/model/types';
 import { UseMessageParams } from '../../model/types';
 import { Emoji } from '@emoji-mart/data';
+import { AppException } from '@/shared/api/error';
+import { useSession } from '@/entities/session/lib/hooks/useSession';
+import { SessionTypes } from '@/entities/session/model/types';
 
 export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
+    const { dispatch } = useSession();
     const { data: { conversation } } = useConversationContext();
     const { drafts, setDrafts } = useLayoutContext();
 
@@ -79,7 +83,9 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             toast.success('Message deleted', { position: 'top-center' });
         } catch (error) {
             console.error(error);
-            error instanceof Error && toast.error(error.message, { position: 'top-center' });
+            error instanceof AppException && error.statusCode === 401 ? dispatch({ type: SessionTypes.SET_ON_LOGOUT }) : toast.error('Cannot delete message', {
+                position: 'top-center'
+            }) 
         } finally {
             setDefaultState();
             setIsAsyncActionLoading(false);
@@ -169,7 +175,9 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             await actions[type](trimmedValue);
         } catch (error) {
             console.error(error);
-            toast.error('Cannot send message', { position: 'top-center' });
+            error instanceof AppException && error.statusCode === 401 ? dispatch({ type: SessionTypes.SET_ON_LOGOUT }) : toast.error('Cannot send message', { 
+                position: 'top-center' 
+            });
         }
     };
 
@@ -191,7 +199,9 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             setDefaultState();
         } catch (error) {
             console.error(error);
-            error instanceof Error && toast.error(error.message, { position: 'top-center' });
+            error instanceof AppException && error.statusCode === 401 && dispatch({ 
+                type: SessionTypes.SET_ON_LOGOUT 
+            });
         } finally {
             setIsLoading(false);
             setTimeout(() => textareaRef.current?.focus(), 0); // kludge, .focus() doesn't work cuz of disabled textarea on loading

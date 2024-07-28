@@ -8,6 +8,7 @@ import { debounce } from "@/shared/lib/utils/debounce";
 import { useSidebarEvents } from "./useSidebarEvents";
 import { toast } from "sonner";
 import { getSortedFeedByLastMessage } from "@/shared/lib/utils/getSortedFeedByLastMessage";
+import { AppException } from "@/shared/api/error";
 
 const MIN_SEARCH_LENGTH = 3;
 
@@ -97,6 +98,9 @@ export const useSidebar = () => {
         } catch (error) {
             console.error(error);
             setGlobalResults([]);
+            error instanceof AppException && error.statusCode === 401 && dispatch({ 
+                type: SessionTypes.SET_ON_LOGOUT 
+            });
         } finally {
             setSearchLoading(false);
         }

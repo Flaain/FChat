@@ -5,10 +5,13 @@ import { ConversationStatuses, ConversationWithMeta } from '../../model/types';
 import { Conversation, IMessage, CONVERSATION_EVENTS } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { AppException } from '@/shared/api/error';
+import { useSession } from '@/entities/session/lib/hooks/useSession';
+import { SessionTypes } from '@/entities/session/model/types';
 
 export const useConversation = () => {
     const { id: recipientId } = useParams() as { id: string };
     const { socket } = useLayoutContext();
+    const { dispatch } = useSession();
 
     const [data, setConversation] = React.useState<ConversationWithMeta>(null!);
     const [status, setStatus] = React.useState<ConversationStatuses>('loading');
@@ -35,6 +38,9 @@ export const useConversation = () => {
             }));
         } catch (error) {
             console.error(error);
+            error instanceof AppException && error.statusCode === 401 && dispatch({ 
+                type: SessionTypes.SET_ON_LOGOUT 
+            });
         } finally {
             setIsPreviousMessagesLoading(false);
         }
@@ -86,7 +92,14 @@ export const useConversation = () => {
             console.error(error);
             setStatus('error');
             
-            error instanceof AppException && (error.statusCode === 404 ? navigate('/') : setError(error.message));
+            const errorActions: Record<number, () => void> = {
+                401: () => dispatch({ type: SessionTypes.SET_ON_LOGOUT }),
+                404: () => navigate('/'),
+            };
+
+            if (error instanceof AppException) {
+                error.statusCode in errorActions ? errorActions[error.statusCode]() : setError(error.message);
+            }
         } finally {
             setIsRefetching(false);
         }
