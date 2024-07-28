@@ -18,7 +18,7 @@ import { OtpModule } from './modules/otp/otp.module';
     imports: [
         AuthModule,
         UserModule,
-        ConfigModule.forRoot(),
+        ConfigModule.forRoot({ isGlobal: true, expandVariables: true }),
         MongooseModule.forRoot(process.env.DATABASE_URI, { retryWrites: true }),
         ThrottlerModule.forRoot([{ limit: 5, ttl: 10000 }]),
         EventEmitterModule.forRoot(),

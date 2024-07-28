@@ -3,8 +3,6 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JWT_KEYS } from 'src/utils/types';
 import { CookiesModule } from 'src/utils/services/cookies/cookies.module';
 import { BcryptModule } from 'src/utils/services/bcrypt/bcrypt.module';
 import { UserModule } from '../user/user.module';
@@ -12,29 +10,28 @@ import { OtpModule } from '../otp/otp.module';
 import { SessionModule } from '../session/session.module';
 import { AuthAccessStrategy } from './strategies/auth.access.strategy';
 import { AuthRefreshStrategy } from './strategies/auth.refresh.strategy';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
     imports: [
         UserModule,
         PassportModule,
-        ConfigModule,
         CookiesModule,
         BcryptModule,
+        MailModule,
         OtpModule,
         SessionModule,
         PassportModule.register({ defaultStrategy: 'jwt', property: 'user' }),
         JwtModule.registerAsync({
-            useFactory: (config: ConfigService) => {
+            useFactory: () => {
                 return {
-                    secret: config.get<string>(JWT_KEYS.ACCESS_TOKEN_SECRET),
+                    secret: process.env.ACCESS_TOKEN_SECRET,
                     signOptions: {
-                        expiresIn: config.get<string>(JWT_KEYS.ACCESS_TOKEN_EXPIRESIN),
+                        expiresIn: process.env.ACCESS_TOKEN_EXPIRESIN,
                         audience: ['user'],
                     },
                 };
             },
-            imports: [ConfigModule],
-            inject: [ConfigService],
         }),
     ],
     controllers: [AuthController],

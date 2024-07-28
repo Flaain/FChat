@@ -22,9 +22,9 @@ export class OtpService implements IOtpService {
 
         const otpExists = await this.otpModel.findOne({ email, type }, { expiresAt: 1 });
 
-        if (otpExists && new Date(otpExists.expiresAt).getTime() > Date.now()) return { 
-            retryDelay: new Date(otpExists.expiresAt).getTime() - Date.now()
-        };
+        if (otpExists && new Date(otpExists.expiresAt).getTime() > Date.now()) {
+            return { retryDelay: new Date(otpExists.expiresAt).getTime() - Date.now() };
+        }
 
         const generatedOTP = Math.floor(100000 + Math.random() * 900000);
 

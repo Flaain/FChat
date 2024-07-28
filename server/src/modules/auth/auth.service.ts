@@ -83,7 +83,7 @@ export class AuthService implements IAuthService {
     logout = async ({ user, sessionId }: { user: UserDocument; sessionId: string }) => {
         const session = await this.sessionService.findOneByPayload({ _id: sessionId, userId: user._id });
 
-        if (!session) throw new AppException({ message: "Cannot find current session" }, HttpStatus.UNAUTHORIZED);
+        if (!session) throw new AppException({ message: "Cannot find session" }, HttpStatus.UNAUTHORIZED);
 
         await session.deleteOne()
 

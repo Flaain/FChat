@@ -8,12 +8,14 @@ import { CookiesService } from 'src/utils/services/cookies/cookies.service';
 import { IAuthController } from './types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
 import { RefreshGuard } from 'src/utils/guards/refresh.guard';
+import { MailService } from '../mail/mail.service';
 
 @Controller(Routes.AUTH)
 export class AuthController implements IAuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly cookiesService: CookiesService,
+        private readonly mailService: MailService
     ) {}
 
     @Post('signup')
@@ -38,6 +40,11 @@ export class AuthController implements IAuthController {
         this.cookiesService.setAuthCookies({ res, accessToken, refreshToken });
 
         return user;
+    }
+    
+    @Get('test-email')
+    testEmail() {
+        return this.mailService.sendTestEmail();
     }
 
     @Get('refresh')
