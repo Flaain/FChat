@@ -26,6 +26,7 @@ export const ProfileProvider = ({ defaultProfile, children }: ProfileProviderPro
     React.useEffect(() => {
         const onRefreshError = () => {
             dispatch({ type: SessionTypes.SET_ON_LOGOUT });
+            setProfile(undefined!);
         }
 
         api.user.subscribeRefreshError(onRefreshError);
