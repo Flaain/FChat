@@ -1,11 +1,13 @@
 export interface User {
     _id: string;
     name: string;
+    login: string;
     email: string;
     status?: string;
-    isVerified?: boolean;
     lastSeenAt: string;
-    isPrivate?: boolean;
+    isOfficial: boolean;
+    isPrivate: boolean;
+    isDeleted: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -15,8 +17,7 @@ export interface DataWithCursor<T> {
     nextCursor: string | null;
 }
 
-export interface Profile extends User {
-}
+export interface Profile extends User {}
 
 export interface ProfileContextProps {
     profile: Profile;

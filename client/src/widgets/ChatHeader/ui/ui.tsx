@@ -4,7 +4,7 @@ import { Loader2, Verified } from 'lucide-react';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { ChatHeaderProps } from '../model/types';
 
-const ChatHeader = ({ name, description, isVerified }: ChatHeaderProps) => {
+const ChatHeader = ({ name, description, isOfficial }: ChatHeaderProps) => {
     const { isConnected } = useLayoutContext();
 
     return (
@@ -15,10 +15,10 @@ const ChatHeader = ({ name, description, isVerified }: ChatHeaderProps) => {
                     size='lg'
                     weight='medium'
                     variant='primary'
-                    className={cn(isVerified && 'flex items-center gap-2')}
+                    className={cn(isOfficial && 'flex items-center gap-2')}
                 >
                     {name}
-                    {isVerified && (
+                    {isOfficial && (
                         <Typography>
                             <Verified className='w-5 h-5' />
                         </Typography>

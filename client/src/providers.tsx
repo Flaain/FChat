@@ -6,8 +6,8 @@ import { ProfileProvider } from './shared/lib/contexts/profile/model/provider';
 import { ProfileProviderProps } from './shared/lib/contexts/profile/model/types';
 
 export interface ProvidersProps {
-    profile: Omit<ProfileProviderProps, 'children'>;
     theme: Omit<ThemeProviderProps, 'children'>;
+    profile?: Omit<ProfileProviderProps, 'children'>;
     session?: Omit<SessionProviderProps, 'children'>;
     children: React.ReactNode;
 }

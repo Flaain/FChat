@@ -18,9 +18,9 @@ const UserItem = ({ user }: { user: UserFeed }) => {
                 }
             >
                 <AvatarByName name={user.name} size='lg' />
-                <Typography as='h2' weight='medium' className={cn(user.isVerified && 'flex items-center')}>
+                <Typography as='h2' weight='medium' className={cn(user.isOfficial && 'flex items-center')}>
                     {user.name}
-                    {user.isVerified && (
+                    {user.isOfficial && (
                         <Typography className='ml-2'>
                             <Verified className='w-5 h-5' />
                         </Typography>

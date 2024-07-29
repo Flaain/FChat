@@ -1,3 +1,4 @@
+import { OTP } from './OTP';
 import { ConversationAPI } from './conversationAPI';
 import { GroupAPI } from './groupAPI';
 import { MessageAPI } from './messageAPI';
@@ -7,5 +8,6 @@ export const api = {
     user: new UserAPI(),
     conversation: new ConversationAPI(),
     message: new MessageAPI(),
-    group: new GroupAPI()
+    group: new GroupAPI(),
+    otp: new OTP()
 };

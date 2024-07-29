@@ -1,12 +1,12 @@
-import React from "react";
-import FirstStepSignUp from "../FirstStepSignUp";
-import SecondStepSignUp from "../SecondStepSignUp";
-import { Form } from "@/shared/ui/Form";
-import { Button } from "@/shared/ui/Button";
-import { useSignup } from "../../lib/hooks/useSignup";
-import { LoaderCircle } from "lucide-react";
-import Typography from "@/shared/ui/Typography";
-import { AuthContainer } from "../AuthContainer";
+import React from 'react';
+import FirstStepSignUp from '../FirstStepSignUp';
+import SecondStepSignUp from '../SecondStepSignUp';
+import Typography from '@/shared/ui/Typography';
+import OTP from '@/pages/Auth/ui/OTP';
+import RightBlock from '../RightBlock';
+import LeftBlock from '../LeftBlock';
+import FormContainer from '../FormContainer';
+import { useSignup } from '../../lib/hooks/useSignup';
 
 const SignupForm = () => {
     const { form, loading, step, stepsLength, isLastStep, isNextButtonDisabled, onBack, onSubmit } = useSignup();
@@ -14,52 +14,33 @@ const SignupForm = () => {
     const forms: Record<number, React.ReactNode> = {
         0: <FirstStepSignUp form={form} />,
         1: <SecondStepSignUp form={form} />,
+        2: <OTP onComplete={onSubmit} loading={loading} form={form} />
     };
 
     return (
-        <div className='flex items-center w-full h-full max-w-[1230px] mx-auto box-border'>
-            <div className='flex flex-col gap-2 items-end pr-10 max-md:hidden'>
-                <Typography variant='primary' as='h1' size='6xl' weight='bold' align='right'>
-                    Create account
+        <FormContainer>
+            <LeftBlock
+                title={isLastStep ? 'Verify your email' : 'Sign up'}
+                description={
+                    isLastStep
+                        ? `We’ve sent an email to ${form.getValues('email').toLowerCase()} with a OTP code to verify your email`
+                        : "We're so excited to have you join us!"
+                }
+            />
+            <RightBlock
+                form={form}
+                onSubmit={onSubmit}
+                loading={loading}
+                onBack={onBack}
+                isSubmitButtonDisabled={isNextButtonDisabled}
+                isSubmitButtonHidden={isLastStep}
+            >
+                <Typography variant='primary' weight='medium' className='mb-5'>
+                    Step {step + 1} of {stepsLength}
                 </Typography>
-                <Typography as='p' size='xl' variant='secondary' align='right'>
-                    We're so excited to have you join us!
-                </Typography>
-            </div>
-            <Form {...form}>
-                <AuthContainer>
-                    <form
-                        onSubmit={onSubmit}
-                        className='flex flex-col gap-4 h-full justify-center max-w-[560px] w-full'
-                    >
-                        <Typography variant='primary' weight='medium' className='mb-5'>
-                            Step {step + 1} of {stepsLength}
-                        </Typography>
-                        {forms[step]}
-                        <div className='flex w-full items-center justify-between mt-5'>
-                            <Button
-                                type='button'
-                                variant='secondary'
-                                className='w-24'
-                                onClick={onBack}
-                                disabled={loading}
-                            >
-                                Back
-                            </Button>
-                            <Button className='w-24' disabled={isNextButtonDisabled}>
-                                {loading ? (
-                                    <LoaderCircle className='w-5 h-5 animate-loading' />
-                                ) : isLastStep ? (
-                                    "Submit"
-                                ) : (
-                                    "Next"
-                                )}
-                            </Button>
-                        </div>
-                    </form>
-                </AuthContainer>
-            </Form>
-        </div>
+                {forms[step]}
+            </RightBlock>
+        </FormContainer>
     );
 };
 

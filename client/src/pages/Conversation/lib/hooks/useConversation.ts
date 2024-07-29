@@ -1,16 +1,17 @@
 import React from 'react';
 import { api } from '@/shared/api';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { ConversationStatuses, ConversationWithMeta } from '../../model/types';
 import { Conversation, IMessage, CONVERSATION_EVENTS } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { ApiError } from '@/shared/api/error';
+import { AppException } from '@/shared/api/error';
+import { useSession } from '@/entities/session/lib/hooks/useSession';
+import { SessionTypes } from '@/entities/session/model/types';
 
 export const useConversation = () => {
     const { id: recipientId } = useParams() as { id: string };
-    const { state: { accessToken } } = useSession();
     const { socket } = useLayoutContext();
+    const { dispatch } = useSession();
 
     const [data, setConversation] = React.useState<ConversationWithMeta>(null!);
     const [status, setStatus] = React.useState<ConversationStatuses>('loading');
@@ -23,8 +24,8 @@ export const useConversation = () => {
             setIsPreviousMessagesLoading(true);
 
             const { data: previousMessages } = await api.conversation.get({
-                body: { recipientId: data?.conversation.recipient._id, params: { cursor: data?.nextCursor! } },
-                token: accessToken!
+                recipientId: data?.conversation.recipient._id, 
+                params: { cursor: data?.nextCursor! }
             });
 
             setConversation((prev) => ({
@@ -79,7 +80,7 @@ export const useConversation = () => {
         try {
             action === 'init' ? setStatus('loading') : setIsRefetching(true);
 
-            const { data: response } = await api.conversation.get({ token: accessToken!, body: { recipientId } });
+            const { data: response } = await api.conversation.get({ recipientId });
 
             setConversation(response);
             setStatus('idle');
@@ -88,7 +89,14 @@ export const useConversation = () => {
             console.error(error);
             setStatus('error');
             
-            error instanceof ApiError && (error.statusCode === 404 ? navigate('/') : setError(error.message));
+            const errorActions: Record<number, () => void> = {
+                401: () => dispatch({ type: SessionTypes.SET_ON_LOGOUT }),
+                404: () => navigate('/'),
+            };
+
+            if (error instanceof AppException) {
+                error.statusCode in errorActions ? errorActions[error.statusCode]() : setError(error.message);
+            }
         } finally {
             setIsRefetching(false);
         }

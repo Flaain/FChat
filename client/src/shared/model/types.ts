@@ -1,6 +1,5 @@
 import { ModalConfig } from '../lib/contexts/modal/types';
-import { Profile, User } from '../lib/contexts/profile/model/types';
-import { FieldError } from 'react-hook-form';
+import { User } from '../lib/contexts/profile/model/types';
 
 export enum FeedTypes {
     CONVERSATION = 'conversation',
@@ -8,12 +7,23 @@ export enum FeedTypes {
     USER = 'user'
 }
 
+export enum OtpType {
+    EMAIL_VERIFICATION = 'email_verification',
+    PASSWORD_RESET = 'password_reset'
+}
+
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams };
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
 export type MessageFormState = 'send' | 'edit';
 
+export interface RequestParams {
+    cursor: string;
+}
+
 export interface BaseAPI {
     baseUrl?: string;
+    credentials?: RequestCredentials;
     headers?: {
         'Content-Type'?: 'application/json' | (string & object);
         Authorization?: 'Bearer' | (string & object);
@@ -22,32 +32,24 @@ export interface BaseAPI {
 
 export interface APIData<T> {
     data: T;
-    status: Response['status'];
-    statusText: Response['statusText'];
+    statusCode: Response['status'];
     headers: Record<string, string>;
-    error?: unknown;
     message: string;
 }
 
-export interface AuthResponse extends Profile {
-    accessToken: string;
-    expiresIn: string | number;
+export enum AppExceptionCode {
+    INVALID_ACCESS_TOKEN = 'INVALID_ACCESS_TOKEN',
+    FORM = 'FORM'
 }
 
-export interface APIMethodParams<T = undefined>
-    extends Partial<Omit<BaseAPI, 'baseUrl'>>,
-        Omit<RequestInit, 'headers' | 'body'> {
-    endpoint?: string;
-    token?: string;
-    body?: T;
-}
-
-export interface APIError<E> {
-    error: E;
+export interface IAppException {
+    message: string;
+    url: string;
     statusCode: number;
-    headers?: Record<string, string>;
-    message: string;
-    type?: string;
+    timestamp: Date;
+    headers: Record<string, string>;
+    errors?: Array<{ path: string; message: string }>;
+    errorCode?: AppExceptionCode;
 }
 
 export interface IMessage {
@@ -66,11 +68,10 @@ export interface GroupParticipant {
     name: string;
     email: string;
     userId: string;
-    isVerified?: boolean;
 }
 
 export interface ConversationParticipant
-    extends Pick<User, '_id' | 'isVerified' | 'email' | 'name' | 'lastSeenAt' | 'isPrivate'> {}
+    extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate'> {}
 
 export interface Conversation {
     _id: string;
@@ -86,7 +87,7 @@ export interface Group {
     _id: string;
     name: string;
     participants: Array<GroupParticipant>;
-    isVerified?: boolean;
+    isOfficial?: boolean;
     messages: Array<IMessage>;
     lastMessage?: IMessage;
     lastMessageSentAt: string;
@@ -143,7 +144,8 @@ export type TypographyComponent = <T extends React.ElementType = 'span'>(
 export interface SearchUser {
     _id: string;
     name: string;
-    isVerified?: boolean;
+    isOfficial: boolean;
+    login: string;
     type: FeedTypes.USER;
 }
 
@@ -157,24 +159,6 @@ export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement>
     name?: string;
     size?: 'sm' | 'md' | 'lg';
 }
-
-export type FormErrorsType = [
-    string,
-    (
-        | FieldError
-        | (Record<
-              string,
-              Partial<{
-                  type: string | number;
-                  message: string;
-              }>
-          > &
-              Partial<{
-                  type: string | number;
-                  message: string;
-              }>)
-    )
-];
 
 export interface UseInfiniteScrollOptions extends IntersectionObserverInit {
     callback: () => Promise<void> | void;
@@ -195,7 +179,7 @@ export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'lastM
     type: FeedTypes.CONVERSATION;
 };
 
-export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'isVerified' | 'name'> & {
+export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'isOfficial' | 'name'> & {
     type: FeedTypes.GROUP;
 };
 
@@ -236,4 +220,24 @@ export interface DeleteMessageEventParams {
     lastMessage: IMessage;
     lastMessageSentAt: string;
     conversationId: string;
+}
+
+export enum UserCheckType {
+    EMAIL = 'email',
+    LOGIN = 'login'
+}
+
+export type UserCheckParams =
+    | { type: UserCheckType.EMAIL; email: string }
+    | { type: UserCheckType.LOGIN; login: string };
+
+export interface GetConversation {
+    conversation: Pick<Conversation, '_id' | 'recipient' | 'messages' | 'createdAt'>;
+    nextCursor: string;
+}
+
+export interface DeleteMessageRes {
+    isLastMessage: boolean;
+    lastMessage: IMessage;
+    lastMessageSentAt: string;
 }

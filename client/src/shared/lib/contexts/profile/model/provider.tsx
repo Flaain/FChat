@@ -6,25 +6,36 @@ import { SessionTypes } from "@/entities/session/model/types";
 import { api } from "@/shared/api";
 
 export const ProfileProvider = ({ defaultProfile, children }: ProfileProviderProps) => {
-    const { state: { accessToken }, dispatch } = useSession();
+    const { dispatch } = useSession();
 
     const [profile, setProfile] = React.useState<Profile>(defaultProfile!);
+    
+    const getProfile = async () => {
+        try {
+            const { data: profile } = await api.user.profile();
+            
+            setProfile(profile);
+            dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { userId: profile._id } });
+        } catch (error) {
+            console.error(error);
+        } finally {
+            dispatch({ type: SessionTypes.SET_IS_AUTH_IN_PROGRESS, payload: { isAuthInProgress: false } });
+        }
+    }
 
     React.useEffect(() => {
-        (async () => {
-            try {
-                if (!accessToken) return;
+        const onRefreshError = () => {
+            dispatch({ type: SessionTypes.SET_ON_LOGOUT });
+            setProfile(undefined!);
+        }
 
-                const { data: profile } = await api.user.profile({ token: accessToken });
+        api.user.subscribeRefreshError(onRefreshError);
 
-                setProfile(profile);
-                dispatch({ type: SessionTypes.SET_AUTH_DONE, payload: { userId: profile._id, isAuthorized: true } });
-            } catch (error) {
-                console.error(error);
-            } finally {
-                dispatch({ type: SessionTypes.SET_IS_AUTH_IN_PROGRESS, payload: { isAuthInProgress: false } });
-            }
-        })();
+        getProfile();
+
+        return () => {
+            api.user.unsubscribeRefreshError(onRefreshError);
+        }
     }, []);
 
     const value = React.useMemo<ProfileContextProps>(() => ({ profile, setProfile }), [profile, setProfile]);

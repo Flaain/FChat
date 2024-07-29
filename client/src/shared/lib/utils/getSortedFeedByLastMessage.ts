@@ -1,5 +1,3 @@
-import { ConversationFeed, GroupFeed } from '@/shared/model/types';
-
-export const getSortedFeedByLastMessage = (a: GroupFeed | ConversationFeed, b: GroupFeed | ConversationFeed) => {
+export const getSortedFeedByLastMessage = (a: { lastMessageSentAt: string }, b: { lastMessageSentAt: string }) => {
    return new Date(b.lastMessageSentAt).getTime() - new Date(a.lastMessageSentAt).getTime();
 };

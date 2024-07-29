@@ -2,7 +2,6 @@ import React from 'react';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
 import { IMessage } from '@/shared/model/types';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
@@ -10,7 +9,6 @@ import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 export const useMessage = (message: IMessage) => {
     const { _id, text } = message;
     const { data: { conversation } } = useConversationContext();
-    const { state: { accessToken } } = useSession();
     const { setDrafts } = useLayoutContext();
     const { setIsAsyncActionLoading, closeModal } = useModal()
 
@@ -23,13 +21,10 @@ export const useMessage = (message: IMessage) => {
         try {
             setIsAsyncActionLoading(true);
 
-            await api.message.delete({ 
-                body: { 
-                    messageId: _id,
-                    conversationId: conversation._id, 
-                    recipientId: conversation.recipient._id 
-                }, 
-                token: accessToken! 
+            await api.message.delete({
+                messageId: _id,
+                conversationId: conversation._id,
+                recipientId: conversation.recipient._id
             });
             
             toast.success('Message deleted', { position: 'top-center' });

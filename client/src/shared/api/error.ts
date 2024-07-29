@@ -1,19 +1,21 @@
-import { APIError } from "../model/types";
+import { AppExceptionCode, IAppException } from '../model/types';
 
-export class ApiError extends Error {
-    readonly error: unknown;
-    readonly message: string;
-    readonly statusCode: number;
-    readonly headers?: Record<string, string>;
-    readonly type?: string;
+export class AppException extends Error implements IAppException {
+    public url: string;
+    public timestamp: Date;
+    public errorCode?: AppExceptionCode;
+    public headers: Record<string, string>;
+    public statusCode: number;
+    public errors?: Array<{ path: string; message: string }>;
 
-    constructor({ error, message, statusCode, headers, type }: APIError<unknown>) {
-        super(message);
+    constructor(error: IAppException) {
+        super(error.message);
 
-        this.headers = headers;
-        this.error = error;
-        this.message = message;
-        this.statusCode = statusCode;
-        this.type = type;
+        this.url = error.url;
+        this.timestamp = error.timestamp;
+        this.errorCode = error.errorCode;
+        this.errors = error.errors;
+        this.headers = error.headers;
+        this.statusCode = error.statusCode;
     }
 }

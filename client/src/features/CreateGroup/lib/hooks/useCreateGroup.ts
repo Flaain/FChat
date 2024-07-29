@@ -1,13 +1,10 @@
 import React from 'react';
-import { FieldErrors, FieldPath, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
+import { FieldPath, useForm } from 'react-hook-form';
 import { api } from '@/shared/api';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { FormErrorsType, SearchUser } from '@/shared/model/types';
+import { SearchUser } from '@/shared/model/types';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { useNavigate } from 'react-router-dom';
-import { ApiError } from '@/shared/api/error';
 import { CreateGroupType } from '../../model/types';
 import { debounce } from '@/shared/lib/utils/debounce';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,7 +18,6 @@ const steps: Record<number, { fields: Array<FieldPath<CreateGroupType>> }> = {
 
 export const useCreateGroup = () => {
     const { setProfile } = useProfile();
-    const { state: { accessToken } } = useSession();
     const { setIsAsyncActionLoading, isAsyncActionLoading, closeModal } = useModal();
 
     const [step, setStep] = React.useState(0);
@@ -85,18 +81,11 @@ export const useCreateGroup = () => {
         try {
             setIsAsyncActionLoading(true);
 
-            const { data } = await api.user.search({ body: { username: value }, token: accessToken! });
+            const { data } = await api.user.search({ query: value });
 
             setSearchedUsers(data);
         } catch (error) {
             console.error(error);
-            if (error instanceof Error) {
-                const isFormError = error instanceof ApiError && error.type === 'form';
-
-                isFormError ? Object.entries(error.error as FieldErrors<CreateGroupType>).forEach(_displayErrorsFromAPI) : toast.error(error.message, {
-                    position: 'top-center'
-                });
-            }
         } finally {
             setIsAsyncActionLoading(false);
         }
@@ -115,11 +104,7 @@ export const useCreateGroup = () => {
         const { displayName, groupName } = form.getValues();
 
         console.log(selectedUsers, displayName, groupName);
-    }, [accessToken, navigate, closeModal, selectedUsers, setProfile]);
-
-    const _displayErrorsFromAPI = React.useCallback(([key, { message }]: FormErrorsType) => {
-        form.setError(key as FieldPath<CreateGroupType>, { message }, { shouldFocus: true });
-    }, [form]);
+    }, [navigate, closeModal, selectedUsers, setProfile]);
 
     const handleSearchUser = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         const trimmedValue = value.trim();
@@ -144,13 +129,6 @@ export const useCreateGroup = () => {
             await actions[step as keyof typeof actions]();
         } catch (error) {
             console.error(error);
-            if (error instanceof Error) {
-                const isFormError = error instanceof ApiError && error.type === 'form';
-
-                isFormError ? Object.entries(error.error as FieldErrors<CreateGroupType>).forEach(_displayErrorsFromAPI) : toast.error(error.message, {
-                    position: 'top-center'
-                });
-            }
         }
     };
 

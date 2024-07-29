@@ -34,7 +34,7 @@ const Conversation = () => {
             <OutletContainer>
                 <ChatHeader
                     name={data.conversation.recipient.name}
-                    isVerified={data.conversation.recipient.isVerified}
+                    isOfficial={data.conversation.recipient.isOfficial}
                     description={`last seen at ${getRelativeTimeString(new Date(data.conversation.recipient.lastSeenAt), 'en-US')}`}
                 />
                 {data.conversation.messages.length ? (

@@ -1,13 +1,14 @@
 import { z } from "zod";
-import { allowCyrillicRegExp, emailForSchema, nameForSchema, passwordForSchema, passwordRules, regExpError } from "@/shared/constants";
+import { allowCyrillicRegExp, emailForSchema, loginForSchema, nameForSchema, passwordForSchema, passwordRules, regExpError } from "@/shared/constants";
 
 export const signinSchema = z.strictObject({
     login: z
         .string()
-        .min(1, "Field is required")
-        .min(3, "Field must be at least 3 characters long")
-        .max(32, "Field must be at most 32 characters long"),
-    password: passwordForSchema,
+        .trim()
+        .toLowerCase()
+        .min(3, 'Field must be at least 3 characters long')
+        .max(32, 'Field must be at most 32 characters long'),
+    password: passwordForSchema
 });
 
 export const firstStepSignUpSchema = z
@@ -34,6 +35,7 @@ export const firstStepSignUpSchema = z
 
 export const secondStepSignUpSchema = z.object({
     name: nameForSchema.regex(allowCyrillicRegExp, regExpError),
+    login: loginForSchema,
     birthDate: z.coerce
         .date({ required_error: "Birth date is required" })
         .min(new Date("1900-01-01"), "Invalid birth date")
@@ -49,4 +51,8 @@ export const secondStepSignUpSchema = z.object({
         }),
 });
 
-export const signupSchema = z.intersection(firstStepSignUpSchema, secondStepSignUpSchema);
+export const thirdStepSignUpSchema = z.object({
+    otp: z.string()
+});
+
+export const signupSchema = firstStepSignUpSchema.and(secondStepSignUpSchema).and(thirdStepSignUpSchema);

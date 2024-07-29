@@ -1,49 +1,37 @@
-import { APIMethodParams, IMessage, WithRequired } from '../model/types';
 import { API } from './API';
+import { DeleteMessageRes, IMessage } from '../model/types';
 
 export class MessageAPI extends API {
-    send = async ({
-        body,
-        token,
-        ...rest
-    }: WithRequired<APIMethodParams<{ message: string; recipientId: string }>, 'body' | 'token'>) => {
-        const response = await fetch(this._baseUrl + `/message/send/${body.recipientId}`, {
+    send = async ({ message, recipientId }: { message: string; recipientId: string }) => {
+        const request: RequestInit = {
             method: 'POST',
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
-            body: JSON.stringify(body),
-            ...rest
-        });
+            headers: this._headers,
+            credentials: this._cretedentials,
+            body: JSON.stringify({ message, recipientId })
+        }
 
-        return this._checkResponse<IMessage & { conversationId: string }>(response);
+        return this._checkResponse<IMessage & { conversationId: string }>(await fetch(this._baseUrl + `/message/send/${recipientId}`, request), request);
     };
 
-    edit = async ({
-        body: { messageId, ...body },
-        token,
-        ...rest
-    }: WithRequired<APIMethodParams<{ message: string; messageId: string, recipientId: string }>, 'body' | 'token'>) => {
-        const response = await fetch(this._baseUrl + `/message/edit/${messageId}`, {
+    edit = async ({ messageId, ...body }: { message: string; messageId: string; recipientId: string }) => {
+        const request: RequestInit = {
             method: 'PATCH',
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
-            body: JSON.stringify(body),
-            ...rest
-        });
+            headers: this._headers,
+            credentials: this._cretedentials,
+            body: JSON.stringify(body)
+        }
 
-        return this._checkResponse<IMessage>(response);
+        return this._checkResponse<IMessage>(await fetch(this._baseUrl + `/message/edit/${messageId}`, request), request);
     };
 
-    delete = async ({
-        body: { conversationId, messageId, recipientId },
-        token,
-        ...rest
-    }: WithRequired<APIMethodParams<{ messageId: string; conversationId: string, recipientId: string }>, 'body' | 'token'>) => {
-        const response = await fetch(this._baseUrl + `/message/delete/${messageId}`, {
+    delete = async ({ messageId, ...body }: { messageId: string; conversationId: string; recipientId: string }) => {
+        const request: RequestInit = {
             method: 'DELETE',
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ conversationId, recipientId }),
-            ...rest
-        });
+            headers: this._headers,
+            credentials: this._cretedentials,
+            body: JSON.stringify(body)
+        };
 
-        return this._checkResponse<{ isLastMessage: boolean; lastMessage: IMessage; lastMessageSentAt: string }>(response);
+        return this._checkResponse<DeleteMessageRes>(await fetch(this._baseUrl + `/message/delete/${messageId}`, request), request);
     };
 }

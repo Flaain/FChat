@@ -1,57 +1,37 @@
 import { API } from './API';
-import { APIMethodParams, Conversation, GetConversationsRes, WithRequired } from '../model/types';
+import { Conversation, GetConversation, GetConversationsRes, WithParams } from '../model/types';
 
 export class ConversationAPI extends API {
-    create = async ({
-        body,
-        token,
-        ...rest
-    }: WithRequired<APIMethodParams<{ recipientId: string }>, 'body' | 'token'>) => {
-        const response = await fetch(this._baseUrl + '/conversation/create', {
+    create = async (body: { recipientId: string }) => {
+        const request: RequestInit = {
             method: 'POST',
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
+            credentials: this._cretedentials,
+            headers: this._headers,
             body: JSON.stringify(body),
-            ...rest
-        });
+        };
 
-        return this._checkResponse<Pick<Conversation, '_id' | 'lastMessageSentAt'>>(response);
+        return this._checkResponse<Pick<Conversation, '_id' | 'lastMessageSentAt'>>(await fetch(this._baseUrl + '/conversation/create', request), request);
     };
 
-    get = async ({
-        token,
-        body,
-        ...rest
-    }: WithRequired<APIMethodParams<{ recipientId: string; params?: { cursor?: string | null } }>, 'token' | 'body'>) => {
+    get = async (body: WithParams<{ recipientId: string }>) => {
         const url = new URL(this._baseUrl + `/conversation/${body.recipientId}`);
+        const request: RequestInit = { credentials: this._cretedentials, headers: this._headers };
 
         body.params && Object.entries(body.params).forEach(([key, value]) => {
-           value && url.searchParams.append(key, value);
+            url.searchParams.append(key, value);
         });
 
-        const response = await fetch(url, {
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
-            ...rest
-        });
-
-        return this._checkResponse<{ conversation: Pick<Conversation, '_id' | 'recipient' | 'messages' | 'createdAt'>; nextCursor: string }>(response);
+        return this._checkResponse<GetConversation>(await fetch(url, request), request);
     };
 
-    getAll = async ({
-        token,
-        body,
-        ...rest
-    }: WithRequired<APIMethodParams<{ params?: { cursor: string } }>, 'token'>) => {
+    getAll = async (body?: WithParams) => {
         const url = new URL(this._baseUrl + '/conversation');
+        const request: RequestInit = { credentials: this._cretedentials, headers: this._headers };
 
         body?.params && Object.entries(body.params).forEach(([key, value]) => {
             url.searchParams.append(key, value);
         });
 
-        const response = await fetch(url, {
-            headers: { ...this._headers, Authorization: `Bearer ${token}` },
-            ...rest
-        });
-
-        return this._checkResponse<GetConversationsRes>(response);
+        return this._checkResponse<GetConversationsRes>(await fetch(url, request), request);
     };
 }
