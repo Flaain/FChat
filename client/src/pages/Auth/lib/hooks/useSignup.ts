@@ -27,7 +27,7 @@ export const useSignup = () => {
 
     const [step, setStep] = React.useState(0);
     const [loading, setLoading] = React.useState(false);
-
+    
     const form = useForm<SignupSchemaType>({
         resolver: zodResolver(signupSchema),
         defaultValues: {
@@ -43,6 +43,11 @@ export const useSignup = () => {
         mode: "all",
         shouldFocusError: true,
     });
+
+    React.useEffect(() => {
+        console.log(steps[step].fields[0]);
+        setTimeout(() => form.setFocus(steps[step].fields[0]), 0);
+    }, [step])
 
     const checkNextAvailability = () => {
         return (
@@ -121,7 +126,6 @@ export const useSignup = () => {
         loading,
         stepsLength: steps.length,
         isLastStep: step === steps.length - 1,
-        rootError: form.formState.errors?.root?.serverError,
         isNextButtonDisabled: checkNextAvailability(),
         onBack,
         onSubmit,

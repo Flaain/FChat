@@ -8,11 +8,9 @@ import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { MessageFormState } from '@/shared/model/types';
 import { UseMessageParams } from '../../model/types';
 import { Emoji } from '@emoji-mart/data';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
 
 export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
-    const { dispatch } = useSession();
     const { data: { conversation } } = useConversationContext();
     const { drafts, setDrafts } = useLayoutContext();
 
