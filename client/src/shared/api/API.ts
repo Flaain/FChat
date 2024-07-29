@@ -5,6 +5,7 @@ export abstract class API {
     protected readonly _baseUrl: string;
     protected readonly _headers: BaseAPI['headers'];
     protected readonly _cretedentials: BaseAPI['credentials'];
+    protected readonly _refreshErrorObservers: Set<(error: AppException) => void> = new Set();
 
     constructor({
         baseUrl = import.meta.env.VITE_BASE_URL,
@@ -14,6 +15,12 @@ export abstract class API {
         this._baseUrl = baseUrl;
         this._headers = headers;
         this._cretedentials = credentials;
+
+        this._refreshErrorObservers = new Set();
+    }
+
+    private notifyRefreshError = (error: AppException) => {
+        this._refreshErrorObservers.forEach((cb) => cb(error));
     }
 
     private _refreshToken = async () => {
@@ -25,7 +32,11 @@ export abstract class API {
         const refreshData = await refreshResponse.json();
 
         if (!refreshResponse.ok) {
-            throw new AppException({ ...refreshData, headers: Object.fromEntries([...refreshResponse.headers.entries()]) });
+            const error: AppException = { ...refreshData, headers: Object.fromEntries([...refreshResponse.headers.entries()]) };
+
+            this.notifyRefreshError(error);
+
+            throw new AppException(error);
         }
 
         return refreshData;

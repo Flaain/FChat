@@ -38,9 +38,6 @@ export const useConversation = () => {
             }));
         } catch (error) {
             console.error(error);
-            error instanceof AppException && error.statusCode === 401 && dispatch({ 
-                type: SessionTypes.SET_ON_LOGOUT 
-            });
         } finally {
             setIsPreviousMessagesLoading(false);
         }

@@ -9,9 +9,6 @@ import { CreateGroupType } from '../../model/types';
 import { debounce } from '@/shared/lib/utils/debounce';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createGroupSchema } from '../../model/schemas';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { AppException } from '@/shared/api/error';
-import { SessionTypes } from '@/entities/session/model/types';
 
 const steps: Record<number, { fields: Array<FieldPath<CreateGroupType>> }> = {
     0: { fields: ['displayName'] },
@@ -21,7 +18,6 @@ const steps: Record<number, { fields: Array<FieldPath<CreateGroupType>> }> = {
 
 export const useCreateGroup = () => {
     const { setProfile } = useProfile();
-    const { dispatch } = useSession();
     const { setIsAsyncActionLoading, isAsyncActionLoading, closeModal } = useModal();
 
     const [step, setStep] = React.useState(0);
@@ -90,9 +86,6 @@ export const useCreateGroup = () => {
             setSearchedUsers(data);
         } catch (error) {
             console.error(error);
-            error instanceof AppException && error.statusCode === 401 && dispatch({ 
-                type: SessionTypes.SET_ON_LOGOUT 
-            });
         } finally {
             setIsAsyncActionLoading(false);
         }

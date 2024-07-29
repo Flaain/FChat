@@ -23,7 +23,7 @@ export interface RequestParams {
 
 export interface BaseAPI {
     baseUrl?: string;
-    credentials?: RequestCredentials  
+    credentials?: RequestCredentials;
     headers?: {
         'Content-Type'?: 'application/json' | (string & object);
         Authorization?: 'Bearer' | (string & object);
@@ -39,7 +39,7 @@ export interface APIData<T> {
 
 export enum AppExceptionCode {
     INVALID_ACCESS_TOKEN = 'INVALID_ACCESS_TOKEN',
-    FORM = "FORM"
+    FORM = 'FORM'
 }
 
 export interface IAppException {
@@ -48,7 +48,7 @@ export interface IAppException {
     statusCode: number;
     timestamp: Date;
     headers: Record<string, string>;
-    errors?: Array<{ path: string, message: string }>;
+    errors?: Array<{ path: string; message: string }>;
     errorCode?: AppExceptionCode;
 }
 
@@ -70,7 +70,8 @@ export interface GroupParticipant {
     userId: string;
 }
 
-export interface ConversationParticipant extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate'> {}
+export interface ConversationParticipant
+    extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate'> {}
 
 export interface Conversation {
     _id: string;
@@ -209,7 +210,9 @@ export enum FEED_EVENTS {
 }
 
 export interface GetConversationsRes {
-    conversations: Array<Omit<ConversationFeed, 'type' | 'recipient'> & { participants: Array<ConversationParticipant> }>;
+    conversations: Array<
+        Omit<ConversationFeed, 'type' | 'recipient'> & { participants: Array<ConversationParticipant> }
+    >;
     nextCursor: string;
 }
 
@@ -224,4 +227,17 @@ export enum UserCheckType {
     LOGIN = 'login'
 }
 
-export type UserCheckParams = { type: UserCheckType.EMAIL, email: string } | { type: UserCheckType.LOGIN, login: string }
+export type UserCheckParams =
+    | { type: UserCheckType.EMAIL; email: string }
+    | { type: UserCheckType.LOGIN; login: string };
+
+export interface GetConversation {
+    conversation: Pick<Conversation, '_id' | 'recipient' | 'messages' | 'createdAt'>;
+    nextCursor: string;
+}
+
+export interface DeleteMessageRes {
+    isLastMessage: boolean;
+    lastMessage: IMessage;
+    lastMessageSentAt: string;
+}

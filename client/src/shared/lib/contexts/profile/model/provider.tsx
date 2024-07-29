@@ -24,7 +24,17 @@ export const ProfileProvider = ({ defaultProfile, children }: ProfileProviderPro
     }
 
     React.useEffect(() => {
+        const onRefreshError = () => {
+            dispatch({ type: SessionTypes.SET_ON_LOGOUT });
+        }
+
+        api.user.subscribeRefreshError(onRefreshError);
+
         getProfile();
+
+        return () => {
+            api.user.unsubscribeRefreshError(onRefreshError);
+        }
     }, []);
 
     const value = React.useMemo<ProfileContextProps>(() => ({ profile, setProfile }), [profile, setProfile]);
