@@ -10,7 +10,6 @@ import { OtpModule } from '../otp/otp.module';
 import { SessionModule } from '../session/session.module';
 import { AuthAccessStrategy } from './strategies/auth.access.strategy';
 import { AuthRefreshStrategy } from './strategies/auth.refresh.strategy';
-import { MailModule } from '../mail/mail.module';
 
 @Module({
     imports: [
@@ -18,7 +17,6 @@ import { MailModule } from '../mail/mail.module';
         PassportModule,
         CookiesModule,
         BcryptModule,
-        MailModule,
         OtpModule,
         SessionModule,
         PassportModule.register({ defaultStrategy: 'jwt', property: 'user' }),

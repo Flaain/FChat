@@ -28,7 +28,10 @@ export class UserService implements IUserService {
     ) => this.userModel.find(payload, projection, options);
 
     search = async ({ initiatorId, query, page, limit }: UserSearchParams) => {
-        const parsedQuery = userSearchSchema.parse({ query, page, limit }, { path: ['query'] });
+        const parsedQuery = userSearchSchema.parse(
+            { query, page: Number(page), limit: Number(limit) },
+            { path: ['query'] },
+        );
 
         const users = await this.userModel.find(
             {
