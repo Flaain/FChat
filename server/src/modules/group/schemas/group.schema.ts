@@ -4,11 +4,8 @@ import { IGroup } from '../types';
 
 @Schema({ timestamps: true })
 export class Group implements IGroup {
-    @Prop({ type: String })
-    name: string;
-
     @Prop({ type: String, required: true, unique: true })
-    login: string;
+    name: string;
 
     @Prop({ type: String, required: true })
     displayName: string;

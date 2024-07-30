@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Group } from './schemas/group.schema';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { ParticipantService } from '../participant/participant.service';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class GroupService {
 
             if (!participants.length) return { groups: [], nextCursor: null };
 
-            const groupIds = participants.map((participant) => participant.group);
+            const groupIds = participants.map((participant) => participant.groupId);
 
             const groups = await this.groupModel.find(
                 { _id: { $in: groupIds }, ...(cursor && { lastMessageSentAt: { $lt: cursor } }) },
@@ -45,4 +45,16 @@ export class GroupService {
             return { groups: [], nextCursor: null };
         }
     };
+
+    findManyByPayload = async (
+        payload: FilterQuery<Group>,
+        projection?: ProjectionType<Group>,
+        options?: QueryOptions<Group>,
+    ) => this.groupModel.find(payload, projection, options);
+
+    findOneByPayload = async (
+        payload: FilterQuery<Group>,
+        projection?: ProjectionType<Group>,
+        options?: QueryOptions<Group>,
+    ) => this.groupModel.findOne(payload, projection, options);
 }

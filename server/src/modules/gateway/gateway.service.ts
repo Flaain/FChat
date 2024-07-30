@@ -24,8 +24,10 @@ import {
 } from '@nestjs/websockets';
 import { UserService } from '../user/user.service';
 import { CONVERSATION_EVENTS } from './constants';
+import { AppException } from 'src/utils/exceptions/app.exception';
+import { HttpStatus } from '@nestjs/common';
 
-@WebSocketGateway({ cors: { origin: 'http://localhost:5173' } })
+@WebSocketGateway({ cors: { origin: 'http://localhost:5173', credentials: true } })
 export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     private server: Server;
@@ -39,24 +41,12 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
 
     afterInit(server: Server) {
         server.use(async (socket, next) => {
-            const token = socket.handshake.auth.token;
+            const cookies = socket.handshake.headers;
 
-            if (!token) return next(new Error('invalid token'));
+            if (!cookies) return next(new AppException({ message: 'Unauthorized' }, HttpStatus.UNAUTHORIZED));
 
             try {
-                const user = await this.userService.findOneByPayload(
-                    {
-                        _id: this.jwtService.verify<{ _id: string }>(token, { secret: this.configService.get<string>('JWT_SECRET') })?._id,
-                        deleted: false,
-                    },
-                    { password: 0, email: 0 },
-                );
-
-                if (!user) throw new Error('invalid user');
-
-                socket.data.user = user;
-
-                next();
+                
             } catch (error) {
                 console.log(error);
                 return next(error);

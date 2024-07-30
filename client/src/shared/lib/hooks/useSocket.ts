@@ -6,7 +6,9 @@ export const useSocket = () => {
     const [isConnected, setIsConnected] = React.useState(false);
 
     React.useEffect(() => {
-        const socket = io(import.meta.env.VITE_BASE_URL);
+        const socket = io(import.meta.env.VITE_BASE_URL, {
+            withCredentials: true,
+        });
 
         socket.on('connect', () => {
             setIsConnected(true);

@@ -131,13 +131,13 @@ export class ConversationService implements IConversationService {
         };
     };
 
-    findOneByPayload = async (
+    findOneByPayload = (
         payload: FilterQuery<Conversation>,
         projection?: ProjectionType<Conversation>,
         options?: QueryOptions<Conversation>,
     ) => this.conversationModel.findOne(payload, projection, options);
 
-    findManyByPayload = async (
+    findManyByPayload = (
         payload: FilterQuery<Conversation>,
         projection?: ProjectionType<Conversation>,
         options?: QueryOptions<Conversation>,
