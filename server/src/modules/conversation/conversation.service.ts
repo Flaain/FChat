@@ -51,41 +51,8 @@ export class ConversationService implements IConversationService {
         return { _id: conversation._id };
     };
 
-    getConversations = async ({ initiatorId, cursor }: { initiatorId: Types.ObjectId; cursor?: string }) => {
-        const CONVERSATION_BATCH = 10;
-        let nextCursor: string | null = null;
-
-        const conversations = await this.conversationModel
-            .find(
-                { participants: { $in: initiatorId }, ...(cursor && { lastMessageSentAt: { $lt: cursor } }) },
-                { lastMessage: 1, participants: 1, lastMessageSentAt: 1 },
-                {
-                    limit: CONVERSATION_BATCH,
-                    populate: [
-                        {
-                            path: 'participants',
-                            model: 'User',
-                            select: 'login name email isOfficial isDeleted',
-                            match: { _id: { $ne: initiatorId } },
-                        },
-                        {
-                            path: 'lastMessage',
-                            model: 'Message',
-                            populate: { path: 'sender', model: 'User', select: 'name' },
-                        },
-                    ],
-                    sort: { lastMessageSentAt: -1 },
-                },
-            )
-            .lean();
-
-        conversations.length === CONVERSATION_BATCH && (nextCursor = conversations[CONVERSATION_BATCH - 1].lastMessageSentAt.toISOString());
-
-        return { conversations, nextCursor };
-    };
-
     getConversation = async ({ initiator, recipientId, cursor }: { initiator: UserDocument; recipientId: string; cursor?: string }) => {
-        const recipient = await this.userService.findOneByPayload({ _id: recipientId }, { birthDate: 0, password: 0 });
+        const recipient = await this.userService.findOneByPayload({ _id: recipientId }, { birthDate: 0, password: 0, isPrivate: 0 });
 
         if (!recipient) throw new AppException({ message: "User not found" }, HttpStatus.NOT_FOUND);
 

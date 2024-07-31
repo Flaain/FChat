@@ -34,10 +34,11 @@ export class MessageController implements IMessageController {
     @Patch('edit/:messageId')
     @UseGuards(AccessGuard)
     async edit(@Req() req: RequestWithUser, @Body() dto: MessageEditDTO, @Param('messageId') messageId: string) {
-        const { message, conversationId } = await this.messageService.edit({ ...dto, messageId, initiatorId: req.user.doc._id });
+        const { message, conversationId, isLastMessage } = await this.messageService.edit({ ...dto, messageId, initiatorId: req.user.doc._id });
 
         this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.EDIT_MESSAGE, { 
             message, 
+            isLastMessage,
             conversationId,
             recipientId: dto.recipientId,
             initiatorId: req.user.doc._id.toString(),

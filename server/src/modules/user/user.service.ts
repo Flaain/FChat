@@ -43,7 +43,7 @@ export class UserService implements IUserService {
                 isPrivate: false,
                 isDeleted: false,
             },
-            { _id: 1, name: 1, login: 1 },
+            { _id: 1, name: 1, login: 1, isOfficial: 1 },
             { limit, skip: page * limit },
         )
         .lean();

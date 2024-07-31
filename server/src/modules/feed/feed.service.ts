@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
+import { Injectable } from '@nestjs/common';
 import { ConversationService } from '../conversation/conversation.service';
 import { GroupService } from '../group/group.service';
 import { ParticipantService } from '../participant/participant.service';
+import { Conversation } from '../conversation/schemas/conversation.schema';
 
 @Injectable()
 export class FeedService {
@@ -12,13 +13,13 @@ export class FeedService {
         private readonly participantService: ParticipantService,
     ) {}
 
-    getFeed = async ({ initiatorId, cursor }: { initiatorId: Types.ObjectId; cursor?: string }) => {
+    getFeed = async ({ initiatorId, cursor, existingIds = [] }: { initiatorId: Types.ObjectId; cursor?: string, existingIds?: Array<string> }) => {
         const BATCH_SIZE = 10;
         let nextCursor: string | null = null;
 
         const participants = await this.participantService.findManyByPayload({ userId: initiatorId });
         const groups = await this.groupService.findManyByPayload(
-            { _id: { $in: participants.map((participant) => participant.groupId) } },
+            { _id: { $in: participants.map((participant) => participant.groupId), $nin: existingIds } },
             {
                 _id: 1,
                 displayName: 1,
@@ -38,7 +39,7 @@ export class FeedService {
             },
         );
         const chats = await this.conversationService.findManyByPayload(
-            { participants: { $in: initiatorId } },
+            { _id: { $nin: existingIds }, participants: { $in: initiatorId } },
             { lastMessage: 1, participants: 1, lastMessageSentAt: 1 },
             {
                 populate: [
@@ -61,7 +62,19 @@ export class FeedService {
             .filter((chat) => !cursor || chat.lastMessageSentAt < new Date(cursor))
             .sort((a, b) => new Date(b.lastMessageSentAt).getTime() - new Date(a.lastMessageSentAt).getTime())
             .slice(0, BATCH_SIZE)
-            .map((chat) => ({ ...chat.toObject(), type: chat.collection.name === 'groups' ? 'group' : 'conversation' }));
+            .map((chat) => {
+                if (chat.collection.name === 'conversations') {
+                    const { participants, ...rest } = chat.toObject() as Conversation;
+
+                    return {
+                        ...rest,
+                        recipient: participants[0],
+                        type: 'conversation'
+                    }
+                }
+
+                return { ...chat.toObject(), type: "group" }
+            });
 
         feed.length === BATCH_SIZE && (nextCursor = feed[BATCH_SIZE - 1].lastMessageSentAt.toISOString());
 

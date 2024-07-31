@@ -15,11 +15,6 @@ export interface IConversation {
 
 export type ConversationDocument = Conversation & Document & SchemaTimestampsConfig;
 
-export interface GetConversationsReturn {
-    conversations: Array<Omit<IConversation, 'messages'>>;
-    nextCursor: string | null;
-}
-
 export interface GetConversationReturn {
     conversation: {
         _id?: Types.ObjectId;
@@ -37,7 +32,6 @@ export interface CreateConversationReturn {
 
 export interface IConversationService {
     createConversation: (params: ConversationCreateDTO & { initiatorId: Types.ObjectId }) => Promise<CreateConversationReturn>;
-    getConversations: (params: { initiatorId: Types.ObjectId; cursor?: string }) => Promise<GetConversationsReturn>;
     getConversation: (params: { initiator: UserDocument; recipientId: string; cursor?: string }) => Promise<GetConversationReturn>;
     deleteConversation: (params: { initiatorId: Types.ObjectId; conversationId: string }) => Promise<{ _id: Types.ObjectId }>;
     findOneByPayload: (
@@ -55,6 +49,5 @@ export interface IConversationService {
 export interface IConversationController {
     create: (req: RequestWithUser, dto: ConversationCreateDTO) => Promise<CreateConversationReturn>;
     delete: (req: RequestWithUser, id: string) => Promise<{ _id: Types.ObjectId }>;
-    getConversations(req: RequestWithUser, cursor?: string): Promise<GetConversationsReturn>;
     getConversation(req: RequestWithUser, recipientId: string, cursor?: string): Promise<GetConversationReturn>;
 }

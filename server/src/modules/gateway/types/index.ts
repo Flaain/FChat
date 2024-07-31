@@ -36,6 +36,10 @@ export interface ConversationSendMessageParams {
     conversationId: string;
 }
 
+export interface ConversationEditMessageParams extends ConversationSendMessageParams {
+    isLastMessage: boolean;
+}
+
 export interface ConversationCreateParams {
     initiatorId: string;
     conversationId: string;

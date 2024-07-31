@@ -13,6 +13,15 @@ export class CookiesService {
         secure: process.env.NODE_ENV === 'production',
     };
 
+    parseCookies(cookies: string) {
+        if (!cookies) return {};
+
+        return Object.fromEntries(cookies.split(';').map((cookie) => {
+            const [key, value] = cookie.split('=');
+
+            return [decodeURIComponent(key.trim()), decodeURIComponent(value.trim())];
+        }))
+    }
 
     setAccessToken(res: Response, accessToken: string) {
         res.cookie(AuthCookiesName.ACCESS_TOKEN, accessToken, {

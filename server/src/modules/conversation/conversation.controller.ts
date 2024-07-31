@@ -14,12 +14,6 @@ export class ConversationController implements IConversationController {
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
-    @Get()
-    @UseGuards(AccessGuard)
-    getConversations(@Req() req: RequestWithUser, @Query('cursor') cursor?: string) {
-        return this.conversationService.getConversations({ initiatorId: req.user.doc._id, cursor });
-    }
-
     @Post('create')
     @UseGuards(AccessGuard)
     async create(@Req() req: RequestWithUser, @Body() dto: ConversationCreateDTO) {
