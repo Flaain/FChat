@@ -10,9 +10,12 @@ import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { ConversationStatuses } from '../model/types';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
+import { Location, useLocation } from 'react-router-dom';
+import { ConversationParticipant, UserFeed } from '@/shared/model/types';
 
 const Conversation = () => {
     const { data, refetch, error, status, isRefetching, getPreviousMessages, isPreviousMessagesLoading } = useConversationContext();
+    const { state } = useLocation() as Location<ConversationParticipant | UserFeed>;
 
     const components: Record<Exclude<ConversationStatuses, 'idle'>, React.ReactNode> = {
         error: (
@@ -26,7 +29,7 @@ const Conversation = () => {
                 }
             />
         ),
-        loading: <ConversationSkeleton />
+        loading: <ConversationSkeleton recipient={state} />
     };
 
     return (

@@ -6,8 +6,6 @@ import { useProfile } from "@/shared/lib/hooks/useProfile";
 import { ConversationFeed, FeedItem, FeedTypes, GroupFeed, UserFeed } from "@/shared/model/types";
 import { debounce } from "@/shared/lib/utils/debounce";
 import { useSidebarEvents } from "./useSidebarEvents";
-import { toast } from "sonner";
-import { getSortedFeedByLastMessage } from "@/shared/lib/utils/getSortedFeedByLastMessage";
 
 const MIN_SEARCH_LENGTH = 3;
 
@@ -37,29 +35,14 @@ export const useSidebar = () => {
     
     useSidebarEvents({ setLocalResults });
     
-    const cursors = React.useRef<Record<string, string | null> | null>(null);
-
     React.useEffect(() => {
         (async () => {
             try {
-                const [
-                    { data: { conversations, nextCursor: nextConversationCursor } }
-                    // { data: { groups, nextCursor: nextGroupCursor } }
-                ] = await Promise.all([
-                    api.conversation.getAll()
-                    // api.group.getAll({ token: accessToken! })
-                ]);
+                const { data } = await api.feed.get();
 
-                setLocalResults(conversations.sort(getSortedFeedByLastMessage).map(({ participants, ...conversation }) => ({
-                    type: FeedTypes.CONVERSATION,
-                    recipient: participants[0],
-                    ...conversation
-                })));
-
-                cursors.current = { nextConversationCursor };
+                setLocalResults(data.feed);
             } catch (error) {
                 console.error(error);
-                error instanceof Error && toast.error(error.message);
             }
         })();
     }, []);
@@ -110,7 +93,6 @@ export const useSidebar = () => {
             searchValue,
             searchLoading,
         },
-        cursors,
         handleSearch,
         handleLogout,
         searchInputRef

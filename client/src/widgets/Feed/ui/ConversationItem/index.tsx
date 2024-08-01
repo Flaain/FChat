@@ -16,6 +16,7 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
     return (
         <li>
             <NavLink
+                state={conversation.recipient}
                 to={`conversation/${conversation.recipient._id}`}
                 className={({ isActive }) =>
                     cn(

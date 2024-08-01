@@ -1,8 +1,8 @@
-import { allowCyrillicRegExp, nameForSchema, onlyLatinRegExp, regExpError } from '@/shared/constants';
 import { z } from 'zod';
+import { allowCyrillicRegExp, loginForSchema, nameForSchema, regExpError } from '@/shared/constants';
 
 export const createGroupSchema = z.object({
-    username: z.string(),
+    username: z.string().optional(),
     displayName: nameForSchema.regex(allowCyrillicRegExp, regExpError),
-    groupName: nameForSchema.regex(onlyLatinRegExp, regExpError)
+    groupName: loginForSchema
 });

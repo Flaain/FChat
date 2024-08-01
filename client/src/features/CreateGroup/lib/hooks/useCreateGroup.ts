@@ -86,6 +86,7 @@ export const useCreateGroup = () => {
             setSearchedUsers(data);
         } catch (error) {
             console.error(error);
+            setSearchedUsers([]);
         } finally {
             setIsAsyncActionLoading(false);
         }
@@ -116,12 +117,12 @@ export const useCreateGroup = () => {
 
     const onSubmit = async () => {
         try {
+            const isValid =  await form.trigger(steps[step].fields, { shouldFocus: true })
+
+            if (!isValid) return;
+
             const actions = {
-                0: async () => {
-                    if (!await form.trigger(steps[step].fields, { shouldFocus: true })) return;
-                    
-                    setStep((prevState) => prevState + 1);
-                },
+                0: () => setStep((prevState) => prevState + 1),
                 1: () => setStep((prevState) => prevState + 1),
                 2: createGroup
             };

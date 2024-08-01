@@ -14,7 +14,7 @@ const modalVariants = cva(
                 default: 'w-full h-full max-w-[750px] max-h-[600px] p-8',
                 sm: 'w-full h-full max-w-[550px] max-h-[400px] p-5',
                 lg: 'w-full h-full max-w-[900px] max-h-[700px] p-10',
-                fitHeight: 'max-w-[750px] w-full p-8 max-h-[600px]',
+                fitHeight: 'max-w-[450px] w-full p-8 max-h-[600px]',
                 fit: 'w-auto h-auto p-8 max-h-[600px]',
                 screen: 'w-full h-full p-8'
             }
@@ -25,8 +25,24 @@ const modalVariants = cva(
     }
 );
 
-const ModalHeader = ({ title, closeHandler }: Omit<ModalProps, 'children'>) => {
+const ModalHeader = ({
+    title,
+    withCloseButton,
+    closeHandler
+}: Omit<ModalProps, 'children' | 'bodyClassName' | 'size' | 'withHeader'>) => {
     const { isAsyncActionLoading } = useModal();
+
+    if (!title && !withCloseButton) {
+        throw new Error('Please use at least one of title or withCloseButton props or provide falsy withHeader prop');
+    }
+
+    if (title && !withCloseButton) {
+        return (
+            <Typography variant='primary' size='3xl' weight='bold'>
+                {title}
+            </Typography>
+        );
+    }
 
     return (
         <>
@@ -127,11 +143,11 @@ const ModalBody = ({ children, size, className, ...rest }: Omit<ModalBodyProps, 
     );
 };
 
-const Modal = ({ closeHandler, title, children, size }: ModalProps) => {
+const Modal = ({ closeHandler, children, withHeader = true, withCloseButton = true, ...config }: ModalProps) => {
     return (
         <ModalContainer closeHandler={closeHandler}>
-            <ModalBody size={size}>
-                <ModalHeader title={title} closeHandler={closeHandler} />
+            <ModalBody size={config.size} className={config.bodyClassName}>
+                {withHeader && <ModalHeader title={config.title} withCloseButton={withCloseButton} closeHandler={closeHandler} />}
                 {children}
             </ModalBody>
         </ModalContainer>

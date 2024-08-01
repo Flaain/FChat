@@ -24,6 +24,18 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
             );
         });
 
+        socket?.on(FEED_EVENTS.EDIT_MESSAGE, ({ message, conversationId }: { message: IMessage; conversationId: string }) => {
+            setLocalResults((prevState) =>
+                prevState
+                    .map((item) =>
+                        item._id === conversationId
+                            ? { ...item, lastMessage: message, lastMessageSentAt: message.createdAt }
+                            : item
+                    )
+                    .sort(getSortedFeedByLastMessage)
+            );
+        })
+
         socket?.on(FEED_EVENTS.DELETE_MESSAGE, ({ lastMessage, lastMessageSentAt, conversationId }: DeleteMessageEventParams) => {
             setLocalResults((prevState) =>
                 prevState

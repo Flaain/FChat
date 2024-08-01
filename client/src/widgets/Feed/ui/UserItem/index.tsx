@@ -9,6 +9,7 @@ const UserItem = ({ user }: { user: UserFeed }) => {
     return (
         <li>
             <NavLink
+                state={user}
                 to={`conversation/${user._id}`}
                 className={({ isActive }) =>
                     cn(
@@ -18,14 +19,17 @@ const UserItem = ({ user }: { user: UserFeed }) => {
                 }
             >
                 <AvatarByName name={user.name} size='lg' />
-                <Typography as='h2' weight='medium' className={cn(user.isOfficial && 'flex items-center')}>
-                    {user.name}
-                    {user.isOfficial && (
-                        <Typography className='ml-2'>
-                            <Verified className='w-5 h-5' />
-                        </Typography>
-                    )}
-                </Typography>
+                <div>
+                    <Typography as='h2' weight='medium' className={cn(user.isOfficial && 'flex items-center')}>
+                        {user.name}
+                        {user.isOfficial && (
+                            <Typography className='ml-2'>
+                                <Verified className='w-5 h-5' />
+                            </Typography>
+                        )}
+                    </Typography>
+                    <Typography variant='secondary'>@{user.login}</Typography>
+                </div>
             </NavLink>
         </li>
     );

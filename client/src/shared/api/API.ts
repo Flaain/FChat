@@ -23,7 +23,7 @@ export abstract class API {
         this._refreshErrorObservers.forEach((cb) => cb(error));
     }
 
-    private _refreshToken = async () => {
+    private refreshToken = async () => {
         const refreshResponse = await fetch(this._baseUrl + '/auth/refresh', {
             headers: this._headers,
             credentials: this._cretedentials
@@ -48,7 +48,7 @@ export abstract class API {
         
         if (!response.ok) {
             if (response.status === 401) {
-                await this._refreshToken();
+                await this.refreshToken();
 
                 return this._checkResponse<T>(await fetch(response.url, requestInit), requestInit);
             } else {

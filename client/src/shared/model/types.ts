@@ -157,7 +157,7 @@ export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement> {
     name?: string;
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
 export interface UseInfiniteScrollOptions extends IntersectionObserverInit {
@@ -193,7 +193,7 @@ export interface Drafts {
 
 export enum CONVERSATION_EVENTS {
     JOIN = 'conversation.join',
-    LEFT = 'conversation.left',
+    LEAVE = 'conversation.leave',
     CREATED = 'conversation.created',
     DELETED = 'conversation.deleted',
     MESSAGE_SEND = 'conversation.message.send',

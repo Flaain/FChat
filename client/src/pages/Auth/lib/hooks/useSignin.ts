@@ -29,6 +29,10 @@ export const useSignin = () => {
         shouldFocusError: true,
     });
 
+    React.useEffect(() => {
+        form.setFocus('login');
+    }, [])
+
     const onSubmit = React.useCallback(async (data: SigininSchemaType) => {
         try {
             setLoading(true);

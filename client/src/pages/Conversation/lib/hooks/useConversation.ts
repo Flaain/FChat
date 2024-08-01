@@ -118,7 +118,7 @@ export const useConversation = () => {
         socket?.on(CONVERSATION_EVENTS.DELETED, () => navigate('/'));
 
         return () => {
-            socket?.emit(CONVERSATION_EVENTS.LEFT, { recipientId });
+            socket?.emit(CONVERSATION_EVENTS.LEAVE, { recipientId });
 
             socket?.off(CONVERSATION_EVENTS.MESSAGE_SEND);
             socket?.off(CONVERSATION_EVENTS.MESSAGE_EDIT);

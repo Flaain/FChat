@@ -23,23 +23,20 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         setConfig(null);
     }, []);
 
-    const value = React.useMemo(
-        () => ({
-            isModalOpen,
-            isAsyncActionLoading,
-            setIsAsyncActionLoading,
-            setIsModalOpen,
-            openModal,
-            handleChangeTitle,
-            closeModal
-        }),
-        [closeModal, isAsyncActionLoading, isModalOpen, openModal]
-    );
+    const value = React.useMemo(() => ({
+        isModalOpen,
+        isAsyncActionLoading,
+        setIsAsyncActionLoading,
+        setIsModalOpen,
+        openModal,
+        handleChangeTitle,
+        closeModal
+    }), [closeModal, isAsyncActionLoading, isModalOpen, openModal]);
 
     return (
         <ModalContext.Provider value={value}>
             {isModalOpen && config?.content && ReactDOM.createPortal(
-                <Modal size={config.size} title={config.title} closeHandler={() => setIsModalOpen(false)}>
+                <Modal {...config} closeHandler={() => setIsModalOpen(false)}>
                     {config.content}
                 </Modal>, document.querySelector('#modal-root')!
                 )}

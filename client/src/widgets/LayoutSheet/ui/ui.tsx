@@ -2,14 +2,16 @@ import Switch from '@/shared/ui/Switch';
 import Typography from '@/shared/ui/Typography';
 import AvatarByName from '@/shared/ui/AvatarByName';
 import CreateGroup from '@/features/CreateGroup/ui/ui';
+import Settings from '@/widgets/Settings/ui/ui';
 import { useTheme } from '@/entities/theme/lib/hooks/useTheme';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { Button } from '@/shared/ui/Button';
-import { Archive, Moon, Settings, Users, Verified } from 'lucide-react';
+import { Archive, Moon, Users, Settings as SettingsIcon, Verified } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/shared/lib/utils/cn';
 import { ModalConfig } from '@/shared/lib/contexts/modal/types';
+import { SettingsProvider } from '@/widgets/Settings/lib/contexts/provider';
 
 const listIconStyle = 'dark:text-primary-white text-primary-dark-200 w-5 h-5';
 
@@ -21,7 +23,7 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
     const onSheetAction = (modal: ModalConfig) => {
         setSheetOpen(false);
         openModal(modal);
-    }
+    };
 
     const sheetList: Array<{ title: string; icon: JSX.Element; action: () => void }> = [
         {
@@ -32,12 +34,26 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
         {
             title: 'New group',
             icon: <Users className={listIconStyle} />,
-            action: () => onSheetAction({ title: 'Create group', content: <CreateGroup />, size: 'fitHeight' })
+            action: () =>
+                onSheetAction({
+                    withCloseButton: false,
+                    content: <CreateGroup />,
+                    bodyClassName: 'max-w-[450px] p-5 h-auto'
+                })
         },
         {
             title: 'Settings',
-            icon: <Settings className={listIconStyle} />,
-            action: () => onSheetAction({ title: 'Settings', content: <Settings />, size: 'fitHeight' })
+            icon: <SettingsIcon className={listIconStyle} />,
+            action: () =>
+                onSheetAction({
+                    content: (
+                        <SettingsProvider>
+                            <Settings />
+                        </SettingsProvider>
+                    ),
+                    bodyClassName: 'max-w-[450px] p-0 h-auto',
+                    withHeader: false
+                })
         }
     ];
 

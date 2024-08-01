@@ -14,5 +14,8 @@ export interface ModalContextProps {
 export interface ModalConfig {
     title?: string;
     size?: ModalSize;
+    bodyClassName?: string;
+    withCloseButton?: boolean;
+    withHeader?: boolean;
     content: React.ReactNode;
 }

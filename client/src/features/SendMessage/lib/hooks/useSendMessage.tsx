@@ -28,7 +28,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
 
     React.useEffect(() => {
         setValue(drafts.get(queryId!)?.value ?? '');
-    }, [queryId]);
+    }, [queryId, drafts]);
 
     React.useEffect(() => {
         if (!textareaRef.current) return;
@@ -108,10 +108,10 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
 
             return newState;
         });
-    }, [queryId]);
+    }, [queryId, currentDraft]);
 
     const onSendEditedConversationMessage = React.useCallback(async ({ messageId, message }: { messageId: string; message: string }) => {
-        await api.message.edit({ messageId, message, recipientId: queryId });
+        await api.message.edit({ messageId, message, recipientId: queryId, conversationId: conversation._id });
     }, []);
 
     const onSendEditedMessage = async () => {

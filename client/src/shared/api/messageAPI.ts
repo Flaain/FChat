@@ -13,7 +13,7 @@ export class MessageAPI extends API {
         return this._checkResponse<IMessage & { conversationId: string }>(await fetch(this._baseUrl + `/message/send/${recipientId}`, request), request);
     };
 
-    edit = async ({ messageId, ...body }: { message: string; messageId: string; recipientId: string }) => {
+    edit = async ({ messageId, ...body }: { message: string; messageId: string; recipientId: string, conversationId: string }) => {
         const request: RequestInit = {
             method: 'PATCH',
             headers: this._headers,

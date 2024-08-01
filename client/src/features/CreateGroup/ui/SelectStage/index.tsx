@@ -1,6 +1,6 @@
 import Typography from '@/shared/ui/Typography';
 import SearchedUsersList from '@/widgets/SearchedUsersList/ui/ui';
-import { X } from 'lucide-react';
+import { UserSearch, X } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Input } from '@/shared/ui/Input';
@@ -16,6 +16,8 @@ const SelectStage = ({
     handleRemove,
     handleSelect
 }: SelectStageProps) => {
+    const searchQuery = form.getValues('username');
+
     return (
         <>
             <FormField
@@ -41,17 +43,26 @@ const SelectStage = ({
                     </FormItem>
                 )}
             />
-            {!!searchedUsers.length && (
-                <SearchedUsersList
-                    title='Finded Users'
-                    onUserSelect={handleSelect}
-                    searchedUsers={searchedUsers}
-                    selectedUsers={selectedUsers}
-                />
+            {searchQuery?.trim().length! > 2 && !searchedUsers.length ? (
+                <>
+                    <UserSearch className='dark:text-primary-white w-10 h-10 self-center' />
+                    <Typography as='p' variant='secondary' className='self-center text-center'>
+                        There were no results for "{searchQuery}".
+                    </Typography>
+                </>
+            ) : (
+                !!searchedUsers.length && (
+                    <SearchedUsersList
+                        title='Finded Users'
+                        onUserSelect={handleSelect}
+                        searchedUsers={searchedUsers}
+                        selectedUsers={selectedUsers}
+                    />
+                )
             )}
             {!!selectedUsers.size && (
                 <>
-                    <Typography size='xl' weight='medium' as='h2' variant='primary' className='mt-5'>
+                    <Typography size='xl' weight='medium' as='h2' variant='primary'>
                         Selected users
                     </Typography>
                     <ul className='flex items-center gap-2 flex-wrap overflow-auto'>
