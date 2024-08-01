@@ -5,20 +5,22 @@ import { useSettings } from '../lib/hooks/useSettings';
 import { ArrowLeft, X } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { useModal } from '@/shared/lib/hooks/useModal';
-import { MainMenu } from '../model/types';
+import { SettingMenu } from '../model/types';
+import ActiveSessions from '@/features/ActiveSessions/ui/ui';
 
 const Settings = () => {
     const { closeModal } = useModal();
     const { currentMenu, titles, onBack } = useSettings();
 
-    const components: Record<MainMenu, React.ReactNode> = {
+    const components: Record<SettingMenu, React.ReactNode> = {
         main: <SettingsMain />,
-        privacy: <Privacy />
+        privacy: <Privacy />,
+        sessions: <ActiveSessions />
     };
 
     return (
         <div className='flex flex-col'>
-            <div className='flex items-center px-5 pt-2 pb-5 gap-5'>
+            <div className='flex items-center p-5 gap-5'>
                 {currentMenu !== 'main' && (
                     <Button variant='text' className='h-auto p-0' onClick={onBack}>
                         <ArrowLeft className='w-6 h-6' />

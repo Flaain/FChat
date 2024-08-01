@@ -1,5 +1,36 @@
+import { Button } from '@/shared/ui/Button';
+import { useSettings } from '@/widgets/Settings/lib/hooks/useSettings';
+import { MonitorSmartphone } from 'lucide-react';
+
 const Privacy = () => {
-    return <div>Privacy</div>;
+    const { onMenuChange } = useSettings();
+
+    const list: Array<{ icon: React.ReactNode; title: string; action: () => void }> = [
+        {
+            title: 'Active sessions',
+            icon: <MonitorSmartphone className='w-5 h-5' />,
+            action: () => onMenuChange('sessions')
+        }
+    ];
+
+    return (
+        <div className='border-b-8 dark:border-b-primary-dark-50 py-2'>
+            <ul className='flex flex-col gap-2'>
+                {list.map(({ title, icon, action }, index) => (
+                    <li key={index}>
+                        <Button
+                            onClick={action}
+                            variant='ghost'
+                            className='px-5 flex items-center gap-4 justify-start w-full rounded-none'
+                        >
+                            {icon}
+                            {title}
+                        </Button>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 };
 
 export default Privacy;

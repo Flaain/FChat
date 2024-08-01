@@ -2,11 +2,17 @@ import React from 'react';
 import { PrivacyMenu, SettingMenu } from '../../model/types';
 import { SettingsContext } from './context';
 
+const prevMenu: Record<SettingMenu | PrivacyMenu, SettingMenu | PrivacyMenu> = {
+    main: 'main',
+    privacy: 'main',
+    sessions: 'privacy',
+    changePassword: 'privacy',
+    deleteAccount: 'privacy'
+}
+
 export const SettingsProvider = ({ children }: any) => {
     const [currentMenu, setCurrentMenu] = React.useState<SettingMenu>('main');
     
-    const prevMenuRef = React.useRef<SettingMenu | null>(null);
-
     const titles: Record<SettingMenu | PrivacyMenu, string> = {
         main: 'Settings',
         privacy: 'Privacy and Security',
@@ -16,18 +22,16 @@ export const SettingsProvider = ({ children }: any) => {
     };
 
     const onBack = () => {
-        setCurrentMenu(prevMenuRef.current!);
+        setCurrentMenu(prevMenu[currentMenu]);
     };
 
     const onMenuChange = (menu: SettingMenu) => {
         setCurrentMenu(menu);
-        prevMenuRef.current = currentMenu;
     };
 
     const value = React.useMemo(() => ({
         titles,
         currentMenu,
-        prevMenuRef,
         onMenuChange,
         onBack
     }), [currentMenu, titles]);

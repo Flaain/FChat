@@ -5,7 +5,6 @@ export type PrivacyMenu = 'privacy' | 'sessions' | 'changePassword' | 'deleteAcc
 export interface SettingsContextProps {
     titles: Record<SettingMenu | PrivacyMenu, string>;
     currentMenu: SettingMenu;
-    prevMenuRef: React.MutableRefObject<SettingMenu | null> | null;
     onMenuChange: (menu: SettingMenu) => void;
     onBack: () => void;
 }
