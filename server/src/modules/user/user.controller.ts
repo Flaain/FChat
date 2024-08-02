@@ -1,8 +1,9 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RequestWithUser, Routes } from 'src/utils/types';
-import { CheckType, IUserController } from './types';
+import { ActionPasswordType, CheckType, IUserController } from './types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
+import { UserPasswordDto } from './dtos/user.password.dto';
 
 @Controller(Routes.USER)
 export class UserController implements IUserController {
@@ -17,5 +18,11 @@ export class UserController implements IUserController {
     @Get('check')
     check(@Query('type') type: CheckType, @Query('email') email: string, @Query('login') login: string) {
         return this.userService.check({ type, email, login });
+    }
+
+    @Post('password')
+    @UseGuards(AccessGuard)
+    password(@Req() req: RequestWithUser, @Body() dto: UserPasswordDto, @Query('type') type: ActionPasswordType) {
+        return this.userService.password({ initiator: req.user.doc, type, ...dto });
     }
 }

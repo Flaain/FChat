@@ -8,6 +8,8 @@ import { userCheckSchema } from '../schemas/user.check.schema';
 import { SignupDTO } from 'src/modules/auth/dtos/auth.signup.dto';
 
 export type CheckType = 'email' | 'login';
+export type ActionPasswordType = 'set' | 'check';
+
 export type UserWithoutPassword = Omit<IUser, 'password'>;
 export type UserDocument = User & Document & SchemaTimestampsConfig;
 export type UserSearchParams = z.infer<typeof userSearchSchema> & { initiatorId: Types.ObjectId };

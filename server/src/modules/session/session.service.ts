@@ -13,7 +13,8 @@ export class SessionService {
     findById = (id: Types.ObjectId | string) => this.sessionModel.findById(id);
     findOneByPayload = (payload: FilterQuery<Session>) => this.sessionModel.findOne(payload);
     findManyByPayload = (payload: FilterQuery<Session>) => this.sessionModel.find(payload);
-    
+    deleteMany = (payload: FilterQuery<Session>) => this.sessionModel.deleteMany(payload);
+
     validate = async (_id: Types.ObjectId | string) => {
         const session = await this.findById(_id);
 

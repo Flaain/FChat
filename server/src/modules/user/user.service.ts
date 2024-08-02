@@ -6,14 +6,22 @@ import { userCheckSchema } from './schemas/user.check.schema';
 import { userSearchSchema } from './schemas/user.search.schema';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { emailExistError, loginExistError } from '../auth/constants';
-import { IUserService, UserSearchParams } from './types';
+import { IUserService, UserDocument, UserSearchParams } from './types';
 import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { IAppException } from 'src/utils/types';
 import { SignupDTO } from '../auth/dtos/auth.signup.dto';
+import { userPasswordSchema } from './schemas/user.password.schema';
+import { BcryptService } from 'src/utils/services/bcrypt/bcrypt.service';
+import { incorrectPasswordError } from './constants';
+import { SessionService } from '../session/session.service';
 
 @Injectable()
 export class UserService implements IUserService {
-    constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
+    constructor(
+        @InjectModel(User.name) private readonly userModel: Model<User>, 
+        private readonly bcryptService: BcryptService,
+        private readonly sessionService: SessionService
+    ) {}
 
     findOneByPayload = async (
         payload: FilterQuery<User>,
@@ -55,10 +63,25 @@ export class UserService implements IUserService {
 
     findById = async (id: string | Types.ObjectId) => this.userModel.findById(id);
 
-    check = async ({ type, email, login }: z.infer<typeof userCheckSchema>) => {
-        const parsedQuery = userCheckSchema.parse({ type, email, login });
+    password = async ({ initiator, ...dto }: z.infer<typeof userPasswordSchema> & { initiator: UserDocument }) => {
+        const parsedQuery = userPasswordSchema.parse(dto);
 
-        const errors: Record<typeof type, Pick<IAppException, 'message' | 'errors'>> = {
+        if (!await this.bcryptService.compareAsync(dto.currentPassword, initiator.password)) {
+            throw new AppException(incorrectPasswordError, HttpStatus.CONFLICT);
+        }
+
+        if (parsedQuery.type === 'set') {
+            initiator.password = await this.bcryptService.hashAsync(dto.newPassword);
+            await Promise.all([initiator.save(), this.sessionService.deleteMany({ userId: initiator._id })]);
+        }
+
+        return { status: HttpStatus.OK, message: 'OK' };
+    }
+
+    check = async (dto: z.infer<typeof userCheckSchema>) => {
+        const parsedQuery = userCheckSchema.parse(dto);
+
+        const errors: Record<typeof parsedQuery.type, Pick<IAppException, 'message' | 'errors'>> = {
             email: emailExistError,
             login: loginExistError,
         }
@@ -68,7 +91,7 @@ export class UserService implements IUserService {
             isDeleted: false 
         });
 
-        if (user) throw new AppException(errors[type], HttpStatus.CONFLICT);
+        if (user) throw new AppException(errors[parsedQuery.type], HttpStatus.CONFLICT);
 
         return { status: HttpStatus.OK, message: 'OK' };
     }

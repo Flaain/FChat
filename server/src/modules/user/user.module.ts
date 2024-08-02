@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { Conversation, ConversationSchema } from '../conversation/schemas/conversation.schema';
 import { GroupModule } from '../group/group.module';
+import { BcryptModule } from 'src/utils/services/bcrypt/bcrypt.module';
+import { SessionModule } from '../session/session.module';
 
 @Module({
     imports: [
@@ -13,6 +15,8 @@ import { GroupModule } from '../group/group.module';
             { name: Conversation.name, schema: ConversationSchema },
         ]),
         GroupModule,
+        BcryptModule,
+        SessionModule
     ],
     controllers: [UserController],
     providers: [UserService],

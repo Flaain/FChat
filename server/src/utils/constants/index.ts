@@ -3,6 +3,13 @@ import { z } from 'zod';
 export const onlyLatinRegExp = /^[a-zA-Z0-9_\s]*$/;
 export const allowCyrillicRegExp = /^[\p{L}0-9\s]*$/u;
 
+export const passwordForSchema = z
+    .string()
+    .trim()
+    .min(1, 'Password is required')
+    .min(6, 'Password must be at least 6 characters long')
+    .max(32, 'Password must be at most 32 characters long');
+
 export const nameForSchema = z
     .string()
     .trim()
