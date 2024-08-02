@@ -1,6 +1,6 @@
 import { Button } from '@/shared/ui/Button';
 import { useSettings } from '@/widgets/Settings/lib/hooks/useSettings';
-import { MonitorSmartphone } from 'lucide-react';
+import { LockKeyhole, MonitorSmartphone } from 'lucide-react';
 
 const Privacy = () => {
     const { onMenuChange } = useSettings();
@@ -10,6 +10,11 @@ const Privacy = () => {
             title: 'Active sessions',
             icon: <MonitorSmartphone className='w-5 h-5' />,
             action: () => onMenuChange('sessions')
+        },
+        {
+            title: "Change password",
+            icon: <LockKeyhole className='w-5 h-5' />,
+            action: () => onMenuChange('changePassword')
         }
     ];
 

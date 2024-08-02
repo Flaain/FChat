@@ -1,12 +1,13 @@
 import Privacy from '@/features/Privacy/ui/ui';
 import SettingsMain from './SettingsMain';
+import ActiveSessions from '@/features/ActiveSessions/ui/ui';
+import ChangePassword from '@/features/ChangePassword/ui/ui';
 import Typography from '@/shared/ui/Typography';
 import { useSettings } from '../lib/hooks/useSettings';
 import { ArrowLeft, X } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { SettingMenu } from '../model/types';
-import ActiveSessions from '@/features/ActiveSessions/ui/ui';
 
 const Settings = () => {
     const { closeModal } = useModal();
@@ -15,7 +16,8 @@ const Settings = () => {
     const components: Record<SettingMenu, React.ReactNode> = {
         main: <SettingsMain />,
         privacy: <Privacy />,
-        sessions: <ActiveSessions />
+        sessions: <ActiveSessions />,
+        changePassword: <ChangePassword />
     };
 
     return (

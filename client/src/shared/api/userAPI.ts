@@ -1,7 +1,7 @@
 import { API } from './API';
 import { Profile, User } from '../lib/contexts/profile/model/types';
 import { SigininSchemaType, SignupSchemaType } from '@/pages/Auth/model/types';
-import { SearchUser, UserCheckParams } from '../model/types';
+import { SearchUser, UserCheckParams, UserPasswordParams } from '../model/types';
 import { AppException } from './error';
 
 export class UserAPI extends API {
@@ -16,6 +16,20 @@ export class UserAPI extends API {
 
         return this._checkResponse<{ status: number; message: string }>(await fetch(url, request), request);
     };
+
+    password = async ({ type, ...body }: UserPasswordParams) => {
+        const request: RequestInit = {
+            method: 'POST',
+            headers: this._headers,
+            credentials: this._cretedentials,
+            body: JSON.stringify(body)
+        }
+        const url = new URL(this._baseUrl + `/user/password`);
+
+        url.searchParams.append('type', type);
+
+        return this._checkResponse<{ status: number; message: string }>(await fetch(url, request), request);
+    }
 
     signup = async (body: Omit<SignupSchemaType, 'confirmPassword'>) => {
         const request: RequestInit = {

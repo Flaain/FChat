@@ -41,7 +41,7 @@ const SettingsMain = () => {
                     </div>
                 </div>
             </div>
-            <div className='border-b-8 dark:border-b-primary-dark-50 py-2'>
+            <div className='py-2'>
                 <ul className='flex flex-col gap-2'>
                     {list.map(({ title, icon, action }, index) => (
                         <li key={index}>
