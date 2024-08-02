@@ -8,10 +8,11 @@ import { ArrowLeft, X } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { SettingMenu } from '../model/types';
+import { titles } from '../lib/contexts/provider';
 
 const Settings = () => {
     const { closeModal } = useModal();
-    const { currentMenu, titles, onBack } = useSettings();
+    const { currentMenu, onBack } = useSettings();
 
     const components: Record<SettingMenu, React.ReactNode> = {
         main: <SettingsMain />,

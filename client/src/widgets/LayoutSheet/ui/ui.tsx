@@ -36,7 +36,7 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
             icon: <Users className={listIconStyle} />,
             action: () =>
                 onSheetAction({
-                    withCloseButton: false,
+                    withHeader: false,
                     content: <CreateGroup />,
                     bodyClassName: 'max-w-[450px] p-5 h-auto'
                 })

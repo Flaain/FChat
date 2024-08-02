@@ -31,7 +31,6 @@ export const useCreateGroup = () => {
             username: '',
             groupName: ''
         },
-        disabled: isAsyncActionLoading,
         mode: 'all',
         shouldFocusError: true
     });
@@ -79,8 +78,6 @@ export const useCreateGroup = () => {
 
     const handleSearchDelay = React.useCallback(debounce(async (value: string) => {
         try {
-            setIsAsyncActionLoading(true);
-
             const { data } = await api.user.search({ query: value });
 
             setSearchedUsers(data);
@@ -111,8 +108,11 @@ export const useCreateGroup = () => {
         const trimmedValue = value.trim();
 
         if (!value || !trimmedValue.length) return setSearchedUsers([]);
-
-       trimmedValue.length > 2 && handleSearchDelay(trimmedValue)
+        
+        if (trimmedValue.length > 2) {
+            setIsAsyncActionLoading(true);
+            handleSearchDelay(trimmedValue);
+        }
     }
 
     const onSubmit = async () => {

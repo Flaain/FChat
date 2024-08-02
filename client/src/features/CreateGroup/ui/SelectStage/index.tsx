@@ -5,6 +5,7 @@ import { Button } from '@/shared/ui/Button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Input } from '@/shared/ui/Input';
 import { SelectStageProps } from '../../model/types';
+import { useModal } from '@/shared/lib/hooks/useModal';
 
 const MAX_CONVERSATION_SIZE = 10;
 
@@ -16,6 +17,8 @@ const SelectStage = ({
     handleRemove,
     handleSelect
 }: SelectStageProps) => {
+    const { isAsyncActionLoading } = useModal();
+
     const searchQuery = form.getValues('username');
 
     return (
@@ -43,7 +46,7 @@ const SelectStage = ({
                     </FormItem>
                 )}
             />
-            {searchQuery?.trim().length! > 2 && !searchedUsers.length ? (
+            {searchQuery?.trim().length! > 2 && !isAsyncActionLoading && !searchedUsers.length ? (
                 <>
                     <UserSearch className='dark:text-primary-white w-10 h-10 self-center' />
                     <Typography as='p' variant='secondary' className='self-center text-center'>

@@ -5,5 +5,4 @@ export const SettingsContext = React.createContext<SettingsContextProps>({
     currentMenu: 'main',
     onBack: () => {},
     onMenuChange: () => {},
-    titles: undefined!
 })

@@ -27,7 +27,7 @@ export const useChangePassword = () => {
             newPassword: ''
         },
         disabled: isLoading,
-        mode: 'all'
+        mode: 'onSubmit'
     });
 
     React.useEffect(() => {
@@ -39,7 +39,7 @@ export const useChangePassword = () => {
             event.preventDefault()
 
             const isValid = await form.trigger(steps[step].fields, { shouldFocus: true });
-console.log(isValid)
+
             if (!isValid) return;
 
             const { currentPassword, newPassword } = form.getValues();
@@ -57,6 +57,7 @@ console.log(isValid)
 
                     closeModal();
                     toast.success('Password changed successfully', { position: 'top-center' });
+                    // maybe we can even logout user or it's better wait to access token expiration 
                 }
             };
 

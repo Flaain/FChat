@@ -6,7 +6,8 @@ export abstract class API {
     protected readonly _headers: BaseAPI['headers'];
     protected readonly _cretedentials: BaseAPI['credentials'];
     protected readonly _refreshErrorObservers: Set<(error: AppException) => void> = new Set();
-
+    protected readonly _noRefreshPaths: Array<string> = ['/auth/signin'];
+    
     constructor({
         baseUrl = import.meta.env.VITE_BASE_URL,
         headers = { 'Content-Type': 'application/json' },
@@ -43,11 +44,12 @@ export abstract class API {
     }
 
     protected _checkResponse = async <T>(response: Response, requestInit?: RequestInit): Promise<APIData<T>> => {
+        const url = new URL(response.url);
         const data = await response.json();
         const headers = Object.fromEntries([...response.headers.entries()]);
         
         if (!response.ok) {
-            if (response.status === 401) {
+            if (response.status === 401 && !this._noRefreshPaths.includes(url.pathname)) {
                 await this.refreshToken();
 
                 return this._checkResponse<T>(await fetch(response.url, requestInit), requestInit);
