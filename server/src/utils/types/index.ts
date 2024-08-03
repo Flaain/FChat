@@ -16,6 +16,10 @@ export enum Routes {
     OTP = 'auth/otp',
 }
 
+export enum Providers {
+    PARSER_CLIENT = 'PARSER_CLIENT',
+}
+
 export enum AuthCookiesName {
     ACCESS_TOKEN = 'accessToken',
     REFRESH_TOKEN = 'refreshToken',

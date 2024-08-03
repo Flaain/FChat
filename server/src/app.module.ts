@@ -14,12 +14,14 @@ import { GroupMessageModule } from './modules/group-message/group-message.module
 import { SessionModule } from './modules/session/session.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { FeedModule } from './modules/feed/feed.module';
+import { UAParserModule } from './utils/uaparser/uaparser.module';
 
 @Module({
     imports: [
         AuthModule,
         UserModule,
         FeedModule,
+        UAParserModule.forRoot(),
         ConfigModule.forRoot({ isGlobal: true, expandVariables: true }),
         MongooseModule.forRoot(process.env.DATABASE_URI, { retryWrites: true }),
         ThrottlerModule.forRoot([{ limit: 5, ttl: 10000 }]),
