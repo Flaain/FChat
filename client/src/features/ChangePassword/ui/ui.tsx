@@ -8,7 +8,7 @@ const ChangePassword = () => {
 
     return (
         <Form {...form}>
-            <form onSubmit={onSubmit} className='px-5 pb-5 flex flex-col gap-2'>
+            <form onSubmit={onSubmit} className='px-5 py-5 flex flex-col gap-2'>
                 <FormField
                     name='currentPassword'
                     control={form.control}

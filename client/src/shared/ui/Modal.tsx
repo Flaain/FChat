@@ -29,7 +29,7 @@ const ModalHeader = ({
     title,
     withCloseButton,
     closeHandler
-}: Omit<ModalProps, 'children' | 'bodyClassName' | 'size' | 'withHeader'>) => {
+}: Omit<ModalProps, 'children' | 'bodyClassName' | 'size' | 'withHeader' | 'id'>) => {
     const { isAsyncActionLoading } = useModal();
 
     if (!title && !withCloseButton) {
@@ -64,7 +64,7 @@ const ModalHeader = ({
     );
 };
 
-const ModalContainer = ({ children, closeHandler }: Omit<ModalProps, 'title'>) => {
+const ModalContainer = ({ children, closeHandler }: Omit<ModalProps, 'title' | 'id' | 'withHeader' | 'withCloseButton' | 'bodyClassName' | 'size'>) => {
     const { isAsyncActionLoading } = useModal();
 
     React.useEffect(() => {
@@ -129,6 +129,10 @@ const ModalBody = ({ children, size, className, ...rest }: Omit<ModalBodyProps, 
     }, []);
 
     React.useEffect(() => {
+        if (!bodyRef.current) return;
+
+        bodyRef.current.focus();
+
         document.addEventListener('keydown', handleKeyDown);
 
         return () => {
@@ -137,13 +141,13 @@ const ModalBody = ({ children, size, className, ...rest }: Omit<ModalBodyProps, 
     }, [handleKeyDown]);
 
     return (
-        <div ref={bodyRef} onKeyDown={handleKeyDown} className={cn(modalVariants({ size, className }))} {...rest}>
+        <div ref={bodyRef} tabIndex={-1} onKeyDown={handleKeyDown} className={cn(modalVariants({ size, className }))} {...rest}>
             {children}
         </div>
     );
 };
 
-const Modal = ({ closeHandler, children, withHeader = true, withCloseButton = true, ...config }: ModalProps) => {
+const Modal = ({ closeHandler, children, withHeader = true, withCloseButton = true, ...config }: Omit<ModalProps, 'id'>) => {
     return (
         <ModalContainer closeHandler={closeHandler}>
             <ModalBody size={config.size} className={config.bodyClassName}>

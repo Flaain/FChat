@@ -34,26 +34,26 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
         {
             title: 'New group',
             icon: <Users className={listIconStyle} />,
-            action: () =>
-                onSheetAction({
-                    withHeader: false,
-                    content: <CreateGroup />,
-                    bodyClassName: 'max-w-[450px] p-5 h-auto'
-                })
+            action: () => onSheetAction({
+                id: 'create-group-modal',
+                withHeader: false,
+                content: <CreateGroup />,
+                bodyClassName: 'max-w-[450px] p-5 h-auto'
+            })
         },
         {
             title: 'Settings',
             icon: <SettingsIcon className={listIconStyle} />,
-            action: () =>
-                onSheetAction({
-                    content: (
-                        <SettingsProvider>
-                            <Settings />
-                        </SettingsProvider>
-                    ),
-                    bodyClassName: 'max-w-[450px] p-0 h-auto',
-                    withHeader: false
-                })
+            action: () => onSheetAction({
+                id: 'settings-modal',
+                content: (
+                    <SettingsProvider>
+                        <Settings modalId='settings-modal' />
+                    </SettingsProvider>
+                ),
+                bodyClassName: 'max-w-[450px] p-0 h-auto',
+                withHeader: false
+            })
         }
     ];
 

@@ -1,3 +1,4 @@
+import { Session } from '@/entities/session/model/types';
 import { ModalConfig } from '../lib/contexts/modal/types';
 import { User } from '../lib/contexts/profile/model/types';
 
@@ -249,4 +250,49 @@ export interface DeleteMessageRes {
     isLastMessage: boolean;
     lastMessage: IMessage;
     lastMessageSentAt: string;
+}
+
+export interface GetSessionsReturn {
+    currentSession: {
+        _id: string;
+        userAgent: ParsedSession;
+        createdAt: string;
+        expiresAt: string;
+    };
+    sessions: Array<Session>;
+}
+
+export interface ParsedSession {
+    ua: string;
+    browser: IBrowser;
+    device: IDevice;
+    engine: IEngine;
+    os: IOS;
+    cpu: ICPU;
+}
+
+export interface IBrowser {
+    name: string | undefined;
+    version: string | undefined;
+    major: string | undefined;
+}
+
+export interface IDevice {
+    model: string | undefined;
+    type: string | undefined;
+    vendor: string | undefined;
+}
+
+export interface IEngine {
+    name: string | undefined;
+    version: string | undefined;
+}
+
+export interface IOS {
+    name: string | undefined;
+    version: string | undefined;
+}
+
+export interface ICPU {
+    architecture: string | undefined;
 }

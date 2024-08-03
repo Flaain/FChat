@@ -12,29 +12,27 @@ const Privacy = () => {
             action: () => onMenuChange('sessions')
         },
         {
-            title: "Change password",
+            title: 'Change password',
             icon: <LockKeyhole className='w-5 h-5' />,
             action: () => onMenuChange('changePassword')
         }
     ];
 
     return (
-        <div className='py-2'>
-            <ul className='flex flex-col gap-2'>
-                {list.map(({ title, icon, action }, index) => (
-                    <li key={index}>
-                        <Button
-                            onClick={action}
-                            variant='ghost'
-                            className='px-5 flex items-center gap-4 justify-start w-full rounded-none'
-                        >
-                            {icon}
-                            {title}
-                        </Button>
-                    </li>
-                ))}
-            </ul>
-        </div>
+        <ul className='flex flex-col pt-5'>
+            {list.map(({ title, icon, action }, index) => (
+                <li key={index}>
+                    <Button
+                        onClick={action}
+                        variant='ghost'
+                        className='px-5 flex items-center gap-4 justify-start w-full rounded-none'
+                    >
+                        {icon}
+                        {title}
+                    </Button>
+                </li>
+            ))}
+        </ul>
     );
 };
 

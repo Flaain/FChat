@@ -1,3 +1,12 @@
+import { ParsedSession } from "@/shared/model/types";
+
+export interface Session {
+    _id: string;
+    userAgent: ParsedSession;
+    createdAt: string;
+    expiresAt: string;
+}
+
 export interface SessionContextProps {
     state: SessionState;
     dispatch: React.Dispatch<SessionAction>;
@@ -24,3 +33,9 @@ export type SessionAction =
     | { type: SessionTypes.SET_IS_AUTH_IN_PROGRESS; payload: { isAuthInProgress: boolean } }
     | { type: SessionTypes.SET_ON_AUTH; payload: { userId: string } }
     | { type: SessionTypes.SET_ON_LOGOUT; }
+
+export interface SessionProps {
+    session: Session;
+    withDropButton?: boolean;
+    onDrop?: () => void;
+}

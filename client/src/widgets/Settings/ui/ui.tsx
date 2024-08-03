@@ -10,8 +10,8 @@ import { useModal } from '@/shared/lib/hooks/useModal';
 import { SettingMenu } from '../model/types';
 import { titles } from '../lib/contexts/provider';
 
-const Settings = () => {
-    const { closeModal } = useModal();
+const Settings = ({ modalId }: { modalId: string }) => {
+    const { closeModal, isAsyncActionLoading } = useModal();
     const { currentMenu, onBack } = useSettings();
 
     const components: Record<SettingMenu, React.ReactNode> = {
@@ -22,17 +22,17 @@ const Settings = () => {
     };
 
     return (
-        <div className='flex flex-col'>
-            <div className='flex items-center p-5 gap-5'>
+        <div className='flex flex-col py-5'>
+            <div className='flex items-center px-5 gap-5'>
                 {currentMenu !== 'main' && (
-                    <Button variant='text' className='h-auto p-0' onClick={onBack}>
+                    <Button variant='text' className='h-auto p-0' onClick={onBack} disabled={isAsyncActionLoading}>
                         <ArrowLeft className='w-6 h-6' />
                     </Button>
                 )}
                 <Typography as='h1' variant='primary' size='xl' weight='medium' className='self-start'>
                     {titles[currentMenu]}
                 </Typography>
-                <Button variant='text' className='h-auto p-0 ml-auto' onClick={closeModal}>
+                <Button variant='text' className='h-auto p-0 ml-auto' onClick={() => closeModal(modalId)} disabled={isAsyncActionLoading}>
                     <X className='w-6 h-6' />
                 </Button>
             </div>

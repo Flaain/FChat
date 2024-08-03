@@ -5,41 +5,31 @@ import { ModalContext } from './context';
 import { ModalConfig } from './types';
 
 export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
-    const [config, setConfig] = React.useState<ModalConfig | null>(null);
+    const [modals, setModals] = React.useState<Array<ModalConfig>>([]);
     const [isAsyncActionLoading, setIsAsyncActionLoading] = React.useState(false);
 
-    const openModal = React.useCallback((config: ModalConfig) => {
-        setIsModalOpen(true);
-        setConfig(config);
-    }, []);
-
-    const handleChangeTitle = React.useCallback((title: string) => {
-        setConfig((prevState) => ({ ...prevState!, title }));
+    const openModal = React.useCallback((modal: ModalConfig) => {
+        setModals((prevState) => [...prevState, modal]);
     }, []);
 
     const closeModal = React.useCallback(() => {
-        setIsModalOpen(false);
-        setConfig(null);
+        setModals((prevState) => prevState.slice(0, -1));
     }, []);
 
     const value = React.useMemo(() => ({
-        isModalOpen,
         isAsyncActionLoading,
         setIsAsyncActionLoading,
-        setIsModalOpen,
         openModal,
-        handleChangeTitle,
         closeModal
-    }), [closeModal, isAsyncActionLoading, isModalOpen, openModal]);
+    }), [closeModal, isAsyncActionLoading, openModal]);
 
     return (
         <ModalContext.Provider value={value}>
-            {isModalOpen && config?.content && ReactDOM.createPortal(
-                <Modal {...config} closeHandler={() => setIsModalOpen(false)}>
-                    {config.content}
+            {modals.map((modal) => ReactDOM.createPortal(
+                <Modal key={modal.id} {...modal} closeHandler={closeModal}>
+                    {modal.content}
                 </Modal>, document.querySelector('#modal-root')!
-                )}
+            ))}
             {children}
         </ModalContext.Provider>
     );

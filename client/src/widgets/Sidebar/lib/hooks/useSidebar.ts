@@ -67,13 +67,14 @@ export const useSidebar = () => {
 
         setSearchValue(!trimmedValue.length ? '' : value);
 
-        trimmedValue.length > MIN_SEARCH_LENGTH && handleSearchDelay(trimmedValue);
+        if(trimmedValue.length >= MIN_SEARCH_LENGTH) {
+            setSearchLoading(true);
+            handleSearchDelay(trimmedValue);
+        }
     }, []);
 
     const handleSearchDelay = React.useCallback(debounce(async (value: string) => {
         try {
-            setSearchLoading(true);
-
             const { data: users } = await api.user.search({ query: value });
 
             setGlobalResults(users.map((user) => ({ ...user, type: FeedTypes.USER })));
