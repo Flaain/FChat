@@ -11,10 +11,30 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
     const openModal = React.useCallback((modal: ModalConfig) => {
         setModals((prevState) => [...prevState, modal]);
     }, []);
-
+    
     const closeModal = React.useCallback(() => {
         setModals((prevState) => prevState.slice(0, -1));
     }, []);
+
+    React.useEffect(() => {
+        if (!modals.length) return;
+
+        const handleKeyUp = ({ key }: KeyboardEvent) => {
+            !isAsyncActionLoading && key === 'Escape' && closeModal();
+        };
+
+        document.body.style.paddingRight = window.innerWidth - document.body.offsetWidth + 'px';
+        document.body.classList.add('overflow-hidden');
+
+        document.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+            document.body.classList.remove('overflow-hidden');
+            document.body.style.paddingRight = '0';
+        
+            document.removeEventListener('keyup', handleKeyUp);
+        };
+    }, [isAsyncActionLoading, modals]);
 
     const value = React.useMemo(() => ({
         isAsyncActionLoading,

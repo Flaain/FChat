@@ -67,22 +67,6 @@ const ModalHeader = ({
 const ModalContainer = ({ children, closeHandler }: Omit<ModalProps, 'title' | 'id' | 'withHeader' | 'withCloseButton' | 'bodyClassName' | 'size'>) => {
     const { isAsyncActionLoading } = useModal();
 
-    React.useEffect(() => {
-        const handleKeyUp = ({ key }: KeyboardEvent) => {
-            !isAsyncActionLoading && key === 'Escape' && closeHandler();
-        };
-
-        document.body.style.paddingRight = window.innerWidth - document.body.offsetWidth + 'px';
-        document.body.classList.add('overflow-hidden');
-        document.addEventListener('keyup', handleKeyUp);
-
-        return () => {
-            document.body.classList.remove('overflow-hidden');
-            document.body.style.paddingRight = '0';
-            document.removeEventListener('keyup', handleKeyUp);
-        };
-    }, [isAsyncActionLoading]);
-
     const handleOverlayClick = ({ target, currentTarget }: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         !isAsyncActionLoading && target === currentTarget && closeHandler();
     };
