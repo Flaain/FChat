@@ -48,3 +48,4 @@
 - [x] Added socket.io authentication
 - [x] Reworked sockets Map to a Map with an array of sockets, allowing users to join from both browser and phone, receiving all events on both devices
 - [x] Implemented change password functionality
+- [x] Implemented nested modals feature
