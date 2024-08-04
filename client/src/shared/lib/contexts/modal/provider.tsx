@@ -7,7 +7,11 @@ import { ModalConfig } from './types';
 export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
     const [modals, setModals] = React.useState<Array<ModalConfig>>([]);
     const [isAsyncActionLoading, setIsAsyncActionLoading] = React.useState(false);
-
+    
+    const bodyRef = React.useRef<HTMLDivElement | null>(null);
+    const focusableElements = React.useRef<Array<HTMLElement>>([]);
+    const activeIndex = React.useRef(-1);
+    
     const openModal = React.useCallback((modal: ModalConfig) => {
         setModals((prevState) => [...prevState, modal]);
     }, []);
@@ -16,23 +20,54 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         setModals((prevState) => prevState.slice(0, -1));
     }, []);
 
-    React.useEffect(() => {
-        if (!modals.length) return;
+    const handleTabDown = (event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
+        if (!bodyRef.current) return;
 
-        const handleKeyUp = ({ key }: KeyboardEvent) => {
-            !isAsyncActionLoading && key === 'Escape' && closeModal();
+        event.preventDefault();
+        event.stopPropagation();
+
+        focusableElements.current = Array.from(
+            bodyRef.current.querySelectorAll(
+                'a, button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled])'
+            )
+        );
+
+        const total = focusableElements.current.length;
+        const currentIndex = activeIndex.current;
+        activeIndex.current = total ? (currentIndex + (event.shiftKey ? -1 : 1) + total) % total : -1;
+        
+        focusableElements.current[activeIndex.current]?.focus?.();
+    };
+
+    const handleEscapeDown = ({ key }: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
+        !isAsyncActionLoading && key === 'Escape' && closeModal();
+    };
+
+
+    const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
+        const keyListeners = {
+            Tab: handleTabDown,
+            Escape: handleEscapeDown,
         };
+
+        keyListeners[event.key as keyof typeof keyListeners]?.(event);
+    }, []);
+
+    React.useEffect(() => {
+        if (!modals.length || !bodyRef.current) return;
+
+        bodyRef.current.focus();
 
         document.body.style.paddingRight = window.innerWidth - document.body.offsetWidth + 'px';
         document.body.classList.add('overflow-hidden');
 
-        document.addEventListener('keyup', handleKeyUp);
+        document.addEventListener('keydown', handleKeyDown);
 
         return () => {
             document.body.classList.remove('overflow-hidden');
             document.body.style.paddingRight = '0';
         
-            document.removeEventListener('keyup', handleKeyUp);
+            document.removeEventListener('keydown', handleKeyDown);
         };
     }, [isAsyncActionLoading, modals]);
 
@@ -45,8 +80,8 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <ModalContext.Provider value={value}>
-            {modals.map((modal) => ReactDOM.createPortal(
-                <Modal key={modal.id} {...modal} closeHandler={closeModal}>
+            {modals.map((modal, index, array) => ReactDOM.createPortal(
+                <Modal ref={index ===  array.length - 1 ? bodyRef : null} key={modal.id} {...modal} closeHandler={closeModal}>
                     {modal.content}
                 </Modal>, document.querySelector('#modal-root')!
             ))}

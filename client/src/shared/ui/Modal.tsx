@@ -80,66 +80,23 @@ const ModalContainer = ({ children, closeHandler }: Omit<ModalProps, 'title' | '
     );
 };
 
-const ModalBody = ({ children, size, className, ...rest }: Omit<ModalBodyProps, 'closeHandler'>) => {
-    const bodyRef = React.useRef<HTMLDivElement | null>(null);
-    const focusableElements = React.useRef<Array<HTMLElement>>([]);
-    const activeIndex = React.useRef(-1);
-
-    const handleTabDown = (event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
-        if (!bodyRef.current) return;
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        focusableElements.current = Array.from(
-            bodyRef.current.querySelectorAll(
-                'a, button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled])'
-            )
-        );
-
-        const total = focusableElements.current.length;
-        const currentIndex = activeIndex.current;
-        activeIndex.current = total ? (currentIndex + (event.shiftKey ? -1 : 1) + total) % total : -1;
-        
-        focusableElements.current[activeIndex.current]?.focus?.();
-    };
-
-    const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
-        const keyListeners = {
-            Tab: handleTabDown
-        };
-
-        keyListeners[event.key as keyof typeof keyListeners]?.(event);
-    }, []);
-
-    React.useEffect(() => {
-        if (!bodyRef.current) return;
-
-        bodyRef.current.focus();
-
-        document.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [handleKeyDown]);
-
+const ModalBody = React.forwardRef<HTMLDivElement, Omit<ModalBodyProps, 'closeHandler'>>(({ children, size, className, ...rest }, ref) => {
     return (
-        <div ref={bodyRef} tabIndex={-1} onKeyDown={handleKeyDown} className={cn(modalVariants({ size, className }))} {...rest}>
+        <div ref={ref} tabIndex={-1} className={cn('outline-none', modalVariants({ size, className }))} {...rest}>
             {children}
         </div>
     );
-};
+})
 
-const Modal = ({ closeHandler, children, withHeader = true, withCloseButton = true, ...config }: Omit<ModalProps, 'id'>) => {
+const Modal = React.forwardRef<HTMLDivElement, Omit<ModalProps, 'id'>>(({ closeHandler, children, withHeader = true, withCloseButton = true, ...config }, ref) => {
     return (
         <ModalContainer closeHandler={closeHandler}>
-            <ModalBody size={config.size} className={config.bodyClassName}>
+            <ModalBody ref={ref} size={config.size} className={config.bodyClassName}>
                 {withHeader && <ModalHeader title={config.title} withCloseButton={withCloseButton} closeHandler={closeHandler} />}
                 {children}
             </ModalBody>
         </ModalContainer>
     );
-};
+})
 
 export default Modal;
