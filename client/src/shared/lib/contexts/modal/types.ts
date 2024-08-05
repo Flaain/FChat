@@ -5,7 +5,7 @@ export interface ModalContextProps {
     isAsyncActionLoading: boolean;
     setIsAsyncActionLoading: React.Dispatch<React.SetStateAction<boolean>>;
     openModal: (config: ModalConfig) => void;
-    closeModal: (id: string) => void;
+    closeModal: () => void;
 }
 
 export interface ModalConfig {

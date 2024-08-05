@@ -2,6 +2,7 @@ import Typography from '@/shared/ui/Typography';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { Button } from '@/shared/ui/Button';
 import { ConfirmationProps } from '../model/types';
+import { Loader2 } from 'lucide-react';
 
 const Confirm = ({
     text,
@@ -21,8 +22,8 @@ const Confirm = ({
                 <Button onClick={onCancel} variant='secondary' disabled={isAsyncActionLoading}>
                     {onCancelText}
                 </Button>
-                <Button onClick={onConfirm} variant='default' disabled={isAsyncActionLoading}>
-                    {onConfirmText}
+                <Button onClick={onConfirm} disabled={isAsyncActionLoading} className='min-w-[100px]'>
+                    {isAsyncActionLoading ? <Loader2 className='w-5 h-5 animate-spin' /> : onConfirmText}
                 </Button>
             </div>
         </div>

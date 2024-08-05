@@ -4,9 +4,10 @@ import ChromeLogo from '@/shared/lib/assets/icons/chrome.svg?react';
 import FireFoxLogo from '@/shared/lib/assets/icons/firefox.svg?react';
 import SafariLogo from '@/shared/lib/assets/icons/safari.svg?react';
 import { Button } from '@/shared/ui/Button';
-import { X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { SessionProps } from '../model/types';
+import { api } from '@/shared/api';
 
 const iconStyles = 'w-7 h-7 dark:fill-primary-white fill-primary-dark-50';
 
@@ -16,7 +17,7 @@ const iconsMap = {
     Safari: <SafariLogo className={iconStyles} />
 };
 
-const Session = ({ session, withDropButton, onDrop }: SessionProps) => {
+const Session = ({ session, withDropButton, dropButtonDisabled, onDrop }: SessionProps) => {
     const [isDroping, setIsDroping] = React.useState(false);
 
     const browser = session.userAgent?.browser;
@@ -26,10 +27,13 @@ const Session = ({ session, withDropButton, onDrop }: SessionProps) => {
         try {
             setIsDroping(true);
 
-            onDrop?.();
+            await api.session.dropSession(session._id);
+
+            onDrop?.(session);
+            toast.success('Session dropped', { position: 'top-center' });
         } catch (error) {
             console.error(error);
-            toast.error('Failed to drop session');
+            toast.error('Failed to drop session', { position: 'top-center' });
         } finally {
             setIsDroping(false);
         }
@@ -64,12 +68,12 @@ const Session = ({ session, withDropButton, onDrop }: SessionProps) => {
             {withDropButton && (
                 <Button
                     variant='text'
-                    className='p-0 w-6 h-6 ml-auto'
+                    className='p-0 w-6 h-6 ml-auto overflow-hidden'
                     title='drop session'
-                    disabled={isDroping}
+                    disabled={isDroping || dropButtonDisabled}
                     onClick={handleDrop}
                 >
-                    <X />
+                    {isDroping ? <Loader2 className='w-5 h-5 animate-spin' /> : <X className='w-5 h-5' />}
                 </Button>
             )}
         </div>

@@ -37,5 +37,6 @@ export type SessionAction =
 export interface SessionProps {
     session: Session;
     withDropButton?: boolean;
-    onDrop?: () => void;
+    dropButtonDisabled?: boolean;
+    onDrop?: (session: Session) => void;
 }

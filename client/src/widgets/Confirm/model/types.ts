@@ -1,5 +1,5 @@
 export interface ConfirmationProps {
-    onConfirm: () => Promise<void>;
+    onConfirm: () => void | Promise<void>;
     onCancel: () => void;
     text: string;
     onConfirmText?: string;
