@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from 'mongoose';
 
 export interface SessionDocument {
     _id: mongoose.Types.ObjectId;
@@ -6,4 +6,10 @@ export interface SessionDocument {
     userAgent?: string;
     createdAt: Date;
     expiresAt?: Date;
+}
+
+export interface DropSessionParams {
+    initiatorUserId: Types.ObjectId | string;
+    initiatorSessionId: string;
+    sessionId: string;
 }

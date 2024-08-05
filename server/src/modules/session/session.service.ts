@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Session } from './schemas/session.schema';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { AppExceptionCode, Providers } from 'src/utils/types';
+import { DropSessionParams } from './types';
 
 @Injectable()
 export class SessionService {
@@ -54,4 +55,19 @@ export class SessionService {
             })),
         };
     };
+
+    dropSession = async ({ initiatorUserId, initiatorSessionId, sessionId }: DropSessionParams) => {
+        const session = await this.sessionModel.findOneAndDelete({ 
+            userId: initiatorUserId,
+            $and: [{ _id: sessionId }, { _id: { $ne: initiatorSessionId } }]
+        });
+
+        if (!session) throw new AppException({ message: 'Failed to drop session' }, HttpStatus.BAD_REQUEST);
+
+        return { _id: session._id.toString() };
+    }
+
+    terminateAllSessions = async ({ initiatorUserId, initiatorSessionId }: Omit<DropSessionParams, 'sessionId'>) => {
+        return this.sessionModel.deleteMany({ userId: initiatorUserId, _id: { $ne: initiatorSessionId } });
+    }
 }
