@@ -4,13 +4,18 @@ import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/lib/utils/cn';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { useSettings } from '../../lib/hooks/useSettings';
-import { LockKeyholeIcon } from 'lucide-react';
+import { LockKeyholeIcon, UserCircle2 } from 'lucide-react';
 
 const SettingsMain = () => {
     const { profile } = useProfile();
     const { onMenuChange } = useSettings();
 
     const list: Array<{ icon: React.ReactNode; title: string; action: () => void }> = [
+        {
+            title: "My Account",
+            icon: <UserCircle2 className='w-5 h-5' />,
+            action: () => onMenuChange('myAccount')
+        },
         {
             title: 'Privacy and Security',
             icon: <LockKeyholeIcon className='w-5 h-5' />,

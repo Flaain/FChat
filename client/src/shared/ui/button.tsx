@@ -19,10 +19,10 @@ const buttonVariants = cva(
                 text: 'dark:text-primary-white text-primary-dark-200 hover:opacity-50 ring-offset-0 rounded-none transition-opacity ring-0 ring-transparent focus-visible:ring-0 ring-offset-0 focus-visible:opacity-50 focus focus-visible:ring-offset-0 rounded-none outline-none ring-0'
             },
             size: {
-                default: 'h-10 px-4 py-2',
+                default: 'h-10 px-4 py-2 min-w-[80px]',
                 sm: 'h-9 rounded-md px-3',
-                lg: 'h-10 py-2 px-8',
-                icon: 'h-10 w-10',
+                lg: 'h-10 py-2 px-8 min-w-[120px]',
+                icon: 'w-auto h-auto p-0',
                 text: 'p-0'
             }
         },

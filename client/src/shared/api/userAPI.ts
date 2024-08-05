@@ -89,4 +89,15 @@ export class UserAPI extends API {
 
         return this._checkResponse<Array<SearchUser>>(await fetch(url, request), request);
     };
+
+    status = async (body: { status: string }) => {
+        const request: RequestInit = { 
+            method: 'POST', 
+            headers: this._headers, 
+            credentials: this._cretedentials,
+            body: JSON.stringify(body)
+        };
+
+        return this._checkResponse<{ status: number; message: string }>(await fetch(this._baseUrl + `/user/status`, request), request);
+    };
 }

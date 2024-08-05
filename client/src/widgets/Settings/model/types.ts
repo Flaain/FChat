@@ -1,6 +1,7 @@
 export type MainMenu = 'main' | 'privacy';
-export type SettingMenu = 'main' | PrivacyMenu;
+export type SettingMenu = 'main' | PrivacyMenu | MyAccountMenu;
 export type PrivacyMenu = 'privacy' | 'sessions' | 'changePassword' | 'deleteAccount';
+export type MyAccountMenu = 'myAccount' | 'deleteAccount';
 
 export interface SettingsContextProps {
     currentMenu: SettingMenu;
@@ -13,5 +14,6 @@ export enum SettingsMenu {
     PRIVACY = 'privacy',
     SESSIONS = 'sessions',
     CHANGE_PASSWORD = 'changePassword',
-    DELETE_ACCOUNT = 'deleteAccount'
+    DELETE_ACCOUNT = 'deleteAccount',
+    MY_ACCOUNT = 'myAccount',
 }

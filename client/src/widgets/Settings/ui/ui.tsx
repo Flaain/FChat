@@ -9,6 +9,7 @@ import { Button } from '@/shared/ui/Button';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { SettingMenu } from '../model/types';
 import { titles } from '../lib/contexts/provider';
+import MyAccount from '@/features/MyAccount/ui/ui';
 
 const Settings = ({ modalId }: { modalId: string }) => {
     const { closeModal, isAsyncActionLoading } = useModal();
@@ -18,21 +19,23 @@ const Settings = ({ modalId }: { modalId: string }) => {
         main: <SettingsMain />,
         privacy: <Privacy />,
         sessions: <ActiveSessions />,
-        changePassword: <ChangePassword />
+        changePassword: <ChangePassword />,
+        myAccount: <MyAccount />
+
     };
 
     return (
         <div className='flex flex-col py-5'>
             <div className='flex items-center px-5 gap-5'>
                 {currentMenu !== 'main' && (
-                    <Button variant='text' className='h-auto p-0' onClick={onBack} disabled={isAsyncActionLoading}>
+                    <Button variant='text' size='icon' className='h-auto p-0' onClick={onBack} disabled={isAsyncActionLoading}>
                         <ArrowLeft className='w-6 h-6' />
                     </Button>
                 )}
                 <Typography as='h1' variant='primary' size='xl' weight='medium' className='self-start'>
                     {titles[currentMenu]}
                 </Typography>
-                <Button variant='text' className='h-auto p-0 ml-auto' onClick={() => closeModal(modalId)} disabled={isAsyncActionLoading}>
+                <Button variant='text' size='icon' className='h-auto p-0 ml-auto' onClick={() => closeModal()} disabled={isAsyncActionLoading}>
                     <X className='w-6 h-6' />
                 </Button>
             </div>

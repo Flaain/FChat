@@ -158,7 +158,7 @@ export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement> {
     name?: string;
-    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
 }
 
 export interface UseInfiniteScrollOptions extends IntersectionObserverInit {
