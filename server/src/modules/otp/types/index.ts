@@ -5,6 +5,8 @@ import { OtpCreateSchema } from '../schemas/otp.create.schema';
 
 export enum OtpType {
     EMAIL_VERIFICATION = 'email_verification',
+    EMAIL_CHANGE = 'email_change',
+    PASSWORD_CHANGE = 'password_change',
     PASSWORD_RESET = 'password_reset',
 }
 

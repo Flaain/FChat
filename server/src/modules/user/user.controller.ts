@@ -4,6 +4,7 @@ import { RequestWithUser, Routes } from 'src/utils/types';
 import { ActionPasswordType, CheckType, IUserController } from './types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
 import { UserPasswordDto } from './dtos/user.password.dto';
+import { UserStatusDTO } from './dtos/user.status.dto';
 
 @Controller(Routes.USER)
 export class UserController implements IUserController {
@@ -11,7 +12,12 @@ export class UserController implements IUserController {
 
     @Get('search')
     @UseGuards(AccessGuard)
-    search(@Req() req: RequestWithUser, @Query('query') query: string, @Query('page') page: number, @Query('limit') limit: number) {
+    search(
+        @Req() req: RequestWithUser,
+        @Query('query') query: string,
+        @Query('page') page: number,
+        @Query('limit') limit: number,
+    ) {
         return this.userService.search({ initiatorId: req.user.doc._id, query, page, limit });
     }
 
@@ -24,5 +30,11 @@ export class UserController implements IUserController {
     @UseGuards(AccessGuard)
     password(@Req() req: RequestWithUser, @Body() dto: UserPasswordDto, @Query('type') type: ActionPasswordType) {
         return this.userService.password({ initiator: req.user.doc, type, ...dto });
+    }
+
+    @Post('status')
+    @UseGuards(AccessGuard)
+    status(@Req() req: RequestWithUser, @Body() { status }: UserStatusDTO) {
+        return this.userService.status({ initiator: req.user.doc, status });
     }
 }

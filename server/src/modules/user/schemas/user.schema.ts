@@ -29,6 +29,9 @@ export class User implements Omit<IUser, '_id'> {
 
     @Prop({ type: Boolean, default: false })
     isDeleted: boolean;
+
+    @Prop({ type: String })
+    status?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

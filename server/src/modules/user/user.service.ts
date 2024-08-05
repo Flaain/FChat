@@ -14,6 +14,7 @@ import { userPasswordSchema } from './schemas/user.password.schema';
 import { BcryptService } from 'src/utils/services/bcrypt/bcrypt.service';
 import { incorrectPasswordError } from './constants';
 import { SessionService } from '../session/session.service';
+import { UserStatusDTO } from './dtos/user.status.dto';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -92,6 +93,14 @@ export class UserService implements IUserService {
         });
 
         if (user) throw new AppException(errors[parsedQuery.type], HttpStatus.CONFLICT);
+
+        return { status: HttpStatus.OK, message: 'OK' };
+    }
+
+    status = async ({ initiator, status }: UserStatusDTO & { initiator: UserDocument }) => {
+        initiator.status = status.trim().length ? status : undefined;
+
+        await initiator.save();
 
         return { status: HttpStatus.OK, message: 'OK' };
     }
