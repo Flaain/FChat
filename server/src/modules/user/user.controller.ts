@@ -5,6 +5,7 @@ import { ActionPasswordType, CheckType, IUserController } from './types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
 import { UserPasswordDto } from './dtos/user.password.dto';
 import { UserStatusDTO } from './dtos/user.status.dto';
+import { UserNameDto } from './dtos/user.name.dto';
 
 @Controller(Routes.USER)
 export class UserController implements IUserController {
@@ -36,5 +37,11 @@ export class UserController implements IUserController {
     @UseGuards(AccessGuard)
     status(@Req() req: RequestWithUser, @Body() { status }: UserStatusDTO) {
         return this.userService.status({ initiator: req.user.doc, status });
+    }
+
+    @Post('name')
+    @UseGuards(AccessGuard)
+    name(@Req() req: RequestWithUser, @Body() { name }: UserNameDto) {
+        return this.userService.name({ initiator: req.user.doc, name });
     }
 }

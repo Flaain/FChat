@@ -15,6 +15,7 @@ import { BcryptService } from 'src/utils/services/bcrypt/bcrypt.service';
 import { incorrectPasswordError } from './constants';
 import { SessionService } from '../session/session.service';
 import { UserStatusDTO } from './dtos/user.status.dto';
+import { UserNameDto } from './dtos/user.name.dto';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -99,6 +100,14 @@ export class UserService implements IUserService {
 
     status = async ({ initiator, status }: UserStatusDTO & { initiator: UserDocument }) => {
         initiator.status = status.trim().length ? status : undefined;
+
+        await initiator.save();
+
+        return { status: HttpStatus.OK, message: 'OK' };
+    }
+
+    name = async ({ initiator, name }: UserNameDto & { initiator: UserDocument }) => {
+        initiator.name = name.trim();
 
         await initiator.save();
 
