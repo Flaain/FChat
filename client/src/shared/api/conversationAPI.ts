@@ -1,5 +1,5 @@
 import { API } from './API';
-import { Conversation, GetConversation, GetConversationsRes, WithParams } from '../model/types';
+import { Conversation, GetConversation, WithParams } from '../model/types';
 
 export class ConversationAPI extends API {
     create = async (body: { recipientId: string }) => {

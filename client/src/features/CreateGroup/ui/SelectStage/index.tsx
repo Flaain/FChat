@@ -1,25 +1,21 @@
 import Typography from '@/shared/ui/Typography';
 import SearchedUsersList from '@/widgets/SearchedUsersList/ui/ui';
+import SearchUserSkeleton from '@/widgets/SearchedUsersList/ui/Skeletons/SearchUserSkeleton';
 import { UserSearch, X } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Input } from '@/shared/ui/Input';
-import { SelectStageProps } from '../../model/types';
+import { useCreateGroupContext } from '../../lib/hooks/useCreateGroupContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
 
 const MAX_CONVERSATION_SIZE = 10;
 
-const SelectStage = ({
-    form,
-    selectedUsers,
-    searchedUsers,
-    handleSearchUser,
-    handleRemove,
-    handleSelect
-}: SelectStageProps) => {
+const SelectStage = () => {
     const { isAsyncActionLoading } = useModal();
+    const { selectedUsers, searchedUsers, form, handleSearchUser, handleSelect, handleRemove } = useCreateGroupContext();
 
     const searchQuery = form.getValues('username');
+    const isResultsEmpty = searchQuery?.trim().length! > 2 && !isAsyncActionLoading && !searchedUsers.length;
 
     return (
         <>
@@ -46,17 +42,19 @@ const SelectStage = ({
                     </FormItem>
                 )}
             />
-            {searchQuery?.trim().length! > 2 && !isAsyncActionLoading && !searchedUsers.length ? (
+            {isResultsEmpty ? (
                 <>
                     <UserSearch className='dark:text-primary-white w-10 h-10 self-center' />
                     <Typography as='p' variant='secondary' className='self-center text-center'>
                         There were no results for "{searchQuery}".
                     </Typography>
                 </>
+            ) : isAsyncActionLoading ? (
+                <SearchUserSkeleton />
             ) : (
                 !!searchedUsers.length && (
                     <SearchedUsersList
-                        title='Finded Users'
+                        title='Finded users'
                         onUserSelect={handleSelect}
                         searchedUsers={searchedUsers}
                         selectedUsers={selectedUsers}

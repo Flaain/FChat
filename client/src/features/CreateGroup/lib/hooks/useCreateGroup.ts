@@ -32,8 +32,12 @@ export const useCreateGroup = () => {
             groupName: ''
         },
         mode: 'all',
-        shouldFocusError: true
+        shouldFocusError: true,
     });
+
+    React.useEffect(() => {
+        setTimeout(form.setFocus, 0, steps[step].fields[0]);
+    }, [step, isAsyncActionLoading]);
 
     const navigate = useNavigate();
     
@@ -71,11 +75,6 @@ export const useCreateGroup = () => {
         return actions[step as keyof typeof actions] || isAsyncActionLoading;
     };
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        onSubmit();
-    }
-
     const handleSearchDelay = React.useCallback(debounce(async (value: string) => {
         try {
             const { data } = await api.user.search({ query: value });
@@ -111,12 +110,14 @@ export const useCreateGroup = () => {
         
         if (trimmedValue.length > 2) {
             setIsAsyncActionLoading(true);
-            handleSearchDelay(trimmedValue);
+            handleSearchDelay(trimmedValue)
         }
     }
 
-    const onSubmit = async () => {
+    const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         try {
+            event.preventDefault();
+
             const isValid =  await form.trigger(steps[step].fields, { shouldFocus: true })
 
             if (!isValid) return;
@@ -147,7 +148,7 @@ export const useCreateGroup = () => {
         handleBack,
         handleSelect,
         handleRemove,
-        handleSubmit,
+        onSubmit,
         handleSearchUser
     };
 };

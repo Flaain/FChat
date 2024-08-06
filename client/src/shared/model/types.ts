@@ -18,6 +18,11 @@ export type WithParams<T = Record<string, unknown>> = T & { params?: RequestPara
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
 export type MessageFormState = 'send' | 'edit';
 
+export interface BasicAPIResponse {
+    status: number;
+    message: string;
+}
+
 export interface RequestParams {
     cursor: string;
 }

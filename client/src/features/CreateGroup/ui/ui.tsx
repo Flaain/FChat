@@ -1,11 +1,11 @@
-import NameStage from './NameStage';
+import LinkStage from './LinkStage';
+import DisplayNameStage from './DisplayNameStage';
 import SelectStage from './SelectStage';
-import SetupStage from './SetupStage';
 import { useModal } from '@/shared/lib/hooks/useModal';
-import { useCreateGroup } from '../lib/hooks/useCreateGroup';
 import { Button } from '@/shared/ui/Button';
 import { LoaderCircle } from 'lucide-react';
 import { Form } from '@/shared/ui/Form';
+import { useCreateGroupContext } from '../lib/hooks/useCreateGroupContext';
 
 const buttonConfig = {
     0: 'Next',
@@ -13,39 +13,20 @@ const buttonConfig = {
     2: 'Create'
 };
 
+const stages: Record<number, React.ReactNode> = {
+    0: <DisplayNameStage />,
+    1: <SelectStage />,
+    2: <LinkStage />
+};
+
 const CreateGroup = () => {
     const { isAsyncActionLoading } = useModal();
-    const {
-        form,
-        step,
-        selectedUsers,
-        searchedUsers,
-        isNextButtonDisabled,
-        handleSearchUser,
-        handleSelect,
-        handleRemove,
-        handleSubmit,
-        handleBack
-    } = useCreateGroup();
+    const { form, step, isNextButtonDisabled, handleBack, onSubmit } = useCreateGroupContext();
 
-    const stages: Record<number, React.ReactNode> = {
-        0: <NameStage form={form} />,
-        1: (
-            <SelectStage
-                form={form}
-                handleSearchUser={handleSearchUser}
-                handleRemove={handleRemove}
-                handleSelect={handleSelect}
-                searchedUsers={searchedUsers}
-                selectedUsers={selectedUsers}
-            />
-        ),
-        2: <SetupStage form={form} />
-    };
 
     return (
         <Form {...form}>
-            <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+            <form onSubmit={onSubmit} className='flex flex-col gap-5'>
                 {stages[step]}
                 <div className='flex items-center gap-5 justify-between'>
                     <Button

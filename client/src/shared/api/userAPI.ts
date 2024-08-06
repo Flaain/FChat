@@ -1,7 +1,7 @@
 import { API } from './API';
 import { Profile, User } from '../lib/contexts/profile/model/types';
 import { SigininSchemaType, SignupSchemaType } from '@/pages/Auth/model/types';
-import { SearchUser, UserCheckParams, UserPasswordParams } from '../model/types';
+import { BasicAPIResponse, SearchUser, UserCheckParams, UserPasswordParams } from '../model/types';
 import { AppException } from './error';
 
 export class UserAPI extends API {
@@ -14,7 +14,7 @@ export class UserAPI extends API {
 
         const request: RequestInit = { headers: this._headers };
 
-        return this._checkResponse<{ status: number; message: string }>(await fetch(url, request), request);
+        return this._checkResponse<BasicAPIResponse>(await fetch(url, request), request);
     };
 
     password = async ({ type, ...body }: UserPasswordParams) => {
@@ -28,7 +28,7 @@ export class UserAPI extends API {
 
         url.searchParams.append('type', type);
 
-        return this._checkResponse<{ status: number; message: string }>(await fetch(url, request), request);
+        return this._checkResponse<BasicAPIResponse>(await fetch(url, request), request);
     }
 
     signup = async (body: Omit<SignupSchemaType, 'confirmPassword'>) => {
@@ -68,7 +68,7 @@ export class UserAPI extends API {
             credentials: this._cretedentials
         };
 
-        return this._checkResponse<{ status: number; message: string }>(await fetch(this._baseUrl + '/auth/logout', request), request);
+        return this._checkResponse<BasicAPIResponse>(await fetch(this._baseUrl + '/auth/logout', request), request);
     };
 
     subscribeRefreshError = (cb: (error: AppException) => void) => {
@@ -98,6 +98,17 @@ export class UserAPI extends API {
             body: JSON.stringify(body)
         };
 
-        return this._checkResponse<{ status: number; message: string }>(await fetch(this._baseUrl + `/user/status`, request), request);
+        return this._checkResponse<BasicAPIResponse>(await fetch(this._baseUrl + `/user/status`, request), request);
+    };
+
+    name = async (body: { name: string }) => {
+        const request: RequestInit = { 
+            method: 'POST', 
+            headers: this._headers, 
+            credentials: this._cretedentials,
+            body: JSON.stringify(body)
+        };
+
+        return this._checkResponse<BasicAPIResponse>(await fetch(this._baseUrl + `/user/name`, request), request);
     };
 }

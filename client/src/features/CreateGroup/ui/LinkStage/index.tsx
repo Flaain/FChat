@@ -1,9 +1,10 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
+import { useCreateGroupContext } from '../../lib/hooks/useCreateGroupContext';
 import { Input } from '@/shared/ui/Input';
-import { UseFormReturn } from 'react-hook-form';
-import { CreateGroupType } from '../../model/types';
 
-const SetupStage = ({ form }: { form: UseFormReturn<CreateGroupType> }) => {
+const LinkStage = () => {
+    const { form } = useCreateGroupContext();
+
     return (
         <FormField
             name='groupName'
@@ -27,4 +28,4 @@ const SetupStage = ({ form }: { form: UseFormReturn<CreateGroupType> }) => {
     );
 };
 
-export default SetupStage;
+export default LinkStage;

@@ -1,9 +1,7 @@
 import Typography from '@/shared/ui/Typography';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { Button } from '@/shared/ui/Button';
-import { X } from 'lucide-react';
 import { Input } from '@/shared/ui/Input';
-import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { useEditName } from '../lib/hooks/useEditName';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 

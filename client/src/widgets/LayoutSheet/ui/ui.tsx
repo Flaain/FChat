@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { cn } from '@/shared/lib/utils/cn';
 import { ModalConfig } from '@/shared/lib/contexts/modal/types';
 import { SettingsProvider } from '@/widgets/Settings/lib/contexts/provider';
+import { CreateGroupProvider } from '@/features/CreateGroup/model/provider';
 
 const listIconStyle = 'dark:text-primary-white text-primary-dark-200 w-5 h-5';
 
@@ -34,26 +35,32 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
         {
             title: 'New group',
             icon: <Users className={listIconStyle} />,
-            action: () => onSheetAction({
-                id: 'create-group-modal',
-                withHeader: false,
-                content: <CreateGroup />,
-                bodyClassName: 'max-w-[450px] p-5 h-auto'
-            })
+            action: () =>
+                onSheetAction({
+                    id: 'create-group-modal',
+                    withHeader: false,
+                    content: (
+                        <CreateGroupProvider>
+                            <CreateGroup />
+                        </CreateGroupProvider>
+                    ),
+                    bodyClassName: 'max-w-[450px] p-5 h-auto'
+                })
         },
         {
             title: 'Settings',
             icon: <SettingsIcon className={listIconStyle} />,
-            action: () => onSheetAction({
-                id: 'settings-modal',
-                content: (
-                    <SettingsProvider>
-                        <Settings modalId='settings-modal' />
-                    </SettingsProvider>
-                ),
-                bodyClassName: 'max-w-[450px] p-0 h-auto',
-                withHeader: false
-            })
+            action: () =>
+                onSheetAction({
+                    id: 'settings-modal',
+                    content: (
+                        <SettingsProvider>
+                            <Settings modalId='settings-modal' />
+                        </SettingsProvider>
+                    ),
+                    bodyClassName: 'max-w-[450px] p-0 h-auto',
+                    withHeader: false
+                })
         }
     ];
 

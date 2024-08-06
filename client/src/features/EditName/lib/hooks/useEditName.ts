@@ -1,12 +1,16 @@
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { EditNameType } from '../../model/types';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { editNameSchema } from '../../model/schema';
-import React from 'react';
+import { api } from '@/shared/api';
+import { toast } from 'sonner';
+import { useModal } from '@/shared/lib/hooks/useModal';
 
 export const useEditName = () => {
-    const { profile } = useProfile();
+    const { closeModal } = useModal();
+    const { profile, setProfile } = useProfile();
 
     const form = useForm<EditNameType>({
         resolver: zodResolver(editNameSchema),
@@ -20,8 +24,16 @@ export const useEditName = () => {
         form.setFocus('name');
     }, [])
 
-    const onSubmit = ({ name }: EditNameType) => {
-        console.log(name);
+    const onSubmit = async (data: EditNameType) => {
+        try {
+            await api.user.name(data);
+
+            closeModal();
+            setProfile({ ...profile, name: data.name.trim() });
+        } catch (error) {
+            console.log(error);
+            toast.error('Failed to change name');
+        }
     };
 
     return {
