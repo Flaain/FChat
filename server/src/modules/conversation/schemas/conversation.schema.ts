@@ -16,6 +16,12 @@ export class Conversation implements Omit<IConversation, '_id'> {
     @Prop({ type: Date, required: true, default: () => new Date() })
     lastMessageSentAt: Date;
 
+    @Prop({ type: String, required: true })
+    publicKey: string;
+
+    @Prop({ type: String, required: true })
+    privateKey: string;
+
     @Prop({ type: Date, default: () => new Date() })
     createdAt: Date;
 

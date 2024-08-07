@@ -10,6 +10,12 @@ export class Message implements Omit<IMessage, '_id'> {
     @Prop({ required: true })
     text: string;
 
+    @Prop({ type: String, required: true })
+    symKey: string;
+
+    @Prop({ type: String, required: true })
+    iv: string;
+
     @Prop({ required: true, default: false })
     hasBeenRead: boolean;
 
