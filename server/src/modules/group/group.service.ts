@@ -29,15 +29,25 @@ export class GroupService {
         options?: QueryOptions<Group>,
     ) => this.groupModel.findOne(payload, projection, options);
 
-    create = async ({ login, name, initiator, participants }: CreateGroupDTO & { initiator: UserDocument }) => {
+    create = async ({ login, name, initiator, participants: dtoParticipants }: CreateGroupDTO & { initiator: UserDocument }) => {
         if ((await this.groupModel.exists({ login })) || (await this.userService.exists({ login }))) {
             throw new AppException(loginExistError, HttpStatus.CONFLICT);
         }
 
-        const findedUsers = await this.userService.findManyByPayload({ _id: { $in: participants }, isDeleted: false, isPrivate: false });
-        const group = await this.groupModel.create({ login, displayName: name, owner: initiator._id, participants: [] });
-
-        group.participants = (await this.participantService.insertMany(findedUsers.map((user) => ({ userId: user._id, groupId: group._id })))).map((participant) => participant._id);
+        const findedUsers = await this.userService.findManyByPayload(
+            {
+                _id: { $in: dtoParticipants, $ne: initiator._id },
+                isDeleted: false,
+                isPrivate: false,
+            },
+            {
+                _id: 1,
+            },
+        );
+        const group = await this.groupModel.create({ login, name, owner: initiator._id, participants: [] });
+        const participants = await this.participantService.insertMany(findedUsers.map((user) => ({ userId: user._id, groupId: group._id })));
+        
+        group.participants = [...participants.map((participant) => participant._id), initiator._id];
 
         await group.save();
 

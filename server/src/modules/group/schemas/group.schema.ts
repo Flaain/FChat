@@ -8,7 +8,7 @@ export class Group implements IGroup {
     login: string;
 
     @Prop({ type: String, required: true })
-    displayName: string;
+    name: string;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Participant' }] })
     participants: Array<mongoose.Types.ObjectId>;

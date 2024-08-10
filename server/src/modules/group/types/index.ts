@@ -5,7 +5,7 @@ export interface IGroup {
     participants: Array<Types.ObjectId>;
     messages: Array<Types.ObjectId>;
     owner: Types.ObjectId;
-    displayName: string;
+    name: string;
     isPrivate: boolean;
     isOfficial: boolean;
     lastMessage: Types.ObjectId;

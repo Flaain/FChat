@@ -8,7 +8,7 @@ export const createGroupSchema = z
         name: nameForSchema,
         participants: z
             .array(z.string().min(1, 'Participant id is required').max(24, 'Participant id is invalid'))
-            .max(10)
+            .max(9, 'Maximum 10 participants are allowed including yourself')
             .optional(),
     })
     .superRefine(({ participants }, ctx) => {
