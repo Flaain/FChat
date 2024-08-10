@@ -10,6 +10,9 @@ export const localStorageKeys = {
     TOKEN: 'token'
 };
 
+export const MIN_USER_SEARCH_LENGTH = 2;
+export const MAX_GROUP_SIZE = 10;
+
 export const onlyLatinRegExp = /^[a-zA-Z0-9_\s]*$/;
 export const allowCyrillicRegExp = /^[\p{L}0-9\s]*$/u;
 export const regExpError = 'Name must contain only letters, numbers, and spaces';

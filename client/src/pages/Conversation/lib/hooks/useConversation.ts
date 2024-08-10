@@ -20,7 +20,6 @@ export const useConversation = () => {
     const [isPreviousMessagesLoading, setIsPreviousMessagesLoading] = React.useState(false);
 
     const onUserPresence = React.useCallback(({ presence, lastSeenAt }: { presence: PRESENCE, lastSeenAt?: string }) => {
-        console.log(lastSeenAt)
         setConversation((prevState) => ({ 
             ...prevState, 
             conversation: {
@@ -159,6 +158,6 @@ export const useConversation = () => {
         isPreviousMessagesLoading,
         setConversation,
         getPreviousMessages,
-        refetch: getConversation
+        refetch: () => getConversation('refetch')
     };
 };

@@ -6,8 +6,7 @@ import { useProfile } from "@/shared/lib/hooks/useProfile";
 import { ConversationFeed, FeedItem, FeedTypes, GroupFeed, UserFeed } from "@/shared/model/types";
 import { debounce } from "@/shared/lib/utils/debounce";
 import { useSidebarEvents } from "./useSidebarEvents";
-
-const MIN_SEARCH_LENGTH = 3;
+import { MIN_USER_SEARCH_LENGTH } from "@/shared/constants";
 
 export const useSidebar = () => {
     const { setProfile } = useProfile();
@@ -67,7 +66,7 @@ export const useSidebar = () => {
 
         setSearchValue(!trimmedValue.length ? '' : value);
 
-        if(trimmedValue.length >= MIN_SEARCH_LENGTH) {
+        if(trimmedValue.length > MIN_USER_SEARCH_LENGTH) {
             setSearchLoading(true);
             handleSearchDelay(trimmedValue);
         }

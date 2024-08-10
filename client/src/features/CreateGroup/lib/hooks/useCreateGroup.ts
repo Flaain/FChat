@@ -11,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createGroupSchema } from '../../model/schemas';
 import { AppException } from '@/shared/api/error';
 import { toast } from 'sonner';
+import { MAX_GROUP_SIZE, MIN_USER_SEARCH_LENGTH } from '@/shared/constants';
 
 const steps: Record<number, { fields: Array<FieldPath<CreateGroupType>> }> = {
     0: { fields: ['displayName'] },
@@ -46,12 +47,15 @@ export const useCreateGroup = () => {
     const handleSelect = React.useCallback((user: SearchUser) => {
         setSelectedUsers((prevState) => {
             const newState = new Map([...prevState]);
+            const isNew = !newState.has(user._id);
 
-            newState.has(user._id) ? newState.delete(user._id) : newState.set(user._id, user);
+            if (selectedUsers.size + 1 === MAX_GROUP_SIZE && isNew) return prevState;
+
+            isNew ? newState.set(user._id, user) : newState.delete(user._id);
 
             return newState;
         });
-    }, []);
+    }, [selectedUsers]);
 
     const handleRemove = React.useCallback((id: string) => {
         setSelectedUsers((prevState) => {
@@ -99,7 +103,7 @@ export const useCreateGroup = () => {
 
         if (!value || !trimmedValue.length) return setSearchedUsers([]);
         
-        if (trimmedValue.length > 2) {
+        if (trimmedValue.length > MIN_USER_SEARCH_LENGTH) {
             setIsAsyncActionLoading(true);
             handleSearchDelay(trimmedValue)
         }

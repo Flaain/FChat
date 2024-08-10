@@ -1,21 +1,20 @@
 import Typography from '@/shared/ui/Typography';
-import SearchedUsersList from '@/widgets/SearchedUsersList/ui/ui';
-import SearchUserSkeleton from '@/widgets/SearchedUsersList/ui/Skeletons/SearchUserSkeleton';
-import { UserSearch, X } from 'lucide-react';
+import AvatarByName from '@/shared/ui/AvatarByName';
+import SearchUserSkeleton from '../Skeletons/SearchUserSkeleton';
+import { Minus, Plus, UserSearch, X } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Input } from '@/shared/ui/Input';
 import { useCreateGroupContext } from '../../lib/hooks/useCreateGroupContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
-
-const MAX_CONVERSATION_SIZE = 10;
+import { MAX_GROUP_SIZE, MIN_USER_SEARCH_LENGTH } from '@/shared/constants';
 
 const SelectStage = () => {
     const { isAsyncActionLoading } = useModal();
     const { selectedUsers, searchedUsers, form, handleSearchUser, handleSelect, handleRemove } = useCreateGroupContext();
 
     const searchQuery = form.getValues('username');
-    const isResultsEmpty = searchQuery?.trim().length! > 2 && !isAsyncActionLoading && !searchedUsers.length;
+    const isResultsEmpty = searchQuery?.trim().length! > MIN_USER_SEARCH_LENGTH && !isAsyncActionLoading && !searchedUsers.length;
 
     return (
         <>
@@ -28,7 +27,7 @@ const SelectStage = () => {
                         <FormLabel className='text-white'>
                             Add Members&nbsp;
                             <Typography as='sup' variant='secondary' className='ml-1 text-xs'>
-                                {selectedUsers.size + 1} / {MAX_CONVERSATION_SIZE}
+                                {selectedUsers.size + 1} / {MAX_GROUP_SIZE}
                             </Typography>
                         </FormLabel>
                         <FormControl>
@@ -53,12 +52,52 @@ const SelectStage = () => {
                 <SearchUserSkeleton />
             ) : (
                 !!searchedUsers.length && (
-                    <SearchedUsersList
-                        title='Finded users'
-                        onUserSelect={handleSelect}
-                        searchedUsers={searchedUsers}
-                        selectedUsers={selectedUsers}
-                    />
+                    <>
+                        <Typography size='xl' weight='medium' as='h2' variant='primary'>
+                            Finded users
+                        </Typography>
+                        <ul className='flex flex-col gap-2 overflow-auto max-h-[300px]'>
+                            {searchedUsers.map((user) => {
+                                const isUserAlreadySelected = selectedUsers.has(user._id);
+                                const isDisabled = selectedUsers.size + 1 === MAX_GROUP_SIZE && !isUserAlreadySelected;
+
+                                return (
+                                    <li
+                                        key={user._id}
+                                        className='group focus-within:bg-primary-dark-50 flex items-center gap-3 p-2 rounded-lg hover:bg-primary-dark-50 transition-colors duration-200 ease-in-out'
+                                    >
+                                        <AvatarByName name={user.name} />
+                                        <div className='flex flex-col'>
+                                            <Typography
+                                                as='p'
+                                                size='lg'
+                                                variant='primary'
+                                                weight='medium'
+                                                className='line-clamp-1'
+                                            >
+                                                {user.name}
+                                            </Typography>
+                                            <Typography as='p' size='md' variant='secondary' className='line-clamp-1'>
+                                                @{user.login}
+                                            </Typography>
+                                        </div>
+                                        <Button
+                                            type='button'
+                                            disabled={isDisabled}
+                                            onClick={() => handleSelect(user)}
+                                            className='disabled:pointer-events-none min-w-[24px] max-w-[50px] h-[40px] rounded-lg opacity-0 focus:opacity-100 enabled:group-hover:opacity-100 ml-auto transition-opacity duration-200 ease-in-out'
+                                        >
+                                            {isUserAlreadySelected ? (
+                                                <Minus className='w-5 h-5' />
+                                            ) : (
+                                                <Plus className='w-5 h-5' />
+                                            )}
+                                        </Button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </>
                 )
             )}
             {!!selectedUsers.size && (
