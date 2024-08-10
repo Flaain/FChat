@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 export interface IGroup {
-    name: string;
+    login: string;
     participants: Array<Types.ObjectId>;
     messages: Array<Types.ObjectId>;
     owner: Types.ObjectId;

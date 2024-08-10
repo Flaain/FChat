@@ -46,7 +46,7 @@ export class FeedService {
                     {
                         path: 'participants',
                         model: 'User',
-                        select: 'login name email isOfficial isDeleted',
+                        select: 'login name email isOfficial isDeleted presence',
                         match: { _id: { $ne: initiatorId } },
                     },
                     {

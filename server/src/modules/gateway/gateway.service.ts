@@ -12,6 +12,9 @@ import {
     ConversationSendMessageParams,
     STATIC_CONVERSATION_EVENTS,
     ConversationEditMessageParams,
+    ChangeUserStatusParams,
+    USER_EVENTS,
+    SocketWithUser,
 } from './types';
 import {
     ConnectedSocket,
@@ -29,6 +32,8 @@ import { AppException } from 'src/utils/exceptions/app.exception';
 import { HttpStatus } from '@nestjs/common';
 import { CookiesService } from 'src/utils/services/cookies/cookies.service';
 import { JWT_KEYS } from 'src/utils/types';
+import { ConversationService } from '../conversation/conversation.service';
+import { PRESENCE } from '../user/types';
 
 @WebSocketGateway({ cors: { origin: 'http://localhost:5173', credentials: true } })
 export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -37,6 +42,7 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
 
     constructor(
         private readonly userService: UserService,
+        private readonly conversationService: ConversationService,
         private readonly configService: ConfigService,
         private readonly cookiesService: CookiesService,
         private readonly jwtService: JwtService,
@@ -73,12 +79,51 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
         });
     }
 
-    handleConnection(client: Socket) {
+    @SubscribeMessage(USER_EVENTS.PRESENCE)
+    async changeUserStatus(@MessageBody() { presence, lastSeenAt }: ChangeUserStatusParams, @ConnectedSocket() client: SocketWithUser) {
+        client.data.user.presence = presence;
+
+        const initiatorId = client.data.user._id;
+
+        const { 0: conversations } = await Promise.all([this.conversationService.findManyByPayload(
+            { participants: { $in: initiatorId } },
+            { participants: 1 },
+            {
+                populate: [
+                    {
+                        path: 'participants',
+                        model: 'User',
+                        select: '_id',
+                        match: { _id: { $ne: initiatorId } },
+                    },
+                ],
+            },
+        ), client.data.user.save()]);
+
+        conversations.forEach((conversation) => {
+            const recipientId = conversation.participants[0]._id.toString();
+            const recipientSockets = this.gatewayManager.sockets.get(recipientId);
+
+            recipientSockets?.forEach((socket) => {
+                socket.emit(presence === PRESENCE.ONLINE ? FEED_EVENTS.USER_ONLINE : FEED_EVENTS.USER_OFFLINE, initiatorId.toString());
+            });
+
+            client.to(CONVERSATION_EVENTS.ROOM(GatewayUtils.getRoomIdByParticipants([initiatorId.toString(), recipientId]))).emit(STATIC_CONVERSATION_EVENTS.PRESENCE, { 
+                presence, 
+                lastSeenAt 
+            });
+        }); 
+    }
+
+    handleConnection(client: SocketWithUser) {
         this.gatewayManager.socket = { userId: client.data.user._id.toString(), socket: client };
     }
 
-    handleDisconnect(client: Socket) {
+    handleDisconnect(client: SocketWithUser) {
+        client.data.user.lastSeenAt = new Date();
+
         this.gatewayManager.removeSocket({ userId: client.data.user._id.toString(), socket: client });
+        this.changeUserStatus({ presence: PRESENCE.OFFLINE, lastSeenAt: client.data.user.lastSeenAt }, client);
     }
 
     @SubscribeMessage(STATIC_CONVERSATION_EVENTS.JOIN)

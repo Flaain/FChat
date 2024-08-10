@@ -7,6 +7,11 @@ import { RequestWithUser } from 'src/utils/types';
 import { userCheckSchema } from '../schemas/user.check.schema';
 import { SignupDTO } from 'src/modules/auth/dtos/auth.signup.dto';
 
+export enum PRESENCE {
+    ONLINE = 'online',
+    OFFLINE = 'offline'
+}
+
 export type CheckType = 'email' | 'login';
 export type ActionPasswordType = 'set' | 'check';
 

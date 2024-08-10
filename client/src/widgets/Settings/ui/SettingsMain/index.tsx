@@ -46,7 +46,7 @@ const SettingsMain = () => {
                     </div>
                 </div>
             </div>
-            <ul className='flex flex-col gap-2 pt-2'>
+            <ul className='flex flex-col pt-2'>
                 {list.map(({ title, icon, action }, index) => (
                     <li key={index}>
                         <Button

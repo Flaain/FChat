@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IUser } from '../types';
+import { IUser, PRESENCE } from '../types';
 
 @Schema({ timestamps: true })
 export class User implements Omit<IUser, '_id'> {
@@ -20,6 +20,9 @@ export class User implements Omit<IUser, '_id'> {
 
     @Prop({ type: Boolean, required: true, default: false })
     isPrivate: boolean;
+
+    @Prop({ type: String, enum: PRESENCE, required: true, default: PRESENCE.OFFLINE })
+    presence: PRESENCE;
 
     @Prop({ type: Boolean, default: false })
     isOfficial: boolean;

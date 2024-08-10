@@ -2,7 +2,7 @@ import AvatarByName from '@/shared/ui/AvatarByName';
 import Typography from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { ConversationFeed } from '@/shared/model/types';
+import { ConversationFeed, PRESENCE } from '@/shared/model/types';
 import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
@@ -26,7 +26,7 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                     )
                 }
             >
-                <AvatarByName name={conversation.recipient.name} size='lg' />
+                <AvatarByName name={conversation.recipient.name} size='lg' isOnline={conversation.recipient.presence === PRESENCE.ONLINE} />
                 <div className='flex flex-col items-start w-full'>
                     <Typography
                         as='h2'

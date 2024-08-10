@@ -1,5 +1,3 @@
 export class GatewayUtils {
-    static getRoomIdByParticipants(participants: Array<string>, seperator: string = '-') {
-        return participants.sort().join(seperator);
-    }
+    static getRoomIdByParticipants = (participants: Array<string>, seperator: string = '-') => participants.sort().join(seperator);
 }

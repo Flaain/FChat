@@ -72,7 +72,7 @@ export class ConversationService implements IConversationService {
                             populate: {
                                 path: 'sender',
                                 model: 'User',
-                                select: 'login name email isOfficial isDeleted',
+                                select: 'login name email isOfficial isDeleted presence',
                             },
                             options: {
                                 limit: MESSAGES_BATCH,

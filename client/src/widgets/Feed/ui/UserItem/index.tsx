@@ -1,7 +1,7 @@
 import AvatarByName from '@/shared/ui/AvatarByName';
 import Typography from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
-import { UserFeed } from '@/shared/model/types';
+import { PRESENCE, UserFeed } from '@/shared/model/types';
 import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
@@ -18,7 +18,7 @@ const UserItem = ({ user }: { user: UserFeed }) => {
                     )
                 }
             >
-                <AvatarByName name={user.name} size='lg' />
+                <AvatarByName name={user.name} size='lg' isOnline={user.presence === PRESENCE.ONLINE} />
                 <div>
                     <Typography as='h2' weight='medium' className={cn(user.isOfficial && 'flex items-center')}>
                         {user.name}

@@ -55,7 +55,7 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
                     id: 'settings-modal',
                     content: (
                         <SettingsProvider>
-                            <Settings modalId='settings-modal' />
+                            <Settings />
                         </SettingsProvider>
                     ),
                     bodyClassName: 'max-w-[450px] p-0 h-auto',

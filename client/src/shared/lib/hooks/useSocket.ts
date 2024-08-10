@@ -1,5 +1,6 @@
-import React from "react";
-import { Socket, io } from "socket.io-client";
+import React from 'react';
+import { PRESENCE, USER_EVENTS } from '@/shared/model/types';
+import { Socket, io } from 'socket.io-client';
 
 export const useSocket = () => {
     const [socket, setSocket] = React.useState<Socket | null>(null);
@@ -12,6 +13,8 @@ export const useSocket = () => {
 
         socket.on('connect', () => {
             setIsConnected(true);
+
+            socket.emit(USER_EVENTS.PRESENCE, { presence: PRESENCE.ONLINE });
         });
 
         socket.on('disconnect', () => {
@@ -19,11 +22,11 @@ export const useSocket = () => {
         });
 
         setSocket(socket);
-        
+
         return () => {
             socket.disconnect();
         };
     }, []);
 
     return { socket, isConnected };
-}
+};

@@ -9,11 +9,13 @@ import { CreateGroupType } from '../../model/types';
 import { debounce } from '@/shared/lib/utils/debounce';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createGroupSchema } from '../../model/schemas';
+import { AppException } from '@/shared/api/error';
+import { toast } from 'sonner';
 
 const steps: Record<number, { fields: Array<FieldPath<CreateGroupType>> }> = {
     0: { fields: ['displayName'] },
     1: { fields: ['username'] },
-    2: { fields: ['groupName'] }
+    2: { fields: ['login'] }
 };
 
 export const useCreateGroup = () => {
@@ -29,7 +31,7 @@ export const useCreateGroup = () => {
         defaultValues: {
             displayName: '',
             username: '',
-            groupName: ''
+            login: ''
         },
         mode: 'all',
         shouldFocusError: true,
@@ -89,18 +91,7 @@ export const useCreateGroup = () => {
     }, 500), []);
 
     const createGroup = React.useCallback(async () => {
-        // const { data } = await api.conversation.createConversation({
-        //     token: accessToken!,
-        //     body: { participants: [...selectedUsers.keys()], name: groupName }
-        // });
-
-        // closeModal();
-        // setProfile((prevState) => ({ ...prevState, conversations: [...prevState.conversations, data] }));
-        // navigate(`/group/${data._id}`);
-
-        const { displayName, groupName } = form.getValues();
-
-        console.log(selectedUsers, displayName, groupName);
+       
     }, [navigate, closeModal, selectedUsers, setProfile]);
 
     const handleSearchUser = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,6 +122,13 @@ export const useCreateGroup = () => {
             await actions[step as keyof typeof actions]();
         } catch (error) {
             console.error(error);
+            if (error instanceof AppException) {
+                error.errors?.forEach((error) => {
+                    form.setError(error.path as FieldPath<CreateGroupType>, { message: error.message });
+                })
+
+                !error.errors && toast.error(error.message);
+            }
         }
     };
 

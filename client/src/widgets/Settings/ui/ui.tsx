@@ -1,3 +1,4 @@
+import MyAccount from '@/features/MyAccount/ui/ui';
 import Privacy from '@/features/Privacy/ui/ui';
 import SettingsMain from './SettingsMain';
 import ActiveSessions from '@/features/ActiveSessions/ui/ui';
@@ -9,9 +10,8 @@ import { Button } from '@/shared/ui/Button';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { SettingMenu } from '../model/types';
 import { titles } from '../lib/contexts/provider';
-import MyAccount from '@/features/MyAccount/ui/ui';
 
-const Settings = ({ modalId }: { modalId: string }) => {
+const Settings = () => {
     const { closeModal, isAsyncActionLoading } = useModal();
     const { currentMenu, onBack } = useSettings();
 
@@ -21,7 +21,6 @@ const Settings = ({ modalId }: { modalId: string }) => {
         sessions: <ActiveSessions />,
         changePassword: <ChangePassword />,
         myAccount: <MyAccount />
-
     };
 
     return (

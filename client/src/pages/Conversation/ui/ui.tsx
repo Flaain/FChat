@@ -11,7 +11,7 @@ import { Loader2 } from 'lucide-react';
 import { ConversationStatuses } from '../model/types';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
 import { Location, useLocation } from 'react-router-dom';
-import { ConversationParticipant, UserFeed } from '@/shared/model/types';
+import { ConversationParticipant, PRESENCE, UserFeed } from '@/shared/model/types';
 
 const Conversation = () => {
     const { data, refetch, error, status, isRefetching, getPreviousMessages, isPreviousMessagesLoading } = useConversationContext();
@@ -38,7 +38,14 @@ const Conversation = () => {
                 <ChatHeader
                     name={data.conversation.recipient.name}
                     isOfficial={data.conversation.recipient.isOfficial}
-                    description={`last seen at ${getRelativeTimeString(new Date(data.conversation.recipient.lastSeenAt), 'en-US')}`}
+                    description={
+                        data.conversation.recipient.presence === PRESENCE.ONLINE
+                            ? 'online'
+                            : `last seen at ${getRelativeTimeString(
+                                  new Date(data.conversation.recipient.lastSeenAt),
+                                  'en-US'
+                              )}`
+                    }
                 />
                 {data.conversation.messages.length ? (
                     <MessagesList

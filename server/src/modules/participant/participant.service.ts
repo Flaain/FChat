@@ -7,7 +7,7 @@ import { FilterQuery, Model, ProjectionType, QueryOptions } from 'mongoose';
 export class ParticipantService {
     constructor(@InjectModel(Participant.name) private readonly participantModel: Model<Participant>) {}
 
-    createParticipant = (participant: Participant) => new this.participantModel(participant);
+    create = (participant: Participant) => this.participantModel.create(participant);
 
     findOneByPayload = async (
         payload: FilterQuery<Participant>,
@@ -20,4 +20,6 @@ export class ParticipantService {
         projection?: ProjectionType<Participant>,
         options?: QueryOptions<Participant>,
     ) => this.participantModel.find(payload, projection, options);
+
+    insertMany = (participants: Array<Participant>) => this.participantModel.insertMany(participants);
 }

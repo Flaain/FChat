@@ -4,9 +4,10 @@ import { GatewayManager } from './gateway.manager';
 import { GatewayService } from './gateway.service';
 import { UserModule } from '../user/user.module';
 import { CookiesModule } from 'src/utils/services/cookies/cookies.module';
+import { ConversationModule } from '../conversation/conversation.module';
 
 @Module({
-    imports: [UserModule, JwtModule, CookiesModule],
+    imports: [UserModule, ConversationModule, JwtModule, CookiesModule],
     providers: [GatewayService, GatewayManager],
 })
 export class GatewayModule {}

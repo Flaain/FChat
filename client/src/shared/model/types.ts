@@ -76,8 +76,7 @@ export interface GroupParticipant {
     userId: string;
 }
 
-export interface ConversationParticipant
-    extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate'> {}
+export interface ConversationParticipant extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence'> {}
 
 export interface Conversation {
     _id: string;
@@ -151,8 +150,8 @@ export interface SearchUser {
     _id: string;
     name: string;
     isOfficial: boolean;
+    presence: PRESENCE;
     login: string;
-    type: FeedTypes.USER;
 }
 
 export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -164,6 +163,7 @@ export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
 export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement> {
     name?: string;
     size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+    isOnline?: boolean;
 }
 
 export interface UseInfiniteScrollOptions extends IntersectionObserverInit {
@@ -204,7 +204,8 @@ export enum CONVERSATION_EVENTS {
     DELETED = 'conversation.deleted',
     MESSAGE_SEND = 'conversation.message.send',
     MESSAGE_EDIT = 'conversation.message.edit',
-    MESSAGE_DELETE = 'conversation.message.delete'
+    MESSAGE_DELETE = 'conversation.message.delete',
+    USER_PRESENCE = 'conversation.user.presence',
 }
 
 export enum FEED_EVENTS {
@@ -212,7 +213,20 @@ export enum FEED_EVENTS {
     EDIT_MESSAGE = 'feed.edit.message',
     DELETE_MESSAGE = 'feed.delete.message',
     CREATE_CONVERSATION = 'feed.create.conversation',
-    DELETE_CONVERSATION = 'feed.delete.conversation'
+    DELETE_CONVERSATION = 'feed.delete.conversation',
+    USER_ONLINE = 'feed.user.online',
+    USER_OFFLINE = 'feed.user.offline'
+}
+
+export enum USER_EVENTS {
+    PRESENCE = 'user.presence',
+    ONLINE = 'user.online',
+    OFFLINE = 'user.offline',
+}
+
+export enum PRESENCE {
+    ONLINE = 'online',
+    OFFLINE = 'offline',
 }
 
 export interface GetConversationsRes {

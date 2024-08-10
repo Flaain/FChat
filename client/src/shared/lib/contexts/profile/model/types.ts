@@ -1,8 +1,11 @@
+import { PRESENCE } from "@/shared/model/types";
+
 export interface User {
     _id: string;
     name: string;
     login: string;
     email: string;
+    presence: PRESENCE;
     status?: string;
     lastSeenAt: string;
     isOfficial: boolean;

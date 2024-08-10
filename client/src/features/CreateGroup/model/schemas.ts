@@ -4,5 +4,5 @@ import { allowCyrillicRegExp, loginForSchema, nameForSchema, regExpError } from 
 export const createGroupSchema = z.object({
     username: z.string().optional(),
     displayName: nameForSchema.regex(allowCyrillicRegExp, regExpError),
-    groupName: loginForSchema
+    login: loginForSchema
 });

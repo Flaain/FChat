@@ -2,7 +2,7 @@ import React from 'react';
 import { api } from '@/shared/api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ConversationStatuses, ConversationWithMeta } from '../../model/types';
-import { Conversation, IMessage, CONVERSATION_EVENTS } from '@/shared/model/types';
+import { Conversation, IMessage, CONVERSATION_EVENTS, PRESENCE } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { AppException } from '@/shared/api/error';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
@@ -18,6 +18,21 @@ export const useConversation = () => {
     const [error, setError] = React.useState<string | null>(null);
     const [isRefetching, setIsRefetching] = React.useState(false);
     const [isPreviousMessagesLoading, setIsPreviousMessagesLoading] = React.useState(false);
+
+    const onUserPresence = React.useCallback(({ presence, lastSeenAt }: { presence: PRESENCE, lastSeenAt?: string }) => {
+        console.log(lastSeenAt)
+        setConversation((prevState) => ({ 
+            ...prevState, 
+            conversation: {
+                ...prevState.conversation,
+                recipient: {
+                    ...prevState.conversation.recipient,
+                    lastSeenAt: lastSeenAt || prevState.conversation.recipient.lastSeenAt,
+                    presence
+                }
+            }
+        }))
+    }, [])
 
     const getPreviousMessages = async () => {
         try {
@@ -111,20 +126,27 @@ export const useConversation = () => {
             socket?.emit(CONVERSATION_EVENTS.JOIN, { recipientId });
             // getConversation('refetch');
         })
+        socket?.on(CONVERSATION_EVENTS.USER_PRESENCE, onUserPresence);
+
         socket?.on(CONVERSATION_EVENTS.MESSAGE_SEND, onNewMessage);
         socket?.on(CONVERSATION_EVENTS.MESSAGE_EDIT, onEditMessage);
         socket?.on(CONVERSATION_EVENTS.MESSAGE_DELETE, onDeleteMessage);
+        
         socket?.on(CONVERSATION_EVENTS.CREATED, onCreateConversation);
         socket?.on(CONVERSATION_EVENTS.DELETED, () => navigate('/'));
 
         return () => {
             socket?.emit(CONVERSATION_EVENTS.LEAVE, { recipientId });
 
+            socket?.off(CONVERSATION_EVENTS.USER_PRESENCE);
+
             socket?.off(CONVERSATION_EVENTS.MESSAGE_SEND);
             socket?.off(CONVERSATION_EVENTS.MESSAGE_EDIT);
             socket?.off(CONVERSATION_EVENTS.MESSAGE_DELETE);
+            
             socket?.off(CONVERSATION_EVENTS.CREATED);
             socket?.off(CONVERSATION_EVENTS.DELETED);
+            
             socket?.off('reconnect');
         };
     }, [recipientId]);

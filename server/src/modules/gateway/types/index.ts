@@ -1,5 +1,7 @@
-import { Message } from "src/modules/message/schemas/message.schema";
-import { UserDocument } from "src/modules/user/types";
+import { Message } from 'src/modules/message/schemas/message.schema';
+import { PRESENCE, UserDocument } from 'src/modules/user/types';
+import { Socket,  } from 'socket.io';
+import { DefaultEventsMap  } from 'socket.io/dist/typed-events';
 
 export enum STATIC_CONVERSATION_EVENTS {
     JOIN = 'conversation.join',
@@ -9,6 +11,13 @@ export enum STATIC_CONVERSATION_EVENTS {
     DELETE_MESSAGE = 'conversation.message.delete',
     CREATED = 'conversation.created',
     DELETED = 'conversation.deleted',
+    PRESENCE = 'conversation.user.presence',
+}
+
+export enum USER_EVENTS {
+    PRESENCE = 'user.presence',
+    ONLINE = 'user.online',
+    OFFLINE = 'user.offline',
 }
 
 export enum FEED_EVENTS {
@@ -17,6 +26,8 @@ export enum FEED_EVENTS {
     DELETE_MESSAGE = 'feed.delete.message',
     CREATE_CONVERSATION = 'feed.create.conversation',
     DELETE_CONVERSATION = 'feed.delete.conversation',
+    USER_ONLINE = 'feed.user.online',
+    USER_OFFLINE = 'feed.user.offline',
 }
 
 export interface ConversationDeleteMessageParams {
@@ -52,3 +63,10 @@ export interface ConversationDeleteParams {
     recipientId: string;
     conversationId: string;
 }
+
+export interface ChangeUserStatusParams {
+    presence: PRESENCE;
+    lastSeenAt?: Date;
+}
+
+export interface SocketWithUser extends Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, { user: UserDocument }> {}
