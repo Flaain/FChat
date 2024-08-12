@@ -13,11 +13,11 @@ import { AppException } from '@/shared/api/error';
 import { toast } from 'sonner';
 import { MAX_GROUP_SIZE, MIN_USER_SEARCH_LENGTH } from '@/shared/constants';
 
-const steps: Record<number, { fields: Array<FieldPath<CreateGroupType>> }> = {
-    0: { fields: ['displayName'] },
-    1: { fields: ['username'] },
-    2: { fields: ['login'] }
-};
+const steps: Array<{ fields: Array<FieldPath<CreateGroupType>> }> = [
+    { fields: ['displayName'] },
+    { fields: ['username'] },
+    { fields: ['login'] }
+];
 
 export const useCreateGroup = () => {
     const { setProfile } = useProfile();
@@ -72,13 +72,7 @@ export const useCreateGroup = () => {
         const isFieldHasErrors = !!Object.entries(form.formState.errors).some(([key]) => steps[step]?.fields.includes(key as FieldPath<CreateGroupType>));
         const fieldErrors = isFieldEmpty || isFieldHasErrors;
 
-        const actions = {
-            0: fieldErrors,
-            1: selectedUsers.size >= 10,
-            2: fieldErrors
-        }
-
-        return actions[step as keyof typeof actions] || isAsyncActionLoading;
+        return fieldErrors || isAsyncActionLoading;
     };
 
     const handleSearchDelay = React.useCallback(debounce(async (value: string) => {
@@ -95,7 +89,7 @@ export const useCreateGroup = () => {
     }, 500), []);
 
     const createGroup = React.useCallback(async () => {
-       
+       console.log(selectedUsers);
     }, [navigate, closeModal, selectedUsers, setProfile]);
 
     const handleSearchUser = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,13 +111,7 @@ export const useCreateGroup = () => {
 
             if (!isValid) return;
 
-            const actions = {
-                0: () => setStep((prevState) => prevState + 1),
-                1: () => setStep((prevState) => prevState + 1),
-                2: createGroup
-            };
-
-            await actions[step as keyof typeof actions]();
+            step === steps.length - 1 ? await createGroup() : setStep((prevState) => prevState + 1);
         } catch (error) {
             console.error(error);
             if (error instanceof AppException) {
