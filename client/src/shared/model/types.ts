@@ -9,7 +9,7 @@ export enum FeedTypes {
 }
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
-export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams };
+export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams, signal?: AbortSignal };
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
 export type MessageFormState = 'send' | 'edit';
 

@@ -5,19 +5,18 @@ import { ConversationStatuses, ConversationWithMeta } from '../../model/types';
 import { Conversation, IMessage, CONVERSATION_EVENTS, PRESENCE } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { AppException } from '@/shared/api/error';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { SessionTypes } from '@/entities/session/model/types';
 
 export const useConversation = () => {
-    const { id: recipientId } = useParams() as { id: string };
+    const { id: recipientId } = useParams<{ id: string }>();
     const { socket } = useLayoutContext();
-    const { dispatch } = useSession();
 
     const [data, setConversation] = React.useState<ConversationWithMeta>(null!);
     const [status, setStatus] = React.useState<ConversationStatuses>('loading');
     const [error, setError] = React.useState<string | null>(null);
     const [isRefetching, setIsRefetching] = React.useState(false);
     const [isPreviousMessagesLoading, setIsPreviousMessagesLoading] = React.useState(false);
+
+    const abortControllerRef = React.useRef<AbortController | null>(null);
 
     const onUserPresence = React.useCallback(({ presence, lastSeenAt }: { presence: PRESENCE, lastSeenAt?: string }) => {
         setConversation((prevState) => ({ 
@@ -92,24 +91,26 @@ export const useConversation = () => {
 
     const getConversation = React.useCallback(async (action: 'init' | 'refetch') => {
         try {
+            abortControllerRef.current?.abort('Signal aborted due to new incoming request');
+            abortControllerRef.current = new AbortController();
+
             action === 'init' ? setStatus('loading') : setIsRefetching(true);
 
-            const { data: response } = await api.conversation.get({ recipientId });
+            const { data: response } = await api.conversation.get({ 
+                recipientId: recipientId!, 
+                signal: abortControllerRef.current.signal 
+            });
 
             setConversation(response);
             setStatus('idle');
             setError(null);
         } catch (error) {
             console.error(error);
-            setStatus('error');
             
-            const errorActions: Record<number, () => void> = {
-                401: () => dispatch({ type: SessionTypes.SET_ON_LOGOUT }),
-                404: () => navigate('/'),
-            };
-
             if (error instanceof AppException) {
-                error.statusCode in errorActions ? errorActions[error.statusCode]() : setError(error.message);
+                setStatus('error');
+                setError(error.message);
+                error.statusCode === 404 && navigate('/');
             }
         } finally {
             setIsRefetching(false);
@@ -135,6 +136,8 @@ export const useConversation = () => {
         socket?.on(CONVERSATION_EVENTS.DELETED, () => navigate('/'));
 
         return () => {
+            abortControllerRef.current?.abort('Signal aborted due to new incoming request');
+
             socket?.emit(CONVERSATION_EVENTS.LEAVE, { recipientId });
 
             socket?.off(CONVERSATION_EVENTS.USER_PRESENCE);

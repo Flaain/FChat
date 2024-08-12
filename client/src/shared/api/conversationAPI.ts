@@ -15,7 +15,7 @@ export class ConversationAPI extends API {
 
     get = async (body: WithParams<{ recipientId: string }>) => {
         const url = new URL(this._baseUrl + `/conversation/${body.recipientId}`);
-        const request: RequestInit = { credentials: this._cretedentials, headers: this._headers };
+        const request: RequestInit = { credentials: this._cretedentials, headers: this._headers, signal: body.signal };
 
         body.params && Object.entries(body.params).forEach(([key, value]) => {
             url.searchParams.append(key, value);

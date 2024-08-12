@@ -2,21 +2,24 @@ import Typography from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
 import { ConversationParticipant, UserFeed } from '@/shared/model/types';
 import { Verified } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
-const ConversationSkeleton = ({ recipient }: { recipient?: ConversationParticipant | UserFeed }) => {
+const ConversationSkeleton = () => {
+    const { state } = useLocation<ConversationParticipant | UserFeed>();
+
     return (
         <div className='flex flex-col flex-1 h-svh overflow-hidden gap-5 items-center justify-start dark:bg-primary-dark-200 bg-primary-white'>
             <div className='min-h-[70px] flex items-center self-start w-full px-5 py-3 box-border dark:bg-primary-dark-100 sticky top-0 z-[999]'>
-                {recipient && (
+                {state && (
                     <Typography
                         as='h2'
                         size='lg'
                         weight='medium'
                         variant='primary'
-                        className={cn(recipient.isOfficial && 'flex items-center gap-2')}
+                        className={cn(state.isOfficial && 'flex items-center gap-2')}
                     >
-                        {recipient.name}
-                        {recipient.isOfficial && (
+                        {state.name}
+                        {state.isOfficial && (
                             <Typography>
                                 <Verified className='w-5 h-5' />
                             </Typography>
