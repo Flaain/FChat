@@ -3,7 +3,7 @@ import AuthGuard from '@/shared/ui/AuthGuard';
 import ScreenLoader from '@/shared/ui/ScreenLoader';
 import { routerList } from '@/shared/constants';
 import { RouteObject } from 'react-router-dom';
-import { Providers } from './model/providers';
+import { AuthProvider } from '@/shared/lib/contexts/auth/provider';
 import { View } from './model/view';
 
 export const AuthPage: RouteObject = {
@@ -11,9 +11,9 @@ export const AuthPage: RouteObject = {
     element: (
         <AuthGuard fallback={<ScreenLoader />}>
             <React.Suspense fallback={<ScreenLoader />}>
-                <Providers>
+                <AuthProvider>
                     <View />
-                </Providers>
+                </AuthProvider>
             </React.Suspense>
         </AuthGuard>
     )

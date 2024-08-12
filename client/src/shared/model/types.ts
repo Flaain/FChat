@@ -1,16 +1,11 @@
 import { Session } from '@/entities/session/model/types';
 import { ModalConfig } from '../lib/contexts/modal/types';
-import { User } from '../lib/contexts/profile/model/types';
+import { User } from '../lib/contexts/profile/types';
 
 export enum FeedTypes {
     CONVERSATION = 'conversation',
     GROUP = 'group',
     USER = 'user'
-}
-
-export enum OtpType {
-    EMAIL_VERIFICATION = 'email_verification',
-    PASSWORD_RESET = 'password_reset'
 }
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };

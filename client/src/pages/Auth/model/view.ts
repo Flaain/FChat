@@ -1,3 +1,3 @@
-import React from "react";
+import React from 'react';
 
-export const View = React.lazy(() => import("../ui/ui"));
+export const View = React.lazy(() => import('../ui/ui'));

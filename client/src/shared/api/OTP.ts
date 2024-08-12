@@ -1,5 +1,5 @@
-import { API } from './API';
-import { OtpType } from '../model/types';
+import { API } from "@/shared/api/API";
+import { OtpType } from "@/shared/lib/contexts/otp/types";
 
 export class OTP extends API {
     create = async (body: { email: string; type: OtpType }) => {

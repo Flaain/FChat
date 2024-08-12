@@ -1,12 +1,17 @@
-import SigninForm from './SigninForm';
-import SignupForm from './SignupForm';
-import WelcomeStage from './WelcomeStage';
+import SigninForm from '@/widgets/SigninForm/ui/ui';
+import SignupForm from '@/widgets/SignupForm/ui/ui';
+import WelcomeStage from '@/widgets/WelcomeStage/ui/ui';
+import { useAuth } from '@/shared/lib/hooks/useAuth';
 import { Toaster } from 'sonner';
-import { useAuth } from '../lib/hooks/useAuth';
+import { SigninProvider } from '@/widgets/SigninForm/model/provider';
 
 const stages = {
     welcome: <WelcomeStage />,
-    signIn: <SigninForm />,
+    signIn: (
+        <SigninProvider>
+            <SigninForm />
+        </SigninProvider>
+    ),
     signUp: <SignupForm />
 };
 

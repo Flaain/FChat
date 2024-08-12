@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 import { cn } from '../lib/utils/cn';
-import { AvatarByNameProps, PRESENCE } from '../model/types';
+import { AvatarByNameProps } from '../model/types';
 import { User } from 'lucide-react';
 
 const avatarVariants = cva(
