@@ -86,6 +86,7 @@ export interface Conversation {
 export interface Group {
     _id: string;
     name: string;
+    login: string;
     participants: Array<GroupParticipant>;
     isOfficial?: boolean;
     messages: Array<IMessage>;
@@ -180,7 +181,7 @@ export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'lastM
     type: FeedTypes.CONVERSATION;
 };
 
-export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'isOfficial' | 'name'> & {
+export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'isOfficial' | 'name' | 'login'> & {
     type: FeedTypes.GROUP;
 };
 

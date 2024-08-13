@@ -12,9 +12,10 @@ import { createGroupSchema } from '../../model/schemas';
 import { AppException } from '@/shared/api/error';
 import { toast } from 'sonner';
 import { MAX_GROUP_SIZE, MIN_USER_SEARCH_LENGTH } from '@/shared/constants';
+import { createGroupAPI } from '../../api';
 
 const steps: Array<{ fields: Array<FieldPath<CreateGroupType>> }> = [
-    { fields: ['displayName'] },
+    { fields: ['name'] },
     { fields: ['username'] },
     { fields: ['login'] }
 ];
@@ -30,11 +31,11 @@ export const useCreateGroup = () => {
     const form = useForm<CreateGroupType>({
         resolver: zodResolver(createGroupSchema),
         defaultValues: {
-            displayName: '',
+            name: '',
             username: '',
             login: ''
         },
-        mode: 'all',
+        mode: 'onChange',
         shouldFocusError: true,
     });
 
@@ -68,7 +69,7 @@ export const useCreateGroup = () => {
     }, []);
 
     const _isNextButtonDisabled = () => {
-        const isFieldEmpty = !form.getValues(steps[step]?.fields).every?.(Boolean);
+        const isFieldEmpty = step !== 1 && !form.getValues(steps[step]?.fields).every?.(Boolean);
         const isFieldHasErrors = !!Object.entries(form.formState.errors).some(([key]) => steps[step]?.fields.includes(key as FieldPath<CreateGroupType>));
         const fieldErrors = isFieldEmpty || isFieldHasErrors;
 
@@ -89,8 +90,12 @@ export const useCreateGroup = () => {
     }, 500), []);
 
     const createGroup = React.useCallback(async () => {
-       console.log(selectedUsers);
-    }, [navigate, closeModal, selectedUsers, setProfile]);
+        const { username, ...rest } = form.getValues();
+
+        const response = await createGroupAPI.create({ ...rest, participants: [...selectedUsers.keys()] }); 
+
+        console.log(response);
+    }, [selectedUsers]);
 
     const handleSearchUser = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         const trimmedValue = value.trim();
@@ -106,6 +111,8 @@ export const useCreateGroup = () => {
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         try {
             event.preventDefault();
+            
+            setIsAsyncActionLoading(true);
 
             const isValid =  await form.trigger(steps[step].fields, { shouldFocus: true })
 
@@ -115,12 +122,14 @@ export const useCreateGroup = () => {
         } catch (error) {
             console.error(error);
             if (error instanceof AppException) {
-                error.errors?.forEach((error) => {
-                    form.setError(error.path as FieldPath<CreateGroupType>, { message: error.message });
+                error.errors?.forEach(({ path, message }) => {
+                    form.setError(path as FieldPath<CreateGroupType>, { message }, { shouldFocus: true });
                 })
 
                 !error.errors && toast.error(error.message);
             }
+        } finally {
+            setIsAsyncActionLoading(false);
         }
     };
 

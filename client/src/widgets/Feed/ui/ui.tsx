@@ -1,22 +1,14 @@
-import UserItem from './UserItem';
+import FeedItem from '@/features/FeedItem/ui/ui';
 import Typography from '@/shared/ui/Typography';
 import FeedSkeleton from './Skeletons/FeedSkeleton';
-import ConversationItem from './ConversationItem';
-import { ConversationFeed, FeedItem, FeedTypes, UserFeed } from '@/shared/model/types';
-import { ReactNode } from 'react';
 import { UserSearch } from 'lucide-react';
 import { FeedProps } from '../model/types';
+import { feedMapper } from '../lib/utils/feedMapper';
 
 const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, searchLoading, searchValue }: FeedProps) => {
     if (isFeedEmpty) return <FeedSkeleton skeletonsCount={3} />;
 
     const trimmedSearchValue = searchValue.trim();
-
-    const feedItems: Record<FeedTypes, (item: FeedItem) => ReactNode> = {
-        conversation: (item: FeedItem) => <ConversationItem key={item._id} conversation={item as ConversationFeed} />,
-        user: (item: FeedItem) => <UserItem key={item._id} user={item as UserFeed} />,
-        group: (item: FeedItem) => <div key={item._id}>{item._id}</div>
-    };
 
     return !searchLoading && !filteredLocalResults.length && !filteredGlobalResults.length ? (
         <>
@@ -29,7 +21,7 @@ const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, search
         <>
             {!!filteredLocalResults.length && (
                 <ul className='flex flex-col gap-5 px-3 overflow-auto'>
-                    {filteredLocalResults.map((item) => feedItems[item.type](item))}
+                    {feedMapper(filteredLocalResults).map((item) => <FeedItem key={item._id} {...item} />)}
                 </ul>
             )}
             {searchLoading ? (
@@ -41,7 +33,7 @@ const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, search
                             Global results
                         </Typography>
                         <ul className='flex flex-col gap-5 overflow-auto px-3'>
-                            {filteredGlobalResults.map((item) => feedItems[item.type](item))}
+                            {feedMapper(filteredGlobalResults).map((item) => <FeedItem key={item._id} {...item} />)}
                         </ul>
                     </div>
                 )

@@ -2,45 +2,43 @@ import AvatarByName from '@/shared/ui/AvatarByName';
 import Typography from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { ConversationFeed, PRESENCE } from '@/shared/model/types';
 import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
+import { FeedItemProps } from '../model/types';
+import { FeedTypes } from '@/shared/model/types';
 
-const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
+const FeedItem = ({ login, name, to, type, lastMessage, draftId, isOnline, isOfficial }: FeedItemProps) => {
     const { state: { userId } } = useSession();
     const { drafts } = useLayoutContext();
 
-    const draft = drafts.get(conversation.recipient._id);
+    const draft = draftId ? drafts.get(draftId) : undefined;
 
     return (
         <li>
             <NavLink
-                state={conversation.recipient}
-                to={`conversation/${conversation.recipient._id}`}
+                state={{ name, isOfficial }}
+                to={to}
                 className={({ isActive }) =>
                     cn(
                         'flex items-center gap-5 p-2 rounded-lg transition-colors duration-200 ease-in-out',
-                        isActive && 'dark:bg-primary-dark-50 bg-primary-gray/10',
-                        !isActive && 'dark:hover:bg-primary-dark-50/30 hover:bg-primary-gray/5'
+                        isActive ? 'dark:bg-primary-dark-50 bg-primary-gray/10' : 'dark:hover:bg-primary-dark-50/30 hover:bg-primary-gray/5'
                     )
                 }
             >
-                <AvatarByName name={conversation.recipient.name} size='lg' isOnline={conversation.recipient.presence === PRESENCE.ONLINE} />
+                <AvatarByName name={name} size='lg' isOnline={isOnline} />
                 <div className='flex flex-col items-start w-full'>
-                    <Typography
-                        as='h2'
-                        weight='medium'
-                        className={cn(conversation.recipient.isOfficial && 'flex items-center')}
-                    >
-                        {conversation.recipient.name}
-                        {conversation.recipient.isOfficial && (
+                    <Typography as='h2' weight='medium' className={cn(isOfficial && 'flex items-center')}>
+                        {name}
+                        {isOfficial && (
                             <Typography className='ml-2'>
                                 <Verified className='w-5 h-5' />
                             </Typography>
                         )}
                     </Typography>
-                    {draft?.state === 'send' ? (
+                    {type === FeedTypes.USER ? (
+                        <Typography variant='secondary'>@{login}</Typography>
+                    ) : draft?.state === 'send' ? (
                         <Typography as='p' variant='secondary' className='line-clamp-1'>
                             <Typography as='span' variant='error'>
                                 Draft:&nbsp;
@@ -48,21 +46,20 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                             {draft.value}
                         </Typography>
                     ) : (
-                        !!conversation.lastMessage && (
+                        !!lastMessage && (
                             <div className='flex items-center w-full gap-5'>
                                 <Typography as='p' variant='secondary' className='line-clamp-1'>
-                                    {conversation.lastMessage.sender._id === userId
-                                        ? `You: ${conversation.lastMessage.text}`
-                                        : conversation.lastMessage.text}
+                                    {lastMessage.sender._id === userId
+                                        ? `You: ${lastMessage.text}`
+                                        : type === FeedTypes.GROUP
+                                        ? `${lastMessage.sender.name}: ${lastMessage.text}`
+                                        : lastMessage.text}
                                 </Typography>
                                 <Typography className='ml-auto' variant='secondary'>
-                                    {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(
-                                        navigator.language,
-                                        {
-                                            hour: 'numeric',
-                                            minute: 'numeric'
-                                        }
-                                    )}
+                                    {new Date(lastMessage.createdAt).toLocaleTimeString(navigator.language, {
+                                        hour: 'numeric',
+                                        minute: 'numeric'
+                                    })}
                                 </Typography>
                             </div>
                         )
@@ -73,4 +70,4 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
     );
 };
 
-export default ConversationItem;
+export default FeedItem;

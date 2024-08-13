@@ -2,12 +2,12 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shar
 import { Input } from '@/shared/ui/Input';
 import { useCreateGroupContext } from '../../lib/hooks/useCreateGroupContext';
 
-const DisplayNameStage = () => {
+const GroupNameStage = () => {
     const { form } = useCreateGroupContext();
 
     return (
         <FormField
-            name='displayName'
+            name='name'
             control={form.control}
             render={({ field }) => (
                 <FormItem>
@@ -26,4 +26,4 @@ const DisplayNameStage = () => {
     );
 };
 
-export default DisplayNameStage;
+export default GroupNameStage;

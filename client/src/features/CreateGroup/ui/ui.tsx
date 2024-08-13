@@ -1,5 +1,5 @@
 import LinkStage from './LinkStage';
-import DisplayNameStage from './DisplayNameStage';
+import GroupNameStage from './GroupNameStage';
 import SelectStage from './SelectStage';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { Button } from '@/shared/ui/Button';
@@ -14,7 +14,7 @@ const buttonConfig = {
 };
 
 const stages: Record<number, React.ReactNode> = {
-    0: <DisplayNameStage />,
+    0: <GroupNameStage />,
     1: <SelectStage />,
     2: <LinkStage />
 };

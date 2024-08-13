@@ -26,7 +26,7 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
         value
     } = useSendMessage({ type, queryId });
 
-    const trimmedValue = value.trim().length;
+    const trimmedValueLength = value.trim().length;
 
     const messageBars: Record<Exclude<MessageFormState, "send">, React.ReactNode> = {
         edit: (
@@ -71,8 +71,8 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
                     type='button'
                     disabled={isLoading}
                     className={cn('transition-transform duration-200 ease-in-out', {
-                        'translate-x-14': !trimmedValue,
-                        'translate-x-0': trimmedValue || currentDraft?.state === 'edit'
+                        'translate-x-20': !trimmedValueLength,
+                        'translate-x-0': trimmedValueLength || currentDraft?.state === 'edit'
                     })}
                     onClick={(e) => {e.stopPropagation(); setIsEmojiPickerOpen((prev) => !prev)}}
                 >
@@ -90,10 +90,10 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
                 )}
                 <Button
                     variant='text'
-                    disabled={(!trimmedValue && currentDraft?.state === 'send') || isLoading}
+                    disabled={(!trimmedValueLength && currentDraft?.state === 'send') || isLoading}
                     className={cn(
                         'opacity-0 pointer-events-none invisible scale-50 transition-all duration-100 ease-in-out',
-                        (!!trimmedValue || currentDraft?.state === 'edit') &&
+                        (!!trimmedValueLength || currentDraft?.state === 'edit') &&
                             'opacity-100 visible scale-100 pointer-events-auto'
                     )}
                 >

@@ -1,10 +1,11 @@
 import React from 'react';
 import { z } from 'zod';
-import { SearchUser } from '@/shared/model/types';
+import { APIData, SearchUser } from '@/shared/model/types';
 import { createGroupSchema } from './schemas';
 import { UseFormReturn } from 'react-hook-form';
 
 export type CreateGroupType = z.infer<typeof createGroupSchema>;
+export type CreateGroupParams = Omit<z.infer<typeof createGroupSchema>, 'username'> & { participants: Array<string> };
 
 export interface CreateGroupContextProps {
     form: UseFormReturn<CreateGroupType>;
@@ -17,4 +18,8 @@ export interface CreateGroupContextProps {
     handleRemove: (id: string) => void;
     handleSearchUser: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleBack: () => void;
+}
+
+export interface ICreateGroupAPI {
+    create(params: CreateGroupParams): Promise<APIData<{ _id: string }>>;
 }
