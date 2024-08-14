@@ -1,3 +1,4 @@
+import React from 'react';
 import Typography from '@/shared/ui/Typography';
 import { getOtpRetryTime } from '../lib/utils/getOtpRetryTime';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/shared/ui/input-otp';
@@ -7,20 +8,19 @@ import { Button } from '@/shared/ui/Button';
 import { OtpProps } from '../model/types';
 import { LoaderCircle } from 'lucide-react';
 
-const OTP = ({ email, type, loading, onComplete, ...rest }: OtpProps) => {
-    const { onResend, isResending, onChange, otp: { value, retryDelay } } = useOtp();
+const OTP = React.forwardRef<HTMLInputElement, OtpProps>(({ email, type, loading, onComplete, ...rest }, ref) => {
+    const { onResend, isResending, otp: { retryDelay } } = useOtp();
 
     return (
         <div className='flex flex-col gap-2'>
             <InputOTP
                 autoFocus
                 maxLength={6}
-                value={value}
                 pattern={REGEXP_ONLY_DIGITS}
                 onComplete={onComplete}
-                onChange={onChange}
                 containerClassName='max-w-fit'
                 disabled={loading}
+                ref={ref}
                 {...rest}
             >
                 <InputOTPGroup>
@@ -43,6 +43,6 @@ const OTP = ({ email, type, loading, onComplete, ...rest }: OtpProps) => {
             )}
         </div>
     );
-};
+})
 
 export default OTP;

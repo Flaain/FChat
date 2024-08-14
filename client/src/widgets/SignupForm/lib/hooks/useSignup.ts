@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { UserCheckType } from "@/shared/model/types";
 import { SessionTypes } from "@/entities/session/model/types";
 import { AppException } from "@/shared/api/error";
-import { toast } from "sonner";
 import { OtpType } from "@/shared/lib/contexts/otp/types";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { useOtp } from "@/shared/lib/hooks/useOtp";
@@ -87,7 +86,7 @@ export const useSignup = () => {
 
                     const { data: { retryDelay } } = await api.otp.create({ email: data.email, type: OtpType.EMAIL_VERIFICATION });
 
-                    setOtp((prevState) => ({ ...prevState, type: OtpType.EMAIL_VERIFICATION, retryDelay }));
+                    setOtp({ type: OtpType.EMAIL_VERIFICATION, retryDelay });
                     setStep((prevState) => prevState + 1);
                 },
                 2: async () => {
@@ -105,12 +104,12 @@ export const useSignup = () => {
             console.error(error);
             if (error instanceof AppException) {
                 error.errors?.forEach(({ path, message }) => {
-                   form.setError(path as FieldPath<SignupSchemaType>, { message }, { shouldFocus: true });
-
-                   path === 'otp' && setOtp((prevState) => ({ ...prevState, error: message }));
+                    if (steps[step].fields.includes(path as FieldPath<SignupSchemaType>)) {
+                        form.setError(path as FieldPath<SignupSchemaType>, { message }, { shouldFocus: true });
+                    }
                 });
                 
-                !error.errors && toast.error(error.message ?? "Something went wrong", { position: "bottom-right" });
+                !error.errors && error.toastError();
             }
         } finally {
             setLoading(false);
@@ -120,8 +119,9 @@ export const useSignup = () => {
     const onBack = React.useCallback(() => {
         if (!step) return setAuthStage("welcome");
 
+        form.resetField('otp');
+
         setStep((prevState) => prevState - 1);
-        setOtp((prevState) => ({ ...prevState, error: null, value: '' }));
     }, [setAuthStage, step]);
 
     return {

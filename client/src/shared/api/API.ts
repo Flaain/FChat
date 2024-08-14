@@ -5,8 +5,9 @@ export abstract class API {
     protected readonly _baseUrl: string;
     protected readonly _headers: BaseAPI['headers'];
     protected readonly _cretedentials: BaseAPI['credentials'];
-    protected readonly _refreshErrorObservers: Set<(error: AppException) => void> = new Set();
     protected readonly _noRefreshPaths: Array<string> = ['/auth/signin'];
+
+    static readonly _refreshErrorObservers: Set<(error: AppException) => void> = new Set();
     
     constructor({
         baseUrl = import.meta.env.VITE_BASE_URL,
@@ -16,13 +17,11 @@ export abstract class API {
         this._baseUrl = baseUrl;
         this._headers = headers;
         this._cretedentials = credentials;
-
-        this._refreshErrorObservers = new Set();
     }
 
     private notifyRefreshError = (error: AppException) => {
-        this._refreshErrorObservers.forEach((cb) => cb(error));
-    }
+        API._refreshErrorObservers.forEach((cb) => cb(error));
+    };
 
     private refreshToken = async () => {
         const refreshResponse = await fetch(this._baseUrl + '/auth/refresh', {
@@ -34,7 +33,7 @@ export abstract class API {
 
         if (!refreshResponse.ok) {
             const error: AppException = { ...refreshData, headers: Object.fromEntries([...refreshResponse.headers.entries()]) };
-
+            
             this.notifyRefreshError(error);
 
             throw new AppException(error);

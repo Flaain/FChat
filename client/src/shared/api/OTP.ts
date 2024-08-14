@@ -11,4 +11,14 @@ export class OTP extends API {
 
         return this._checkResponse<{ retryDelay: number }>(await fetch(this._baseUrl + '/auth/otp', request), request);
     };
+
+    verify = async (body: { otp: string; email: string; type: OtpType }) => {
+        const request: RequestInit = {
+            method: 'POST',
+            headers: this._headers,
+            body: JSON.stringify(body)
+        };
+
+        return this._checkResponse<boolean>(await fetch(this._baseUrl + '/auth/otp', request), request);
+    };
 }

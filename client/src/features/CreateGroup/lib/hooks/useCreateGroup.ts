@@ -123,10 +123,12 @@ export const useCreateGroup = () => {
             console.error(error);
             if (error instanceof AppException) {
                 error.errors?.forEach(({ path, message }) => {
-                    form.setError(path as FieldPath<CreateGroupType>, { message }, { shouldFocus: true });
+                    if (steps[step].fields.includes(path as FieldPath<CreateGroupType>)) {
+                        form.setError(path as FieldPath<CreateGroupType>, { message }, { shouldFocus: true });
+                    }
                 })
 
-                !error.errors && toast.error(error.message);
+                !error.errors && error.toastError();
             }
         } finally {
             setIsAsyncActionLoading(false);

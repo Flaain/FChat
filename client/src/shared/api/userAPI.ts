@@ -36,14 +36,6 @@ export class UserAPI extends API {
         return this._checkResponse<BasicAPIResponse>(await fetch(this._baseUrl + '/auth/logout', request), request);
     };
 
-    subscribeRefreshError = (cb: (error: AppException) => void) => {
-        this._refreshErrorObservers.add(cb);
-    }
-
-    unsubscribeRefreshError = (cb: (error: AppException) => void) => {
-        this._refreshErrorObservers.delete(cb);
-    }
-
     search = async ({ query, page = 0, limit = 10 }: { query: string; page?: number; limit?: number }) => {
         const url = new URL(this._baseUrl + '/user/search');
         const request: RequestInit = { headers: this._headers, credentials: this._cretedentials };
@@ -53,6 +45,14 @@ export class UserAPI extends API {
         url.searchParams.append('limit', limit.toString());
 
         return this._checkResponse<Array<SearchUser>>(await fetch(url, request), request);
+    };
+
+    subscribeRefreshError = (cb: (error: AppException) => void) => {
+        API._refreshErrorObservers.add(cb);
+    };
+
+    unsubscribeRefreshError = (cb: (error: AppException) => void) => {
+        API._refreshErrorObservers.delete(cb);
     };
 
     status = async (body: { status: string }) => {

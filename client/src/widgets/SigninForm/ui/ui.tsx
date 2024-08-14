@@ -1,3 +1,4 @@
+import Forgot from "@/features/Forgot/ui/ui";
 import Signin from "@/features/Signin/ui/ui";
 import Typography from "@/shared/ui/Typography";
 import { SigninStages } from "@/features/Signin/model/types";
@@ -15,11 +16,11 @@ const stageDescription: Record<SigninStages, { title: string; description: strin
 };
 
 const SigninForm = () => {
-    const { stage, setStage } = useSigninForm();
+    const { stage } = useSigninForm();
     
     const components: Record<SigninStages, React.ReactNode> = {
-        signin: <Signin changeStage={(stage) => setStage(stage)}/>,
-        forgot: <div>forgot</div>
+        signin: <Signin />,
+        forgot: <Forgot />
     };
 
     return (

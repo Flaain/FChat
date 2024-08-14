@@ -17,15 +17,18 @@ const SignupForm = () => {
             <FormField
                 name='otp'
                 control={form.control}
-                render={({ field }) => (
-                    <FormItem className='relative'>
-                        <FormLabel className='text-white'>Enter verification code</FormLabel>
-                        <FormControl>
-                            <OTP {...field} email={form.getValues('email')} onComplete={onSubmit} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
+                render={({ field }) => {
+                    console.log(field);
+                    return (
+                        <FormItem className='relative'>
+                            <FormLabel className='text-white'>Enter verification code</FormLabel>
+                            <FormControl>
+                                <OTP {...field} email={form.getValues('email')} onComplete={onSubmit} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )
+                }}
             />
         )
     };

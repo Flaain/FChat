@@ -43,7 +43,7 @@ export const useSignin = () => {
             dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { userId: profile._id } });
         } catch (error) {
             console.error(error);
-            error instanceof AppException && toast.error(error.message);
+            error instanceof AppException && error.toastError();
         } finally {
             setLoading(false);
         }

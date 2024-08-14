@@ -66,10 +66,12 @@ export const useChangePassword = () => {
             console.error(error);
             if (error instanceof AppException) {
                 error.errors?.forEach(({ path, message }) => {
-                    form.setError(path as FieldPath<ChangePasswordSchemaType>, { message });
+                    if (steps[step].fields.includes(path as FieldPath<ChangePasswordSchemaType>)) {
+                        form.setError(path as FieldPath<ChangePasswordSchemaType>, { message }, { shouldFocus: true });
+                    }
                 });
 
-                !error.errors && toast.error(error.message);
+                !error.errors && error.toastError();
             }
         } finally {
             setIsLoading(false);

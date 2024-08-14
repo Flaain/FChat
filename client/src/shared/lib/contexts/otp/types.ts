@@ -4,10 +4,8 @@ export enum OtpType {
 }
 
 export interface OtpState {
-    value: string;
     retryDelay: number;
     type: OtpType;
-    error: string | null;
 }
 
 export interface OtpContextProps {
@@ -15,7 +13,6 @@ export interface OtpContextProps {
     isResending: boolean;
     setOtp: React.Dispatch<React.SetStateAction<OtpState>>;
     onResend: (params: OnResendParams) => void;
-    onChange: (value: string) => void;
 }
 
 export interface OnResendParams {

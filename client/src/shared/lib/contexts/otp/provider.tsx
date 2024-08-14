@@ -3,20 +3,12 @@ import { OtpContext } from './context';
 import { OnResendParams, OtpState } from './types';
 import { api } from '@/shared/api';
 import { AppException } from '@/shared/api/error';
-import { toast } from 'sonner';
 
 export const OtpProvider = ({ children }: { children: React.ReactNode }) => {
     const [isResending, setIsResending] = React.useState(false);
-    const [otp, setOtp] = React.useState<OtpState>({
-        value: '',
-        retryDelay: 0,
-        type: null!,
-        error: null
-    });
+    const [otp, setOtp] = React.useState<OtpState>({ retryDelay: 0, type: null! });
 
     const timerRef = React.useRef<NodeJS.Timeout>();
-
-    const onChange = React.useCallback((value: string) => setOtp((prevState) => ({ ...prevState, value })), []);
 
     const onResend = React.useCallback(async ({ email, type }: OnResendParams) => {
         try {
@@ -26,12 +18,8 @@ export const OtpProvider = ({ children }: { children: React.ReactNode }) => {
 
             setOtp((prevState) => ({ ...prevState, type: type ?? otp.type, retryDelay }));
         } catch (error) {
-            if (error instanceof AppException) {
-                const appError = error; // <-- this shit is necessary cuz of ('error' is of type 'unknown') in setOtp
-
-                setOtp((prevState) => ({ ...prevState, error: appError.message }));
-                toast.error(appError.message ?? "Cannot resend OTP code", { position: "top-center" });
-            }
+            console.error(error);
+            error instanceof AppException && error.toastError('Cannot resend OTP code');
         } finally {
             setIsResending(false);
         }
@@ -52,7 +40,7 @@ export const OtpProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [otp.retryDelay]);
 
-    const value = React.useMemo(() => ({ otp, isResending, setOtp, onResend, onChange }), [otp]);
+    const value = React.useMemo(() => ({ otp, isResending, setOtp, onResend }), [otp]);
 
     return <OtpContext.Provider value={value}>{children}</OtpContext.Provider>;
 };

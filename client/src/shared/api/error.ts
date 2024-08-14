@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { AppExceptionCode, IAppException } from '../model/types';
 
 export class AppException extends Error implements IAppException {
@@ -17,5 +18,9 @@ export class AppException extends Error implements IAppException {
         this.errors = error.errors;
         this.headers = error.headers;
         this.statusCode = error.statusCode;
+    }
+
+    toastError(message?:string) {
+        toast.error(message || this.message || "Something went wrong", { position: "top-center" });
     }
 }
