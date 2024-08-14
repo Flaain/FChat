@@ -40,7 +40,5 @@ export const OtpProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [otp.retryDelay]);
 
-    const value = React.useMemo(() => ({ otp, isResending, setOtp, onResend }), [otp]);
-
-    return <OtpContext.Provider value={value}>{children}</OtpContext.Provider>;
+    return <OtpContext.Provider value={{ otp, isResending, setOtp, onResend }}>{children}</OtpContext.Provider>;
 };

@@ -19,6 +19,6 @@ export class OTP extends API {
             body: JSON.stringify(body)
         };
 
-        return this._checkResponse<boolean>(await fetch(this._baseUrl + '/auth/otp', request), request);
+        return this._checkResponse<boolean>(await fetch(this._baseUrl + '/auth/otp/verify', request), request);
     };
 }

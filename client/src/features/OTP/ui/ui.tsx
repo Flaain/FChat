@@ -8,8 +8,13 @@ import { Button } from '@/shared/ui/Button';
 import { OtpProps } from '../model/types';
 import { LoaderCircle } from 'lucide-react';
 
-const OTP = React.forwardRef<HTMLInputElement, OtpProps>(({ email, type, loading, onComplete, ...rest }, ref) => {
-    const { onResend, isResending, otp: { retryDelay } } = useOtp();
+const OTP = React.forwardRef<HTMLInputElement, OtpProps>(({ email, type, loading, onResend, onComplete, ...rest }, ref) => {
+    const { onResend: _onResend, isResending, otp: { retryDelay } } = useOtp();
+
+    const handleResend = () => {
+        _onResend({ email, type });
+        onResend?.();
+    }
 
     return (
         <div className='flex flex-col gap-2'>
@@ -37,7 +42,7 @@ const OTP = React.forwardRef<HTMLInputElement, OtpProps>(({ email, type, loading
                     Resend your email if it doesn’t arrive in {getOtpRetryTime(retryDelay)}
                 </Typography>
             ) : (
-                <Button disabled={isResending} size='text' variant='link' className='self-start' onClick={() => onResend({ email, type })}>
+                <Button type='button' disabled={isResending} size='text' variant='link' className='self-start' onClick={handleResend}>
                     {isResending ? <LoaderCircle className='w-4 h-4 animate-spin' /> : 'Resend email'}
                 </Button>
             )}

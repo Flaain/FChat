@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { SigininSchemaType } from "../../model/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SessionTypes } from "@/entities/session/model/types";
-import { toast } from "sonner";
 import { AppException } from "@/shared/api/error";
 import { signinSchema } from "../../model/schema";
 import { api } from "../../api";

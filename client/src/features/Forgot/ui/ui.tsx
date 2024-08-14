@@ -53,6 +53,7 @@ const Forgot = () => {
                                             {...field}
                                             email={form.getValues('email')}
                                             onComplete={onSubmit}
+                                            onResend={() => form.resetField('otp')}
                                             type={OtpType.PASSWORD_RESET}
                                         />
                                     </FormControl>
