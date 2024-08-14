@@ -44,10 +44,11 @@ export class GroupService {
                 _id: 1,
             },
         );
-        const group = await this.groupModel.create({ login, name, owner: initiator._id, participants: [] });
-        const participants = await this.participantService.insertMany(findedUsers.map((user) => ({ userId: user._id, groupId: group._id })));
+        const group = await this.groupModel.create({ login, owner: initiator._id, name, participants: [] });
+        const participants = await this.participantService.insertMany([initiator, ...findedUsers].map((user) => ({ userId: user._id, groupId: group._id })));
         
-        group.participants = [...participants.map((participant) => participant._id), initiator._id];
+        group.participants = participants.map((participant) => participant._id);
+        group.owner = participants[0]._id;
 
         await group.save();
 

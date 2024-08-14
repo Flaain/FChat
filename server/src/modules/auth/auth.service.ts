@@ -16,6 +16,8 @@ import { OtpType } from '../otp/types';
 import { UserDocument } from '../user/types';
 import { User } from '../user/schemas/user.schema';
 import { SessionDocument } from '../session/types';
+import { ForgotDTO } from './dtos/auth.forgot.dto';
+import { AuthResetDTO } from './dtos/auth.reset.dto';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -79,6 +81,37 @@ export class AuthService implements IAuthService {
             sessionId: session._id.toString() 
         }),
     });
+
+    forgot = async ({ email }: ForgotDTO) => {
+        if (!await this.userService.findOneByPayload({ email, isDeleted: false })) {
+            return { retryDelay: 120000 };
+        };
+
+        return this.otpService.create({ email, type: OtpType.PASSWORD_RESET });
+    };
+
+    reset = async ({ email, otp, password }: AuthResetDTO) => {
+        if (!await this.otpService.findOneAndDelete({ otp, email, type: OtpType.PASSWORD_RESET })) {
+            throw new AppException({ 
+                message: 'An error occurred during the password reset process. Please try again.',
+                errors: [{ message: 'Invalid OTP code', path: 'otp' }]
+             }, HttpStatus.BAD_REQUEST);
+        }
+
+        const user = await this.userService.findOneByPayload({ email, isDeleted: false });
+
+        if (!user) throw new AppException({ message: 'Something went wrong' }, HttpStatus.INTERNAL_SERVER_ERROR);
+
+        const hashedPassword = await this.bcryptService.hashAsync(password);
+
+        await this.sessionService.deleteMany({ userId: user._id });
+
+        user.password = hashedPassword;
+
+        await user.save();
+
+        return { status: HttpStatus.OK, message: 'OK' };
+    }
 
     logout = async ({ user, sessionId }: { user: UserDocument; sessionId: string }) => {
         const session = await this.sessionService.findOneByPayload({ _id: sessionId, userId: user._id });

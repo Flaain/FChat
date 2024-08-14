@@ -6,7 +6,7 @@ import { getOtpTemplate } from './templates';
 export class MailService {
     constructor(private readonly mailerService: MailerService) {}
 
-    sendOtpEmail = (otp: number, options: Omit<ISendMailOptions, 'html' | 'template'>) => {
+    sendOtpEmail = (otp: number, options?: Omit<ISendMailOptions, 'html' | 'template'>) => {
         return this.mailerService.sendMail({ ...options, html: getOtpTemplate(otp) });
     };
 }

@@ -6,6 +6,7 @@ import { AppException } from 'src/utils/exceptions/app.exception';
 import { IOtpService, OtpType } from './types';
 import { UserService } from '../user/user.service';
 import { MailService } from '../mail/mail.service';
+import { OtpVerifyDTO } from './dtos/otp.verify.dto';
 
 @Injectable()
 export class OtpService implements IOtpService {
@@ -16,9 +17,7 @@ export class OtpService implements IOtpService {
     ) {}
 
     create = async ({ email, type }: Pick<OTP, 'email' | 'type'>) => {
-        const isUserAlreadyExists = await this.userService.exists({ email });
-
-        if (isUserAlreadyExists && type === OtpType.EMAIL_VERIFICATION) {
+        if (type === OtpType.EMAIL_VERIFICATION && await this.userService.exists({ email })) {
             throw new AppException({ message: 'Cannot create OTP code' }, HttpStatus.CONFLICT);
         }
 
@@ -47,6 +46,17 @@ export class OtpService implements IOtpService {
         }
 
         return { retryDelay: new Date(otp.expiresAt).getTime() - Date.now() };
+    };
+
+    verify = async ({ otp, email, type }: OtpVerifyDTO) => {
+        if (!await this.exists({ otp, email, type })) {
+            throw new AppException({
+                message: 'Invalid OTP code',
+                errors: [{ path: 'otp', message: 'Invalid OTP code' }]
+            }, HttpStatus.BAD_REQUEST);
+        }
+
+        return { message: 'OK', statusCode: HttpStatus.OK }
     };
 
     exists = (query: FilterQuery<OTP>) => this.otpModel.exists(query);

@@ -22,7 +22,8 @@ export class FeedService {
             { _id: { $in: participants.map((participant) => participant.groupId), $nin: existingIds } },
             {
                 _id: 1,
-                displayName: 1,
+                name: 1,
+                login: 1,
                 lastMessage: 1,
                 lastMessageSentAt: 1,
             },

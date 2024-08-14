@@ -8,6 +8,8 @@ import { CookiesService } from 'src/utils/services/cookies/cookies.service';
 import { IAuthController } from './types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
 import { RefreshGuard } from 'src/utils/guards/refresh.guard';
+import { ForgotDTO } from './dtos/auth.forgot.dto';
+import { AuthResetDTO } from './dtos/auth.reset.dto';
 
 @Controller(Routes.AUTH)
 export class AuthController implements IAuthController {
@@ -47,8 +49,19 @@ export class AuthController implements IAuthController {
 
        this.cookiesService.setAccessToken(res, accessToken);
 
-       return { message: 'refresh success', statusCode: HttpStatus.OK };
+       return { message: 'refresh success', status: HttpStatus.OK };
     }
+
+    @Post('forgot')
+    forgot(@Body() dto: ForgotDTO) {
+        return this.authService.forgot(dto);
+    }
+
+    @Post('reset')
+    reset(@Body() dto: AuthResetDTO) {
+        return this.authService.reset(dto);
+    }
+
 
     @Get('logout')
     @UseGuards(AccessGuard)

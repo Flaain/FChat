@@ -40,7 +40,7 @@ export class SessionService {
         if (!currentSession) {
             throw new AppException({ 
                 message: 'Session expired',
-                errorCode: AppExceptionCode.REFRESH_DENIED,
+                errorCode: AppExceptionCode.EXPIRED_ACCESS_TOKEN,
             }, HttpStatus.UNAUTHORIZED);
         }
 
