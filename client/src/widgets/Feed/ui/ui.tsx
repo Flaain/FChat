@@ -1,14 +1,22 @@
-import FeedItem from '@/features/FeedItem/ui/ui';
 import Typography from '@/shared/ui/Typography';
 import FeedSkeleton from './Skeletons/FeedSkeleton';
+import ConversationItem from './ConversationItem';
+import UserItem from './UserItem';
+import GroupItem from './GroupItem';
 import { UserSearch } from 'lucide-react';
 import { FeedProps } from '../model/types';
-import { feedMapper } from '../lib/utils/feedMapper';
+import { ConversationFeed, FeedItem, FeedTypes, GroupFeed, UserFeed } from '@/shared/model/types';
 
 const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, searchLoading, searchValue }: FeedProps) => {
     if (isFeedEmpty) return <FeedSkeleton skeletonsCount={3} />;
 
     const trimmedSearchValue = searchValue.trim();
+
+    const feedItems: Record<FeedTypes, (item: FeedItem) => React.ReactNode> = {
+        conversation: (item) => <ConversationItem key={item._id} conversation={item as ConversationFeed} />,
+        user: (item) => <UserItem user={item as UserFeed} key={item._id} />,
+        group: (item) => <GroupItem group={item as GroupFeed} key={item._id} />
+    }
 
     return !searchLoading && !filteredLocalResults.length && !filteredGlobalResults.length ? (
         <>
@@ -21,7 +29,7 @@ const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, search
         <>
             {!!filteredLocalResults.length && (
                 <ul className='flex flex-col gap-5 px-3 overflow-auto'>
-                    {feedMapper(filteredLocalResults).map((item) => <FeedItem key={item._id} {...item} />)}
+                    {filteredLocalResults.map((item) => feedItems[item.type](item))}
                 </ul>
             )}
             {searchLoading ? (
@@ -33,7 +41,7 @@ const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, search
                             Global results
                         </Typography>
                         <ul className='flex flex-col gap-5 overflow-auto px-3'>
-                            {feedMapper(filteredGlobalResults).map((item) => <FeedItem key={item._id} {...item} />)}
+                            {filteredGlobalResults.map((item) => feedItems[item.type](item))}
                         </ul>
                     </div>
                 )

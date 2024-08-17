@@ -5,20 +5,20 @@ import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { FeedItemProps } from '../model/types';
-import { FeedTypes } from '@/shared/model/types';
+import { ConversationFeed, PRESENCE } from '@/shared/model/types';
 
-const FeedItem = ({ login, name, to, type, lastMessage, draftId, isOnline, isOfficial }: FeedItemProps) => {
+const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
     const { state: { userId } } = useSession();
     const { drafts } = useLayoutContext();
 
-    const draft = draftId ? drafts.get(draftId) : undefined;
+    const recipient = conversation.recipient;
+    const draft = drafts.get(recipient._id);
 
     return (
         <li>
             <NavLink
-                state={{ name, isOfficial }}
-                to={to}
+                state={recipient}
+                to={`/conversation/${recipient._id}`}
                 className={({ isActive }) =>
                     cn(
                         'flex items-center gap-5 p-2 rounded-lg transition-colors duration-200 ease-in-out',
@@ -26,19 +26,17 @@ const FeedItem = ({ login, name, to, type, lastMessage, draftId, isOnline, isOff
                     )
                 }
             >
-                <AvatarByName name={name} size='lg' isOnline={isOnline} />
+                <AvatarByName name={recipient.name} size='lg' isOnline={recipient.presence === PRESENCE.ONLINE} />
                 <div className='flex flex-col items-start w-full'>
-                    <Typography as='h2' weight='medium' className={cn(isOfficial && 'flex items-center')}>
-                        {name}
-                        {isOfficial && (
+                    <Typography as='h2' weight='medium' className={cn(recipient.isOfficial && 'flex items-center')}>
+                        {recipient.name}
+                        {recipient.isOfficial && (
                             <Typography className='ml-2'>
                                 <Verified className='w-5 h-5' />
                             </Typography>
                         )}
                     </Typography>
-                    {type === FeedTypes.USER ? (
-                        <Typography variant='secondary'>@{login}</Typography>
-                    ) : draft?.state === 'send' ? (
+                    {draft?.state === 'send' ? (
                         <Typography as='p' variant='secondary' className='line-clamp-1'>
                             <Typography as='span' variant='error'>
                                 Draft:&nbsp;
@@ -46,17 +44,13 @@ const FeedItem = ({ login, name, to, type, lastMessage, draftId, isOnline, isOff
                             {draft.value}
                         </Typography>
                     ) : (
-                        !!lastMessage && (
+                        !!conversation.lastMessage && (
                             <div className='flex items-center w-full gap-5'>
                                 <Typography as='p' variant='secondary' className='line-clamp-1'>
-                                    {lastMessage.sender._id === userId
-                                        ? `You: ${lastMessage.text}`
-                                        : type === FeedTypes.GROUP
-                                        ? `${lastMessage.sender.name}: ${lastMessage.text}`
-                                        : lastMessage.text}
+                                    {conversation.lastMessage.sender._id === userId ? `You: ${conversation.lastMessage.text}` : conversation.lastMessage.text}
                                 </Typography>
                                 <Typography className='ml-auto' variant='secondary'>
-                                    {new Date(lastMessage.createdAt).toLocaleTimeString(navigator.language, {
+                                    {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(navigator.language, {
                                         hour: 'numeric',
                                         minute: 'numeric'
                                     })}
@@ -70,4 +64,4 @@ const FeedItem = ({ login, name, to, type, lastMessage, draftId, isOnline, isOff
     );
 };
 
-export default FeedItem;
+export default ConversationItem;
