@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Group } from './schemas/group.schema';
+import { Group, Invite } from './schemas/group.schema';
 import { FilterQuery, Model, ProjectionType, QueryOptions } from 'mongoose';
 import { UserService } from '../user/user.service';
 import { AppException } from 'src/utils/exceptions/app.exception';
@@ -8,11 +8,13 @@ import { loginExistError } from '../auth/constants';
 import { CreateGroupDTO } from './dtos/create.group.dto';
 import { UserDocument } from '../user/types';
 import { ParticipantService } from '../participant/participant.service';
+import { GroupView } from './types';
 
 @Injectable()
 export class GroupService {
     constructor(
         @InjectModel(Group.name) private readonly groupModel: Model<Group>,
+        @InjectModel(Invite.name) private readonly inviteModel: Model<Invite>,
         private readonly userService: UserService,
         private readonly participantService: ParticipantService,
     ) {}
@@ -54,4 +56,53 @@ export class GroupService {
 
         return { _id: group._id.toString() };
     };
+
+    getGroup = async ({ initiator, groupId, invite }: { initiator: UserDocument; groupId: string; invite: string }) => {
+        const group = await this.groupModel.findById(groupId);
+
+        if (!group) throw new AppException({ message: 'Group not found' }, HttpStatus.NOT_FOUND);
+
+        const participant = await this.participantService.findOneByPayload({ userId: initiator._id, groupId: group._id });
+
+        if (participant) {
+            const populatedGroup = await group.populate({
+                path: 'participants',
+                model: 'Participant',
+                populate: {
+                    path: 'userId',
+                    model: 'User',
+                    select: { login: 1, name: 1 },
+                },
+                match: { _id: { $ne: participant._id } },
+            });
+
+            return { ...populatedGroup.toObject(), displayAs: GroupView.PARTICIPANT };
+        }
+
+        if (group.isPrivate) {
+            const isInviteExist = invite ? await this.inviteModel.exists({ code: invite, groupId: group._id }) : false;
+            const { _id, isOfficial, name, login } = group.toObject();
+
+            return {
+                _id,
+                login,
+                name,
+                isOfficial,
+                displayAs: isInviteExist ? GroupView.JOIN : GroupView.REQUEST,
+            }
+        } else {
+            const populatedGroup = await group.populate({
+                path: 'participants',
+                model: 'Participant',
+                populate: {
+                    path: 'userId',
+                    model: 'User',
+                    select: { login: 1, name: 1 },
+                },
+                match: { _id: { $ne: participant._id } },
+            });
+
+            return { ...populatedGroup.toObject(), displayAs: GroupView.GUEST };
+        }
+    }
 }

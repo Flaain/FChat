@@ -35,6 +35,12 @@ export class User implements Omit<IUser, '_id'> {
 
     @Prop({ type: String })
     status?: string;
+
+    @Prop({ type: Date, default: () => new Date() })
+    createdAt: Date;
+
+    @Prop({ type: Date, default: () => new Date() })
+    updatedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

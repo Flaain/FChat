@@ -14,3 +14,8 @@ export const otpError: Pick<IAppException, 'message' | 'errors' | 'errorCode'> =
     message: 'An error occurred during the registration process. Please try again.',
     errors: [{ message: 'Invalid OTP code', path: 'otp' }],
 };
+
+export const incorrectPasswordError: Pick<IAppException, 'message' | 'errors'> = {
+    message: 'Incorrect password',
+    errors: [{ path: 'currentPassword', message: 'Incorrect password' }],
+};

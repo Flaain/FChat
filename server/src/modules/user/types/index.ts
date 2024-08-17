@@ -1,9 +1,8 @@
 import { z } from 'zod';
 import { User } from '../schemas/user.schema';
-import { userSearchSchema } from '../schemas/user.search.schema';
 import { Document, FilterQuery, ProjectionType, QueryOptions, SchemaTimestampsConfig, Types } from 'mongoose';
 import { HttpStatus } from '@nestjs/common';
-import { RequestWithUser } from 'src/utils/types';
+import { Pagination, RequestWithUser } from 'src/utils/types';
 import { userCheckSchema } from '../schemas/user.check.schema';
 import { SignupDTO } from 'src/modules/auth/dtos/auth.signup.dto';
 
@@ -13,11 +12,10 @@ export enum PRESENCE {
 }
 
 export type CheckType = 'email' | 'login';
-export type ActionPasswordType = 'set' | 'check';
 
 export type UserWithoutPassword = Omit<IUser, 'password'>;
 export type UserDocument = User & Document & SchemaTimestampsConfig;
-export type UserSearchParams = z.infer<typeof userSearchSchema> & { initiatorId: Types.ObjectId };
+export type UserSearchParams = Pagination & { initiatorId: Types.ObjectId };
 
 export interface IUser {
     _id: Types.ObjectId;
@@ -30,11 +28,14 @@ export interface IUser {
     isPrivate: boolean;
     isDeleted: boolean;
     isOfficial: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    presence: PRESENCE;
 }
 
 export interface IUserController {
     check(type: CheckType, email: string, login: string): Promise<{ status: HttpStatus; message: string }>;
-    search(req: RequestWithUser, query: string, page: number, limit: number): Promise<Array<Pick<IUser, '_id' | 'name' | 'login'>>>;
+    search(req: RequestWithUser, pagination: Pagination): Promise<Array<Pick<IUser, '_id' | 'name' | 'login'>>>;
 }
 
 export interface IUserService {

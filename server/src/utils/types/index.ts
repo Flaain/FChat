@@ -55,3 +55,9 @@ export interface ImplementAppException {
     getErrorCode(): AppExceptionCode;
     getStatusCode(): number;
 }
+
+export interface Pagination {
+    query: string;
+    page?: number;
+    limit?: number;
+}

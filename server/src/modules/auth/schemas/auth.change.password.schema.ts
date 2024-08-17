@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { passwordForSchema } from 'src/utils/constants';
 
-export const userPasswordSchema = z
+export const authChangePasswordSchema = z
     .strictObject({
         type: z.enum(['set', 'check']),
         currentPassword: passwordForSchema.optional(),
@@ -13,14 +13,14 @@ export const userPasswordSchema = z
                 (!currentPassword || !newPassword) && ctx.addIssue({
                     code: 'custom',
                     message: 'Please provide current and new password',
-                    path: ['currentPassword', 'newPassword']
+                    path: ['currentPassword', 'newPassword'],
                 });
             },
             check: () => {
                 !currentPassword && ctx.addIssue({
                     code: 'custom',
                     message: 'Please provide current password',
-                    path: ['currentPassword']
+                    path: ['currentPassword'],
                 });
             },
         };

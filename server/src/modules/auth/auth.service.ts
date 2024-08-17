@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { Types } from 'mongoose';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { IAuthService, WithUserAgent } from './types';
@@ -6,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JWT_KEYS } from 'src/utils/types';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { BcryptService } from 'src/utils/services/bcrypt/bcrypt.service';
-import { otpError } from './constants';
+import { incorrectPasswordError, otpError } from './constants';
 import { SigninDTO } from './dtos/auth.signin.dto';
 import { SignupDTO } from './dtos/auth.signup.dto';
 import { UserService } from '../user/user.service';
@@ -18,6 +19,7 @@ import { User } from '../user/schemas/user.schema';
 import { SessionDocument } from '../session/types';
 import { ForgotDTO } from './dtos/auth.forgot.dto';
 import { AuthResetDTO } from './dtos/auth.reset.dto';
+import { authChangePasswordSchema } from './schemas/auth.change.password.schema';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -109,6 +111,21 @@ export class AuthService implements IAuthService {
         user.password = hashedPassword;
 
         await user.save();
+
+        return { status: HttpStatus.OK, message: 'OK' };
+    }
+
+    changePassword = async ({ initiator, ...dto }: z.infer<typeof authChangePasswordSchema> & { initiator: UserDocument }) => {
+        const parsedQuery = authChangePasswordSchema.parse(dto);
+
+        if (!await this.bcryptService.compareAsync(dto.currentPassword, initiator.password)) {
+            throw new AppException(incorrectPasswordError, HttpStatus.CONFLICT);
+        }
+
+        if (parsedQuery.type === 'set') {
+            initiator.password = await this.bcryptService.hashAsync(dto.newPassword);
+            await Promise.all([initiator.save(), this.sessionService.deleteMany({ userId: initiator._id })]);
+        }
 
         return { status: HttpStatus.OK, message: 'OK' };
     }

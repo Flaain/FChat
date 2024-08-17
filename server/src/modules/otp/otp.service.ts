@@ -31,19 +31,7 @@ export class OtpService implements IOtpService {
 
         const otp = await this.otpModel.create({ email, otp: generatedOTP, type });
 
-        try {
-            await this.mailService.sendOtpEmail(generatedOTP, { 
-                from: {
-                    name: 'FCHAT',
-                    address: process.env.MAILER_USER
-                },
-                to: email, 
-                subject: 'Verification code',
-             });
-        } catch (error) {
-            console.log(error);
-            throw new AppException({ message: "Failed to send verification code" }, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        await this.mailService.sendOtpEmail({ otp: generatedOTP, type, email });
 
         return { retryDelay: new Date(otp.expiresAt).getTime() - Date.now() };
     };

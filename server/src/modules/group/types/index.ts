@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types } from 'mongoose';
 
 export interface IGroup {
     login: string;
@@ -9,4 +9,22 @@ export interface IGroup {
     isPrivate: boolean;
     isOfficial: boolean;
     lastMessage: Types.ObjectId;
+    createdAt: Date;
+    updatedAt: Date;
+    lastMessageSentAt: Date;
+}
+
+export interface InviteInterface {
+    code: string;
+    groupId: Types.ObjectId;
+    createdBy: Types.ObjectId;
+    createdAt: Date;
+    expiresAt: Date;
+}
+
+export enum GroupView {
+    PARTICIPANT = 'participant',
+    REQUEST = 'request',
+    JOIN = 'join',
+    GUEST = 'guest',
 }

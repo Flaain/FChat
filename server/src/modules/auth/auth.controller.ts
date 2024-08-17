@@ -3,13 +3,15 @@ import { SigninDTO } from './dtos/auth.signin.dto';
 import { SignupDTO } from './dtos/auth.signup.dto';
 import { AuthService } from './auth.service';
 import { RequestWithSession, RequestWithUser, Routes } from 'src/utils/types';
-import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { CookiesService } from 'src/utils/services/cookies/cookies.service';
-import { IAuthController } from './types';
+import { AuthChangePasswordType, IAuthController } from './types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
 import { RefreshGuard } from 'src/utils/guards/refresh.guard';
 import { ForgotDTO } from './dtos/auth.forgot.dto';
 import { AuthResetDTO } from './dtos/auth.reset.dto';
+import { z } from 'zod';
+import { authChangePasswordSchema } from './schemas/auth.change.password.schema';
 
 @Controller(Routes.AUTH)
 export class AuthController implements IAuthController {
@@ -52,7 +54,13 @@ export class AuthController implements IAuthController {
        return { message: 'refresh success', status: HttpStatus.OK };
     }
 
-    @Post('forgot')
+    @Post('password')
+    @UseGuards(AccessGuard)
+    password(@Req() req: RequestWithUser, @Body() dto: Omit<z.infer<typeof authChangePasswordSchema>, 'type'>, @Query('type') type: AuthChangePasswordType) {
+        return this.authService.changePassword({ initiator: req.user.doc, type, ...dto });
+    }
+
+    @Post('password/forgot')
     forgot(@Body() dto: ForgotDTO) {
         return this.authService.forgot(dto);
     }

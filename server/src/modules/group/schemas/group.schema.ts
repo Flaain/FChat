@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IGroup } from '../types';
+import { IGroup, InviteInterface } from '../types';
+import { DatesService } from 'src/utils/services/dates/dates.service';
 
 @Schema({ timestamps: true })
 export class Group implements IGroup {
@@ -25,11 +26,41 @@ export class Group implements IGroup {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Participant', required: true })
     owner: mongoose.Types.ObjectId;
 
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Invite' }] })
+    invites: Array<mongoose.Types.ObjectId>;
+
     @Prop({ type: Boolean, default: false })
     isPrivate: boolean;
 
     @Prop({ type: Boolean, default: false })
     isOfficial: boolean;
+
+    @Prop({ type: Date, default: () => new Date() })
+    createdAt: Date;
+
+    @Prop({ type: Date, default: () => new Date() })
+    updatedAt: Date;
+}
+
+export class Invite implements InviteInterface {
+    @Prop({ type: String, required: true })
+    code: string;
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Group', required: true })
+    groupId: mongoose.Types.ObjectId;
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Participant', required: true })
+    createdBy: mongoose.Types.ObjectId;
+
+    @Prop({ type: Date, expires: '7d' })
+    createdAt: Date;
+
+    @Prop({ type: Number, default: 0 })
+    inviteAmount: number;
+
+    @Prop({ type: Date, required: true, default: DatesService.oneWeekFromNow })
+    expiresAt: Date;
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);
+export const InviteSchema = SchemaFactory.createForClass(Invite);
