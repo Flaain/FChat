@@ -9,7 +9,7 @@ export enum FeedTypes {
 }
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
-export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams, signal?: AbortSignal };
+export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams; signal?: AbortSignal };
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
 export type MessageFormState = 'send' | 'edit';
 
@@ -71,7 +71,8 @@ export interface GroupParticipant {
     userId: string;
 }
 
-export interface ConversationParticipant extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence'> {}
+export interface ConversationParticipant
+    extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence'> {}
 
 export interface Conversation {
     _id: string;
@@ -167,12 +168,6 @@ export interface UseInfiniteScrollOptions extends IntersectionObserverInit {
     deps: React.DependencyList;
 }
 
-export interface Meta {
-    totalItems: number;
-    totalPages: number;
-    currentPage: number;
-}
-
 export type Feed = Array<ConversationFeed | GroupFeed | UserFeed>;
 
 export type FeedItem = ConversationFeed | GroupFeed | UserFeed;
@@ -201,7 +196,7 @@ export enum CONVERSATION_EVENTS {
     MESSAGE_SEND = 'conversation.message.send',
     MESSAGE_EDIT = 'conversation.message.edit',
     MESSAGE_DELETE = 'conversation.message.delete',
-    USER_PRESENCE = 'conversation.user.presence',
+    USER_PRESENCE = 'conversation.user.presence'
 }
 
 export enum FEED_EVENTS {
@@ -217,12 +212,12 @@ export enum FEED_EVENTS {
 export enum USER_EVENTS {
     PRESENCE = 'user.presence',
     ONLINE = 'user.online',
-    OFFLINE = 'user.offline',
+    OFFLINE = 'user.offline'
 }
 
 export enum PRESENCE {
     ONLINE = 'online',
-    OFFLINE = 'offline',
+    OFFLINE = 'offline'
 }
 
 export interface GetConversationsRes {
@@ -310,4 +305,21 @@ export interface IOS {
 
 export interface ICPU {
     architecture: string | undefined;
+}
+
+export interface Meta {
+    total_items: number;
+    current_page: number;
+    total_pages: number;
+    remaining_items: number;
+}
+
+export interface WithMeta<T> extends Meta {
+    items: T;
+}
+
+export interface Pagination {
+    query: string;
+    page?: number;
+    limit?: number;
 }

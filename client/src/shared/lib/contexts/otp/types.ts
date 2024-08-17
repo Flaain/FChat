@@ -12,10 +12,11 @@ export interface OtpContextProps {
     otp: OtpState;
     isResending: boolean;
     setOtp: React.Dispatch<React.SetStateAction<OtpState>>;
-    onResend: (params: OnResendParams) => void;
+    handleResend: (params: OnResendParams) => void;
 }
 
 export interface OnResendParams {
     email: string;
     type?: OtpType;
+    onSuccess?: (retryDelay: number) => void;
 }

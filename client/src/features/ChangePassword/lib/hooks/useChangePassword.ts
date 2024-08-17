@@ -31,8 +31,8 @@ export const useChangePassword = () => {
     });
 
     React.useEffect(() => {
-        form.setFocus('currentPassword');
-    }, [])
+        setTimeout(form.setFocus, 0, steps[step].fields[0]);
+    }, [step])
 
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         try {
@@ -48,12 +48,12 @@ export const useChangePassword = () => {
 
             const actions = {
                 0: async () => {
-                    await api.user.password({ type: ActionPasswordType.CHECK, currentPassword });
+                    await api.user.changePassword({ type: ActionPasswordType.CHECK, currentPassword });
 
                     setStep((prevState) => prevState + 1);
                 },
                 1: async () => {
-                    await api.user.password({ type: ActionPasswordType.SET, currentPassword, newPassword });
+                    await api.user.changePassword({ type: ActionPasswordType.SET, currentPassword, newPassword });
 
                     closeModal();
                     toast.success('Password changed successfully', { position: 'top-center' });

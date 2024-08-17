@@ -9,7 +9,7 @@ export class ForgotAPI extends API {
             body: JSON.stringify(body)
         };
 
-        return this._checkResponse<{ retryDelay: number }>(await fetch(`${this._baseUrl}/auth/forgot`, request), request);
+        return this._checkResponse<{ retryDelay: number }>(await fetch(`${this._baseUrl}/auth/password/forgot`, request), request);
     }
 
     reset = async (body: { email: string, otp: string, password: string }) => {

@@ -1,4 +1,4 @@
-import { toast } from 'sonner';
+import { ExternalToast, toast } from 'sonner';
 import { AppExceptionCode, IAppException } from '../model/types';
 
 export class AppException extends Error implements IAppException {
@@ -20,7 +20,7 @@ export class AppException extends Error implements IAppException {
         this.statusCode = error.statusCode;
     }
 
-    toastError(message?:string) {
-        toast.error(message || this.message || "Something went wrong", { position: "top-center" });
+    toastError(message?: string, options: ExternalToast = { position: 'top-center' }) {
+        toast.error(message || this.message || 'Something went wrong', options);
     }
 }

@@ -5,6 +5,6 @@ export interface OtpProps extends Omit<React.HTMLAttributes<HTMLInputElement>, '
     email: string;
     type?: OtpType;
     loading?: boolean;
-    onResend?: () => void;
+    onResend?: (retryDelay: number) => void;
     onComplete: (event?: React.FormEvent<HTMLFormElement>) => void;
 }

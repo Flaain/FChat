@@ -54,7 +54,7 @@ const Signin = () => {
                                         type='button'
                                         variant='link'
                                         onClick={() => setStage('forgot')}
-                                        className='ml-auto p-0'
+                                        className='ml-auto p-0 opacity-50 hover:opacity-100 transition-all ease-in-out duration-200'
                                     >
                                         Forgot password?
                                     </Button>

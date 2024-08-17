@@ -10,13 +10,14 @@ export const OtpProvider = ({ children }: { children: React.ReactNode }) => {
 
     const timerRef = React.useRef<NodeJS.Timeout>();
 
-    const onResend = React.useCallback(async ({ email, type }: OnResendParams) => {
+    const handleResend = React.useCallback(async ({ email, type, onSuccess }: OnResendParams) => {
         try {
             setIsResending(true);
 
             const { data: { retryDelay } } = await api.otp.create({ email, type: type ?? otp.type });
 
             setOtp((prevState) => ({ ...prevState, type: type ?? otp.type, retryDelay }));
+            onSuccess?.(retryDelay);
         } catch (error) {
             console.error(error);
             error instanceof AppException && error.toastError('Cannot resend OTP code');
@@ -40,5 +41,5 @@ export const OtpProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [otp.retryDelay]);
 
-    return <OtpContext.Provider value={{ otp, isResending, setOtp, onResend }}>{children}</OtpContext.Provider>;
+    return <OtpContext.Provider value={{ otp, isResending, setOtp, handleResend }}>{children}</OtpContext.Provider>;
 };

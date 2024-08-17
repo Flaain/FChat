@@ -36,6 +36,10 @@ export const useForgot = () => {
         shouldFocusError: true
     });
 
+    React.useEffect(() => {
+        setTimeout(form.setFocus, 0, steps[step].fields[0]);
+    }, [])
+
     const checkNextAvailability = () => {
         return (
             !form.getValues(steps[step].fields).every(Boolean) ||
@@ -70,7 +74,10 @@ export const useForgot = () => {
                 2: async () => {
                     await forgotAPI.reset({ email, password, otp });
 
-                    toast.success('Password changed successfully', { position: 'top-center' });
+                    toast.success('Password changed successfully', { 
+                        position: 'top-center', 
+                        description: 'You can now sign in with your new password' 
+                    });
                     
                     setStage('signin');
                 }

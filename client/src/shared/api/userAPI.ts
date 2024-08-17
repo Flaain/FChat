@@ -4,14 +4,14 @@ import { BasicAPIResponse, SearchUser, UserPasswordParams } from '../model/types
 import { AppException } from './error';
 
 export class UserAPI extends API {
-    password = async ({ type, ...body }: UserPasswordParams) => {
+    changePassword = async ({ type, ...body }: UserPasswordParams) => {
         const request: RequestInit = {
             method: 'POST',
             headers: this._headers,
             credentials: this._cretedentials,
             body: JSON.stringify(body)
         }
-        const url = new URL(this._baseUrl + `/user/password`);
+        const url = new URL(this._baseUrl + `/auth/password`);
 
         url.searchParams.append('type', type);
 
