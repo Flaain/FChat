@@ -23,4 +23,14 @@ export class ConversationAPI extends API {
 
         return this._checkResponse<GetConversation>(await fetch(url, request), request);
     };
+
+    delete = async (recipientId: string) => {
+        const request: RequestInit = {
+            method: 'DELETE',
+            credentials: this._cretedentials,
+            headers: this._headers,
+        };
+
+        return this._checkResponse<{ conversationId: string }>(await fetch(this._baseUrl + `/conversation/delete/${recipientId}`, request), request);
+    };
 }

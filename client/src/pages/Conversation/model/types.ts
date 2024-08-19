@@ -16,4 +16,6 @@ export interface ConversationContextProps {
     isRefetching: boolean;
     refetch: () => Promise<void>;
     setConversation: React.Dispatch<React.SetStateAction<ConversationWithMeta>>;
+    setShowRecipientDetails: React.Dispatch<React.SetStateAction<boolean>>;
+    showRecipientDetails: boolean
 }

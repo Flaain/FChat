@@ -15,6 +15,7 @@ export const useConversation = () => {
     const [error, setError] = React.useState<string | null>(null);
     const [isRefetching, setIsRefetching] = React.useState(false);
     const [isPreviousMessagesLoading, setIsPreviousMessagesLoading] = React.useState(false);
+    const [showRecipientDetails, setShowRecipientDetails] = React.useState(false);
 
     const abortControllerRef = React.useRef<AbortController | null>(null);
 
@@ -160,6 +161,8 @@ export const useConversation = () => {
         isRefetching,
         isPreviousMessagesLoading,
         setConversation,
+        setShowRecipientDetails,
+        showRecipientDetails,
         getPreviousMessages,
         refetch: () => getConversation('refetch')
     };

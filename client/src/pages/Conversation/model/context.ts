@@ -10,4 +10,6 @@ export const ConversationContext = React.createContext<ConversationContextProps>
     refetch: async () => {},
     error: null,
     setConversation: () => {},
+    setShowRecipientDetails: () => {},
+    showRecipientDetails: false
 });

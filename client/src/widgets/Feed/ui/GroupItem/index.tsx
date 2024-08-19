@@ -27,7 +27,7 @@ const GroupItem = ({ group }: { group: GroupFeed }) => {
                     )
                 }
             >
-                <AvatarByName name={group.name} size='lg' />
+                <AvatarByName size='lg' />
                 <div className='flex flex-col items-start w-full'>
                     <Typography as='h2' weight='medium' className={cn(group.isOfficial && 'flex items-center')}>
                         {group.name}
