@@ -49,9 +49,9 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                     ) : (
                         !!conversation.lastMessage && (
                             <div className='flex items-center w-full gap-5'>
-                                    <ReactMarkdown className='dark:text-primary-white/30 text-primary-gray line-clamp-1'>
-                                        {conversation.lastMessage.sender._id === userId ? `You: ${conversation.lastMessage.text}` : conversation.lastMessage.text}
-                                    </ReactMarkdown>
+                                <ReactMarkdown className='break-all dark:text-primary-white/30 text-primary-gray line-clamp-1'>
+                                    {conversation.lastMessage.sender._id === userId ? `You: ${conversation.lastMessage.text}` : conversation.lastMessage.text}
+                                </ReactMarkdown>
                                 <Typography className='ml-auto' variant='secondary'>
                                     {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(navigator.language, {
                                         hour: 'numeric',
