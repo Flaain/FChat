@@ -8,7 +8,7 @@ const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCursor, isF
     const { groupedMessages, listRef, lastMessageRef } = useMessagesList({ messages, canFetch, getPreviousMessages });
 
     return (
-        <ul ref={listRef} className='flex flex-col w-full px-5 mb-auto gap-5 h-svh overflow-auto'>
+        <ul ref={listRef} className='flex flex-col w-full px-5 mb-auto gap-5 h-svh overflow-auto outline-none'>
             {nextCursor && (
                 <li className='flex justify-center items-center'>
                     <Button
@@ -26,7 +26,7 @@ const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCursor, isF
             )}
             {groupedMessages.map((messages, index, array) => (
                 <MessageGroup
-                    key={messages[0]._id} // <-- not sure about this
+                    key={messages[0]._id}
                     messages={messages}
                     isLastGroup={index === array.length - 1}
                     lastMessageRef={lastMessageRef}

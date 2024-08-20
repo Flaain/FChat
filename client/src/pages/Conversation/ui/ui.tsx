@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react';
 import { ConversationStatuses } from '../model/types';
 import { PRESENCE } from '@/shared/model/types';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
+import OutletDetails from '@/widgets/OutletDetails/ui/ui';
 
 const Conversation = () => {
     const {
@@ -54,7 +55,10 @@ const Conversation = () => {
                                 : `last seen ${getRelativeTimeString(data.conversation.recipient.lastSeenAt, 'en-US')}`
                         }
                         dropdownMenu={<ConversationDDM />}
-                        onClick={() => setShowRecipientDetails((prevState) => !prevState)}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setShowRecipientDetails((prevState) => !prevState)
+                        }}
                     />
                     {data.conversation.messages.length ? (
                         <MessagesList
@@ -75,7 +79,7 @@ const Conversation = () => {
                     )}
                     <SendMessage type='conversation' queryId={data.conversation.recipient._id} />
                 </div>
-                {showRecipientDetails && <div className='max-xl:absolute max-xl:top-0 max-xl:right-0 z-[999] px-5 py-3 dark:bg-primary-dark-50 h-full max-w-[390px] w-full border-l-2 border-primary-dark-50'>test details block</div>}
+                {showRecipientDetails && <OutletDetails onClose={() => setShowRecipientDetails(false)} />}
             </OutletContainer>
         )
     );

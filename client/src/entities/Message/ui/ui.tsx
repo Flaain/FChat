@@ -1,8 +1,8 @@
 import React from 'react';
+import MessageLink from '@/shared/ui/MessageLink';
 import Typography from '@/shared/ui/Typography';
 import MessageContextMenu from './MessageContextMenu';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import Markdown from 'markdown-to-jsx';
 import { cn } from '@/shared/lib/utils/cn';
 import { Check, CheckCheck } from 'lucide-react';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
@@ -25,18 +25,28 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
 
         return (
             <ContextMenu>
-                <li {...rest} ref={ref} className={cn('flex', isMessageFromMe ? 'self-end' : 'self-start', className)}>
-                    <ContextMenuTrigger className={cn('flex gap-2', !isMessageFromMe && isFirst && 'flex-col')}>
+                <ContextMenuTrigger asChild>
+                    <li
+                        {...rest}
+                        ref={ref}
+                        className={cn(
+                            'flex gap-2',
+                            isMessageFromMe ? 'self-end' : 'self-start',
+                            !isMessageFromMe && isFirst && 'flex-col',
+                            className
+                        )}
+                    >
                         {!isMessageFromMe && isFirst && (
                             <Typography variant='primary' weight='semibold'>
                                 {sender.name}
                             </Typography>
                         )}
-                        <div
+                        <Typography
+                            as='p'
                             className={cn(
-                                'px-5 py-1 relative max-w-[500px] flex flex-col items-end rounded-ss-[15px] rounded-se-[15px]',
+                                'break-all px-5 py-1 relative max-w-[500px] rounded-ss-[15px] rounded-se-[15px]',
                                 {
-                                    [`self-end dark:bg-primary-white dark:text-primary-dark-200 ${
+                                    [`dark:bg-primary-white dark:text-primary-dark-200 ${
                                         isLast
                                             ? 'before:-right-5 dark:before:shadow-[-13px_0_0_#F9F9F9] rounded-es-[15px] rounded-ee-[0px] relative before:absolute before:w-[20px] before:h-[15px] before:bg-transparent before:-bottom-0 before:rounded-bl-3xl'
                                             : 'rounded-es-[15px] rounded-ee-[5px]'
@@ -49,56 +59,34 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                                 }
                             )}
                         >
-                            <ReactMarkdown
-                                components={{
-                                    a: (props) => <a target='_blank' rel='noreferrer' className='text-primary-blue hover:underline' {...props} />,
-                                }}
-                                remarkPlugins={[remarkGfm]}
-                                className={cn(
-                                    'inline-flex flex-col break-all',
-                                    !isMessageFromMe
-                                        ? 'self-start dark:text-primary-white text-primary-dark-200'
-                                        : 'self-end dark:text-primary-dark-200 text-primary-white'
-                                )}
+                            <Markdown
+                                options={{ wrapper: React.Fragment, overrides: { a: { component: MessageLink } } }}
                             >
                                 {text}
-                            </ReactMarkdown>
+                            </Markdown>
                             <Typography
-                                className={cn('flex self-end items-center gap-5')}
+                                size='sm'
+                                className={cn(
+                                    'flex justify-end items-center gap-2',
+                                    isMessageFromMe
+                                        ? 'dark:text-primary-dark-50/20 text-primary-white'
+                                        : 'dark:text-primary-white/20'
+                                )}
                                 title={`${createTime.toLocaleString()}${
                                     hasBeenEdited ? `\nEdited: ${editTime.toLocaleString()}` : ''
                                 }`}
                             >
-                                <Typography
-                                    className={cn('flex items-center gap-2',
-                                        isMessageFromMe
-                                            ? 'dark:text-primary-dark-50/20 text-primary-white'
-                                            : 'dark:text-primary-white/20'
-                                    )}
-                                >
-                                    {getRelativeTimeString(createTime, 'en-US')}
-                                    {hasBeenEdited && (
-                                        <Typography
-                                            className={cn(
-                                                isMessageFromMe
-                                                    ? 'dark:text-primary-dark-50/20 text-primary-white'
-                                                    : 'dark:text-primary-white/20'
-                                            )}
-                                            size='sm'
-                                        >
-                                            , edited
-                                        </Typography>
-                                    )}
-                                    {hasBeenRead ? (
-                                        <CheckCheck className={stylesForBottomIcon} />
-                                    ) : (
-                                        <Check className={stylesForBottomIcon} />
-                                    )}
-                                </Typography>
+                                {getRelativeTimeString(createTime, 'en-US')}
+                                {hasBeenEdited && ', edited'}
+                                {hasBeenRead ? (
+                                    <CheckCheck className={stylesForBottomIcon} />
+                                ) : (
+                                    <Check className={stylesForBottomIcon} />
+                                )}
                             </Typography>
-                        </div>
-                    </ContextMenuTrigger>
-                </li>
+                        </Typography>
+                    </li>
+                </ContextMenuTrigger>
                 <MessageContextMenu message={message} isMessageFromMe={isMessageFromMe} />
             </ContextMenu>
         );

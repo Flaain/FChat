@@ -1,5 +1,4 @@
 import AvatarByName from '@/shared/ui/AvatarByName';
-import ReactMarkdown from 'react-markdown';
 import Typography from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
@@ -49,9 +48,9 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                     ) : (
                         !!conversation.lastMessage && (
                             <div className='flex items-center w-full gap-5'>
-                                <ReactMarkdown className='break-all dark:text-primary-white/30 text-primary-gray line-clamp-1'>
+                                <Typography className='break-all dark:text-primary-white/30 text-primary-gray line-clamp-1'>
                                     {conversation.lastMessage.sender._id === userId ? `You: ${conversation.lastMessage.text}` : conversation.lastMessage.text}
-                                </ReactMarkdown>
+                                </Typography>
                                 <Typography className='ml-auto' variant='secondary'>
                                     {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(navigator.language, {
                                         hour: 'numeric',
