@@ -6,9 +6,12 @@ import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { ConversationFeed, PRESENCE } from '@/shared/model/types';
+import Markdown from 'markdown-to-jsx';
 
 const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
-    const { state: { userId } } = useSession();
+    const {
+        state: { userId }
+    } = useSession();
     const { drafts } = useLayoutContext();
 
     const recipient = conversation.recipient;
@@ -49,13 +52,20 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                         !!conversation.lastMessage && (
                             <div className='flex items-center w-full gap-5'>
                                 <Typography className='break-all dark:text-primary-white/30 text-primary-gray line-clamp-1'>
-                                    {conversation.lastMessage.sender._id === userId ? `You: ${conversation.lastMessage.text}` : conversation.lastMessage.text}
+                                    <Markdown>
+                                        {conversation.lastMessage.sender._id === userId
+                                            ? `You: ${conversation.lastMessage.text}`
+                                            : conversation.lastMessage.text}
+                                    </Markdown>
                                 </Typography>
                                 <Typography className='ml-auto' variant='secondary'>
-                                    {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(navigator.language, {
-                                        hour: 'numeric',
-                                        minute: 'numeric'
-                                    })}
+                                    {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(
+                                        navigator.language,
+                                        {
+                                            hour: 'numeric',
+                                            minute: 'numeric'
+                                        }
+                                    )}
                                 </Typography>
                             </div>
                         )

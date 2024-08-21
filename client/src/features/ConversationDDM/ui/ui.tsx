@@ -7,13 +7,10 @@ const ConversationDDM = () => {
 
     return (
         <DropdownMenu onOpenChange={setIsMenuOpen} open={isMenuOpen}>
-            <DropdownMenuTrigger
-                onClick={() => setIsMenuOpen((prev) => !prev)}
-                className='hover:opacity-50 transition-opacity ease-in-out duration-200 outline-none'
-            >
+            <DropdownMenuTrigger className='hover:opacity-50 transition-opacity ease-in-out duration-200 outline-none'>
                 <EllipsisVertical className='dark:text-primary-white text-primary-dark-50' />
             </DropdownMenuTrigger>
-            <DropdownMenuContent loop align="end" className='border-none rounded w-[200px] h-auto dark:bg-primary-dark-50 z-[999]'>
+            <DropdownMenuContent onKeyUp={(event) => event.stopPropagation()} loop align="end" className='border-none rounded w-[200px] h-auto dark:bg-primary-dark-50 z-[999]'>
                 <DropdownMenuItem className='flex items-center gap-5 cursor-pointer rounded dark:focus:bg-primary-dark-100/20 text-primary-white'>
                     <svg
                         xmlns='http://www.w3.org/2000/svg'

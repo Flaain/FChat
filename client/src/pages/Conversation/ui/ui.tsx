@@ -6,13 +6,14 @@ import OutletContainer from '@/shared/ui/OutletContainer';
 import OutletError from '@/shared/ui/OutletError';
 import ConversationDDM from '@/features/ConversationDDM/ui/ui';
 import OutletHeader from '@/widgets/OutletHeader/ui/ui';
+import OutletDetails from '@/widgets/OutletDetails/ui/ui';
+import RecipientDetails from '@/widgets/RecipientDetails/ui/ui';
 import { useConversationContext } from '../lib/hooks/useConversationContext';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { ConversationStatuses } from '../model/types';
-import { PRESENCE } from '@/shared/model/types';
+import { FeedTypes, PRESENCE } from '@/shared/model/types';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
-import OutletDetails from '@/widgets/OutletDetails/ui/ui';
 
 const Conversation = () => {
     const {
@@ -23,7 +24,8 @@ const Conversation = () => {
         isRefetching,
         getPreviousMessages,
         isPreviousMessagesLoading,
-        setShowRecipientDetails,
+        closeDetails,
+        openDetails,
         showRecipientDetails
     } = useConversationContext();
 
@@ -42,6 +44,8 @@ const Conversation = () => {
         loading: <ConversationSkeleton />
     };
 
+    const isOnline = data?.conversation.recipient.presence === PRESENCE.ONLINE;
+
     return (
         components[status as keyof typeof components] ?? (
             <OutletContainer>
@@ -49,16 +53,9 @@ const Conversation = () => {
                     <OutletHeader
                         name={data.conversation.recipient.name}
                         isOfficial={data.conversation.recipient.isOfficial}
-                        description={
-                            data.conversation.recipient.presence === PRESENCE.ONLINE
-                                ? 'online'
-                                : `last seen ${getRelativeTimeString(data.conversation.recipient.lastSeenAt, 'en-US')}`
-                        }
+                        description={isOnline ? 'online' : `last seen ${getRelativeTimeString(data.conversation.recipient.lastSeenAt, 'en-US')}`}
                         dropdownMenu={<ConversationDDM />}
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            setShowRecipientDetails((prevState) => !prevState)
-                        }}
+                        onClick={openDetails}
                     />
                     {data.conversation.messages.length ? (
                         <MessagesList
@@ -79,7 +76,19 @@ const Conversation = () => {
                     )}
                     <SendMessage type='conversation' queryId={data.conversation.recipient._id} />
                 </div>
-                {showRecipientDetails && <OutletDetails onClose={() => setShowRecipientDetails(false)} />}
+                {showRecipientDetails && (
+                    <OutletDetails
+                        name={data.conversation.recipient.name}
+                        description={isOnline ? 'online' : `last seen at ${new Date(data.conversation.recipient.lastSeenAt).toLocaleTimeString(navigator.language, { 
+                            hour: 'numeric', 
+                            minute: 'numeric' 
+                        })}`}
+                        info={<RecipientDetails recipient={data.conversation.recipient} />}
+                        shouldCloseOnClickOutside={false}
+                        type={FeedTypes.CONVERSATION}
+                        onClose={closeDetails}
+                    />
+                )}
             </OutletContainer>
         )
     );

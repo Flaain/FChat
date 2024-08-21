@@ -1,6 +1,6 @@
 import React from 'react';
 import { api } from '@/shared/api';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ConversationStatuses, ConversationWithMeta } from '../../model/types';
 import { Conversation, IMessage, CONVERSATION_EVENTS, PRESENCE } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
@@ -10,14 +10,34 @@ export const useConversation = () => {
     const { id: recipientId } = useParams<{ id: string }>();
     const { socket } = useLayoutContext();
 
+    
+    const [searchParams, setSearchParams] = useSearchParams();
     const [data, setConversation] = React.useState<ConversationWithMeta>(null!);
     const [status, setStatus] = React.useState<ConversationStatuses>('loading');
     const [error, setError] = React.useState<string | null>(null);
     const [isRefetching, setIsRefetching] = React.useState(false);
     const [isPreviousMessagesLoading, setIsPreviousMessagesLoading] = React.useState(false);
-    const [showRecipientDetails, setShowRecipientDetails] = React.useState(false);
+    const [showRecipientDetails, setShowRecipientDetails] = React.useState(searchParams.get('details') === 'open');
 
     const abortControllerRef = React.useRef<AbortController | null>(null);
+
+    const openDetails = React.useCallback(() => {
+        setShowRecipientDetails(true);
+        setSearchParams((prevState) => {
+            prevState.set('details', 'open');
+
+            return prevState;
+        })
+    }, [])
+    
+    const closeDetails = React.useCallback(() => {
+        setShowRecipientDetails(false);
+        setSearchParams((prevState) => {
+            prevState.delete('details');
+    
+            return prevState;
+        })
+    }, [])
 
     const onUserPresence = React.useCallback(({ presence, lastSeenAt }: { presence: PRESENCE, lastSeenAt?: string }) => {
         setConversation((prevState) => ({ 
@@ -160,7 +180,8 @@ export const useConversation = () => {
         error,
         isRefetching,
         isPreviousMessagesLoading,
-        setConversation,
+        openDetails,
+        closeDetails,
         setShowRecipientDetails,
         showRecipientDetails,
         getPreviousMessages,

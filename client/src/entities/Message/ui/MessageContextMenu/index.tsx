@@ -47,7 +47,7 @@ const MessageContextMenu = ({ message, isMessageFromMe }: { message: IMessage; i
     ];
 
     return (
-        <ContextMenuContent className='w-52 dark:bg-primary-dark-150 bg-primary-white border border-solid dark:border-primary-dark-200 border-primary-white rounded-md flex flex-col gap-2 p-1'>
+        <ContextMenuContent loop className='z-[999] w-52 dark:bg-primary-dark-150 bg-primary-white border border-solid dark:border-primary-dark-200 border-primary-white rounded-md flex flex-col gap-2 p-1'>
             {contextMenu.map(({ text, icon, onClick, condition }, index) => condition && (
                 <ContextMenuItem
                     key={index}
