@@ -1,13 +1,13 @@
 import React from 'react';
-import MessageLink from '@/shared/ui/MessageLink';
 import Typography from '@/shared/ui/Typography';
 import MessageContextMenu from './MessageContextMenu';
-import { compiler } from 'markdown-to-jsx';
 import { cn } from '@/shared/lib/utils/cn';
 import { Check, CheckCheck } from 'lucide-react';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
 import { ContextMenu, ContextMenuTrigger } from '@/shared/ui/context-menu';
 import { MessageProps } from '../model/types';
+import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
+import { PartOfCompilerUse } from '@/shared/model/types';
 
 const Message = React.forwardRef<HTMLLIElement, MessageProps>(
     ({ message, isFirst, isLast, isMessageFromMe, className, ...rest }, ref) => {
@@ -59,7 +59,7 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                                 }
                             )}
                         >
-                            {compiler(text, { wrapper: null, overrides: { a: { component: MessageLink } } })}
+                            {markdownCompiler(text, PartOfCompilerUse.MESSAGE)}
                             <Typography
                                 size='sm'
                                 className={cn(

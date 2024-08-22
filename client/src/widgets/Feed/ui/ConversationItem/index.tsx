@@ -5,8 +5,9 @@ import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { ConversationFeed, PRESENCE } from '@/shared/model/types';
+import { ConversationFeed, PRESENCE, PartOfCompilerUse } from '@/shared/model/types';
 import Markdown from 'markdown-to-jsx';
+import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 
 const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
     const {
@@ -52,11 +53,9 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                         !!conversation.lastMessage && (
                             <div className='flex items-center w-full gap-5'>
                                 <Typography className='break-all dark:text-primary-white/30 text-primary-gray line-clamp-1'>
-                                    <Markdown>
-                                        {conversation.lastMessage.sender._id === userId
+                                    {markdownCompiler(conversation.lastMessage.sender._id === userId
                                             ? `You: ${conversation.lastMessage.text}`
-                                            : conversation.lastMessage.text}
-                                    </Markdown>
+                                            : conversation.lastMessage.text, PartOfCompilerUse.FEED)}
                                 </Typography>
                                 <Typography className='ml-auto' variant='secondary'>
                                     {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(

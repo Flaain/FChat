@@ -1,6 +1,7 @@
 import { Session } from '@/entities/session/model/types';
 import { ModalConfig } from '../lib/contexts/modal/types';
 import { User } from '../lib/contexts/profile/types';
+import { MarkdownToJSX } from "markdown-to-jsx";
 
 export enum FeedTypes {
     CONVERSATION = 'conversation',
@@ -16,10 +17,20 @@ export enum OutletDetailsTypes {
     LOGIN = 'login'
 }
 
+export enum PartOfCompilerUse {
+    FEED = 'feed',
+    MESSAGE = 'message',
+    MESSAGE_TOP_BAR = 'messageTopBar',
+}
+
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams; signal?: AbortSignal };
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
 export type MessageFormState = 'send' | 'edit';
+
+export interface CompilerOptions extends MarkdownToJSX.Options {
+    shouldStayRaw?: Array<keyof HTMLElementTagNameMap>;
+}
 
 export interface OutletDetailsButtonProps {
     type: OutletDetailsTypes;
