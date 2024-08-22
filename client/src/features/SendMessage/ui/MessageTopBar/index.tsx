@@ -1,4 +1,6 @@
+import React from 'react';
 import Typography from '@/shared/ui/Typography';
+import { compiler } from 'markdown-to-jsx';
 import { Button } from '@/shared/ui/Button';
 import { X } from 'lucide-react';
 import { MessageTopBarProps } from '../../model/types';
@@ -20,7 +22,12 @@ const MessageTopBar = ({
                 </Typography>
                 {description && (
                     <Typography as='p' variant='secondary' className='line-clamp-1'>
-                        {description}
+                        {compiler(description, {
+                            wrapper: null,
+                            createElement: (tag, props, ...children) => {
+                                return tag === 'a' ? <>{children}</> : React.createElement(tag, props, ...children);
+                            }
+                        })}
                     </Typography>
                 )}
             </div>

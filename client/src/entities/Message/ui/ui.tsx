@@ -2,7 +2,7 @@ import React from 'react';
 import MessageLink from '@/shared/ui/MessageLink';
 import Typography from '@/shared/ui/Typography';
 import MessageContextMenu from './MessageContextMenu';
-import Markdown from 'markdown-to-jsx';
+import { compiler } from 'markdown-to-jsx';
 import { cn } from '@/shared/lib/utils/cn';
 import { Check, CheckCheck } from 'lucide-react';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
@@ -59,11 +59,7 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                                 }
                             )}
                         >
-                            <Markdown
-                                options={{ wrapper: React.Fragment, overrides: { a: { component: MessageLink } } }}
-                            >
-                                {text}
-                            </Markdown>
+                            {compiler(text, { wrapper: null, overrides: { a: { component: MessageLink } } })}
                             <Typography
                                 size='sm'
                                 className={cn(

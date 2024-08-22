@@ -51,11 +51,11 @@ const MessageContextMenu = ({ message, isMessageFromMe }: { message: IMessage; i
             {contextMenu.map(({ text, icon, onClick, condition }, index) => condition && (
                 <ContextMenuItem
                     key={index}
-                    className='flex items-center justify-between gap-2 dark:text-primary-white text-primary-dark-200 rounded-md dark:hover:bg-primary-dark-200 focus:bg-primary-gray dark:focus:bg-primary-dark-200 hover:bg-primary-gray'
+                    className='flex items-center gap-5 dark:text-primary-white text-primary-dark-200 rounded-md dark:hover:bg-primary-dark-200 focus:bg-primary-gray dark:focus:bg-primary-dark-200 hover:bg-primary-gray'
                     onClick={onClick}
                 >
-                    {text}
                     {icon}
+                    {text}
                 </ContextMenuItem>
             ))}
         </ContextMenuContent>
