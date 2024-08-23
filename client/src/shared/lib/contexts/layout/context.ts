@@ -5,6 +5,7 @@ export const LayoutContext = React.createContext<LayoutContextProps>({
     openSheet: false,
     socket: null,
     isConnected: false,
+    textareaRef: { current: null },
     drafts: new Map(),
     setDrafts: () => {},
     setOpenSheet: () => {},

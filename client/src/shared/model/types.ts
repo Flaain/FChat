@@ -26,7 +26,7 @@ export enum PartOfCompilerUse {
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams; signal?: AbortSignal };
 export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
-export type MessageFormState = 'send' | 'edit';
+export type MessageFormState = 'send' | 'edit' | 'reply';
 
 export interface CompilerOptions extends MarkdownToJSX.Options {
     shouldStayRaw?: Array<keyof HTMLElementTagNameMap>;
@@ -206,7 +206,7 @@ export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' 
 
 export type UserFeed = SearchUser & { type: FeedTypes.USER };
 
-export interface Drafts {
+export interface Draft {
     value: string;
     state: MessageFormState;
     selectedMessage?: IMessage;
@@ -358,6 +358,17 @@ export interface EmojiMartData {
 export interface Category {
     id: string;
     emojis: string[];
+}
+
+export interface EmojiData {
+    aliases: Array<string>;
+    id: string;
+    keywords: Array<string>;
+    name: string;
+    native: string;
+    shortcodes: string;
+    skin: number;
+    unified: string;
 }
 
 export interface Emoji {

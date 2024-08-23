@@ -69,7 +69,7 @@ const Conversation = () => {
                     ) : (
                         <Typography
                             variant='primary'
-                            className='my-auto px-5 py-2 rounded-full dark:bg-primary-dark-50 bg-primary-white'
+                            className='m-auto px-5 py-2 rounded-full dark:bg-primary-dark-50 bg-primary-white'
                         >
                             No messages yet
                         </Typography>

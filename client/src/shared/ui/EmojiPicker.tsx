@@ -1,12 +1,12 @@
 import Picker from '@emoji-mart/react';
 import { useTheme } from '@/entities/theme/lib/hooks/useTheme';
-import { Emoji } from '../model/types';
+import { EmojiData } from '../model/types';
 
 const EmojiPicker = ({
     onClickOutside,
     onEmojiSelect
 }: {
-    onEmojiSelect: (emoji: Emoji) => void;
+    onEmojiSelect: (emoji: EmojiData) => void;
     onClickOutside: () => void;
 }) => {
     const { theme } = useTheme();

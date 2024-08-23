@@ -5,30 +5,27 @@ import { api } from '@/shared/api';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { MessageFormState } from '@/shared/model/types';
+import { EmojiData, MessageFormState } from '@/shared/model/types';
 import { UseMessageParams } from '../../model/types';
-import { Emoji } from '@emoji-mart/data';
 
 export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
     const { data: { conversation } } = useConversationContext();
-    const { drafts, setDrafts } = useLayoutContext();
+    const { drafts, setDrafts, textareaRef } = useLayoutContext();
 
     const [isLoading, setIsLoading] = React.useState(false);
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false);
     const [value, setValue] = React.useState(drafts.get(queryId!)?.value ?? '');
 
-    const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
     const currentDraft = drafts.get(queryId);
 
-    const onEmojiSelect = React.useCallback(({ native }: Emoji) => {
+    const onEmojiSelect = React.useCallback(({ native }: EmojiData) => {
         setValue((prev) => prev + native);
         textareaRef.current?.focus();
     }, []);
 
-    React.useEffect(() => {
-        setValue(drafts.get(queryId!)?.value ?? '');
-    }, [queryId, drafts]);
+    React.useEffect(() => { textareaRef.current?.focus() }, [])
+    React.useEffect(() => { setValue(currentDraft?.value ?? '') }, [currentDraft]);
 
     React.useEffect(() => {
         if (!textareaRef.current) return;

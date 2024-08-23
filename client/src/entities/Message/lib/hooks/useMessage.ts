@@ -1,7 +1,7 @@
 import React from 'react';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
-import { IMessage } from '@/shared/model/types';
+import { Draft, IMessage } from '@/shared/model/types';
 import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
@@ -37,19 +37,19 @@ export const useMessage = (message: IMessage) => {
         }
     }, [conversation, _id]);
 
-    const handleMessageEdit = React.useCallback(async () => {
+    const handleContextAction = React.useCallback((draft: Draft) => {
         setDrafts((prevState) => {
             const newState = new Map([...prevState]);
 
-            newState.set(conversation.recipient._id, { value: text, state: 'edit', selectedMessage: message });
+            newState.set(conversation.recipient._id, draft);
 
             return newState;
         })
-    }, [message]);
+    }, [])
 
     return {
         handleCopyToClipboard,
         handleMessageDelete,
-        handleMessageEdit
+        handleContextAction
     };
 };

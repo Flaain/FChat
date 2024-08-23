@@ -3,12 +3,13 @@ import EmojiPickerFallback from '@emoji-mart/react';
 import MessageTopBar from './MessageTopBar';
 import { cn } from '@/shared/lib/utils/cn';
 import { Button } from '@/shared/ui/Button';
-import { Edit2Icon, Paperclip, SendHorizonal, Smile } from 'lucide-react';
+import { Edit2Icon, Paperclip, Reply, SendHorizonal, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSendMessage } from '../lib/hooks/useSendMessage';
 import { EmojiPicker } from '@/shared/model/view';
 import { UseMessageParams } from '../model/types';
 import { MessageFormState } from '@/shared/model/types';
+import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 
 const SendMessage = ({ type, queryId }: UseMessageParams) => {
     const {
@@ -21,10 +22,10 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
         onEmojiSelect,
         isEmojiPickerOpen,
         isLoading,
-        textareaRef,
         currentDraft,
         value
     } = useSendMessage({ type, queryId });
+    const { textareaRef } = useLayoutContext();
 
     const trimmedValueLength = value.trim().length;
 
@@ -38,6 +39,15 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
                 preventClose={isLoading}
             />
         ),
+        reply: (
+            <MessageTopBar
+                title={`Reply to ${currentDraft?.selectedMessage?.sender?.name}`}
+                mainIconSlot={<Reply className='dark:text-primary-white text-primary-gray' />}
+                onClose={setDefaultState}
+                description={currentDraft?.selectedMessage?.text}
+                preventClose={isLoading}
+            />
+        )
     };
 
     return (
@@ -49,7 +59,9 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
             >
                 <Button
                     variant='text'
+                    size='icon'
                     type='button'
+                    className='px-4'
                     disabled={isLoading}
                     onClick={() => toast.info('Coming soon!', { position: 'top-center' })}
                 >
@@ -64,14 +76,15 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
                     disabled={isLoading}
                     onKeyDown={onKeyDown}
                     placeholder='Write a message...'
-                    className='overscroll-contain py-[24px] disabled:opacity-50 leading-5 min-h-[70px] scrollbar-hide max-h-[120px] overflow-auto flex pr-11 box-border w-full transition-colors duration-200 ease-in-out resize-none appearance-none ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none focus:placeholder:opacity-0 focus:placeholder:translate-x-2 outline-none ring-0 placeholder:transition-all placeholder:duration-300 placeholder:ease-in-out dark:bg-primary-dark-100 border-none text-white dark:placeholder:text-white placeholder:opacity-50'
+                    className='overscroll-contain disabled:opacity-50 leading-5 py-[25px] min-h-[70px] scrollbar-hide max-h-[120px] overflow-auto flex box-border w-full transition-colors duration-200 ease-in-out resize-none appearance-none ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none focus:placeholder:opacity-0 focus:placeholder:translate-x-2 outline-none ring-0 placeholder:transition-all placeholder:duration-300 placeholder:ease-in-out dark:bg-primary-dark-100 border-none text-white dark:placeholder:text-white placeholder:opacity-50'
                 ></textarea>
                 <Button
                     variant='text'
                     type='button'
+                    size='icon'
                     disabled={isLoading}
-                    className={cn('transition-transform duration-200 ease-in-out', {
-                        'translate-x-20': !trimmedValueLength,
+                    className={cn('px-4 transition-transform duration-200 ease-in-out', {
+                        'translate-x-10': !trimmedValueLength,
                         'translate-x-0': trimmedValueLength || currentDraft?.state === 'edit'
                     })}
                     onClick={(e) => {e.stopPropagation(); setIsEmojiPickerOpen((prev) => !prev)}}
@@ -90,9 +103,10 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
                 )}
                 <Button
                     variant='text'
+                    size='icon'
                     disabled={(!trimmedValueLength && currentDraft?.state === 'send') || isLoading}
                     className={cn(
-                        'opacity-0 pointer-events-none invisible scale-50 transition-all duration-100 ease-in-out',
+                        'px-4 opacity-0 pointer-events-none invisible scale-50 transition-all duration-100 ease-in-out',
                         (!!trimmedValueLength || currentDraft?.state === 'edit') &&
                             'opacity-100 visible scale-100 pointer-events-auto'
                     )}
