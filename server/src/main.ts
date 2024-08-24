@@ -13,12 +13,12 @@ import { cookieParser } from './utils/middlewares/cookieParser';
         const PORT = process.env.PORT ?? 3000;
 
         app.use(cookieParser); // <-- right now for my needs i can use my custom parser without lib
-        
+
         app.useGlobalPipes(new ZodValidationPipe());
         app.useGlobalFilters(new AllExceptionFilter(app.get(HttpAdapterHost), app.get(CookiesService)));
-        
+
         app.enableCors({ origin: process.env.CLIENT_URL, credentials: true });
-        
+
         app.use('/health', (_, res: Response) => {
             res.json({ status: true });
         });

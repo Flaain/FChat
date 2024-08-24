@@ -3,25 +3,28 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { OTP } from './schemas/otp.schema';
 import { AppException } from 'src/utils/exceptions/app.exception';
-import { IOtpService, OtpType } from './types';
+import { IOtpService, OtpDocument, OtpType } from './types';
 import { UserService } from '../user/user.service';
 import { MailService } from '../mail/mail.service';
 import { OtpVerifyDTO } from './dtos/otp.verify.dto';
+import { BaseService } from 'src/utils/services/base/base.service';
 
 @Injectable()
-export class OtpService implements IOtpService {
+export class OtpService extends BaseService<OtpDocument, OTP> implements IOtpService {
     constructor(
-        @InjectModel(OTP.name) private readonly otpModel: Model<OTP>,
+        @InjectModel(OTP.name) private readonly otpModel: Model<OtpDocument>,
         private readonly userService: UserService,
         private readonly mailService: MailService
-    ) {}
+    ) {
+        super(otpModel);
+    }
 
-    create = async ({ email, type }: Pick<OTP, 'email' | 'type'>) => {
+    createOtp = async ({ email, type }: Pick<OTP, 'email' | 'type'>) => {
         if (type === OtpType.EMAIL_VERIFICATION && await this.userService.exists({ email })) {
             throw new AppException({ message: 'Cannot create OTP code' }, HttpStatus.CONFLICT);
         }
 
-        const otpExists = await this.otpModel.findOne({ email, type }, { expiresAt: 1 });
+        const otpExists = await this.findOne({ email, type }, { expiresAt: 1 });
 
         if (otpExists && new Date(otpExists.expiresAt).getTime() > Date.now()) {
             return { retryDelay: new Date(otpExists.expiresAt).getTime() - Date.now() };
@@ -29,7 +32,7 @@ export class OtpService implements IOtpService {
 
         const generatedOTP = Math.floor(100000 + Math.random() * 900000);
 
-        const otp = await this.otpModel.create({ email, otp: generatedOTP, type });
+        const otp = await this.create({ email, otp: generatedOTP, type });
 
         await this.mailService.sendOtpEmail({ otp: generatedOTP, type, email });
 
@@ -46,8 +49,4 @@ export class OtpService implements IOtpService {
 
         return { message: 'OK', statusCode: HttpStatus.OK }
     };
-
-    exists = (query: FilterQuery<OTP>) => this.otpModel.exists(query);
-
-    findOneAndDelete = (query: FilterQuery<OTP>) => this.otpModel.findOneAndDelete(query);
 }

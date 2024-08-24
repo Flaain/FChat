@@ -1,11 +1,22 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AccessGuard } from 'src/utils/guards/access.guard';
 import { Pagination, RequestWithUser, Routes } from 'src/utils/types';
 import { FeedService } from './feed.service';
+import { Pagination as PaginationDecorator } from 'src/utils/decorators/pagination';
+import { PaginationResolver } from 'src/utils/services/pagination/patination.resolver';
+import { User } from '../user/schemas/user.schema';
+import { Group } from '../group/schemas/group.schema';
 
 @Controller(Routes.FEED)
-export class FeedController {
-    constructor(private readonly feedService: FeedService) {}
+export class FeedController extends PaginationResolver {
+    private readonly types: Record<string, string> = {
+        [`${User.name}s`.toLowerCase()]: 'user',
+        [`${Group.name}s`.toLowerCase()]: 'group',
+    };
+
+    constructor(private readonly feedService: FeedService) {
+        super();
+    }
 
     @Get()
     @UseGuards(AccessGuard)
@@ -15,7 +26,16 @@ export class FeedController {
 
     @Get('search')
     @UseGuards(AccessGuard)
-    search(@Req() req: RequestWithUser, @Query() { query, limit, page }: Pagination) {
-        return this.feedService.search({ initiatorId: req.user.doc._id, query, page, limit });
+    async search(@Req() req: RequestWithUser, @PaginationDecorator() params: Pagination) {
+        const [users, groups] = await this.feedService.search({ ...params, initiatorId: req.user.doc._id });
+
+        return this.wrapPagination({ 
+            ...params, 
+            items: [...users, ...groups],
+            onSuccess: (items) => items.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).map((item) => ({ 
+                ...item.toObject(), 
+                type: this.types[item.collection.name] 
+            }))
+        });
     }
 }

@@ -7,10 +7,10 @@ import { User } from 'src/modules/user/schemas/user.schema';
 
 export interface IConversation {
     _id: Types.ObjectId;
-    lastMessageSentAt: Date;
+    lastMessageSentAt?: Date;
     lastMessage?: Types.ObjectId;
     participants: Array<Types.ObjectId>;
-    messages: Array<Types.ObjectId>;
+    messages?: Array<Types.ObjectId>;
 }
 
 export type ConversationDocument = Conversation & Document & SchemaTimestampsConfig;
@@ -31,23 +31,22 @@ export interface CreateConversationReturn {
 }
 
 export interface IConversationService {
-    createConversation: (params: ConversationCreateDTO & { initiatorId: Types.ObjectId }) => Promise<CreateConversationReturn>;
-    getConversation: (params: { initiator: UserDocument; recipientId: string; cursor?: string }) => Promise<GetConversationReturn>;
-    deleteConversation: (params: { initiatorId: Types.ObjectId; conversationId: string }) => Promise<{ _id: Types.ObjectId }>;
-    findOneByPayload: (
-        payload: FilterQuery<Conversation>, 
-        projection?: ProjectionType<Conversation>, 
-        options?: QueryOptions<Conversation>
-    ) => Promise<IConversation | null>;
-    findManyByPayload: (
-        payload: FilterQuery<Conversation>, 
-        projection?: ProjectionType<Conversation>, 
-        options?: QueryOptions<Conversation>
-    ) => Promise<Array<IConversation>>;
+    createConversation: (
+        params: ConversationCreateDTO & { initiatorId: Types.ObjectId },
+    ) => Promise<CreateConversationReturn>;
+    getConversation: (params: {
+        initiator: UserDocument;
+        recipientId: string;
+        cursor?: string;
+    }) => Promise<GetConversationReturn>;
+    deleteConversation: (params: {
+        initiatorId: Types.ObjectId;
+        recipientId: string;
+    }) => Promise<{ _id: Types.ObjectId; recipientId: string }>;
 }
 
 export interface IConversationController {
     create: (req: RequestWithUser, dto: ConversationCreateDTO) => Promise<CreateConversationReturn>;
-    delete: (req: RequestWithUser, id: string) => Promise<{ _id: Types.ObjectId }>;
+    delete: (req: RequestWithUser, id: string) => Promise<{ conversationId: Types.ObjectId }>;
     getConversation(req: RequestWithUser, recipientId: string, cursor?: string): Promise<GetConversationReturn>;
 }

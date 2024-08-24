@@ -1,24 +1,21 @@
 import UAParser from 'ua-parser-js';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Session } from './schemas/session.schema';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { AppExceptionCode, Providers } from 'src/utils/types';
-import { DropSessionParams } from './types';
+import { DropSessionParams, SessionDocument } from './types';
+import { BaseService } from 'src/utils/services/base/base.service';
 
 @Injectable()
-export class SessionService {
+export class SessionService extends BaseService<SessionDocument, Session> {
     constructor(
-        @InjectModel(Session.name) private readonly sessionModel: Model<Session>,
+        @InjectModel(Session.name) private readonly sessionModel: Model<SessionDocument>,
         @Inject(Providers.PARSER_CLIENT) private readonly UAParser: UAParser,
-    ) {}
-
-    create = ({ userId, userAgent, expiresAt }: Omit<Session, 'createdAt'>) => this.sessionModel.create({ userId, userAgent, expiresAt });
-    findById = (id: Types.ObjectId | string) => this.sessionModel.findById(id);
-    findOneByPayload = (payload: FilterQuery<Session>) => this.sessionModel.findOne(payload);
-    findManyByPayload = (payload: FilterQuery<Session>) => this.sessionModel.find(payload);
-    deleteMany = (payload: FilterQuery<Session>) => this.sessionModel.deleteMany(payload);
+    ) {
+        super(sessionModel);
+    }
 
     validate = async (_id: Types.ObjectId | string) => {
         const session = await this.findById(_id);
@@ -57,7 +54,7 @@ export class SessionService {
     };
 
     dropSession = async ({ initiatorUserId, initiatorSessionId, sessionId }: DropSessionParams) => {
-        const session = await this.sessionModel.findOneAndDelete({ 
+        const session = await this.findOneAndDelete({ 
             userId: initiatorUserId,
             $and: [{ _id: sessionId }, { _id: { $ne: initiatorSessionId } }]
         });
@@ -68,6 +65,6 @@ export class SessionService {
     }
 
     terminateAllSessions = async ({ initiatorUserId, initiatorSessionId }: Omit<DropSessionParams, 'sessionId'>) => {
-        return this.sessionModel.deleteMany({ userId: initiatorUserId, _id: { $ne: initiatorSessionId } });
+        return this.deleteMany({ userId: initiatorUserId, _id: { $ne: initiatorSessionId } });
     }
 }

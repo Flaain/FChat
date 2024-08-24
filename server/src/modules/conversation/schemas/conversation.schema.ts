@@ -8,19 +8,19 @@ export class Conversation implements Omit<IConversation, '_id'> {
     participants: Array<mongoose.Types.ObjectId>;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }] })
-    messages: Array<mongoose.Types.ObjectId>;
+    messages?: Array<mongoose.Types.ObjectId>;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Message' })
-    lastMessage: mongoose.Types.ObjectId;
+    lastMessage?: mongoose.Types.ObjectId;
 
     @Prop({ type: Date, required: true, default: () => new Date() })
-    lastMessageSentAt: Date;
+    lastMessageSentAt?: Date;
 
     @Prop({ type: Date, default: () => new Date() })
-    createdAt: Date;
+    createdAt?: Date;
 
     @Prop({ type: Date, default: () => new Date() })
-    updatedAt: Date;
+    updatedAt?: Date;
 }
 
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);

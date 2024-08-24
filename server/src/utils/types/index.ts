@@ -1,13 +1,13 @@
-import { SessionDocument } from "src/modules/session/types";
-import { UserDocument } from "src/modules/user/types";
+import { SessionDocument } from 'src/modules/session/types';
+import { UserDocument } from 'src/modules/user/types';
 
-export type RequestWithUser = Request & { user: { doc: UserDocument, sessionId: string } };
+export type RequestWithUser = Request & { user: { doc: UserDocument; sessionId: string } };
 export type RequestWithSession = Request & { user: { session: SessionDocument } };
 
 export enum Routes {
     AUTH = 'auth',
-    USER = "user",
-    GROUP = "group",
+    USER = 'user',
+    GROUP = 'group',
     FEED = 'feed',
     SESSION = 'session',
     CONVERSATION = 'conversation',
@@ -58,6 +58,21 @@ export interface ImplementAppException {
 
 export interface Pagination {
     query: string;
-    page?: number;
-    limit?: number;
+    page: number;
+    limit: number;
+}
+
+export interface PaginationWrapper<T> {
+    page: number;
+    limit: number;
+    items: Array<T>;
+    onSuccess?: (items: Array<T>) => Array<any>;
+}
+
+export interface WrappedInPagination<T> {
+    items: Array<T>;
+    total_items: number;
+    current_page: number;
+    total_pages: number;
+    remaining_items: number;
 }

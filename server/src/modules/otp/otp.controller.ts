@@ -11,7 +11,7 @@ export class OtpController implements IOtpController {
 
     @Post()
     create(@Body() { email, type }: OtpCreateDTO) {
-        return this.otpService.create({ email, type });
+        return this.otpService.createOtp({ email, type });
     }
 
     @Post('verify')

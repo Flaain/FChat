@@ -5,15 +5,21 @@ import { CheckType, IUserController } from './types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
 import { UserStatusDTO } from './dtos/user.status.dto';
 import { UserNameDto } from './dtos/user.name.dto';
+import { PaginationResolver } from 'src/utils/services/pagination/patination.resolver';
+import { Pagination as PaginationDecorator } from 'src/utils/decorators/pagination';
 
 @Controller(Routes.USER)
-export class UserController implements IUserController {
-    constructor(private readonly userService: UserService) {}
+export class UserController extends PaginationResolver implements IUserController {
+    constructor(private readonly userService: UserService) {
+        super();
+    }
 
     @Get('search')
     @UseGuards(AccessGuard)
-    search(@Req() req: RequestWithUser, @Query() { query, page, limit }: Pagination) {
-        return this.userService.search({ initiatorId: req.user.doc._id, query, page, limit });
+    async search(@Req() req: RequestWithUser, @PaginationDecorator() params: Pagination) {
+        const items = await this.userService.search({ initiatorId: req.user.doc._id, ...params });
+
+        return this.wrapPagination({ ...params, items });
     }
 
     @Get('check')

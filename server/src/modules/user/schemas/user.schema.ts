@@ -19,28 +19,28 @@ export class User implements Omit<IUser, '_id'> {
     birthDate: Date;
 
     @Prop({ type: Boolean, required: true, default: false })
-    isPrivate: boolean;
+    isPrivate?: boolean;
 
     @Prop({ type: String, enum: PRESENCE, required: true, default: PRESENCE.OFFLINE })
-    presence: PRESENCE;
+    presence?: PRESENCE;
 
-    @Prop({ type: Boolean, default: false })
-    isOfficial: boolean;
+    @Prop({ type: Boolean, required: true, default: false })
+    isOfficial?: boolean;
 
     @Prop({ type: Date, required: true, default: () => new Date() })
-    lastSeenAt: Date;
+    lastSeenAt?: Date;
 
     @Prop({ type: Boolean, default: false })
-    isDeleted: boolean;
+    isDeleted?: boolean;
 
     @Prop({ type: String })
     status?: string;
 
     @Prop({ type: Date, default: () => new Date() })
-    createdAt: Date;
+    createdAt?: Date;
 
     @Prop({ type: Date, default: () => new Date() })
-    updatedAt: Date;
+    updatedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

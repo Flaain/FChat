@@ -10,17 +10,23 @@ export class Message implements Omit<IMessage, '_id'> {
     @Prop({ required: true })
     text: string;
 
-    @Prop({ required: true, default: false })
-    hasBeenRead: boolean;
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Message' })
+    replyTo?: mongoose.Types.ObjectId;
+
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message'}] })
+    replies?: Array<mongoose.Types.ObjectId>;
 
     @Prop({ required: true, default: false })
-    hasBeenEdited: boolean;
+    hasBeenRead?: boolean;
+
+    @Prop({ required: true, default: false })
+    hasBeenEdited?: boolean;
 
     @Prop({ type: Date, default: () => new Date() })
-    createdAt: Date;
+    createdAt?: Date;
 
     @Prop({ type: Date, default: () => new Date() })
-    updatedAt: Date;
+    updatedAt?: Date;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

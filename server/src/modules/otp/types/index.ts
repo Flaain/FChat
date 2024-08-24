@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { OTP } from '../schemas/otp.schema';
-import { FilterQuery, Types } from 'mongoose';
+import { SchemaTimestampsConfig } from 'mongoose';
 import { OtpCreateSchema } from '../schemas/otp.create.schema';
+import { Document } from 'mongoose';
 
 export enum OtpType {
     EMAIL_VERIFICATION = 'email_verification',
@@ -9,18 +9,18 @@ export enum OtpType {
     PASSWORD_RESET = 'password_reset',
 }
 
-export interface OtpDocument {
+export interface IOtp {
     email: string;
-    otp: string;
+    otp: number;
     type: OtpType;
     expiresAt?: Date;
     createdAt?: Date;
 }
 
+export type OtpDocument = IOtp & Document & SchemaTimestampsConfig;
+
 export interface IOtpService {
-    create: (dto: Pick<OtpDocument, 'email' | 'type'>) => Promise<{ retryDelay?: number }>;
-    exists: (query: FilterQuery<OTP>) => Promise<{ _id: Types.ObjectId }>;
-    findOneAndDelete: (query: FilterQuery<OTP>) => Promise<{ _id: Types.ObjectId }>;
+    createOtp: (dto: Pick<IOtp, 'email' | 'type'>) => Promise<{ retryDelay?: number }>;
 }
 
 export interface IOtpController {

@@ -34,8 +34,9 @@ import { CookiesService } from 'src/utils/services/cookies/cookies.service';
 import { JWT_KEYS } from 'src/utils/types';
 import { ConversationService } from '../conversation/conversation.service';
 import { PRESENCE } from '../user/types';
+import { config } from 'src/config';
 
-@WebSocketGateway({ cors: { origin: 'http://localhost:5173', credentials: true } })
+@WebSocketGateway({ cors: { origin: config().CLIENT_URL, credentials: true } })
 export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     private server: Server;
@@ -60,7 +61,7 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
                 
                 if (!accessToken) return next(new AppException({ message: 'Unauthorized' }, HttpStatus.UNAUTHORIZED));
 
-                const user = await this.userService.findOneByPayload({
+                const user = await this.userService.findOne({
                     _id: this.jwtService.verify<{ userId: string }>(accessToken, {
                         secret: this.configService.get(JWT_KEYS.ACCESS_TOKEN_SECRET),
                     }).userId,
@@ -85,7 +86,7 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
 
         const initiatorId = client.data.user._id;
 
-        const { 0: conversations } = await Promise.all([this.conversationService.findManyByPayload(
+        const { 0: conversations } = await Promise.all([this.conversationService.find(
             { participants: { $in: initiatorId } },
             { participants: 1 },
             {
@@ -123,7 +124,11 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
         client.data.user.lastSeenAt = new Date();
 
         this.gatewayManager.removeSocket({ userId: client.data.user._id.toString(), socket: client });
-        this.changeUserStatus({ presence: PRESENCE.OFFLINE, lastSeenAt: client.data.user.lastSeenAt }, client);
+        
+        !this.gatewayManager.sockets.has(client.data.user._id.toString()) && this.changeUserStatus({ 
+            presence: PRESENCE.OFFLINE, 
+            lastSeenAt: client.data.user.lastSeenAt 
+        }, client);
     }
 
     @SubscribeMessage(STATIC_CONVERSATION_EVENTS.JOIN)
@@ -131,7 +136,7 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
         const roomId = GatewayUtils.getRoomIdByParticipants([client.data.user._id.toString(), recipientId]);
 
         try {
-            const recipient = await this.userService.findOneByPayload({ _id: recipientId });
+            const recipient = await this.userService.findOne({ _id: recipientId });
 
             if (!recipient) throw new Error('recipient not found');
 

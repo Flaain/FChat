@@ -1,31 +1,32 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message } from './schemas/message.schema';
-import { FilterQuery, Model, ProjectionType, QueryOptions, Types } from 'mongoose';
-import { DeleteMessageType, EditMessageParams, SendMessageParams } from './types';
+import { Model, Types } from 'mongoose';
+import { DeleteMessageType, EditMessageParams, MessageDocument, SendMessageParams } from './types';
 import { ConversationService } from '../conversation/conversation.service';
 import { AppException } from 'src/utils/exceptions/app.exception';
+import { BaseService } from 'src/utils/services/base/base.service';
 
 @Injectable()
-export class MessageService {
+export class MessageService extends BaseService<MessageDocument, Message> {
     constructor(
-        @InjectModel(Message.name) private readonly messageModel: Model<Message>,
+        @InjectModel(Message.name) private readonly messageModel: Model<MessageDocument>,
         private readonly conversationService: ConversationService,
-    ) {}
+    ) {
+        super(messageModel);
+    }
 
     send = async ({ recipientId, message, initiatorId }: SendMessageParams) => {
-        const conversation = await this.conversationService.findOneByPayload({
-            participants: { $all: [new Types.ObjectId(recipientId), initiatorId] },
-        });
+        const conversation = await this.conversationService.findOne({ participants: { $all: [new Types.ObjectId(recipientId), initiatorId] } });
 
         if (!conversation) throw new AppException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
 
-        const newMessage = new this.messageModel({ sender: initiatorId, text: message.trim() });
+        const newMessage = await this.create({ sender: initiatorId, text: message.trim() });
 
         Object.assign(conversation, {
-            lastMessage: newMessage._id,
-            lastMessageSentAt: newMessage.createdAt.toISOString(),
-            messages: [...conversation.messages, newMessage._id],
+           lastMessage: newMessage._id,
+           lastMessageSentAt: newMessage.createdAt,
+           messages: [...conversation.messages, newMessage._id],
         });
 
         const { 0: savedMessage } = await Promise.all([newMessage.save(), conversation.save()]);
@@ -36,7 +37,7 @@ export class MessageService {
     };
 
     edit = async ({ messageId, initiatorId, message: newMessage, conversationId, recipientId }: EditMessageParams) => {
-        const conversation = await this.conversationService.findOneByPayload(
+        const conversation = await this.conversationService.findOne(
             {
                 _id: conversationId,
                 participants: { $all: [initiatorId, new Types.ObjectId(recipientId)] },
@@ -47,10 +48,10 @@ export class MessageService {
 
         if (!conversation) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
 
-        const message = await this.messageModel.findOneAndUpdate(
+        const message = await this.findOneAndUpdate(
             { _id: messageId, sender: initiatorId, text: { $ne: newMessage.trim() } },
             { text: newMessage.trim(), hasBeenEdited: true },
-            { runValidators: true, new: true, populate: { path: 'sender', model: 'User', select: 'name email' } },
+            { runValidators: true, populate: { path: 'sender', model: 'User', select: 'name email' } },
         );
 
         if (!message) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
@@ -62,12 +63,12 @@ export class MessageService {
         };
     };
 
-    delete = async ({ conversationId, messageId, initiatorId }: DeleteMessageType) => {
-        const message = await this.messageModel.findOne({ _id: messageId, sender: initiatorId });
+    deleteMessage = async ({ conversationId, messageId, initiatorId }: DeleteMessageType) => {
+        const message = await this.findOne({ _id: messageId, sender: initiatorId });
 
         if (!message) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
 
-        const conversation = await this.conversationService.findOneByPayload(
+        const conversation = await this.conversationService.findOne(
             { _id: conversationId, participants: { $in: initiatorId }, messages: { $in: message._id } },
             { _id: 1, lastMessage: 1, lastMessageSentAt: 1, messages: 1, createdAt: 1 },
             { populate: { path: 'lastMessage', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name' } } },
@@ -80,7 +81,7 @@ export class MessageService {
         const isLastMessage = message._id.toString() === conversation.lastMessage._id.toString();
 
         if (isLastMessage) {
-            const lastMessage = await this.messageModel.findById(conversation.messages[conversation.messages.length - 1], undefined, { populate: { 
+            const lastMessage = await this.findById(conversation.messages[conversation.messages.length - 1], undefined, { populate: { 
                 path: 'sender', 
                 model: 'User', 
                 select: 'name' 
@@ -102,20 +103,8 @@ export class MessageService {
         
         return {
             isLastMessage,
-            lastMessage: conversation.lastMessage as unknown as Message,
+            lastMessage: conversation.lastMessage,
             lastMessageSentAt: conversation.lastMessageSentAt,
         };
     };
-
-    findOneByPayload = async (
-        payload: FilterQuery<Message>,
-        projection?: ProjectionType<Message>,
-        options?: QueryOptions<Message>,
-    ) => this.messageModel.findOne(payload, projection, options);
-
-    findManyByPayload = async (
-        payload: FilterQuery<Message>,
-        projection?: ProjectionType<Message>,
-        options?: QueryOptions<Message>,
-    ) => this.messageModel.find(payload, projection, options);
 }

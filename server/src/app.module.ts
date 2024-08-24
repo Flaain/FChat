@@ -14,7 +14,7 @@ import { GroupMessageModule } from './modules/group-message/group-message.module
 import { SessionModule } from './modules/session/session.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { FeedModule } from './modules/feed/feed.module';
-import { UAParserModule } from './utils/uaparser/uaparser.module';
+import { UAParserModule } from './utils/services/uaparser/uaparser.module';
 
 @Module({
     imports: [

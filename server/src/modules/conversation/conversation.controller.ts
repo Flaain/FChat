@@ -35,7 +35,15 @@ export class ConversationController implements IConversationController {
     @Delete('/delete/:id')
     @UseGuards(AccessGuard)
     async delete(@Req() req: RequestWithUser, @Param('id') id: string) {
-        return this.conversationService.deleteConversation({ initiatorId: req.user.doc._id, conversationId: id });
+        const { _id, recipientId } = await this.conversationService.deleteConversation({ initiatorId: req.user.doc._id, recipientId: id });
+        
+        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.DELETED, { 
+            recipientId,
+            initiatorId: req.user.doc._id.toString(), 
+            conversationId: _id.toString()
+        });
+
+        return { conversationId: _id };
     }
 
     @Get(':id')

@@ -44,7 +44,7 @@ export class AuthService implements IAuthService {
     }
 
     signin = async ({ login, password, userAgent }: WithUserAgent<SigninDTO>) => {
-        const user = await this.userService.findOneByPayload({ isDeleted: false, $or: [{ email: login }, { login }] });
+        const user = await this.userService.findOne({ isDeleted: false, $or: [{ email: login }, { login }] });
 
         if (!user) throw new AppException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
 
@@ -59,8 +59,8 @@ export class AuthService implements IAuthService {
         return { user: rest, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
     }
 
-    signup = async ({ password, otp, userAgent, ...dto }: WithUserAgent<SignupDTO>) => {     
-        if (await this.userService.findOneByPayload({$or: [{ email: dto.email }, { login: dto.login }] })) {
+    signup = async ({ password, otp, userAgent, ...dto }: WithUserAgent<Required<SignupDTO>>) => {     
+        if (await this.userService.findOne({$or: [{ email: dto.email }, { login: dto.login }] })) {
             throw new AppException({ 
                 message: 'An error occurred during the registration process. Please try again.'
             }, HttpStatus.BAD_REQUEST);
@@ -71,10 +71,10 @@ export class AuthService implements IAuthService {
         }
 
         const hashedPassword = await this.bcryptService.hashAsync(password);
-        const user = await this.userService.create({ ...dto, password: hashedPassword });
-        const session = await this.sessionService.create({ userId: user._id, userAgent });
+        const { password: _, ...restUser } = (await this.userService.create({ ...dto, password: hashedPassword })).toObject<User>();
+        const session = await this.sessionService.create({ userId: restUser._id, userAgent });
 
-        return { user, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
+        return { user: restUser, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: restUser._id.toString() }) };
     };
 
     refresh = async (session: SessionDocument) => ({
@@ -85,11 +85,11 @@ export class AuthService implements IAuthService {
     });
 
     forgot = async ({ email }: ForgotDTO) => {
-        if (!await this.userService.findOneByPayload({ email, isDeleted: false })) {
+        if (!await this.userService.findOne({ email, isDeleted: false })) {
             return { retryDelay: 120000 };
         };
 
-        return this.otpService.create({ email, type: OtpType.PASSWORD_RESET });
+        return this.otpService.createOtp({ email, type: OtpType.PASSWORD_RESET });
     };
 
     reset = async ({ email, otp, password }: AuthResetDTO) => {
@@ -100,7 +100,7 @@ export class AuthService implements IAuthService {
              }, HttpStatus.BAD_REQUEST);
         }
 
-        const user = await this.userService.findOneByPayload({ email, isDeleted: false });
+        const user = await this.userService.findOne({ email, isDeleted: false });
 
         if (!user) throw new AppException({ message: 'Something went wrong' }, HttpStatus.INTERNAL_SERVER_ERROR);
 
@@ -131,7 +131,7 @@ export class AuthService implements IAuthService {
     }
 
     logout = async ({ user, sessionId }: { user: UserDocument; sessionId: string }) => {
-        const session = await this.sessionService.findOneByPayload({ _id: sessionId, userId: user._id });
+        const session = await this.sessionService.findOne({ _id: sessionId, userId: user._id });
 
         if (!session) throw new AppException({ message: "Cannot find session" }, HttpStatus.UNAUTHORIZED);
 
@@ -141,7 +141,7 @@ export class AuthService implements IAuthService {
     }
 
     validate = async (id: Types.ObjectId | string) => {
-        const candidate = await this.userService.findOneByPayload({ _id: id, isDeleted: false });
+        const candidate = await this.userService.findOne({ _id: id, isDeleted: false });
 
         if (!candidate) throw new AppException({ message: "Unauthorized" }, HttpStatus.UNAUTHORIZED);
 

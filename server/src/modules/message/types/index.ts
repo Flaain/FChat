@@ -8,11 +8,11 @@ import { RequestWithUser } from "src/utils/types";
 export interface IMessage {
     _id: Types.ObjectId;
     sender: Types.ObjectId
-    hasBeenEdited: boolean;
-    hasBeenRead: boolean;
+    hasBeenEdited?: boolean;
+    hasBeenRead?: boolean;
     text: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface IMessageService {
@@ -22,11 +22,6 @@ export interface IMessageService {
 export interface IMessageController {
     send(req: RequestWithUser, dto: MessageSendDTO, recipientId: string): Promise<Message>;
     edit(req: RequestWithUser, dto: MessageEditDTO, messageId: string): Promise<Message>;
-    delete(req: RequestWithUser, dto: MessageDeleteDTO, messageId: string): Promise<{
-        isLastMessage: boolean;
-        lastMessage?: Message;
-        lastMessageSentAt: Date;
-    }>;
 }
 
 export type MessageDocument = Message & Document & SchemaTimestampsConfig;

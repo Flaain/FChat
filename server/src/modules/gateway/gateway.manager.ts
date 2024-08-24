@@ -16,6 +16,8 @@ export class GatewayManager {
     }
 
     removeSocket = ({ userId, socket }: { userId: string; socket: Socket }) => {
-        this._sockets.set(userId, this.sockets.get(userId).filter((client) => client.id !== socket.id));
+        const filteredSockets = this.sockets.get(userId).filter((client) => client.id !== socket.id);
+
+        filteredSockets.length ? this._sockets.set(userId, filteredSockets) : this._sockets.delete(userId);
     }
 }

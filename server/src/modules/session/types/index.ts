@@ -1,10 +1,14 @@
-import mongoose, { Types } from 'mongoose';
+import mongoose, { SchemaTimestampsConfig, Types } from 'mongoose';
+import { Session } from '../schemas/session.schema';
+import { Document } from 'mongoose';
 
-export interface SessionDocument {
+export type SessionDocument = Session & Document & SchemaTimestampsConfig;
+
+export interface ISession {
     _id: mongoose.Types.ObjectId;
     userId: mongoose.Types.ObjectId;
     userAgent?: string;
-    createdAt: Date;
+    createdAt?: Date;
     expiresAt?: Date;
 }
 

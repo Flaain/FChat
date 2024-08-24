@@ -1,7 +1,7 @@
 import { DynamicModule, Module, Provider } from '@nestjs/common';
 import { UAParser } from 'ua-parser-js';
-import { Providers } from '../types';
 import { UAParserService } from './uaparser.service';
+import { Providers } from 'src/utils/types';
 
 @Module({})
 export class UAParserModule {

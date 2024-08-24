@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { Request, Response } from 'express';
 import { SigninDTO } from './dtos/auth.signin.dto';
 import { SignupDTO } from './dtos/auth.signup.dto';
@@ -10,7 +11,6 @@ import { AccessGuard } from 'src/utils/guards/access.guard';
 import { RefreshGuard } from 'src/utils/guards/refresh.guard';
 import { ForgotDTO } from './dtos/auth.forgot.dto';
 import { AuthResetDTO } from './dtos/auth.reset.dto';
-import { z } from 'zod';
 import { authChangePasswordSchema } from './schemas/auth.change.password.schema';
 
 @Controller(Routes.AUTH)
@@ -21,11 +21,8 @@ export class AuthController implements IAuthController {
     ) {}
 
     @Post('signup')
-    async signup(@Body() dto: SignupDTO, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-        const { user, accessToken, refreshToken } = await this.authService.signup({
-            ...dto,
-            userAgent: req.headers['user-agent'],
-        });
+    async signup(@Body() dto: Required<SignupDTO>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+        const { user, accessToken, refreshToken } = await this.authService.signup({ ...dto, userAgent: req.headers['user-agent'] });
 
         this.cookiesService.setAuthCookies({ res, accessToken, refreshToken });
 
