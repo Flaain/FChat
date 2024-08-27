@@ -9,6 +9,7 @@ import { SessionTypes } from "@/entities/session/model/types";
 import { AppException } from "@/shared/api/error";
 import { signinSchema } from "../../model/schema";
 import { api } from "../../api";
+import { toast } from "sonner";
 
 export const useSignin = () => {
     const { setAuthStage } = useAuth();
@@ -42,7 +43,7 @@ export const useSignin = () => {
             dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { userId: profile._id } });
         } catch (error) {
             console.error(error);
-            error instanceof AppException && error.toastError();
+            error instanceof AppException ? error.toastError() : toast.error('Cannot signin. Please try again later', { position: 'top-center' });
         } finally {
             setLoading(false);
         }

@@ -5,9 +5,11 @@ import { ConversationStatuses, ConversationWithMeta } from '../../model/types';
 import { Conversation, IMessage, CONVERSATION_EVENTS, PRESENCE } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { AppException } from '@/shared/api/error';
+import { useProfile } from '@/shared/lib/hooks/useProfile';
 
 export const useConversation = () => {
     const { id: recipientId } = useParams<{ id: string }>();
+    const { profile } = useProfile();
     const { socket } = useLayoutContext();
 
     
@@ -49,6 +51,27 @@ export const useConversation = () => {
                     lastSeenAt: lastSeenAt || prevState.conversation.recipient.lastSeenAt,
                     presence
                 }
+            }
+        }))
+    }, [])
+
+    const onBlock = React.useCallback((id: string) => {
+        setConversation((prev) => ({
+            ...prev,
+            conversation: {
+                ...prev.conversation,
+                [id === profile._id ? 'isInitiatorBlocked' : 'isRecipientBlocked']: true
+            }
+        }))
+    }, [])
+
+    const onUnblock = React.useCallback((id: string) => {
+        setConversation((prev) => ({
+            ...prev,
+            conversation: {
+                ...prev.conversation,
+                isInitiatorBlocked: id === profile._id ? false : prev.conversation.isInitiatorBlocked,
+                isRecipientBlocked: id === prev.conversation.recipient._id ? false : prev.conversation.isRecipientBlocked
             }
         }))
     }, [])
@@ -148,6 +171,8 @@ export const useConversation = () => {
             // getConversation('refetch');
         })
         socket?.on(CONVERSATION_EVENTS.USER_PRESENCE, onUserPresence);
+        socket?.on(CONVERSATION_EVENTS.USER_BLOCK, onBlock);
+        socket?.on(CONVERSATION_EVENTS.USER_UNBLOCK, onUnblock);
 
         socket?.on(CONVERSATION_EVENTS.MESSAGE_SEND, onNewMessage);
         socket?.on(CONVERSATION_EVENTS.MESSAGE_EDIT, onEditMessage);
@@ -162,6 +187,8 @@ export const useConversation = () => {
             socket?.emit(CONVERSATION_EVENTS.LEAVE, { recipientId });
 
             socket?.off(CONVERSATION_EVENTS.USER_PRESENCE);
+            socket?.off(CONVERSATION_EVENTS.USER_BLOCK);
+            socket?.off(CONVERSATION_EVENTS.USER_UNBLOCK);
 
             socket?.off(CONVERSATION_EVENTS.MESSAGE_SEND);
             socket?.off(CONVERSATION_EVENTS.MESSAGE_EDIT);
@@ -183,6 +210,7 @@ export const useConversation = () => {
         openDetails,
         closeDetails,
         setShowRecipientDetails,
+        setConversation,
         showRecipientDetails,
         getPreviousMessages,
         refetch: () => getConversation('refetch')

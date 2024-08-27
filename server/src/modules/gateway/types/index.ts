@@ -12,12 +12,14 @@ export enum STATIC_CONVERSATION_EVENTS {
     CREATED = 'conversation.created',
     DELETED = 'conversation.deleted',
     PRESENCE = 'conversation.user.presence',
+    BLOCK = 'conversation.user.block',
+    UNBLOCK = 'conversation.user.unblock',
 }
 
 export enum USER_EVENTS {
     PRESENCE = 'user.presence',
-    ONLINE = 'user.online',
-    OFFLINE = 'user.offline',
+    BLOCK = 'user.block',
+    UNBLOCK = 'user.unblock',
 }
 
 export enum FEED_EVENTS {

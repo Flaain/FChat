@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Pagination, RequestWithUser, Routes } from 'src/utils/types';
 import { CheckType, IUserController } from './types';
@@ -7,10 +7,12 @@ import { UserStatusDTO } from './dtos/user.status.dto';
 import { UserNameDto } from './dtos/user.name.dto';
 import { PaginationResolver } from 'src/utils/services/pagination/patination.resolver';
 import { Pagination as PaginationDecorator } from 'src/utils/decorators/pagination';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { STATIC_CONVERSATION_EVENTS, USER_EVENTS } from '../gateway/types';
 
 @Controller(Routes.USER)
 export class UserController extends PaginationResolver implements IUserController {
-    constructor(private readonly userService: UserService) {
+    constructor(private readonly userService: UserService, private readonly eventEmitter: EventEmitter2) {
         super();
     }
 
@@ -37,5 +39,25 @@ export class UserController extends PaginationResolver implements IUserControlle
     @UseGuards(AccessGuard)
     name(@Req() req: RequestWithUser, @Body() { name }: UserNameDto) {
         return this.userService.name({ initiator: req.user.doc, name });
+    }
+
+    @Post('block/:id')
+    @UseGuards(AccessGuard)
+    async block(@Req() req: RequestWithUser, @Param('id') id: string) {
+        const { recipientId } = await this.userService.block({ initiator: req.user.doc, recipientId: id });
+
+        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.BLOCK, { recipientId, initiatorId: req.user.doc._id.toString() });
+
+        return { recipientId };
+    }
+
+    @Post('unblock/:id')
+    @UseGuards(AccessGuard)
+    async unblock(@Req() req: RequestWithUser, @Param('id') id: string) {
+        const { recipientId } = await this.userService.unblock({ initiator: req.user.doc, recipientId: id });
+
+        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.UNBLOCK, { recipientId, initiatorId: req.user.doc._id.toString() });
+
+        return { recipientId };
     }
 }

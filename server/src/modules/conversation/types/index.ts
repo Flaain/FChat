@@ -1,9 +1,15 @@
-import { Document, FilterQuery, ProjectionType, QueryOptions, SchemaTimestampsConfig, Types } from 'mongoose';
+import { Document, SchemaTimestampsConfig, Types } from 'mongoose';
 import { ConversationCreateDTO } from '../dtos/conversation.create.dto';
 import { Conversation } from '../schemas/conversation.schema';
 import { RequestWithUser } from 'src/utils/types';
 import { UserDocument } from 'src/modules/user/types';
 import { User } from 'src/modules/user/schemas/user.schema';
+
+export enum CONVERSATION_HEALTH {
+    BLOCKED_BY_INITIATOR = 'BLOCKED_BY_INITIATOR',
+    BLOCKED_BY_RECIPIENT = 'BLOCKED_BY_RECIPIENT',
+    RECIPIENT_PREMIUM_ONLY = 'RECIPIENT_PREMIUM_ONLY',
+}
 
 export interface IConversation {
     _id: Types.ObjectId;
@@ -32,7 +38,7 @@ export interface CreateConversationReturn {
 
 export interface IConversationService {
     createConversation: (
-        params: ConversationCreateDTO & { initiatorId: Types.ObjectId },
+        params: ConversationCreateDTO & { initiator: UserDocument },
     ) => Promise<CreateConversationReturn>;
     getConversation: (params: {
         initiator: UserDocument;

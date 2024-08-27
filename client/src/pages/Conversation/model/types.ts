@@ -3,7 +3,7 @@ import { Conversation } from "@/shared/model/types";
 export type ConversationStatuses = "idle" | "loading" | "error";
 
 export interface ConversationWithMeta {
-    conversation: Pick<Conversation, "_id" | "recipient" | "messages" | 'createdAt'>
+    conversation: Pick<Conversation, "_id" | "recipient" | "messages" | 'createdAt' | 'isInitiatorBlocked' | 'isRecipientBlocked'>
     nextCursor: string | null
 }
 

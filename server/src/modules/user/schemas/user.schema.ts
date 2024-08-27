@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IUser, PRESENCE } from '../types';
+import mongoose from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User implements Omit<IUser, '_id'> {
@@ -17,6 +18,9 @@ export class User implements Omit<IUser, '_id'> {
 
     @Prop({ type: Date, required: true })
     birthDate: Date;
+
+    @Prop({ type: [{ type: mongoose.Schema.ObjectId, ref: 'User' }] })
+    blockList?: Array<mongoose.Schema.Types.ObjectId>;
 
     @Prop({ type: Boolean, required: true, default: false })
     isPrivate?: boolean;

@@ -4,6 +4,7 @@ import { MessageSendDTO } from '../dtos/message.send.dto';
 import { MessageDeleteDTO } from '../dtos/message.delete.dto';
 import { MessageEditDTO } from '../dtos/message.edit.dto';
 import { RequestWithUser } from "src/utils/types";
+import { UserDocument } from "src/modules/user/types";
 
 export interface IMessage {
     _id: Types.ObjectId;
@@ -26,6 +27,6 @@ export interface IMessageController {
 
 export type MessageDocument = Message & Document & SchemaTimestampsConfig;
 
-export type SendMessageParams = MessageSendDTO & { recipientId: string; initiatorId: Types.ObjectId };
+export type SendMessageParams = MessageSendDTO & { recipientId: string; initiator: UserDocument };
 export type EditMessageParams = MessageEditDTO & { initiatorId: Types.ObjectId, messageId: string };
 export type DeleteMessageType = MessageDeleteDTO & { messageId: string; initiatorId: Types.ObjectId };

@@ -18,7 +18,7 @@ export class ConversationController implements IConversationController {
     @UseGuards(AccessGuard)
     async create(@Req() req: RequestWithUser, @Body() dto: ConversationCreateDTO) {
         const conversation = await this.conversationService.createConversation({ 
-            initiatorId: req.user.doc._id, 
+            initiator: req.user.doc, 
             recipientId: dto.recipientId 
         });
 
@@ -32,7 +32,7 @@ export class ConversationController implements IConversationController {
         return conversation;
     }
 
-    @Delete('/delete/:id')
+    @Delete('delete/:id')
     @UseGuards(AccessGuard)
     async delete(@Req() req: RequestWithUser, @Param('id') id: string) {
         const { _id, recipientId } = await this.conversationService.deleteConversation({ initiatorId: req.user.doc._id, recipientId: id });

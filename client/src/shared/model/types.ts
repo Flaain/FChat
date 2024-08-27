@@ -95,8 +95,7 @@ export interface GroupParticipant {
     userId: string;
 }
 
-export interface ConversationParticipant
-    extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence' | 'status'> {}
+export interface ConversationParticipant extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence' | 'status'> {}
 
 export interface Conversation {
     _id: string;
@@ -106,6 +105,8 @@ export interface Conversation {
     lastMessageSentAt: string;
     createdAt: string;
     updatedAt: string;
+    isInitiatorBlocked?: boolean;
+    isRecipientBlocked?: boolean;
 }
 
 export interface Group {
@@ -220,7 +221,9 @@ export enum CONVERSATION_EVENTS {
     MESSAGE_SEND = 'conversation.message.send',
     MESSAGE_EDIT = 'conversation.message.edit',
     MESSAGE_DELETE = 'conversation.message.delete',
-    USER_PRESENCE = 'conversation.user.presence'
+    USER_PRESENCE = 'conversation.user.presence',
+    USER_BLOCK = 'conversation.user.block',
+    USER_UNBLOCK = 'conversation.user.unblock'
 }
 
 export enum FEED_EVENTS {

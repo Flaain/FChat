@@ -82,6 +82,8 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
 
     @SubscribeMessage(USER_EVENTS.PRESENCE)
     async changeUserStatus(@MessageBody() { presence, lastSeenAt }: ChangeUserStatusParams, @ConnectedSocket() client: SocketWithUser) {
+        if (client.data.user.presence === presence) return;
+        
         client.data.user.presence = presence;
 
         const initiatorId = client.data.user._id;
@@ -104,6 +106,7 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
         conversations.forEach((conversation) => {
             const recipientId = conversation.participants[0]._id.toString();
             const recipientSockets = this.gatewayManager.sockets.get(recipientId);
+            // const isBlocked = client.data.user.blockList.some((id) => id.toString() === recipientId);
 
             recipientSockets?.forEach((socket) => {
                 socket.emit(presence === PRESENCE.ONLINE ? FEED_EVENTS.USER_ONLINE : FEED_EVENTS.USER_OFFLINE, initiatorId.toString());
@@ -238,5 +241,19 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
         [initiatorSockets, recipientSockets].forEach((sockets) => {
             sockets?.forEach((socket) => socket.emit(FEED_EVENTS.DELETE_CONVERSATION, conversationId));
         });
+    }
+
+    @OnEvent(STATIC_CONVERSATION_EVENTS.BLOCK)
+    async onBlock({ initiatorId, recipientId }: Pick<ConversationSendMessageParams, 'initiatorId' | 'recipientId'>) {
+        const roomId = GatewayUtils.getRoomIdByParticipants([initiatorId, recipientId]);
+
+        this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.BLOCK, recipientId);
+    }
+
+    @OnEvent(STATIC_CONVERSATION_EVENTS.UNBLOCK)
+    async onUnblock({ initiatorId, recipientId }: Pick<ConversationSendMessageParams, 'initiatorId' | 'recipientId'>) {
+        const roomId = GatewayUtils.getRoomIdByParticipants([initiatorId, recipientId]);
+
+        this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.UNBLOCK, recipientId);
     }
 }

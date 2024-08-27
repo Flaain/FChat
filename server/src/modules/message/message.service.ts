@@ -6,22 +6,40 @@ import { DeleteMessageType, EditMessageParams, MessageDocument, SendMessageParam
 import { ConversationService } from '../conversation/conversation.service';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { BaseService } from 'src/utils/services/base/base.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class MessageService extends BaseService<MessageDocument, Message> {
     constructor(
         @InjectModel(Message.name) private readonly messageModel: Model<MessageDocument>,
+        private readonly userService: UserService,
         private readonly conversationService: ConversationService,
     ) {
         super(messageModel);
     }
 
-    send = async ({ recipientId, message, initiatorId }: SendMessageParams) => {
-        const conversation = await this.conversationService.findOne({ participants: { $all: [new Types.ObjectId(recipientId), initiatorId] } });
+    send = async ({ recipientId, message, initiator }: SendMessageParams) => {
+        const recipient = await this.userService.findOne({ _id: recipientId, isDeleted: false }, { _id: 1, blockList: 1 }, {
+            populate: {
+                path: 'blockList',
+                match: { _id: initiator._id },
+            }
+        });
+
+        if (!recipient) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
+
+        const conversation = await this.conversationService.findOne({ participants: { $all: [recipient._id, initiator._id] } });
 
         if (!conversation) throw new AppException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
 
-        const newMessage = await this.create({ sender: initiatorId, text: message.trim() });
+        const isInitiatorBlocked = recipient.blockList.some((id) => id.toString() === initiator._id.toString());
+        const isRecipientBlocked = initiator.blockList.some((id) => id.toString() === recipient._id.toString());
+
+        const isMessagingRestricted = isInitiatorBlocked || isRecipientBlocked; 
+
+        if (isMessagingRestricted) throw new AppException({ message: 'Messaging restricted' }, HttpStatus.FORBIDDEN);
+
+        const newMessage = await this.create({ sender: initiator._id, text: message.trim() });
 
         Object.assign(conversation, {
            lastMessage: newMessage._id,

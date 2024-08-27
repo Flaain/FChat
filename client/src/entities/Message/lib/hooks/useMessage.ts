@@ -38,6 +38,8 @@ export const useMessage = (message: IMessage) => {
     }, [conversation, _id]);
 
     const handleContextAction = React.useCallback((draft: Draft) => {
+        if (conversation.isInitiatorBlocked || conversation.isRecipientBlocked) return;
+        
         setDrafts((prevState) => {
             const newState = new Map([...prevState]);
 

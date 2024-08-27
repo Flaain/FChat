@@ -44,7 +44,7 @@ export class AuthService implements IAuthService {
     }
 
     signin = async ({ login, password, userAgent }: WithUserAgent<SigninDTO>) => {
-        const user = await this.userService.findOne({ isDeleted: false, $or: [{ email: login }, { login }] });
+        const user = await this.userService.findOne({ isDeleted: false, $or: [{ email: login }, { login }] }, { blockList: 0 });
 
         if (!user) throw new AppException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
 

@@ -19,13 +19,15 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
         super(conversationModel);
     }
 
-    createConversation = async ({ initiatorId, recipientId }: { initiatorId: Types.ObjectId; recipientId: string }) => {
-        if (initiatorId.toString() === recipientId) {
-            throw new AppException({ message: 'Cannot create conversation with yourself' }, HttpStatus.BAD_REQUEST)
+    createConversation = async ({ initiator, recipientId }: { initiator: UserDocument; recipientId: string }) => {
+        const initiatorId = initiator._id;
+
+        if (initiatorId.toString() === recipientId || initiator.blockList.some((id) => id.toString() === recipientId)) {
+            throw new AppException({ message: 'Cannot create conversation' }, HttpStatus.BAD_REQUEST)
         }
 
         const recipient = await this.userService.findOne(
-            { _id: recipientId, isPrivate: false, isDeleted: false },
+            { _id: recipientId, isPrivate: false, isDeleted: false, blockList: { $nin: [initiatorId] } },
             { birthDate: 0, password: 0 },
         );
 
@@ -53,9 +55,19 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
 
         return { _id: conversation._id, recipientId: recipient._id.toString() };
     };
-
+    
     getConversation = async ({ initiator, recipientId, cursor }: { initiator: UserDocument; recipientId: string; cursor?: string }) => {
-        const recipient = await this.userService.findOne({ _id: recipientId }, { birthDate: 0, password: 0, isPrivate: 0 });
+        const recipient = await this.userService.findOne(
+            { _id: recipientId },
+            { birthDate: 0, password: 0, isPrivate: 0 },
+            {
+                populate: {
+                    path: 'blockList',
+                    model: 'User',
+                    match: { _id: initiator._id },
+                },
+            },
+        );
 
         if (!recipient) throw new AppException({ message: "User not found" }, HttpStatus.NOT_FOUND);
 
@@ -85,16 +97,19 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
                 ],
             },
         ).lean();
+        
+        const isInitiatorBlocked = !!recipient.blockList.length;
+        const isRecipientBlocked = !!initiator.blockList.find((id) => id.toString() === recipientId);
 
         if (!conversation) {
             if (recipient.isPrivate) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
-            return { conversation: { recipient, messages: [] }, nextCursor };
+            return { conversation: { recipient, messages: [], isInitiatorBlocked, isRecipientBlocked }, nextCursor };
         }
 
         conversation.messages.length === MESSAGES_BATCH && (nextCursor = conversation.messages[MESSAGES_BATCH - 1]._id.toString());
 
         return {
-            conversation: { _id: conversation._id, recipient, messages: conversation.messages.reverse() },
+            conversation: { _id: conversation._id, recipient, messages: conversation.messages.reverse(), isInitiatorBlocked, isRecipientBlocked },
             nextCursor,
         };
     };

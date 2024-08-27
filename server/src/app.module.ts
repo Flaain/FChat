@@ -25,7 +25,7 @@ import { UAParserModule } from './utils/services/uaparser/uaparser.module';
         ConfigModule.forRoot({ isGlobal: true, expandVariables: true }),
         MongooseModule.forRoot(process.env.DATABASE_URI, { retryWrites: true }),
         ThrottlerModule.forRoot([{ limit: 5, ttl: 10000 }]),
-        EventEmitterModule.forRoot(),
+        EventEmitterModule.forRoot({ global: true }),
         ConversationModule,
         MessageModule,
         GatewayModule,

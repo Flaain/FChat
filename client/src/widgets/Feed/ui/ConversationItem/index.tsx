@@ -6,13 +6,10 @@ import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { ConversationFeed, PRESENCE, PartOfCompilerUse } from '@/shared/model/types';
-import Markdown from 'markdown-to-jsx';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 
 const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
-    const {
-        state: { userId }
-    } = useSession();
+    const { state: { userId } } = useSession();
     const { drafts } = useLayoutContext();
 
     const recipient = conversation.recipient;

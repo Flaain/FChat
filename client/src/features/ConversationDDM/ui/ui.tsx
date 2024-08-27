@@ -1,16 +1,23 @@
-import { EllipsisVertical, Trash } from "lucide-react";
-import { useConversationDDM } from "../lib/hooks/useConversationDDM";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/shared/ui/dropdown-menu";
+import { EllipsisVertical, Lock, Trash } from 'lucide-react';
+import { useConversationDDM } from '../lib/hooks/useConversationDDM';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu';
+import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 
 const ConversationDDM = () => {
-    const { isMenuOpen, onClickDeleteConversation, setIsMenuOpen } = useConversationDDM();
+    const { data: { conversation: { isRecipientBlocked } } } = useConversationContext();
+    const { isMenuOpen, onClickDeleteConversation, setIsMenuOpen, onBlockRecipient, handleUnblockRecipient } = useConversationDDM();
 
     return (
         <DropdownMenu onOpenChange={setIsMenuOpen} open={isMenuOpen}>
             <DropdownMenuTrigger className='hover:opacity-50 transition-opacity ease-in-out duration-200 outline-none'>
                 <EllipsisVertical className='dark:text-primary-white text-primary-dark-50' />
             </DropdownMenuTrigger>
-            <DropdownMenuContent onKeyUp={(event) => event.stopPropagation()} loop align="end" className='border-none rounded w-[200px] h-auto dark:bg-primary-dark-50 z-[999]'>
+            <DropdownMenuContent
+                onKeyUp={(event) => event.stopPropagation()}
+                loop
+                align='end'
+                className='border-none rounded w-[200px] h-auto dark:bg-primary-dark-50 z-[999]'
+            >
                 <DropdownMenuItem className='flex items-center gap-5 cursor-pointer rounded dark:focus:bg-primary-dark-100/20 text-primary-white'>
                     <svg
                         xmlns='http://www.w3.org/2000/svg'
@@ -29,6 +36,13 @@ const ConversationDDM = () => {
                         <path d='m5 17 1.4-1.4' />
                     </svg>
                     Clear history
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onClick={isRecipientBlocked ? handleUnblockRecipient : onBlockRecipient}
+                    className='flex items-center gap-5 cursor-pointer rounded dark:focus:bg-primary-dark-100/20 text-primary-white'
+                >
+                    <Lock className='w-5 h-5' />
+                    {isRecipientBlocked ? 'Unblock user' : 'Block user'}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={onClickDeleteConversation}

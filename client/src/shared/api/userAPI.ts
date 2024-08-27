@@ -76,4 +76,24 @@ export class UserAPI extends API {
 
         return this._checkResponse<BasicAPIResponse>(await fetch(this._baseUrl + `/user/name`, request), request);
     };
+
+    block = async ({ recipientId }: { recipientId: string }) => {
+        const request: RequestInit = { 
+            method: 'POST', 
+            headers: this._headers, 
+            credentials: this._cretedentials,
+        };
+
+        return this._checkResponse<BasicAPIResponse>(await fetch(this._baseUrl + `/user/block/${recipientId}`, request), request);
+    }
+
+    unblock = async ({ recipientId }: { recipientId: string }) => {
+        const request: RequestInit = { 
+            method: 'POST', 
+            headers: this._headers, 
+            credentials: this._cretedentials,
+        };
+
+        return this._checkResponse<BasicAPIResponse>(await fetch(this._baseUrl + `/user/unblock/${recipientId}`, request), request);
+    }
 }

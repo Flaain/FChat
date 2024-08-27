@@ -11,6 +11,22 @@ export const useConversationDDM = () => {
 
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
+    const handleUnblockRecipient = async (event: React.MouseEvent<HTMLDivElement>) => {
+        try {
+            event.stopPropagation();
+
+            setIsAsyncActionLoading(true);
+
+            await api.user.unblock({ recipientId: recipient._id });
+
+            closeModal();
+        } catch (error) {
+            console.error(error);
+            error instanceof AppException && error.toastError('Failed to block recipient');   
+        } finally {
+            setIsAsyncActionLoading(false);
+        }
+    }
     const handleDeleteConversation = async () => {
         try {
             setIsAsyncActionLoading(true);
@@ -46,9 +62,46 @@ export const useConversationDDM = () => {
         });
     };
 
+    const handleBlockRecipient = async () => {
+        try {
+            setIsAsyncActionLoading(true);
+
+            await api.user.block({ recipientId: recipient._id });
+
+            closeModal();
+        } catch (error) {
+            console.error(error);
+            error instanceof AppException && error.toastError('Failed to block recipient');   
+        } finally {
+            setIsAsyncActionLoading(false);
+        }
+    }
+
+    const onBlockRecipient = async (event: React.MouseEvent<HTMLDivElement>) => {
+        event.stopPropagation();
+
+        setIsMenuOpen(false);
+        openModal({
+            id: 'delete-conversation',
+            content: (
+                <Confirm
+                    onConfirm={handleBlockRecipient}
+                    onCancel={closeModal}
+                    text={`Are you sure you want to block ${recipient.name}?`}
+                    onConfirmText='Block'
+                    onConfirmButtonVariant='destructive'
+                />
+            ),
+            withHeader: false,
+            bodyClassName: 'h-auto p-5 w-[400px]'
+        });
+    }
+
     return {
         isMenuOpen,
         setIsMenuOpen,
+        onBlockRecipient,
+        handleUnblockRecipient,
         onClickDeleteConversation
     };
 };

@@ -1,10 +1,9 @@
 import { z } from 'zod';
 import { User } from '../schemas/user.schema';
-import { Document, FilterQuery, ProjectionType, QueryOptions, SchemaTimestampsConfig, Types } from 'mongoose';
+import { Document, SchemaTimestampsConfig, Types } from 'mongoose';
 import { HttpStatus } from '@nestjs/common';
 import { Pagination, RequestWithUser, WrappedInPagination } from 'src/utils/types';
 import { userCheckSchema } from '../schemas/user.check.schema';
-import { SignupDTO } from 'src/modules/auth/dtos/auth.signup.dto';
 
 export enum PRESENCE {
     ONLINE = 'online',

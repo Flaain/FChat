@@ -6,7 +6,7 @@ import { userCheckSchema } from './schemas/user.check.schema';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { emailExistError, loginExistError } from '../auth/constants';
 import { IUserService, UserDocument, UserSearchParams } from './types';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import { IAppException } from 'src/utils/types';
 import { UserStatusDTO } from './dtos/user.status.dto';
 import { UserNameDto } from './dtos/user.name.dto';
@@ -16,6 +16,34 @@ import { BaseService } from 'src/utils/services/base/base.service';
 export class UserService extends BaseService<UserDocument, User> implements IUserService {
     constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) {
         super(userModel);
+    }
+
+    block = async ({ initiator, recipientId }: { initiator: UserDocument; recipientId: string }) => {
+        if (!isValidObjectId(recipientId) || initiator._id.toString() === recipientId || initiator.blockList.some((id) => id.toString() === recipientId)) {
+            throw new AppException({ message: 'Cannot block user' }, HttpStatus.BAD_REQUEST);
+        }
+
+        const recipient = await this.findById(recipientId);
+
+        if (!recipient) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
+
+        await this.updateOne({ _id: initiator._id }, { $addToSet: { blockList: recipient._id } });
+
+        return { recipientId: recipient._id.toString() };
+    }
+
+    unblock = async ({ initiator, recipientId }: { initiator: UserDocument; recipientId: string }) => {
+        if (!isValidObjectId(recipientId) || initiator._id.toString() === recipientId || !initiator.blockList.some((id) => id.toString() === recipientId)) {
+            throw new AppException({ message: 'Cannot unblock user' }, HttpStatus.BAD_REQUEST);
+        }
+
+        const recipient = await this.findById(recipientId);
+
+        if (!recipient) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
+
+        await this.updateOne({ _id: initiator._id }, { $pull: { blockList: recipient._id } });
+
+        return { recipientId: recipient._id.toString() };
     }
 
     search = async ({ initiatorId, query, page, limit }: UserSearchParams) => {

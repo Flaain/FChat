@@ -53,7 +53,13 @@ const Conversation = () => {
                     <OutletHeader
                         name={data.conversation.recipient.name}
                         isOfficial={data.conversation.recipient.isOfficial}
-                        description={isOnline ? 'online' : `last seen ${getRelativeTimeString(data.conversation.recipient.lastSeenAt, 'en-US')}`}
+                        description={
+                            data.conversation.isInitiatorBlocked || data.conversation.isRecipientBlocked
+                                ? 'last seen recently'
+                                : isOnline
+                                ? 'online'
+                                : `last seen ${getRelativeTimeString(data.conversation.recipient.lastSeenAt, 'en-US')}`
+                        }
                         dropdownMenu={<ConversationDDM />}
                         onClick={openDetails}
                     />
@@ -74,15 +80,28 @@ const Conversation = () => {
                             No messages yet
                         </Typography>
                     )}
-                    <SendMessage type='conversation' queryId={data.conversation.recipient._id} />
+                    {data.conversation.isInitiatorBlocked || data.conversation.isRecipientBlocked ? (
+                        <div className='min-h-[70px] px-5 scrollbar-hide overflow-auto flex box-border w-full transition-colors duration-200 ease-in-out resize-none appearance-none ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none focus:placeholder:opacity-0 focus:placeholder:translate-x-2 outline-none ring-0 placeholder:transition-all placeholder:duration-300 placeholder:ease-in-out dark:bg-primary-dark-100 border-none text-white dark:placeholder:text-white placeholder:opacity-50'>
+                            <Typography variant='secondary' className='m-auto text-center'>
+                                {data.conversation.isRecipientBlocked
+                                    ? `You blocked ${data.conversation.recipient.name}`
+                                    : `${data.conversation.recipient.name} has restricted incoming messages`}
+                            </Typography>
+                        </div>
+                    ) : (
+                        <SendMessage type='conversation' queryId={data.conversation.recipient._id} />
+                    )}
                 </div>
                 {showRecipientDetails && (
                     <OutletDetails
                         name={data.conversation.recipient.name}
-                        description={isOnline ? 'online' : `last seen at ${new Date(data.conversation.recipient.lastSeenAt).toLocaleTimeString(navigator.language, { 
-                            hour: 'numeric', 
-                            minute: 'numeric' 
-                        })}`}
+                        description={
+                            data.conversation.isInitiatorBlocked || data.conversation.isRecipientBlocked
+                            ? 'last seen recently'
+                            : isOnline
+                            ? 'online'
+                            : `last seen ${getRelativeTimeString(data.conversation.recipient.lastSeenAt, 'en-US')}`
+                        }
                         info={<RecipientDetails recipient={data.conversation.recipient} />}
                         shouldCloseOnClickOutside={false}
                         type={FeedTypes.CONVERSATION}
