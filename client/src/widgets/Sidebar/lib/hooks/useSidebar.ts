@@ -53,6 +53,11 @@ export const useSidebar = () => {
 
     const searchInputRef = React.useRef<HTMLInputElement | null>(null);
 
+    const resetSearch = () => {
+        setSearchValue('');
+        setGlobalResults([]);
+    }
+
     const handleLogout = React.useCallback(async () => {
         await api.user.logout();
 
@@ -102,6 +107,7 @@ export const useSidebar = () => {
         },
         handleSearch,
         handleLogout,
+        resetSearch,
         searchInputRef
     }
 }

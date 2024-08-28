@@ -88,9 +88,7 @@ export class GroupService extends BaseService<GroupDocument, Group> {
         }
 
         if (group.isPrivate) {
-            const isInviteExist = invite
-                ? await this.inviteService.exists({ code: invite, groupId: group._id })
-                : false;
+            const isInviteExist = invite ? await this.inviteService.exists({ code: invite, groupId: group._id }) : false;
             const { _id, isOfficial, name, login } = group.toObject();
 
             if (!isInviteExist) throw new AppException({ message: 'Group not found' }, HttpStatus.NOT_FOUND);

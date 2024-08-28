@@ -2,15 +2,13 @@ import React from 'react';
 import Confirm from '@/widgets/Confirm/ui/ui';
 import { toast } from 'sonner';
 import { api } from '@/shared/api';
-import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
 import { useModal } from '@/shared/lib/hooks/useModal';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
-import { EmojiData, MessageFormState } from '@/shared/model/types';
+import { APIData, EmojiData, IMessage, MessageFormState } from '@/shared/model/types';
 import { UseMessageParams } from '../../model/types';
 
 export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
-    const { data: { conversation } } = useConversationContext();
     const { drafts, setDrafts, textareaRef } = useLayoutContext();
 
     const [isLoading, setIsLoading] = React.useState(false);
@@ -67,11 +65,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             
             setIsAsyncActionLoading(true);
             
-            await api.message.delete({
-                conversationId: conversation._id,
-                messageId,
-                recipientId: conversation.recipient._id
-            });
+            await api.message.delete({ messageId, recipientId: queryId });
 
             toast.success('Message deleted', { position: 'top-center' });
         } catch (error) {
@@ -81,7 +75,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             setDefaultState();
             setIsAsyncActionLoading(false);
         }
-    }, [currentDraft, conversation]);
+    }, [currentDraft, queryId]);
 
     const onCloseDeleteConfirmation = () => {
         setValue(currentDraft!.selectedMessage!.text);
@@ -108,7 +102,7 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     }, [queryId, currentDraft]);
 
     const onSendEditedConversationMessage = React.useCallback(async ({ messageId, message }: { messageId: string; message: string }) => {
-        await api.message.edit({ messageId, message, recipientId: queryId, conversationId: conversation._id });
+        await api.message.edit({ messageId, message, recipientId: queryId });
     }, []);
 
     const onSendEditedMessage = async () => {
@@ -139,16 +133,8 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
     };
 
     const onSendConversationMessage = React.useCallback(async (message: string) => {
-        let conversationId = conversation._id
-
-        if (!conversationId) {
-            const { data: { _id } } = await api.conversation.create({ recipientId: conversation.recipient._id });
-
-            conversationId = _id;
-        }
-
-        await api.message.send({ message: message, recipientId: conversation.recipient._id });
-    }, [conversation]);
+        await api.message.send({ message, recipientId: queryId });
+    }, [queryId]);
 
     const onSendGroupMessage = React.useCallback(async (message: string) => {
         toast.info('Not implemented', { position: 'top-center', description: message });
@@ -170,6 +156,26 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
         }
     };
 
+    const onReplyMessage = async () => {
+        try {
+            const trimmedValue = value.trim();
+
+            const actions: Record<typeof type, (message: string) => Promise<void | APIData<IMessage>>> = {
+                conversation: (message: string) => api.message.reply({ 
+                    message, 
+                    messageId: currentDraft!.selectedMessage!._id, 
+                    recipientId: queryId
+                }),
+                group: async (message: string) => {}
+            };
+
+            await actions[type](trimmedValue);
+        } catch (error) {
+            console.error(error);
+            toast.error('Cannot reply message', { position: 'top-center' });
+        }
+    } 
+
     const handleSubmitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -180,7 +186,8 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
 
             const actions: Record<MessageFormState, () => Promise<void>> = {
                 send: onSendMessage,
-                edit: onSendEditedMessage
+                edit: onSendEditedMessage,
+                reply: onReplyMessage
             };
 
             await actions[currentDraft?.state ?? 'send']();

@@ -19,29 +19,6 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
         super(conversationModel);
     }
 
-    createConversation = async ({ initiator, recipientId }: { initiator: UserDocument; recipientId: string }) => {
-        const initiatorId = initiator._id;
-
-        if (initiatorId.toString() === recipientId || initiator.blockList.some((id) => id.toString() === recipientId)) {
-            throw new AppException({ message: 'Cannot create conversation' }, HttpStatus.BAD_REQUEST)
-        }
-
-        const recipient = await this.userService.findOne(
-            { _id: recipientId, isPrivate: false, isDeleted: false, blockList: { $nin: [initiatorId] } },
-            { birthDate: 0, password: 0 },
-        );
-
-        if (!recipient) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
-
-        if (await this.exists({ participants: { $all: [initiatorId, recipient._id] } })) {
-            throw new AppException({ message: 'Conversation already exists' }, HttpStatus.CONFLICT)
-        }
-
-        const { _id, lastMessageSentAt } = (await this.create({ participants: [initiatorId, recipient._id] })).toObject();
-
-        return { _id, lastMessageSentAt, recipient: recipient.toObject() };
-    };
-
     deleteConversation = async ({ initiatorId, recipientId }: { initiatorId: Types.ObjectId; recipientId: string }) => {
         const recipient = await this.userService.findOne({ _id: recipientId }, { birthDate: 0, password: 0, isPrivate: 0 });
         
@@ -83,11 +60,19 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
                     {
                         path: 'messages',
                         model: 'Message',
-                        populate: {
-                            path: 'sender',
-                            model: 'User',
-                            select: 'login name email isOfficial isDeleted presence',
-                        },
+                        populate: [
+                            {
+                                path: 'sender',
+                                model: 'User',
+                                select: 'login name email isOfficial isDeleted presence',
+                            },
+                            {
+                                path: 'replyTo',
+                                model: 'Message',
+                                select: 'text',
+                                populate: { path: 'sender', model: 'User', select: 'name' },
+                            },
+                        ],
                         options: {
                             limit: MESSAGES_BATCH,
                             sort: { createdAt: -1 },

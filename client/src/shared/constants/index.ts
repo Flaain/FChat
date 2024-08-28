@@ -3,7 +3,8 @@ import { z } from 'zod';
 export const routerList = {
     HOME: '/',
     AUTH: '/auth',
-    CONVERSATION: '/conversation/:id'
+    CONVERSATION: '/conversation/:id',
+    GROUP: '/group/:id',
 };
 export const localStorageKeys = {
     THEME: 'theme',

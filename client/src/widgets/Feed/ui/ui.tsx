@@ -21,7 +21,7 @@ const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, search
     return !searchLoading && !filteredLocalResults.length && !filteredGlobalResults.length ? (
         <>
             <UserSearch className='dark:text-primary-white w-10 h-10 self-center' />
-            <Typography as='p' variant='secondary' className='self-center text-center'>
+            <Typography as='p' variant='secondary' className='line-clamp-3 break-words px-3 box-border text-center'>
                 There were no results for "{trimmedSearchValue}".
             </Typography>
         </>

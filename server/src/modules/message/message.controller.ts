@@ -8,6 +8,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { STATIC_CONVERSATION_EVENTS } from '../gateway/types';
 import { IMessageController } from './types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
+import { MessageReplyDTO } from './dtos/message.reply.dto';
 
 @Controller(Routes.MESSAGE)
 export class MessageController implements IMessageController {
@@ -19,11 +20,33 @@ export class MessageController implements IMessageController {
     @Post('send/:recipientId')
     @UseGuards(AccessGuard)
     async send(@Req() req: RequestWithUser, @Body() dto: MessageSendDTO, @Param('recipientId') recipientId: string) {
-        const { message, conversationId } = await this.messageService.send({ ...dto, recipientId, initiator: req.user.doc });
+        const { recipient, message, conversation, isNewConversation } = await this.messageService.send({ ...dto, recipientId, initiator: req.user.doc });
+
+       isNewConversation && this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.CREATED, {
+            recipient: recipient.toObject(),
+            initiatorId: req.user.doc._id.toString(),
+            conversationId: conversation._id,
+            lastMessageSentAt: conversation.lastMessageSentAt,
+        });
 
         this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.SEND_MESSAGE, {
             message,
             recipientId,
+            conversationId: conversation._id,
+            initiatorId: req.user.doc._id.toString()
+        });
+
+        return message;
+    }
+
+    @Post('reply/:messageId')
+    @UseGuards(AccessGuard)
+    async reply(@Req() req: RequestWithUser, @Body() dto: MessageReplyDTO, @Param('messageId') messageId: string) {
+        const { message, conversationId } = await this.messageService.reply({ ...dto, messageId, initiator: req.user.doc });
+
+        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.SEND_MESSAGE, {
+            message,
+            recipientId: dto.recipientId,
             conversationId,
             initiatorId: req.user.doc._id.toString(),
         })

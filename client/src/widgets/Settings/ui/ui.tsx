@@ -15,7 +15,7 @@ const Settings = () => {
     const { closeModal, isAsyncActionLoading } = useModal();
     const { currentMenu, onBack } = useSettings();
 
-    const components: Record<SettingMenu, React.ReactNode> = {
+    const components: Record<Exclude<SettingMenu, 'deleteAccount'>, React.ReactNode> = {
         main: <SettingsMain />,
         privacy: <Privacy />,
         sessions: <ActiveSessions />,

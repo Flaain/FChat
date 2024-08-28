@@ -20,6 +20,7 @@ export enum OutletDetailsTypes {
 export enum PartOfCompilerUse {
     FEED = 'feed',
     MESSAGE = 'message',
+    REPLY = 'reply',
     MESSAGE_TOP_BAR = 'messageTopBar',
 }
 
@@ -83,6 +84,7 @@ export interface IMessage {
     hasBeenRead: boolean;
     hasBeenEdited: boolean;
     text: string;
+    replyTo?: Pick<IMessage, '_id' | 'text'> & { sender: Pick<ConversationParticipant, 'name'> } | null;
     createdAt: string;
     updatedAt: string;
     sendingInProgress?: boolean;

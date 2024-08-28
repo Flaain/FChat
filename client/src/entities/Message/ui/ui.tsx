@@ -3,7 +3,6 @@ import Typography from '@/shared/ui/Typography';
 import MessageContextMenu from './MessageContextMenu';
 import { cn } from '@/shared/lib/utils/cn';
 import { Check, CheckCheck } from 'lucide-react';
-import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
 import { ContextMenu, ContextMenuTrigger } from '@/shared/ui/context-menu';
 import { MessageProps } from '../model/types';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
@@ -11,7 +10,7 @@ import { PartOfCompilerUse } from '@/shared/model/types';
 
 const Message = React.forwardRef<HTMLLIElement, MessageProps>(
     ({ message, isFirst, isLast, isMessageFromMe, className, ...rest }, ref) => {
-        const { createdAt, updatedAt, sender, text, hasBeenRead, hasBeenEdited } = message;
+        const { createdAt, updatedAt, sender, text, hasBeenRead, hasBeenEdited, replyTo } = message;
 
         const createTime = new Date(createdAt);
         const editTime = new Date(updatedAt);
@@ -41,46 +40,78 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                                 {sender.name}
                             </Typography>
                         )}
-                        <Typography
-                            as='p'
-                            className={cn(
-                                'break-all px-5 py-1 relative max-w-[500px] rounded-ss-[15px] rounded-se-[15px]',
-                                {
-                                    [`dark:bg-primary-white dark:text-primary-dark-200 ${
-                                        isLast
-                                            ? 'before:-right-5 dark:before:shadow-[-13px_0_0_#F9F9F9] rounded-es-[15px] rounded-ee-[0px] relative before:absolute before:w-[20px] before:h-[15px] before:bg-transparent before:-bottom-0 before:rounded-bl-3xl'
-                                            : 'rounded-es-[15px] rounded-ee-[5px]'
-                                    }`]: isMessageFromMe,
-                                    [`self-start dark:bg-primary-dark-50 bg-primary-white ${
-                                        isLast
-                                            ? 'before:-left-5 dark:before:shadow-[13px_0_0_#424242] before:shadow-[13px_0_0_#EEE] rounded-es-[0px] rounded-ee-[15px] relative before:absolute before:w-[20px] before:h-[15px] before:bg-transparent before:-bottom-0 before:rounded-br-3xl'
-                                            : 'rounded-es-[5px] rounded-ee-[15px]'
-                                    }`]: !isMessageFromMe
-                                }
-                            )}
+                        <div
+                            className={cn('py-2 px-3 relative max-w-[500px] rounded-ss-[15px] rounded-se-[15px]', {
+                                'flex flex-col gap-2': replyTo === null || !!replyTo,
+                                [`dark:bg-primary-white bg-primary-dark-50 ${
+                                    isLast
+                                        ? 'before:-right-5 dark:before:shadow-[-13px_0_0_#F9F9F9] rounded-es-[15px] rounded-ee-[0px] relative before:absolute before:w-[20px] before:h-[15px] before:bg-transparent before:-bottom-0 before:rounded-bl-3xl'
+                                        : 'rounded-es-[15px] rounded-ee-[5px]'
+                                }`]: isMessageFromMe,
+                                [`self-start dark:bg-primary-dark-50 bg-primary-gray ${
+                                    isLast
+                                        ? 'before:-left-5 dark:before:shadow-[13px_0_0_#424242] before:shadow-[13px_0_0_#EEE] rounded-es-[0px] rounded-ee-[15px] relative before:absolute before:w-[20px] before:h-[15px] before:bg-transparent before:-bottom-0 before:rounded-br-3xl'
+                                        : 'rounded-es-[5px] rounded-ee-[15px]'
+                                }`]: !isMessageFromMe
+                            })}
                         >
-                            {markdownCompiler(text, PartOfCompilerUse.MESSAGE)}
-                            <Typography
-                                size='sm'
-                                className={cn(
-                                    'flex justify-end items-center gap-2',
-                                    isMessageFromMe
-                                        ? 'dark:text-primary-dark-50/20 text-primary-white'
-                                        : 'dark:text-primary-white/20'
-                                )}
-                                title={`${createTime.toLocaleString()}${
-                                    hasBeenEdited ? `\nEdited: ${editTime.toLocaleString()}` : ''
-                                }`}
-                            >
-                                {getRelativeTimeString(createTime, 'en-US')}
-                                {hasBeenEdited && ', edited'}
-                                {hasBeenRead ? (
-                                    <CheckCheck className={stylesForBottomIcon} />
-                                ) : (
-                                    <Check className={stylesForBottomIcon} />
-                                )}
-                            </Typography>
-                        </Typography>
+                            {(replyTo === null || !!replyTo) && (
+                                <Typography
+                                    as='p'
+                                    weight='semibold'
+                                    className={cn(
+                                        'line-clamp-1 dark:text-primary-blue text-xs flex flex-col py-1 px-2 w-full rounded bg-primary-blue/10 border-l-4 border-solid border-primary-blue'
+                                    )}
+                                >
+                                    {replyTo === null ? 'Deleted Message' : replyTo.sender.name}
+                                    {!!replyTo && (
+                                        <Typography
+                                            className={cn(
+                                                'text-xs line-clamp-1',
+                                                isMessageFromMe
+                                                    ? 'dark:text-primary-dark-200 text-primary-white'
+                                                    : 'dark:text-primary-white text-primary-dark-50'
+                                            )}
+                                        >
+                                            {markdownCompiler(replyTo.text, PartOfCompilerUse.REPLY)}
+                                        </Typography>
+                                    )}
+                                </Typography>
+                            )}
+                            <div className='flex items-center gap-2 flex-wrap'>
+                                <Typography
+                                    as='p'
+                                    className={cn(
+                                        'break-all',
+                                        isMessageFromMe ? 'dark:text-primary-dark-200' : 'text-primary-white'
+                                    )}
+                                >
+                                    {markdownCompiler(text, PartOfCompilerUse.MESSAGE)}
+                                </Typography>
+                                <Typography
+                                    size='sm'
+                                    className={cn(
+                                        'mt-0.5 ml-auto flex items-center gap-2',
+                                        isMessageFromMe
+                                            ? 'dark:text-primary-dark-50/20 text-primary-white'
+                                            : 'dark:text-primary-white/20'
+                                    )}
+                                    title={`${createTime.toLocaleString()}${
+                                        hasBeenEdited ? `\nEdited: ${editTime.toLocaleString()}` : ''
+                                    }`}
+                                >
+                                    {new Date(createdAt).toLocaleTimeString(navigator.language ?? 'en-US', {
+                                        timeStyle: 'short'
+                                    })}
+                                    {hasBeenEdited && ', edited'}
+                                    {hasBeenRead ? (
+                                        <CheckCheck className={stylesForBottomIcon} />
+                                    ) : (
+                                        <Check className={stylesForBottomIcon} />
+                                    )}
+                                </Typography>
+                            </div>
+                        </div>
                     </li>
                 </ContextMenuTrigger>
                 <MessageContextMenu message={message} isMessageFromMe={isMessageFromMe} />

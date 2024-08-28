@@ -12,6 +12,7 @@ const defaultHandlingForRaw: Required<Pick<CompilerOptions, 'createElement' | 's
 
 const compilerRules: Record<PartOfCompilerUse, CompilerOptions> = {
     message: { overrides: { a: { component: MessageLink } } },
+    reply: { ...defaultHandlingForRaw },
     feed: { ...defaultHandlingForRaw },
     messageTopBar: { ...defaultHandlingForRaw }
 }

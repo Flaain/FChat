@@ -46,7 +46,7 @@ export class SessionService extends BaseService<SessionDocument, Session> {
                 ...currentSession,
                 userAgent: this.UAParser.setUA(currentSession.userAgent).getResult()
             },
-            sessions: sessions.filter(({ _id }) => _id.toString() !== sessionId).map((session) => ({ 
+            sessions: sessions.filter(({ _id }) => _id.toString() !== sessionId).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).map((session) => ({ 
                 ...session,
                 userAgent: this.UAParser.setUA(session.userAgent).getResult(), 
             })),

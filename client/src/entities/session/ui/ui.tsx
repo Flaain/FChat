@@ -3,6 +3,7 @@ import Typography from '@/shared/ui/Typography';
 import ChromeLogo from '@/shared/lib/assets/icons/chrome.svg?react';
 import FireFoxLogo from '@/shared/lib/assets/icons/firefox.svg?react';
 import SafariLogo from '@/shared/lib/assets/icons/safari.svg?react';
+import EdgeLogo from '@/shared/lib/assets/icons/edge.svg?react';
 import { Button } from '@/shared/ui/Button';
 import { Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,7 +15,8 @@ const iconStyles = 'w-7 h-7 dark:fill-primary-white fill-primary-dark-50';
 const iconsMap = {
     Chrome: <ChromeLogo className={iconStyles} />,
     Firefox: <FireFoxLogo className={iconStyles} />,
-    Safari: <SafariLogo className={iconStyles} />
+    Safari: <SafariLogo className={iconStyles} />,
+    Edge: <EdgeLogo className={iconStyles} />
 };
 
 const Session = ({ session, withDropButton, dropButtonDisabled, onDrop }: SessionProps) => {

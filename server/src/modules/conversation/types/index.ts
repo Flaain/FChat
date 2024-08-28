@@ -37,9 +37,6 @@ export interface CreateConversationReturn {
 }
 
 export interface IConversationService {
-    createConversation: (
-        params: ConversationCreateDTO & { initiator: UserDocument },
-    ) => Promise<CreateConversationReturn>;
     getConversation: (params: {
         initiator: UserDocument;
         recipientId: string;
@@ -52,7 +49,6 @@ export interface IConversationService {
 }
 
 export interface IConversationController {
-    create: (req: RequestWithUser, dto: ConversationCreateDTO) => Promise<CreateConversationReturn>;
     delete: (req: RequestWithUser, id: string) => Promise<{ conversationId: Types.ObjectId }>;
     getConversation(req: RequestWithUser, recipientId: string, cursor?: string): Promise<GetConversationReturn>;
 }
