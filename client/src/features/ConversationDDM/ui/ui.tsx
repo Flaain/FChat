@@ -16,10 +16,10 @@ const ConversationDDM = () => {
                 onKeyUp={(event) => event.stopPropagation()}
                 loop
                 align='end'
-                className='border-none rounded w-[200px] h-auto dark:bg-primary-dark-50 z-[999]'
+                className='border-none rounded-md w-[200px] h-auto dark:bg-primary-dark-50 z-[999]'
             >
                 {_id && (
-                    <DropdownMenuItem className='flex items-center gap-5 cursor-pointer rounded dark:focus:bg-primary-dark-100/20 text-primary-white'>
+                    <DropdownMenuItem className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-primary-dark-100/20 text-primary-white'>
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
                             width='20'
@@ -41,7 +41,7 @@ const ConversationDDM = () => {
                 )}
                 <DropdownMenuItem
                     onClick={isRecipientBlocked ? handleUnblockRecipient : onBlockRecipient}
-                    className='flex items-center gap-5 cursor-pointer rounded dark:focus:bg-primary-dark-100/20 text-primary-white'
+                    className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-primary-dark-100/20 text-primary-white'
                 >
                     <Lock className='w-5 h-5' />
                     {isRecipientBlocked ? 'Unblock user' : 'Block user'}
@@ -49,7 +49,7 @@ const ConversationDDM = () => {
                 {_id && (
                     <DropdownMenuItem
                         onClick={onClickDeleteConversation}
-                        className='flex items-center gap-5 cursor-pointer rounded dark:focus:bg-primary-destructive/10 text-primary-destructive'
+                        className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-primary-destructive/10 text-primary-destructive'
                     >
                         <Trash className='w-5 h-5' /> Delete conversation
                     </DropdownMenuItem>

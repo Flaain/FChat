@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { OTP } from './schemas/otp.schema';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { IOtpService, OtpDocument, OtpType } from './types';
@@ -24,7 +24,7 @@ export class OtpService extends BaseService<OtpDocument, OTP> implements IOtpSer
             throw new AppException({ message: 'Cannot create OTP code' }, HttpStatus.CONFLICT);
         }
 
-        const otpExists = await this.findOne({ email, type }, { expiresAt: 1 });
+        const otpExists = await this.findOne({ filter: { email, type }, projection: { expiresAt: 1 } });
 
         if (otpExists && new Date(otpExists.expiresAt).getTime() > Date.now()) {
             return { retryDelay: new Date(otpExists.expiresAt).getTime() - Date.now() };

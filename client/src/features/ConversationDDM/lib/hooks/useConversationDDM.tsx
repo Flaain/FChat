@@ -47,7 +47,6 @@ export const useConversationDDM = () => {
         
         setIsMenuOpen(false);
         openModal({
-            id: 'delete-conversation',
             content: (
                 <Confirm
                     onConfirm={handleDeleteConversation}
@@ -82,7 +81,6 @@ export const useConversationDDM = () => {
 
         setIsMenuOpen(false);
         openModal({
-            id: 'delete-conversation',
             content: (
                 <Confirm
                     onConfirm={handleBlockRecipient}

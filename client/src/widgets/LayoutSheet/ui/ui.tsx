@@ -37,7 +37,6 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
             icon: <Users className={listIconStyle} />,
             action: () =>
                 onSheetAction({
-                    id: 'create-group-modal',
                     withHeader: false,
                     content: (
                         <CreateGroupProvider>
@@ -52,7 +51,6 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
             icon: <SettingsIcon className={listIconStyle} />,
             action: () =>
                 onSheetAction({
-                    id: 'settings-modal',
                     content: (
                         <SettingsProvider>
                             <Settings />
@@ -67,7 +65,7 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
     return (
         <div className='flex flex-col py-8 h-full'>
             <div className='flex flex-col gap-2 items-start px-4'>
-                <AvatarByName name={profile.name} size='lg' />
+                {profile.avatar ? <img src={profile.avatar} className='size-[50px] rounded-full' /> : <AvatarByName name={profile.name} size='lg' />}
                 <Typography as='h2' size='lg' weight='medium' className={cn(profile.isOfficial && 'flex items-center')}>
                     {profile.name}
                     {profile.isOfficial && (

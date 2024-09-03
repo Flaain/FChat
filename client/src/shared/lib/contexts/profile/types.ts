@@ -7,6 +7,7 @@ export interface User {
     email: string;
     presence: PRESENCE;
     status?: string;
+    avatar?: string;
     lastSeenAt: string;
     isOfficial: boolean;
     isPrivate: boolean;

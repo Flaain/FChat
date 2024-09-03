@@ -1,8 +1,15 @@
+import { Document, FilterQuery, MongooseUpdateQueryOptions, ProjectionType, UpdateQuery as MongooseUpdateQuery, QueryOptions, UpdateWithAggregationPipeline } from 'mongoose';
 import { SessionDocument } from 'src/modules/session/types';
 import { UserDocument } from 'src/modules/user/types';
 
 export type RequestWithUser = Request & { user: { doc: UserDocument; sessionId: string } };
 export type RequestWithSession = Request & { user: { session: SessionDocument } };
+
+export enum THROTTLERS {
+    DEFAULT = 'DEFAULT',
+    AUTH = 'AUTH',
+    MESSAGE = 'MESSAGE',
+}
 
 export enum Routes {
     AUTH = 'auth',
@@ -18,6 +25,7 @@ export enum Routes {
 
 export enum Providers {
     PARSER_CLIENT = 'PARSER_CLIENT',
+    S3_CLIENT = 'S3_CLIENT',
 }
 
 export enum AuthCookiesName {
@@ -75,4 +83,16 @@ export interface WrappedInPagination<T> {
     current_page: number;
     total_pages: number;
     remaining_items: number;
+}
+
+export interface FindQuery<Doc extends Document> {
+    filter: FilterQuery<Doc>, 
+    projection?: ProjectionType<Doc>, 
+    options?: QueryOptions<Doc>
+}
+
+export interface UpdateQuery<Doc extends Document> {
+    filter: FilterQuery<Doc>,
+    update?: MongooseUpdateQuery<Doc> | UpdateWithAggregationPipeline,
+    options?: MongooseUpdateQueryOptions<Doc>,
 }

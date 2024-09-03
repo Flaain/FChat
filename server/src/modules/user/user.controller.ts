@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Pagination, RequestWithUser, Routes } from 'src/utils/types';
 import { CheckType, IUserController } from './types';
@@ -9,10 +9,15 @@ import { PaginationResolver } from 'src/utils/services/pagination/patination.res
 import { Pagination as PaginationDecorator } from 'src/utils/decorators/pagination';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { STATIC_CONVERSATION_EVENTS, USER_EVENTS } from '../gateway/types';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { filePipe } from './constants';
 
 @Controller(Routes.USER)
 export class UserController extends PaginationResolver implements IUserController {
-    constructor(private readonly userService: UserService, private readonly eventEmitter: EventEmitter2) {
+    constructor(
+        private readonly userService: UserService,
+        private readonly eventEmitter: EventEmitter2,
+    ) {
         super();
     }
 
@@ -46,7 +51,10 @@ export class UserController extends PaginationResolver implements IUserControlle
     async block(@Req() req: RequestWithUser, @Param('id') id: string) {
         const { recipientId } = await this.userService.block({ initiator: req.user.doc, recipientId: id });
 
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.BLOCK, { recipientId, initiatorId: req.user.doc._id.toString() });
+        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.BLOCK, {
+            recipientId,
+            initiatorId: req.user.doc._id.toString(),
+        });
 
         return { recipientId };
     }
@@ -56,8 +64,18 @@ export class UserController extends PaginationResolver implements IUserControlle
     async unblock(@Req() req: RequestWithUser, @Param('id') id: string) {
         const { recipientId } = await this.userService.unblock({ initiator: req.user.doc, recipientId: id });
 
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.UNBLOCK, { recipientId, initiatorId: req.user.doc._id.toString() });
+        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.UNBLOCK, {
+            recipientId,
+            initiatorId: req.user.doc._id.toString(),
+        });
 
         return { recipientId };
+    }
+
+    @Post('avatar')
+    @UseGuards(AccessGuard)
+    @UseInterceptors(FileInterceptor('image'))
+    avatar(@Req() req: RequestWithUser, @UploadedFile(filePipe) file: Express.Multer.File) {
+        return this.userService.changeAvatar({ initiator: req.user.doc, file });
     }
 }

@@ -24,11 +24,11 @@ const avatarVariants = cva(
     }
 );
 
-const AvatarByName = ({ name, className, size, isOnline, ...rest }: AvatarByNameProps) => {
+const AvatarByName = ({ name, className, children, size, isOnline, ...rest }: AvatarByNameProps) => {
     if (!name) {
         return (
             <span {...rest} className={cn(avatarVariants({ size, className }))}>
-                <User />
+                {children || <User />}
             </span>
         );
     }
@@ -39,9 +39,15 @@ const AvatarByName = ({ name, className, size, isOnline, ...rest }: AvatarByName
 
     return (
         <span {...rest} className={cn('relative', avatarVariants({ size, className }))}>
-            {firstNameInitial.toUpperCase()}
-            {lastNameInitial.toUpperCase()}
-            {isOnline && <span className='absolute right-0 bottom-0 h-3 w-3 rounded-full bg-green-500 border-2 border-solid dark:border-primary-dark-50'></span>}
+            {children || (
+                <>
+                    {firstNameInitial.toUpperCase()}
+                    {lastNameInitial.toUpperCase()}
+                </>
+            )}
+            {isOnline && (
+                <span className='absolute right-0 bottom-0 h-3 w-3 rounded-full bg-green-500 border-2 border-solid dark:border-primary-dark-50'></span>
+            )}
         </span>
     );
 };

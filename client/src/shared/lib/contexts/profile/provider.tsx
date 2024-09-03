@@ -14,6 +14,8 @@ export const ProfileProvider = ({ defaultProfile, children }: ProfileProviderPro
         try {
             const { data: profile } = await api.user.profile();
             
+            profile.avatar = profile.avatar ? URL.createObjectURL(await (await fetch(profile.avatar)).blob()) : profile.avatar;
+
             setProfile(profile);
             dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { userId: profile._id } });
         } catch (error) {
@@ -29,6 +31,8 @@ export const ProfileProvider = ({ defaultProfile, children }: ProfileProviderPro
         const onRefreshError = () => {
             dispatch({ type: SessionTypes.SET_ON_LOGOUT });
             setProfile(undefined!);
+
+            URL.revokeObjectURL(profile.avatar!);
         }
 
         api.user.subscribeRefreshError(onRefreshError);

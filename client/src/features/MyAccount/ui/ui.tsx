@@ -4,15 +4,16 @@ import EditName from '@/features/EditName/ui/ui';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { useMyAccount } from '../lib/hooks/useMyAccount';
-import { AtSign, Mail, UserCircle2 } from 'lucide-react';
+import { AtSign, Camera, Loader2, Mail, UserCircle2 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { useModal } from '@/shared/lib/hooks/useModal';
+import { Input } from '@/shared/ui/Input';
 
 const MyAccount = () => {
     const { openModal } = useModal();
     const { profile } = useProfile();
     const { isConnected } = useLayoutContext();
-    const { statusValue, symbolsLeft, handleChangeStatus } = useMyAccount();
+    const { statusValue, symbolsLeft, isUploading, handleChangeStatus, handleChangeAvatar } = useMyAccount();
 
     const list: Array<{ icon: React.ReactNode; title: string; value: string; action: () => void }> = [
         {
@@ -20,7 +21,6 @@ const MyAccount = () => {
             value: profile.name,
             icon: <UserCircle2 className='w-5 h-5' />,
             action: () => openModal({ 
-                id: 'editName',
                 content: <EditName />,
                 title: 'Edit your name',
                 bodyClassName: 'max-w-[400px] w-full h-auto p-5',
@@ -44,7 +44,13 @@ const MyAccount = () => {
     return (
         <div className='flex flex-col'>
             <div className='flex flex-col items-center justify-center pt-5 px-5'>
-                <AvatarByName name={profile.name} size='4xl' />
+                <div className='relative'>
+                    {profile.avatar ? <img src={profile.avatar} className='size-24 rounded-full' /> : <AvatarByName name={profile.name} size='4xl' />}
+                    <label aria-disabled={isUploading} className='aria-[disabled="false"]:hover:dark:bg-slate-200 transition-colors duration-200 ease-in-out aria-[disabled="false"]:cursor-pointer size-8 flex items-center justify-center rounded-full border border-solid dark:bg-slate-100 bg-primary-dark-50 dark:border-primary-dark-50 border-primary-white absolute bottom-0 right-0'>
+                        {isUploading ? <Loader2 className='w-5 h-6 animate-spin' /> : <Camera className='w-5 h-5' />}
+                        <Input disabled={isUploading} type='file' className='sr-only' onChange={handleChangeAvatar} />
+                    </label>
+                </div>
                 <Typography as='h2' variant='primary' size='xl' weight='medium' className='mt-2'>
                     {profile.name}
                 </Typography>
@@ -64,7 +70,7 @@ const MyAccount = () => {
                     </Typography>
                 </form>
             </div>
-            <ul className='flex flex-col mt-2'>
+            <ul className='flex flex-col mt-3'>
                 {list.map(({ title, value, icon, action }, index) => (
                     <li key={index}>
                         <Button

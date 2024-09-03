@@ -13,7 +13,7 @@ export class MessageAPI extends API {
         return this._checkResponse<IMessage>(await fetch(this._baseUrl + `/message/send/${recipientId}`, request), request);
     };
 
-    edit = async ({ messageId, ...body }: { message: string; messageId: string; recipientId: string, conversationId: string }) => {
+    edit = async ({ messageId, ...body }: { message: string; messageId: string; recipientId: string }) => {
         const request: RequestInit = {
             method: 'PATCH',
             headers: this._headers,
@@ -35,7 +35,7 @@ export class MessageAPI extends API {
         return this._checkResponse<IMessage>(await fetch(this._baseUrl + `/message/reply/${messageId}`, request), request);
     };
 
-    delete = async ({ messageId, ...body }: { messageId: string; conversationId: string; recipientId: string }) => {
+    delete = async ({ messageId, ...body }: { messageId: string; recipientId: string }) => {
         const request: RequestInit = {
             method: 'DELETE',
             headers: this._headers,

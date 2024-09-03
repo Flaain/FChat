@@ -16,10 +16,10 @@ export class Conversation implements Omit<IConversation, '_id'> {
     @Prop({ type: Date, required: true, default: () => new Date() })
     lastMessageSentAt?: Date;
 
-    @Prop({ type: Date, default: () => new Date() })
+    @Prop({ type: Date })
     createdAt?: Date;
 
-    @Prop({ type: Date, default: () => new Date() })
+    @Prop({ type: Date })
     updatedAt?: Date;
 }
 

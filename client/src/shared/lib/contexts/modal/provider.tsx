@@ -81,7 +81,7 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
     return (
         <ModalContext.Provider value={value}>
             {modals.map((modal, index, array) => ReactDOM.createPortal(
-                <Modal ref={index ===  array.length - 1 ? bodyRef : null} key={modal.id} {...modal} closeHandler={closeModal}>
+                <Modal ref={index ===  array.length - 1 ? bodyRef : null} key={index} {...modal} closeHandler={closeModal}>
                     {modal.content}
                 </Modal>, document.querySelector('#modal-root')!
             ))}

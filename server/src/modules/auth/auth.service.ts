@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { Types } from 'mongoose';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IAuthService, WithUserAgent } from './types';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { JWT_KEYS } from 'src/utils/types';
+import { JWT_KEYS, Providers } from 'src/utils/types';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { BcryptService } from 'src/utils/services/bcrypt/bcrypt.service';
 import { incorrectPasswordError, otpError } from './constants';
@@ -14,12 +14,15 @@ import { UserService } from '../user/user.service';
 import { OtpService } from '../otp/otp.service';
 import { SessionService } from '../session/session.service';
 import { OtpType } from '../otp/types';
-import { UserDocument } from '../user/types';
+import { IUser, UserDocument } from '../user/types';
 import { User } from '../user/schemas/user.schema';
 import { SessionDocument } from '../session/types';
 import { ForgotDTO } from './dtos/auth.forgot.dto';
 import { AuthResetDTO } from './dtos/auth.reset.dto';
 import { authChangePasswordSchema } from './schemas/auth.change.password.schema';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { File } from '../file/schemas/file.schema';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -30,6 +33,7 @@ export class AuthService implements IAuthService {
         private readonly otpService: OtpService,
         private readonly sessionService: SessionService,
         private readonly bcryptService: BcryptService,
+        @Inject(Providers.S3_CLIENT) private readonly s3: S3Client
     ) {}
     
     private signAuthTokens = ({ sessionId, userId }: { sessionId: string; userId: string }) => {
@@ -44,23 +48,28 @@ export class AuthService implements IAuthService {
     }
 
     signin = async ({ login, password, userAgent }: WithUserAgent<SigninDTO>) => {
-        const user = await this.userService.findOne({ isDeleted: false, $or: [{ email: login }, { login }] }, { blockList: 0 });
+        const user = await this.userService.findOne({ filter: { isDeleted: false, $or: [{ email: login }, { login }] }, projection: { blockList: 0 } });
 
-        if (!user) throw new AppException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
-
-        const { password: hashedPassword, ...rest } = user.toObject();
-
-        if (!await this.bcryptService.compareAsync(password, hashedPassword)) {
+        if (!user || !(await this.bcryptService.compareAsync(password, user.password))) {
             throw new AppException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
         }
 
-        const session = await this.sessionService.create({ userId: user._id, userAgent });
+        const populatedUser = await user.populate<{ avatar: File }>({ path: 'avatar', model: 'File' });
 
-        return { user: rest, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
+        const avatarUrl = populatedUser.avatar && (await getSignedUrl(this.s3, new GetObjectCommand({ 
+            Bucket: process.env.BUCKET_NAME, 
+            Key: populatedUser.avatar.key 
+        }), { expiresIn: 900 }))
+
+        const { password: _,  ...rest } = populatedUser.toObject<User>();
+
+        const session = await this.sessionService.create({ userId: user._id, userAgent });
+        
+        return { user: { ...rest, avatar: avatarUrl }, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
     }
 
     signup = async ({ password, otp, userAgent, ...dto }: WithUserAgent<Required<SignupDTO>>) => {     
-        if (await this.userService.findOne({$or: [{ email: dto.email }, { login: dto.login }] })) {
+        if (await this.userService.findOne({ filter: { $or: [{ email: dto.email }, { login: dto.login }] } })) {
             throw new AppException({ 
                 message: 'An error occurred during the registration process. Please try again.'
             }, HttpStatus.BAD_REQUEST);
@@ -71,7 +80,7 @@ export class AuthService implements IAuthService {
         }
 
         const hashedPassword = await this.bcryptService.hashAsync(password);
-        const { password: _, ...restUser } = (await this.userService.create({ ...dto, password: hashedPassword })).toObject<User>();
+        const { password: _, ...restUser } = (await this.userService.create({ ...dto, password: hashedPassword })).toObject<IUser>();
         const session = await this.sessionService.create({ userId: restUser._id, userAgent });
 
         return { user: restUser, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: restUser._id.toString() }) };
@@ -85,7 +94,7 @@ export class AuthService implements IAuthService {
     });
 
     forgot = async ({ email }: ForgotDTO) => {
-        if (!await this.userService.findOne({ email, isDeleted: false })) {
+        if (!await this.userService.findOne({ filter: { email, isDeleted: false } })) {
             return { retryDelay: 120000 };
         };
 
@@ -100,17 +109,13 @@ export class AuthService implements IAuthService {
              }, HttpStatus.BAD_REQUEST);
         }
 
-        const user = await this.userService.findOne({ email, isDeleted: false });
+        const user = await this.userService.findOne({ filter: { email, isDeleted: false } });
 
         if (!user) throw new AppException({ message: 'Something went wrong' }, HttpStatus.INTERNAL_SERVER_ERROR);
 
         const hashedPassword = await this.bcryptService.hashAsync(password);
 
-        await this.sessionService.deleteMany({ userId: user._id });
-
-        user.password = hashedPassword;
-
-        await user.save();
+        await Promise.all([this.sessionService.deleteMany({ userId: user._id }), user.updateOne({ password: hashedPassword })])
 
         return { status: HttpStatus.OK, message: 'OK' };
     }
@@ -123,15 +128,19 @@ export class AuthService implements IAuthService {
         }
 
         if (parsedQuery.type === 'set') {
-            initiator.password = await this.bcryptService.hashAsync(dto.newPassword);
-            await Promise.all([initiator.save(), this.sessionService.deleteMany({ userId: initiator._id })]);
+            const hashedPassword = await this.bcryptService.hashAsync(dto.newPassword);
+            
+            await Promise.all([
+                initiator.updateOne({ password: hashedPassword }),
+                this.sessionService.deleteMany({ userId: initiator._id }),
+            ]);
         }
 
         return { status: HttpStatus.OK, message: 'OK' };
     }
 
     logout = async ({ user, sessionId }: { user: UserDocument; sessionId: string }) => {
-        const session = await this.sessionService.findOne({ _id: sessionId, userId: user._id });
+        const session = await this.sessionService.findOne({ filter: { _id: sessionId, userId: user._id } });
 
         if (!session) throw new AppException({ message: "Cannot find session" }, HttpStatus.UNAUTHORIZED);
 
@@ -141,7 +150,7 @@ export class AuthService implements IAuthService {
     }
 
     validate = async (id: Types.ObjectId | string) => {
-        const candidate = await this.userService.findOne({ _id: id, isDeleted: false });
+        const candidate = await this.userService.findOne({ filter: { _id: id, isDeleted: false } });
 
         if (!candidate) throw new AppException({ message: "Unauthorized" }, HttpStatus.UNAUTHORIZED);
 
@@ -149,8 +158,15 @@ export class AuthService implements IAuthService {
     };
 
     profile = async (user: UserDocument) => {
-        const { password, ...rest } = user.toObject<User>();
-        
-        return rest;
+        const populatedUser = await user.populate<{ avatar: File }>({ path: 'avatar', model: 'File' });
+
+        const avatarUrl = populatedUser.avatar && (await getSignedUrl(this.s3, new GetObjectCommand({ 
+            Bucket: process.env.BUCKET_NAME, 
+            Key: populatedUser.avatar.key 
+        }), { expiresIn: 900 }))
+
+        const { password: _, ...rest } = populatedUser.toObject();
+
+        return { ...rest, avatar: avatarUrl };
     };
 }

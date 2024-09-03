@@ -34,10 +34,10 @@ export class Group implements IGroup {
     @Prop({ type: Boolean, default: false })
     isOfficial?: boolean;
 
-    @Prop({ type: Date, default: () => new Date() })
+    @Prop({ type: Date })
     createdAt?: Date;
 
-    @Prop({ type: Date, default: () => new Date() })
+    @Prop({ type: Date })
     updatedAt?: Date;
 }
 

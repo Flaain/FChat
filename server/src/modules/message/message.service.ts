@@ -9,7 +9,6 @@ import { BaseService } from 'src/utils/services/base/base.service';
 import { UserService } from '../user/user.service';
 import { UserDocument } from '../user/types';
 import { MessageReplyDTO } from './dtos/message.reply.dto';
-import { ConversationDocument } from '../conversation/types';
 
 @Injectable()
 export class MessageService extends BaseService<MessageDocument, Message> {
@@ -26,11 +25,15 @@ export class MessageService extends BaseService<MessageDocument, Message> {
             message: 'Invalid recipient id' 
         }, HttpStatus.BAD_REQUEST);
 
-        const recipient = await this.userService.findOne({ _id: recipientId, isDeleted: false }, { password: 0 }, {
-            populate: {
-                path: 'blockList',
-                match: { _id: initiator._id },
-            }
+        const recipient = await this.userService.findOne({
+            filter: { _id: recipientId, isDeleted: false },
+            projection: { password: 0 },
+            options: {
+                populate: {
+                    path: 'blockList',
+                    match: { _id: initiator._id },
+                },
+            },
         });
 
         if (!recipient) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
@@ -45,36 +48,33 @@ export class MessageService extends BaseService<MessageDocument, Message> {
     }
 
     send = async ({ recipientId, message, initiator }: SendMessageParams) => {
-        let isNewConversation = false;
-        let conversation: ConversationDocument | null = null;
-
+        const ctx = { isNewConversation: false, conversation: null };
         const { recipient, isMessagingRestricted } = await this.isMessagingRestricted({ recipientId, initiator });
 
         if (isMessagingRestricted) throw new AppException({ message: 'Messaging restricted' }, HttpStatus.FORBIDDEN);
 
-        conversation = await this.conversationService.findOne(
-            { participants: { $all: [recipient._id, initiator._id] } },
-            { _id: 1 },
-        );
+        ctx.conversation = await this.conversationService.findOne({
+            filter: { participants: { $all: [recipient._id, initiator._id] } },
+            projection: { _id: 1 },
+        });
         
-        if (!conversation) {
+        if (!ctx.conversation) {
             if (recipient.isPrivate) throw new AppException({ message: 'Cannot send message' }, HttpStatus.NOT_FOUND);
 
-            isNewConversation = true;
-
-            conversation = await this.conversationService.create({ participants: [recipient._id, initiator._id] });
+            ctx.isNewConversation = true;
+            ctx.conversation = await this.conversationService.create({ participants: [recipient._id, initiator._id] });
         };
 
         const newMessage = await this.create({ sender: initiator._id, text: message.trim() });
+        const updateQuery = { lastMessage: newMessage._id, lastMessageSentAt: newMessage.createdAt }
+        
+        Object.assign(ctx.conversation, updateQuery);
+        
+        await ctx.conversation.updateOne({ ...updateQuery, $push: { messages: newMessage._id } });
 
-        const { 0: savedMessage } = await Promise.all([ 
-            newMessage.save(),
-            conversation.updateOne({ lastMessage: newMessage._id, lastMessageSentAt: newMessage.createdAt, $push: { messages: newMessage._id } })
-        ]);
+        const populatedMessage = await newMessage.populate([{ path: 'sender', model: 'User', select: 'name email official' }]);
 
-        const populatedMessage = (await savedMessage.populate([{ path: 'sender', model: 'User', select: 'name email official' }])).toObject();
-
-        return { message: populatedMessage, conversation, recipient, isNewConversation };
+        return { ...ctx, message: populatedMessage, recipient };
     };
 
     reply = async ({ messageId, recipientId, message, initiator }: MessageReplyDTO & { initiator: UserDocument, messageId: string }) => {
@@ -88,53 +88,54 @@ export class MessageService extends BaseService<MessageDocument, Message> {
 
         if (!replyMessage) throw new AppException({ message: 'Cannot reply to a message that does not exist' }, HttpStatus.NOT_FOUND);
 
-        const conversation = await this.conversationService.findOne(
-            { participants: { $all: [recipient._id, initiator._id] }, messages: { $in: replyMessage._id } },
-            { _id: 1 },
-        );
+        const conversation = await this.conversationService.findOne({
+            filter: { participants: { $all: [recipient._id, initiator._id] }, messages: { $in: replyMessage._id } },
+            projection: { _id: 1 },
+        });
 
         if (!conversation) throw new AppException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
 
         const newMessage = await this.create({ sender: initiator._id, text: message.trim(), replyTo: replyMessage._id });
 
-        const { 0: savedMessage } = await Promise.all([
-            newMessage.save(),
+        const { 0: populatedMessage } = await Promise.all([
+            newMessage.populate([
+                { path: 'sender', model: 'User', select: 'name email official' },
+                { path: 'replyTo', model: 'Message', select: 'text sender', populate: { path: 'sender', model: 'User', select: 'name' } },
+            ]),
             replyMessage.updateOne({ $push: { replies: newMessage._id } }),
             conversation.updateOne({ lastMessage: newMessage._id, lastMessageSentAt: newMessage.createdAt, $push: { messages: newMessage._id } }),
         ]);
 
-        const populatedMessage = (
-            await savedMessage.populate([
-                { path: 'sender', model: 'User', select: 'name email official' },
-                {
-                    path: 'replyTo',
-                    model: 'Message',
-                    select: 'text',
-                    populate: { path: 'sender', model: 'User', select: 'name' },
-                },
-            ])
-        ).toObject();
-
         return { message: populatedMessage, conversationId: conversation._id.toString() };
     }
 
-    edit = async ({ messageId, initiatorId, message: newMessage, conversationId, recipientId }: EditMessageParams) => {
-        const conversation = await this.conversationService.findOne(
-            {
-                _id: conversationId,
+    edit = async ({ messageId, initiatorId, message: newMessage, recipientId }: EditMessageParams) => {
+        const conversation = await this.conversationService.findOne({
+            filter: {
                 participants: { $all: [initiatorId, new Types.ObjectId(recipientId)] },
                 messages: { $in: new Types.ObjectId(messageId) },
             },
-            { _id: 1, lastMessage: 1 }, 
-        );
+            projection: { _id: 1, lastMessage: 1 },
+        });
 
         if (!conversation) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
 
-        const message = await this.findOneAndUpdate(
-            { _id: messageId, sender: initiatorId, text: { $ne: newMessage.trim() } },
-            { text: newMessage.trim(), hasBeenEdited: true },
-            { runValidators: true, populate: { path: 'sender', model: 'User', select: 'name email' } },
-        );
+        const message = await this.findOneAndUpdate({
+            filter: { _id: messageId, sender: initiatorId, text: { $ne: newMessage.trim() } },
+            update: { text: newMessage.trim(), hasBeenEdited: true },
+            options: {
+                runValidators: true,
+                populate: [
+                    { path: 'sender', model: 'User', select: 'name email' },
+                    {
+                        path: 'replyTo',
+                        model: 'Message',
+                        select: 'text sender',
+                        populate: { path: 'sender', model: 'User', select: 'name' },
+                    },
+                ],
+            },
+        });
 
         if (!message) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
 
@@ -146,46 +147,48 @@ export class MessageService extends BaseService<MessageDocument, Message> {
     };
 
     deleteMessage = async ({ conversationId, messageId, initiatorId }: DeleteMessageType) => {
-        const message = await this.findOne({ _id: messageId, sender: initiatorId });
+        const message = await this.findOne({ filter: { _id: messageId, sender: initiatorId } });
 
         if (!message) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
 
-        const conversation = await this.conversationService.findOne(
-            { _id: conversationId, participants: { $in: initiatorId }, messages: { $in: message._id } },
-            { _id: 1, lastMessage: 1, lastMessageSentAt: 1, messages: 1, createdAt: 1 },
-            { populate: { path: 'lastMessage', model: 'Message', populate: { path: 'sender', model: 'User', select: 'name' } } },
-        );
+        const conversation = await this.conversationService.findOne({
+            filter: { _id: conversationId, participants: { $in: initiatorId }, messages: { $in: message._id } },
+            projection: { _id: 1, lastMessage: 1, lastMessageSentAt: 1, messages: 1, createdAt: 1 },
+            options: {
+                populate: {
+                    path: 'lastMessage',
+                    model: 'Message',
+                    populate: { path: 'sender', model: 'User', select: 'name' },
+                },
+            },
+        });
 
         if (!conversation) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
         
-        conversation.messages = conversation.messages.filter((id) => id.toString() !== messageId);
-        
         const isLastMessage = message._id.toString() === conversation.lastMessage._id.toString();
+        const filteredMessages = conversation.messages.filter((id) => id.toString() !== message._id.toString());
+        const lastMessage = filteredMessages.length ? !isLastMessage ? conversation.lastMessage : await this.findById(filteredMessages[filteredMessages.length - 1], {
+            options: {
+                populate: {
+                    path: 'sender',
+                    model: 'User',
+                    select: 'name',
+                },
+            },
+        }) : undefined;
 
-        if (isLastMessage) {
-            const lastMessage = await this.findById(conversation.messages[conversation.messages.length - 1], undefined, { populate: { 
-                path: 'sender', 
-                model: 'User', 
-                select: 'name' 
-            } });
-
-            conversation.lastMessage = lastMessage?._id;
-            conversation.lastMessageSentAt = lastMessage?.createdAt ?? conversation.createdAt;
-            
-            await Promise.all([message.deleteOne(), conversation.save()]);
-            
-            return {
-                isLastMessage,
-                lastMessage: lastMessage?.toObject(),
-                lastMessageSentAt: conversation.lastMessageSentAt,
-            };
-        }
-        
-        await Promise.all([message.deleteOne(), conversation.save()]);
+        await Promise.all([
+            message.deleteOne(),
+            conversation.updateOne({
+                lastMessage: lastMessage?._id,
+                lastMessageSentAt: (lastMessage as Message)?.createdAt ?? conversation.createdAt,
+                $set: { messages: filteredMessages },
+            }),
+        ]);
         
         return {
+            lastMessage,
             isLastMessage,
-            lastMessage: conversation.lastMessage,
             lastMessageSentAt: conversation.lastMessageSentAt,
         };
     };

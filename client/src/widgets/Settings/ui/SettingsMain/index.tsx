@@ -27,7 +27,7 @@ const SettingsMain = () => {
         <>
             <div className='border-b-8 dark:border-b-primary-dark-50'>
                 <div className='flex items-center gap-5 p-5'>
-                    <AvatarByName name={profile.name} size='2xl' />
+                    {profile.avatar ? <img src={profile.avatar} className='size-16 rounded-full' /> : <AvatarByName name={profile.name} size='2xl' />}
                     <div className='flex flex-col'>
                         <Typography
                             as='h2'

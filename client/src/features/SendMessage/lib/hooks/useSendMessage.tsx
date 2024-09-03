@@ -101,35 +101,36 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
         });
     }, [queryId, currentDraft]);
 
-    const onSendEditedConversationMessage = React.useCallback(async ({ messageId, message }: { messageId: string; message: string }) => {
-        await api.message.edit({ messageId, message, recipientId: queryId });
-    }, []);
-
     const onSendEditedMessage = async () => {
-        const trimmedValue = value.trim();
+        try {
+            const trimmedValue = value.trim();
 
-        if (!trimmedValue.length)
-            return openModal({
-                content: (
-                    <Confirm
-                        onCancel={onCloseDeleteConfirmation}
-                        onConfirm={handleDeleteConversationMessage}
-                        onConfirmText='Delete'
-                        text='Are you sure you want to delete this message?'
-                    />
-                ),
-                title: 'Delete message',
-                size: 'fit'
-            });
+            if (!trimmedValue.length)
+                return openModal({
+                    content: (
+                        <Confirm
+                            onCancel={onCloseDeleteConfirmation}
+                            onConfirm={handleDeleteConversationMessage}
+                            onConfirmText='Delete'
+                            text='Are you sure you want to delete this message?'
+                        />
+                    ),
+                    title: 'Delete message',
+                    size: 'fit'
+                });
 
-        if (trimmedValue === currentDraft!.selectedMessage!.text) return;
+            if (trimmedValue === currentDraft!.selectedMessage!.text) return;
 
-        const actions: Record<typeof type, (params: { messageId: string; message: string }) => Promise<void>> = {
-            conversation: onSendEditedConversationMessage,
-            group: async () => {}
-        };
+            const actions: Record<typeof type, (params: { messageId: string; message: string }) => Promise<APIData<IMessage>>> = {
+                conversation: ({ messageId, message }) => api.message.edit({ messageId, message, recipientId: queryId }),
+                group: async () => {}
+            };
 
-        await actions[type]({ messageId: currentDraft!.selectedMessage!._id, message: trimmedValue });
+            await actions[type]({ messageId: currentDraft!.selectedMessage!._id, message: trimmedValue });
+        } catch (error) {
+            console.error(error);
+            toast.error('Cannot edit message', { position: 'top-center' });
+        }
     };
 
     const onSendConversationMessage = React.useCallback(async (message: string) => {
@@ -191,12 +192,11 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
             };
 
             await actions[currentDraft?.state ?? 'send']();
-
-            setDefaultState();
         } catch (error) {
             console.error(error);
         } finally {
             setIsLoading(false);
+            setDefaultState();
             setTimeout(() => textareaRef.current?.focus(), 0); // kludge, .focus() doesn't work cuz of disabled textarea on loading
         }
     };

@@ -1,6 +1,6 @@
-import { Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
-import { RequestWithUser, Routes } from 'src/utils/types';
+import { RequestWithUser, Routes, THROTTLERS } from 'src/utils/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IConversationController } from './types';
 import { STATIC_CONVERSATION_EVENTS } from '../gateway/types';
@@ -29,7 +29,13 @@ export class ConversationController implements IConversationController {
 
     @Get(':id')
     @UseGuards(AccessGuard)
-    getConversation(@Req() req: RequestWithUser, @Param('id') id: string, @Query('cursor') cursor?: string) {
-        return this.conversationService.getConversation({ initiator: req.user.doc, recipientId: id, cursor });
+    getConversation(@Req() req: RequestWithUser, @Param('id') id: string) {
+        return this.conversationService.getConversation({ initiator: req.user.doc, recipientId: id });
+    }
+
+    @Get("previous-messages/:id")
+    @UseGuards(AccessGuard)
+    getPreviousMessages(@Req() req: RequestWithUser, @Param('id') id: string, @Query('cursor') cursor: string) {
+        return this.conversationService.getPreviousMessages({ recipientId: id, cursor, initiator: req.user.doc })
     }
 }

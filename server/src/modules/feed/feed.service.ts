@@ -17,24 +17,24 @@ export class FeedService {
 
     search = async ({ initiatorId, query }: Pick<Pagination, 'query'> & { initiatorId: Types.ObjectId }) => {
         return Promise.all([
-            this.userService.find(
-                {
+            this.userService.find({
+                filter: {
                     $or: [{ login: { $regex: query, $options: 'i' } }, { name: { $regex: query, $options: 'i' } }],
                     _id: { $ne: initiatorId },
                     isDeleted: false,
                     isPrivate: false,
                 },
-                { _id: 1, name: 1, login: 1, isOfficial: 1 },
-                { sort: { createdAt: -1 } },
-            ),
-            this.groupService.find(
-                {
+                projection: { _id: 1, name: 1, login: 1, isOfficial: 1 },
+                options: { sort: { createdAt: -1 } },
+            }),
+            this.groupService.find({
+                filter: {
                     $or: [{ login: { $regex: query, $options: 'i' } }, { name: { $regex: query, $options: 'i' } }],
                     isPrivate: false,
                 },
-                { _id: 1, name: 1, login: 1, isOfficial: 1 },
-                { sort: { createdAt: -1 } },
-            ),
+                projection: { _id: 1, name: 1, login: 1, isOfficial: 1 },
+                options: { sort: { createdAt: -1 } },
+            }),
         ]);
     };
 
@@ -50,19 +50,19 @@ export class FeedService {
         const BATCH_SIZE = 10;
         let nextCursor: string | null = null;
 
-        const participants = await this.participantService.find({ userId: initiatorId });
+        const participants = await this.participantService.find({ filter: { userId: initiatorId } });
 
         const groups = (
-            await this.groupService.find(
-                { _id: { $in: participants.map((participant) => participant.groupId), $nin: existingIds } },
-                {
+            await this.groupService.find({
+                filter: { _id: { $in: participants.map((participant) => participant.groupId), $nin: existingIds } },
+                projection: {
                     _id: 1,
                     name: 1,
                     login: 1,
                     lastMessage: 1,
                     lastMessageSentAt: 1,
                 },
-                {
+                options: {
                     populate: {
                         path: 'lastMessage',
                         model: 'GroupMessage',
@@ -73,14 +73,14 @@ export class FeedService {
                         },
                     },
                 },
-            )
+            })
         ).map((group) => ({ ...group.toObject(), type: 'group' }));
 
         const chats = (
-            await this.conversationService.find(
-                { _id: { $nin: existingIds }, participants: { $in: initiatorId } },
-                { lastMessage: 1, participants: 1, lastMessageSentAt: 1 },
-                {
+            await this.conversationService.find({
+                filter: { _id: { $nin: existingIds }, participants: { $in: initiatorId } },
+                projection: { lastMessage: 1, participants: 1, lastMessageSentAt: 1 },
+                options: {
                     populate: [
                         {
                             path: 'participants',
@@ -95,7 +95,7 @@ export class FeedService {
                         },
                     ],
                 },
-            )
+            })
         ).map((chat) => {
             const { participants, ...rest } = chat.toObject();
 

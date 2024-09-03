@@ -1,20 +1,27 @@
 import { z } from 'zod';
 import { User } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { userCheckSchema } from './schemas/user.check.schema';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { emailExistError, loginExistError } from '../auth/constants';
 import { IUserService, UserDocument, UserSearchParams } from './types';
 import { Model, isValidObjectId } from 'mongoose';
-import { IAppException } from 'src/utils/types';
+import { IAppException, Providers } from 'src/utils/types';
 import { UserStatusDTO } from './dtos/user.status.dto';
 import { UserNameDto } from './dtos/user.name.dto';
 import { BaseService } from 'src/utils/services/base/base.service';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class UserService extends BaseService<UserDocument, User> implements IUserService {
-    constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) {
+    constructor(
+        @InjectModel(User.name) private readonly userModel: Model<UserDocument>, 
+        @Inject(Providers.S3_CLIENT) private readonly s3: S3Client,
+        private readonly fileService: FileService
+    ) {
         super(userModel);
     }
 
@@ -27,7 +34,7 @@ export class UserService extends BaseService<UserDocument, User> implements IUse
 
         if (!recipient) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
 
-        await this.updateOne({ _id: initiator._id }, { $addToSet: { blockList: recipient._id } });
+        await this.updateOne({ filter: { _id: initiator._id }, update: { $addToSet: { blockList: recipient._id } } });
 
         return { recipientId: recipient._id.toString() };
     }
@@ -41,22 +48,22 @@ export class UserService extends BaseService<UserDocument, User> implements IUse
 
         if (!recipient) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
 
-        await this.updateOne({ _id: initiator._id }, { $pull: { blockList: recipient._id } });
+        await this.updateOne({ filter: { _id: initiator._id }, update: { $pull: { blockList: recipient._id } } });
 
         return { recipientId: recipient._id.toString() };
     }
 
     search = async ({ initiatorId, query, page, limit }: UserSearchParams) => {
-        const users = await this.find(
-            {
+        const users = await this.find({
+            filter: {
                 _id: { $ne: initiatorId },
                 $or: [{ name: { $regex: query, $options: 'i' } }, { login: { $regex: query, $options: 'i' } }],
                 isPrivate: false,
                 isDeleted: false,
             },
-            { _id: 1, name: 1, login: 1, isOfficial: 1 },
-            { limit, skip: page * limit, sort: { createdAt: -1 } },
-        ).lean();
+            projection: { _id: 1, name: 1, login: 1, isOfficial: 1 },
+            options: { limit, skip: page * limit, sort: { createdAt: -1 } },
+        }).lean();
 
         return users;
     };
@@ -84,18 +91,35 @@ export class UserService extends BaseService<UserDocument, User> implements IUse
 
         if (initiator.status === trimmedStatus) return { status: HttpStatus.OK, message: 'OK' };
 
-        initiator.status = trimmedStatus.length ? trimmedStatus : undefined;
-
-        await initiator.save();
+        await initiator.updateOne({ status: trimmedStatus.length ? trimmedStatus : undefined });
 
         return { status: HttpStatus.OK, message: 'OK' };
     };
 
     name = async ({ initiator, name }: UserNameDto & { initiator: UserDocument }) => {
-        initiator.name = name.trim();
-
-        await initiator.save();
+        await initiator.updateOne({ name });
 
         return { status: HttpStatus.OK, message: 'OK' };
     };
+
+    changeAvatar = async ({ initiator, file }: { initiator: UserDocument; file: Express.Multer.File }) => {
+        const key = `users/${initiator._id.toString()}/avatars/${process.env.NODE_ENV === 'dev'  ? Date.now() : crypto.randomUUID()}`;
+
+        await this.s3.send(new PutObjectCommand({
+            Bucket: process.env.BUCKET_NAME,
+            Key: key,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+        }));
+
+        const url = await getSignedUrl(this.s3, new GetObjectCommand({ Bucket: process.env.BUCKET_NAME, Key: key }), { expiresIn: 900 })
+        const newFile = await this.fileService.create({ key, mimetype: file.mimetype, size: file.size })
+
+        await Promise.all([
+            initiator.avatar && this.fileService.deleteMany({ _id: initiator.avatar }), // anyways we store old avatar in storage but delete it from db just in case if we want keep old avatar we should keep it in db
+            initiator.updateOne({ avatar: newFile._id }),
+        ]);
+
+        return { url }
+    }
 }

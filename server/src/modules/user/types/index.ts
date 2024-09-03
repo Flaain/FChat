@@ -23,6 +23,7 @@ export interface IUser {
     login: string;
     email: string;
     birthDate: Date;
+    avatar?: string;
     lastSeenAt?: Date;
     isPrivate?: boolean;
     isDeleted?: boolean;

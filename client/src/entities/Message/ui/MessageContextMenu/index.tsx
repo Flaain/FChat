@@ -13,7 +13,6 @@ const MessageContextMenu = ({ message, isMessageFromMe }: { message: IMessage; i
     const { textareaRef } = useLayoutContext();
 
     const confirmationConfig: ModalConfig = {
-        id: 'delete-message',
         content: (
             <Confirm
                 onCancel={closeModal}

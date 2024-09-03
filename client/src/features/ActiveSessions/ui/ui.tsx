@@ -33,7 +33,6 @@ const ActiveSessions = () => {
                                     openModal({
                                         withHeader: false,
                                         bodyClassName: 'max-w-[350px] p-5 h-auto',
-                                        id: 'terminateSessions-confirm-modal',
                                         content: (
                                             <Confirm
                                                 text='Are you sure you want to terminate all other sessions?'

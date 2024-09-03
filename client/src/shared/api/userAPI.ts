@@ -36,6 +36,16 @@ export class UserAPI extends API {
         return this._checkResponse<BasicAPIResponse>(await fetch(this._baseUrl + '/auth/logout', request), request);
     };
 
+    avatar = async (form: FormData) => {
+        const request: RequestInit = {
+            method: 'POST',
+            credentials: this._cretedentials,
+            body: form
+        };
+
+        return this._checkResponse<{ url: string }>(await fetch(this._baseUrl + '/user/avatar', request), request);
+    }
+
     search = async ({ query, page = 0, limit = 10 }: { query: string; page?: number; limit?: number }) => {
         const url = new URL(this._baseUrl + '/user/search');
         const request: RequestInit = { headers: this._headers, credentials: this._cretedentials };

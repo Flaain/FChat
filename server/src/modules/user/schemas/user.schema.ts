@@ -1,9 +1,9 @@
+import mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IUser, PRESENCE } from '../types';
-import mongoose from 'mongoose';
 
 @Schema({ timestamps: true })
-export class User implements Omit<IUser, '_id'> {
+export class User implements Omit<IUser, '_id' | 'avatar'> {
     @Prop({ type: String, required: true, unique: true })
     login: string;
 
@@ -40,10 +40,13 @@ export class User implements Omit<IUser, '_id'> {
     @Prop({ type: String })
     status?: string;
 
-    @Prop({ type: Date, default: () => new Date() })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'File' })
+    avatar?: mongoose.Types.ObjectId;
+
+    @Prop({ type: Date })
     createdAt?: Date;
 
-    @Prop({ type: Date, default: () => new Date() })
+    @Prop({ type: Date })
     updatedAt?: Date;
 }
 

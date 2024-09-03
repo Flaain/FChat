@@ -22,11 +22,14 @@ export class Message implements Omit<IMessage, '_id'> {
     @Prop({ required: true, default: false })
     hasBeenEdited?: boolean;
 
-    @Prop({ type: Date, default: () => new Date() })
+    @Prop({ type: Date })
     createdAt?: Date;
 
-    @Prop({ type: Date, default: () => new Date() })
+    @Prop({ type: Date })
     updatedAt?: Date;
+
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }] })
+    attachments?: Array<mongoose.Types.ObjectId>;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

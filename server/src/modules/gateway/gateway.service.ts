@@ -62,10 +62,10 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
                 if (!accessToken) return next(new AppException({ message: 'Unauthorized' }, HttpStatus.UNAUTHORIZED));
 
                 const user = await this.userService.findOne({
-                    _id: this.jwtService.verify<{ userId: string }>(accessToken, {
-                        secret: this.configService.get(JWT_KEYS.ACCESS_TOKEN_SECRET),
-                    }).userId,
-                    isDeleted: false,
+                    filter: {
+                        _id: this.jwtService.verify<{ userId: string }>(accessToken, { secret: this.configService.get(JWT_KEYS.ACCESS_TOKEN_SECRET) }).userId,
+                        isDeleted: false,
+                    },
                 });
 
                 if (!user) return next(new AppException({ message: 'Unauthorized' }, HttpStatus.UNAUTHORIZED));
@@ -88,20 +88,23 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
 
         const initiatorId = client.data.user._id;
 
-        const { 0: conversations } = await Promise.all([this.conversationService.find(
-            { participants: { $in: initiatorId } },
-            { participants: 1 },
-            {
-                populate: [
-                    {
-                        path: 'participants',
-                        model: 'User',
-                        select: '_id',
-                        match: { _id: { $ne: initiatorId } },
-                    },
-                ],
-            },
-        ), client.data.user.save()]);
+        const { 0: conversations } = await Promise.all([
+            this.conversationService.find({
+                filter: { participants: { $in: initiatorId } },
+                projection: { participants: 1 },
+                options: {
+                    populate: [
+                        {
+                            path: 'participants',
+                            model: 'User',
+                            select: '_id',
+                            match: { _id: { $ne: initiatorId } },
+                        },
+                    ],
+                },
+            }),
+            client.data.user.save(),
+        ]);
 
         conversations.forEach((conversation) => {
             const recipientId = conversation.participants[0]._id.toString();
@@ -139,7 +142,7 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
         const roomId = GatewayUtils.getRoomIdByParticipants([client.data.user._id.toString(), recipientId]);
 
         try {
-            const recipient = await this.userService.findOne({ _id: recipientId });
+            const recipient = await this.userService.findOne({ filter: { _id: recipientId } });
 
             if (!recipient) throw new Error('recipient not found');
 

@@ -12,6 +12,9 @@ export interface IMessage {
     hasBeenEdited?: boolean;
     hasBeenRead?: boolean;
     text: string;
+    replyTo?: Types.ObjectId;
+    replies?: Array<Types.ObjectId>;
+    attachments?: Array<Types.ObjectId>;
     createdAt?: Date;
     updatedAt?: Date;
 }

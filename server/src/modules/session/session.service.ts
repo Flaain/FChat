@@ -31,7 +31,7 @@ export class SessionService extends BaseService<SessionDocument, Session> {
     };
 
     getSessions = async ({ userId, sessionId }: { userId: Types.ObjectId | string; sessionId: string }) => {
-        const sessions = await this.sessionModel.find({ userId }, { userId: 0 }).lean();
+        const sessions = await this.find({ filter: { userId }, projection: { userId: 0 } }).lean();
         const currentSession = sessions.find(({ _id }) => _id.toString() === sessionId);
 
         if (!currentSession) {

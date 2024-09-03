@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model, Types, isValidObjectId } from 'mongoose';
 import { Conversation } from './schemas/conversation.schema';
 import { ConversationDocument, IConversationService } from './types';
 import { AppException } from 'src/utils/exceptions/app.exception';
@@ -8,6 +8,7 @@ import { Message } from '../message/schemas/message.schema';
 import { UserService } from '../user/user.service';
 import { UserDocument } from '../user/types';
 import { BaseService } from 'src/utils/services/base/base.service';
+import { MESSAGES_BATCH } from './constants';
 
 @Injectable()
 export class ConversationService extends BaseService<ConversationDocument, Conversation> implements IConversationService {
@@ -20,11 +21,14 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
     }
 
     deleteConversation = async ({ initiatorId, recipientId }: { initiatorId: Types.ObjectId; recipientId: string }) => {
-        const recipient = await this.userService.findOne({ _id: recipientId }, { birthDate: 0, password: 0, isPrivate: 0 });
+        const recipient = await this.userService.findOne({
+            filter: { _id: recipientId },
+            projection: { birthDate: 0, password: 0, isPrivate: 0 },
+        });
         
         if (!recipient) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
 
-        const conversation = await this.findOne({ participants: { $all: [initiatorId, recipient._id] } });
+        const conversation = await this.findOne({ filter: { participants: { $all: [initiatorId, recipient._id] } } });
 
         if (!conversation) throw new AppException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
 
@@ -33,29 +37,27 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
         return { _id: conversation._id, recipientId: recipient._id.toString() };
     };
     
-    getConversation = async ({ initiator, recipientId, cursor }: { initiator: UserDocument; recipientId: string; cursor?: string }) => {
-        const recipient = await this.userService.findOne(
-            { _id: recipientId },
-            { birthDate: 0, password: 0, isPrivate: 0 },
-            {
+    getConversation = async ({ initiator, recipientId }: { initiator: UserDocument; recipientId: string }) => {
+        const recipient = await this.userService.findOne({
+            filter: { _id: recipientId },
+            projection: { birthDate: 0, password: 0, isPrivate: 0 },
+            options: {
                 populate: {
                     path: 'blockList',
                     model: 'User',
                     match: { _id: initiator._id },
                 },
             },
-        );
+        });
 
         if (!recipient) throw new AppException({ message: "User not found" }, HttpStatus.NOT_FOUND);
 
-        const MESSAGES_BATCH = 10;
-
         let nextCursor: string | null = null;
 
-        const conversation = await this.findOne(
-            { participants: { $all: [initiator._id, recipient._id] } },
-            { messages: 1 },
-            {
+        const conversation = await this.findOne({
+            filter: { participants: { $all: [initiator._id, recipient._id] } },
+            projection: { messages: 1 },
+            options: {
                 populate: [
                     {
                         path: 'messages',
@@ -64,12 +66,12 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
                             {
                                 path: 'sender',
                                 model: 'User',
-                                select: 'login name email isOfficial isDeleted presence',
+                                select: 'name isDeleted',
                             },
                             {
                                 path: 'replyTo',
                                 model: 'Message',
-                                select: 'text',
+                                select: 'text sender',
                                 populate: { path: 'sender', model: 'User', select: 'name' },
                             },
                         ],
@@ -77,25 +79,70 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
                             limit: MESSAGES_BATCH,
                             sort: { createdAt: -1 },
                         },
-                        ...(cursor && { match: { _id: { $lt: cursor } } }),
                     },
                 ],
             },
-        ).lean();
-        
+        });
+
         const isInitiatorBlocked = !!recipient.blockList.length;
         const isRecipientBlocked = !!initiator.blockList.find((id) => id.toString() === recipientId);
 
-        if (!conversation) {
-            if (recipient.isPrivate) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
-            return { conversation: { recipient, messages: [], isInitiatorBlocked, isRecipientBlocked }, nextCursor };
-        }
+        if (!conversation && recipient.isPrivate) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
 
-        conversation.messages.length === MESSAGES_BATCH && (nextCursor = conversation.messages[MESSAGES_BATCH - 1]._id.toString());
+        conversation?.messages.length === MESSAGES_BATCH && (nextCursor = conversation?.messages[MESSAGES_BATCH - 1]._id.toString());
 
         return {
-            conversation: { _id: conversation._id, recipient, messages: conversation.messages.reverse(), isInitiatorBlocked, isRecipientBlocked },
+            conversation: { 
+                _id: conversation?._id, 
+                recipient, 
+                messages: conversation?.messages.reverse() ?? [], 
+                isInitiatorBlocked, 
+                isRecipientBlocked 
+            },
             nextCursor,
         };
     };
+
+    getPreviousMessages = async ({ cursor, initiator, recipientId }: { cursor: string, initiator: UserDocument, recipientId: string }) => {
+        if (!isValidObjectId(cursor) || !isValidObjectId(recipientId)) throw new AppException({ message: "Invlaid object id" }, HttpStatus.BAD_REQUEST);
+        
+        let nextCursor: string | null = null;
+
+        const conversation = await this.findOne({
+            filter: { participants: { $all: [initiator._id, new Types.ObjectId(recipientId)] } },
+            projection: { messages: 1 },
+            options: {
+                populate: [
+                    {
+                        path: 'messages',
+                        model: 'Message',
+                        populate: [
+                            {
+                                path: 'sender',
+                                model: 'User',
+                                select: 'name isDeleted',
+                            },
+                            {
+                                path: 'replyTo',
+                                model: 'Message',
+                                select: 'text sender',
+                                populate: { path: 'sender', model: 'User', select: 'name' },
+                            },
+                        ],
+                        options: {
+                            limit: MESSAGES_BATCH,
+                            sort: { createdAt: -1 },
+                        },
+                        match: { _id: { $lt: cursor } },
+                    },
+                ],
+            },
+        });
+
+        if (!conversation) throw new AppException({ message: "Cannot get previous messages" }, HttpStatus.NOT_FOUND);
+
+        conversation?.messages.length === MESSAGES_BATCH && (nextCursor = conversation?.messages[MESSAGES_BATCH - 1]._id.toString());
+
+        return { nextCursor, messages: conversation.messages.reverse() }
+    }
 }

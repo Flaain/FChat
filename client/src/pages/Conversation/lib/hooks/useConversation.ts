@@ -80,16 +80,16 @@ export const useConversation = () => {
         try {
             setIsPreviousMessagesLoading(true);
 
-            const { data: previousMessages } = await api.conversation.get({
-                recipientId: data?.conversation.recipient._id, 
-                params: { cursor: data?.nextCursor! }
-            });
+            const { data: previousMessages } = await api.conversation.getPreviousMessages({ 
+                recipientId: data.conversation.recipient._id,
+                params: { cursor: data.nextCursor! } 
+            })
 
             setConversation((prev) => ({
                 ...prev,
                 conversation: {
                     ...prev.conversation,
-                    messages: [...previousMessages.conversation.messages, ...prev.conversation.messages]
+                    messages: [...previousMessages.messages, ...prev.conversation.messages]
                 },
                 nextCursor: previousMessages.nextCursor
             }));

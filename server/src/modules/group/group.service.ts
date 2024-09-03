@@ -33,26 +33,23 @@ export class GroupService extends BaseService<GroupDocument, Group> {
             throw new AppException(loginExistError, HttpStatus.CONFLICT);
         }
 
-        const findedUsers = await this.userService.find(
-            {
+        const findedUsers = await this.userService.find({
+            filter: {
                 _id: { $in: dtoParticipants, $ne: initiator._id },
                 isDeleted: false,
                 isPrivate: false,
             },
-            {
-                _id: 1,
-            },
-        );
+            projection: { _id: 1 },
+        });
+
         const group = await this.create({ login, name, owner: initiator._id });
+        
         const participants = await this.participantService.insertMany([initiator, ...findedUsers].map((user) => ({ 
             userId: user._id, 
             groupId: group._id 
         })));
 
-        group.participants = participants.map((participant) => participant._id);
-        group.owner = participants[0]._id;
-
-        await group.save();
+        await group.updateOne({ participants: participants.map((participant) => participant._id), owner: participants[0]._id });
 
         return { _id: group._id.toString() };
     };
@@ -66,11 +63,11 @@ export class GroupService extends BaseService<GroupDocument, Group> {
         groupId: string;
         invite?: string;
     }) => {
-        const group = await this.findById(groupId, { invites: 0 });
+        const group = await this.findById(groupId, { projection: { invites: 0 } });
 
         if (!group) throw new AppException({ message: 'Group not found' }, HttpStatus.NOT_FOUND);
 
-        const participant = await this.participantService.findOne({ userId: initiator._id, groupId: group._id });
+        const participant = await this.participantService.findOne({ filter: { userId: initiator._id, groupId: group._id } });
 
         if (participant) {
             const populatedGroup = await group.populate({

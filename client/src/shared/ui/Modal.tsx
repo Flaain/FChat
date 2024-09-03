@@ -29,7 +29,7 @@ const ModalHeader = ({
     title,
     withCloseButton,
     closeHandler
-}: Omit<ModalProps, 'children' | 'bodyClassName' | 'size' | 'withHeader' | 'id'>) => {
+}: Omit<ModalProps, 'children' | 'bodyClassName' | 'size' | 'withHeader'>) => {
     const { isAsyncActionLoading } = useModal();
 
     if (!title && !withCloseButton) {
@@ -64,7 +64,7 @@ const ModalHeader = ({
     );
 };
 
-const ModalContainer = ({ children, closeHandler }: Omit<ModalProps, 'title' | 'id' | 'withHeader' | 'withCloseButton' | 'bodyClassName' | 'size'>) => {
+const ModalContainer = ({ children, closeHandler }: Omit<ModalProps, 'title' | 'withHeader' | 'withCloseButton' | 'bodyClassName' | 'size'>) => {
     const { isAsyncActionLoading } = useModal();
 
     const handleOverlayClick = ({ target, currentTarget }: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -88,7 +88,7 @@ const ModalBody = React.forwardRef<HTMLDivElement, Omit<ModalBodyProps, 'closeHa
     );
 })
 
-const Modal = React.forwardRef<HTMLDivElement, Omit<ModalProps, 'id'>>(({ closeHandler, children, withHeader = true, withCloseButton = true, ...config }, ref) => {
+const Modal = React.forwardRef<HTMLDivElement, ModalProps>(({ closeHandler, children, withHeader = true, withCloseButton = true, ...config }, ref) => {
     return (
         <ModalContainer closeHandler={closeHandler}>
             <ModalBody ref={ref} size={config.size} className={config.bodyClassName}>

@@ -9,14 +9,16 @@ import { STATIC_CONVERSATION_EVENTS } from '../gateway/types';
 import { IMessageController } from './types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
 import { MessageReplyDTO } from './dtos/message.reply.dto';
+import { Throttle } from '@nestjs/throttler';
 
+@Throttle({ default: { limit: 50, ttl: 60000 } })
 @Controller(Routes.MESSAGE)
 export class MessageController implements IMessageController {
     constructor(
         private readonly messageService: MessageService,
         private readonly eventEmitter: EventEmitter2
     ) {}
-
+    
     @Post('send/:recipientId')
     @UseGuards(AccessGuard)
     async send(@Req() req: RequestWithUser, @Body() dto: MessageSendDTO, @Param('recipientId') recipientId: string) {
@@ -74,7 +76,7 @@ export class MessageController implements IMessageController {
     @UseGuards(AccessGuard)
     async deleteMessage(@Req() req: RequestWithUser, @Body() dto: MessageDeleteDTO, @Param('messageId') messageId: string) {
         const message = await this.messageService.deleteMessage({ ...dto, messageId, initiatorId: req.user.doc._id });
-
+console.log(message)
         this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.DELETE_MESSAGE, { messageId, initiatorId: req.user.doc._id.toString(), ...dto, ...message })
 
         return message;
