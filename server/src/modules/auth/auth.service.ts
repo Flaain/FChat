@@ -22,7 +22,7 @@ import { AuthResetDTO } from './dtos/auth.reset.dto';
 import { authChangePasswordSchema } from './schemas/auth.change.password.schema';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { File } from '../file/schemas/file.schema';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { getSignedUrl } from 'src/utils/helpers/getSignedUrl';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -56,10 +56,7 @@ export class AuthService implements IAuthService {
 
         const populatedUser = await user.populate<{ avatar: File }>({ path: 'avatar', model: 'File' });
 
-        const avatarUrl = populatedUser.avatar && (await getSignedUrl(this.s3, new GetObjectCommand({ 
-            Bucket: process.env.BUCKET_NAME, 
-            Key: populatedUser.avatar.key 
-        }), { expiresIn: 900 }))
+        const avatarUrl = populatedUser.avatar && (await getSignedUrl(this.s3, populatedUser.avatar.key));
 
         const { password: _,  ...rest } = populatedUser.toObject<User>();
 
@@ -160,10 +157,7 @@ export class AuthService implements IAuthService {
     profile = async (user: UserDocument) => {
         const populatedUser = await user.populate<{ avatar: File }>({ path: 'avatar', model: 'File' });
 
-        const avatarUrl = populatedUser.avatar && (await getSignedUrl(this.s3, new GetObjectCommand({ 
-            Bucket: process.env.BUCKET_NAME, 
-            Key: populatedUser.avatar.key 
-        }), { expiresIn: 900 }))
+        const avatarUrl = populatedUser.avatar && (await getSignedUrl(this.s3, populatedUser.avatar.key))
 
         const { password: _, ...rest } = populatedUser.toObject();
 

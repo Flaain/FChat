@@ -25,6 +25,9 @@ export class Group implements IGroup {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Participant', required: true })
     owner: mongoose.Types.ObjectId;
 
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'File' })
+    avatar?: mongoose.Types.ObjectId;
+
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Invite' }] })
     invites?: Array<mongoose.Types.ObjectId>;
 

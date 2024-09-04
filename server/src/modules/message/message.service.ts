@@ -9,6 +9,8 @@ import { BaseService } from 'src/utils/services/base/base.service';
 import { UserService } from '../user/user.service';
 import { UserDocument } from '../user/types';
 import { MessageReplyDTO } from './dtos/message.reply.dto';
+import { FeedService } from '../feed/feed.service';
+import { FEED_TYPE } from '../feed/types';
 
 @Injectable()
 export class MessageService extends BaseService<MessageDocument, Message> {
@@ -16,6 +18,7 @@ export class MessageService extends BaseService<MessageDocument, Message> {
         @InjectModel(Message.name) private readonly messageModel: Model<MessageDocument>,
         private readonly userService: UserService,
         private readonly conversationService: ConversationService,
+        private readonly feedService: FeedService
     ) {
         super(messageModel);
     }
@@ -66,11 +69,17 @@ export class MessageService extends BaseService<MessageDocument, Message> {
         };
 
         const newMessage = await this.create({ sender: initiator._id, text: message.trim() });
+
         const updateQuery = { lastMessage: newMessage._id, lastMessageSentAt: newMessage.createdAt }
+        const createFeed = { item: ctx.conversation._id, type: FEED_TYPE.CONVERSATION, user: initiator._id, lastActionAt: newMessage.createdAt };
+        const updateFeed = { filter: { user: initiator._id, item: ctx.conversation._id }, update: { lastActionAt: newMessage.createdAt } }
         
         Object.assign(ctx.conversation, updateQuery);
         
-        await ctx.conversation.updateOne({ ...updateQuery, $push: { messages: newMessage._id } });
+        await Promise.all([
+            ctx.isNewConversation ? this.feedService.create(createFeed) : this.feedService.updateOne(updateFeed),
+            ctx.conversation.updateOne({ ...updateQuery, $push: { messages: newMessage._id } }),
+        ]);
 
         const populatedMessage = await newMessage.populate([{ path: 'sender', model: 'User', select: 'name email official' }]);
 

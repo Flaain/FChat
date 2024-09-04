@@ -12,8 +12,8 @@ import { UserStatusDTO } from './dtos/user.status.dto';
 import { UserNameDto } from './dtos/user.name.dto';
 import { BaseService } from 'src/utils/services/base/base.service';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { FileService } from '../file/file.service';
+import { getSignedUrl } from 'src/utils/helpers/getSignedUrl';
 
 @Injectable()
 export class UserService extends BaseService<UserDocument, User> implements IUserService {
@@ -112,7 +112,7 @@ export class UserService extends BaseService<UserDocument, User> implements IUse
             ContentType: file.mimetype,
         }));
 
-        const url = await getSignedUrl(this.s3, new GetObjectCommand({ Bucket: process.env.BUCKET_NAME, Key: key }), { expiresIn: 900 })
+        const url = await getSignedUrl(this.s3, key)
         const newFile = await this.fileService.create({ key, mimetype: file.mimetype, size: file.size })
 
         await Promise.all([

@@ -1,19 +1,29 @@
-import { Types } from 'mongoose';
-import { Injectable } from '@nestjs/common';
+import { Model, Types } from 'mongoose';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConversationService } from '../conversation/conversation.service';
 import { GroupService } from '../group/group.service';
 import { ParticipantService } from '../participant/participant.service';
-import { Pagination } from 'src/utils/types';
+import { Pagination, Providers } from 'src/utils/types';
 import { UserService } from '../user/user.service';
+import { S3Client } from '@aws-sdk/client-s3';
+import { InjectModel } from '@nestjs/mongoose';
+import { BaseService } from 'src/utils/services/base/base.service';
+import { FeedDocument, FeedHandlers, GetFeedParams } from './types';
+import { Feed } from './schemas/feed.schema';
+import { feedHandlers } from './constants';
 
 @Injectable()
-export class FeedService {
+export class FeedService extends BaseService<FeedDocument, Feed> {
     constructor(
         private readonly userService: UserService,
         private readonly conversationService: ConversationService,
         private readonly groupService: GroupService,
         private readonly participantService: ParticipantService,
-    ) {}
+        @Inject(Providers.S3_CLIENT) private readonly s3: S3Client,
+        @InjectModel(Feed.name) private readonly feedModel: Model<FeedDocument>,
+    ) {
+        super(feedModel);
+    }
 
     search = async ({ initiatorId, query }: Pick<Pagination, 'query'> & { initiatorId: Types.ObjectId }) => {
         return Promise.all([
@@ -38,77 +48,29 @@ export class FeedService {
         ]);
     };
 
-    getFeed = async ({
-        initiatorId,
-        cursor,
-        existingIds = [],
-    }: {
-        initiatorId: Types.ObjectId;
-        cursor?: string;
-        existingIds?: Array<string>;
-    }) => {
+    getFeed = async ({ initiatorId, cursor, existingIds = [] }: GetFeedParams) => {
         const BATCH_SIZE = 10;
         let nextCursor: string | null = null;
 
-        const participants = await this.participantService.find({ filter: { userId: initiatorId } });
-
-        const groups = (
-            await this.groupService.find({
-                filter: { _id: { $in: participants.map((participant) => participant.groupId), $nin: existingIds } },
-                projection: {
-                    _id: 1,
-                    name: 1,
-                    login: 1,
-                    lastMessage: 1,
-                    lastMessageSentAt: 1,
-                },
-                options: {
-                    populate: {
-                        path: 'lastMessage',
-                        model: 'GroupMessage',
-                        populate: {
-                            path: 'sender',
-                            model: 'Participant',
-                            populate: { path: 'userId', model: 'User', select: 'name' },
-                        },
-                    },
-                },
-            })
-        ).map((group) => ({ ...group.toObject(), type: 'group' }));
-
-        const chats = (
-            await this.conversationService.find({
-                filter: { _id: { $nin: existingIds }, participants: { $in: initiatorId } },
-                projection: { lastMessage: 1, participants: 1, lastMessageSentAt: 1 },
-                options: {
-                    populate: [
-                        {
-                            path: 'participants',
-                            model: 'User',
-                            select: 'login name isOfficial isDeleted presence',
-                            match: { _id: { $ne: initiatorId } },
-                        },
-                        {
-                            path: 'lastMessage',
-                            model: 'Message',
-                            populate: { path: 'sender', model: 'User', select: 'name' },
-                        },
-                    ],
-                },
-            })
-        ).map((chat) => {
-            const { participants, ...rest } = chat.toObject();
-
-            return { ...rest, recipient: participants[0], type: 'conversation' };
+        const feed = await this.find({
+            filter: { _id: { $nin: existingIds }, user: initiatorId, ...(cursor && { lastActionAt: { $lt: cursor } }) },
+            projection: { item: 1, type: 1, lastActionAt: 1 },
+            options: { limit: BATCH_SIZE, sort: { lastActionAt: -1 } },
         });
 
-        const feed = [...groups, ...chats]
-            .filter((chat) => !cursor || chat.lastMessageSentAt < new Date(cursor))
-            .sort((a, b) => new Date(b.lastMessageSentAt).getTime() - new Date(a.lastMessageSentAt).getTime())
-            .slice(0, BATCH_SIZE);
+        const feedWithPresignedUrls = await Promise.all(feed.map(async (item: FeedDocument) => {
+            const itemHandlers = feedHandlers[item.type];
+            const populatedItem = await item.populate(itemHandlers.populate(initiatorId));
 
-        feed.length === BATCH_SIZE && (nextCursor = feed[BATCH_SIZE - 1].lastMessageSentAt.toISOString());
+            if (!itemHandlers.canPreSignUrl(item)) return itemHandlers.returnObject(populatedItem.toObject());
 
-        return { feed, nextCursor };
+            const url = await itemHandlers.getPreSignedUrl(item, this.s3);
+
+            return itemHandlers.returnObject(populatedItem.toObject(), url);
+        }));
+
+        feed.length === BATCH_SIZE && (nextCursor = feed[BATCH_SIZE - 1].lastActionAt.toISOString());
+
+        return { feed: feedWithPresignedUrls, nextCursor };
     };
 }

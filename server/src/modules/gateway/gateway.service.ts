@@ -103,7 +103,7 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
                     ],
                 },
             }),
-            client.data.user.save(),
+            client.data.user.updateOne({ presence }),
         ]);
 
         conversations.forEach((conversation) => {
