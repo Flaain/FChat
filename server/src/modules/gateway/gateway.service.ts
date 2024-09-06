@@ -167,7 +167,8 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
         this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.SEND_MESSAGE, message);
 
         [initiatorSockets, recipientSockets].forEach((sockets) => sockets?.forEach((socket) => socket.emit(FEED_EVENTS.CREATE_MESSAGE, { 
-            message, conversationId 
+            message, 
+            id: conversationId 
         })));
     }
 
@@ -182,7 +183,7 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
 
         isLastMessage && [initiatorSockets, recipientSockets].forEach((sockets) => sockets?.forEach((socket) => socket.emit(FEED_EVENTS.EDIT_MESSAGE, {
             message,
-            conversationId
+            id: conversationId
         })));
     }
 
@@ -205,7 +206,7 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
             this.server.to(CONVERSATION_EVENTS.ROOM(roomId)).emit(STATIC_CONVERSATION_EVENTS.DELETE_MESSAGE, messageId);
 
             isLastMessage && [initiatorSockets, recipientSockets].forEach((sockets) => {
-                sockets?.forEach((socket) => socket.emit(FEED_EVENTS.DELETE_MESSAGE, { conversationId, lastMessage, lastMessageSentAt }));
+                sockets?.forEach((socket) => socket.emit(FEED_EVENTS.DELETE_MESSAGE, { id: conversationId, lastMessage, lastMessageSentAt }));
             });
         } catch (error) {
             // client.emit('', { error: error.message });

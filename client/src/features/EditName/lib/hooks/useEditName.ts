@@ -26,13 +26,16 @@ export const useEditName = () => {
 
     const onSubmit = async (data: EditNameType) => {
         try {
+            if (data.name.trim() === profile.name) return;
+
             await api.user.name(data);
 
-            closeModal();
             setProfile({ ...profile, name: data.name.trim() });
         } catch (error) {
             console.log(error);
             toast.error('Failed to change name');
+        } finally {
+            closeModal();
         }
     };
 

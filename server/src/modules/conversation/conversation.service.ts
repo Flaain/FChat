@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, isValidObjectId } from 'mongoose';
 import { Conversation } from './schemas/conversation.schema';
@@ -9,12 +9,15 @@ import { UserService } from '../user/user.service';
 import { UserDocument } from '../user/types';
 import { BaseService } from 'src/utils/services/base/base.service';
 import { MESSAGES_BATCH } from './constants';
+import { Providers } from 'src/utils/types';
+import { S3Client } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class ConversationService extends BaseService<ConversationDocument, Conversation> implements IConversationService {
     constructor(
         @InjectModel(Conversation.name) private readonly conversationModel: Model<ConversationDocument>,
         @InjectModel(Message.name) private readonly messageModel: Model<Message>,
+        @Inject(Providers.S3_CLIENT) private readonly s3: S3Client,
         private readonly userService: UserService,
     ) {
         super(conversationModel);
@@ -42,11 +45,18 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
             filter: { _id: recipientId },
             projection: { birthDate: 0, password: 0, isPrivate: 0 },
             options: {
-                populate: {
-                    path: 'blockList',
-                    model: 'User',
-                    match: { _id: initiator._id },
-                },
+                populate: [
+                    {
+                        path: 'blockList',
+                        model: 'User',
+                        match: { _id: initiator._id },
+                    },
+                    {
+                        path: 'avatar',
+                        model: 'File',
+                        select: 'url',
+                    },
+                ],
             },
         });
 
@@ -66,7 +76,8 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
                             {
                                 path: 'sender',
                                 model: 'User',
-                                select: 'name isDeleted',
+                                select: 'name isDeleted avatar',
+                                populate: { path: 'avatar', model: 'File', select: 'url' },
                             },
                             {
                                 path: 'replyTo',
@@ -86,16 +97,16 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
 
         const isInitiatorBlocked = !!recipient.blockList.length;
         const isRecipientBlocked = !!initiator.blockList.find((id) => id.toString() === recipientId);
-
+      
         if (!conversation && recipient.isPrivate) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
 
         conversation?.messages.length === MESSAGES_BATCH && (nextCursor = conversation?.messages[MESSAGES_BATCH - 1]._id.toString());
 
         return {
-            conversation: { 
+            conversation: {
                 _id: conversation?._id, 
                 recipient, 
-                messages: conversation?.messages.reverse() ?? [], 
+                messages: conversation.messages.reverse() ?? [],
                 isInitiatorBlocked, 
                 isRecipientBlocked 
             },
@@ -120,7 +131,8 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
                             {
                                 path: 'sender',
                                 model: 'User',
-                                select: 'name isDeleted',
+                                select: 'name isDeleted avatar',
+                                populate: { path: 'avatar', model: 'File', select: 'url' },
                             },
                             {
                                 path: 'replyTo',

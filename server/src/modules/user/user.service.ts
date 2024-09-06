@@ -11,9 +11,8 @@ import { IAppException, Providers } from 'src/utils/types';
 import { UserStatusDTO } from './dtos/user.status.dto';
 import { UserNameDto } from './dtos/user.name.dto';
 import { BaseService } from 'src/utils/services/base/base.service';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { FileService } from '../file/file.service';
-import { getSignedUrl } from 'src/utils/helpers/getSignedUrl';
 
 @Injectable()
 export class UserService extends BaseService<UserDocument, User> implements IUserService {
@@ -104,22 +103,23 @@ export class UserService extends BaseService<UserDocument, User> implements IUse
 
     changeAvatar = async ({ initiator, file }: { initiator: UserDocument; file: Express.Multer.File }) => {
         const key = `users/${initiator._id.toString()}/avatars/${process.env.NODE_ENV === 'dev'  ? Date.now() : crypto.randomUUID()}`;
+        const url = `${process.env.BUCKET_PUBLIC_ENDPOINT}/${key}`
 
         await this.s3.send(new PutObjectCommand({
             Bucket: process.env.BUCKET_NAME,
             Key: key,
             Body: file.buffer,
             ContentType: file.mimetype,
+            ACL: 'public-read'
         }));
 
-        const url = await getSignedUrl(this.s3, key)
-        const newFile = await this.fileService.create({ key, mimetype: file.mimetype, size: file.size })
+        const newFile = await this.fileService.create({ key, url, mimetype: file.mimetype, size: file.size });
 
         await Promise.all([
             initiator.avatar && this.fileService.deleteMany({ _id: initiator.avatar }), // anyways we store old avatar in storage but delete it from db just in case if we want keep old avatar we should keep it in db
             initiator.updateOne({ avatar: newFile._id }),
         ]);
 
-        return { url }
+        return { _id: newFile._id.toString(), url }
     }
 }

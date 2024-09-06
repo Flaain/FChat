@@ -65,7 +65,7 @@ const Conversation = () => {
                     />
                     {data.conversation.messages.length ? (
                         <MessagesList
-                            type='conversation'
+                            type={FeedTypes.CONVERSATION}
                             messages={data.conversation.messages}
                             getPreviousMessages={getPreviousMessages}
                             isFetchingPreviousMessages={isPreviousMessagesLoading}

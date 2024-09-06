@@ -7,13 +7,18 @@ export interface User {
     email: string;
     presence: PRESENCE;
     status?: string;
-    avatar?: string;
+    avatar?: Avatar;
     lastSeenAt: string;
     isOfficial: boolean;
     isPrivate: boolean;
     isDeleted: boolean;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface Avatar {
+    _id: string;
+    url: string;
 }
 
 export interface DataWithCursor<T> {

@@ -11,7 +11,7 @@ export const feedHandlers: Record<FEED_TYPE, FeedHandlers> = {
                     path: 'participants',
                     model: 'User',
                     select: 'login name isOfficial isDeleted presence avatar',
-                    populate: { path: 'avatar', model: 'File', select: 'key' },
+                    populate: { path: 'avatar', model: 'File', select: 'url' },
                     match: { _id: { $ne: initiatorId } },
                 },
                 {
@@ -24,12 +24,12 @@ export const feedHandlers: Record<FEED_TYPE, FeedHandlers> = {
         }),
         canPreSignUrl: (doc) => !!doc.item.participants[0].avatar,
         getPreSignedUrl: (doc, client) => getSignedUrl(client, doc.item.participants[0].avatar.key),
-        returnObject: ({ item: { participants, ...restItem }, ...doc }, url) => ({ ...doc, ...restItem, recipient: { ...participants[0], avatar: url } }),
+        returnObject: ({ item: { participants, ...restItem }, ...doc }) => ({ ...doc, ...restItem, recipient: participants[0] }),
     },
     Group: {
         populate: () => ({ path: 'item' }),
         canPreSignUrl: (doc) => !!doc.item.avatar,
         getPreSignedUrl: async () => '#',
-        returnObject: (doc, url) => ({ ...doc.item, avatar: url }),
+        returnObject: (doc) => doc,
     }
 };

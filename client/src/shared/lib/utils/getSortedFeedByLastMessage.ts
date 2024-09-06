@@ -1,3 +1,3 @@
-export const getSortedFeedByLastMessage = (a: { lastMessageSentAt: string }, b: { lastMessageSentAt: string }) => {
-   return new Date(b.lastMessageSentAt).getTime() - new Date(a.lastMessageSentAt).getTime();
+export const getSortedFeedByLastMessage = (a: { lastActionAt: string }, b: { lastActionAt: string }) => {
+   return new Date(b.lastActionAt).getTime() - new Date(a.lastActionAt).getTime();
 };

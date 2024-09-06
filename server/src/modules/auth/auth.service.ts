@@ -20,9 +20,7 @@ import { SessionDocument } from '../session/types';
 import { ForgotDTO } from './dtos/auth.forgot.dto';
 import { AuthResetDTO } from './dtos/auth.reset.dto';
 import { authChangePasswordSchema } from './schemas/auth.change.password.schema';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { File } from '../file/schemas/file.schema';
-import { getSignedUrl } from 'src/utils/helpers/getSignedUrl';
+import { S3Client } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -54,15 +52,13 @@ export class AuthService implements IAuthService {
             throw new AppException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
         }
 
-        const populatedUser = await user.populate<{ avatar: File }>({ path: 'avatar', model: 'File' });
-
-        const avatarUrl = populatedUser.avatar && (await getSignedUrl(this.s3, populatedUser.avatar.key));
+        const populatedUser = await user.populate({ path: 'avatar', model: 'File', select: 'url' })
 
         const { password: _,  ...rest } = populatedUser.toObject<User>();
 
         const session = await this.sessionService.create({ userId: user._id, userAgent });
         
-        return { user: { ...rest, avatar: avatarUrl }, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
+        return { user: { ...rest, avatar: rest.avatar }, ...this.signAuthTokens({ sessionId: session._id.toString(), userId: user._id.toString() }) };
     }
 
     signup = async ({ password, otp, userAgent, ...dto }: WithUserAgent<Required<SignupDTO>>) => {     
@@ -147,7 +143,12 @@ export class AuthService implements IAuthService {
     }
 
     validate = async (id: Types.ObjectId | string) => {
-        const candidate = await this.userService.findOne({ filter: { _id: id, isDeleted: false } });
+        const candidate = await this.userService.findOne({
+            filter: { _id: id, isDeleted: false },
+            options: {
+                populate: { path: 'avatar', model: 'File', select: 'url' },
+            },
+        });
 
         if (!candidate) throw new AppException({ message: "Unauthorized" }, HttpStatus.UNAUTHORIZED);
 
@@ -155,12 +156,8 @@ export class AuthService implements IAuthService {
     };
 
     profile = async (user: UserDocument) => {
-        const populatedUser = await user.populate<{ avatar: File }>({ path: 'avatar', model: 'File' });
+        const { password: _, ...rest } = user.toObject();
 
-        const avatarUrl = populatedUser.avatar && (await getSignedUrl(this.s3, populatedUser.avatar.key))
-
-        const { password: _, ...rest } = populatedUser.toObject();
-
-        return { ...rest, avatar: avatarUrl };
+        return { ...rest };
     };
 }

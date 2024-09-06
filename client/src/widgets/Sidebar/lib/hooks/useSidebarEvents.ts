@@ -1,53 +1,39 @@
 import React from "react";
 import { useLayoutContext } from "@/shared/lib/hooks/useLayoutContext";
 import { getSortedFeedByLastMessage } from "@/shared/lib/utils/getSortedFeedByLastMessage";
-import { ConversationFeed, DeleteMessageEventParams, FEED_EVENTS, FeedTypes, IMessage, PRESENCE } from "@/shared/model/types";
+import { ConversationFeed, DeleteMessageEventParams, FEED_EVENTS, FeedTypes, GroupFeed, IMessage, PRESENCE } from "@/shared/model/types";
 import { UseSidebarEventsProps } from "../../model/types";
 
 export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => {
     const { socket } = useLayoutContext();
     
+    const updateFeed = React.useCallback((update: Pick<ConversationFeed | GroupFeed, 'lastMessage' | 'lastActionAt'>, id: string, sort?: boolean) => {
+        setLocalResults((prevState) => {
+            const updatedArray = prevState.map((item) => item._id === id ? { ...item, ...update } : item);
+
+            return sort ? updatedArray.sort(getSortedFeedByLastMessage) : updatedArray;
+        });
+    }, [])
+
     React.useEffect(() => {
         socket?.on(FEED_EVENTS.CREATE_CONVERSATION, (conversation: ConversationFeed) => {
             setLocalResults((prevState) => [{ ...conversation, type: FeedTypes.CONVERSATION }, ...prevState]);
         });
 
-        socket?.on(FEED_EVENTS.CREATE_MESSAGE, ({ message, conversationId }: { message: IMessage; conversationId: string }) => {
-            setLocalResults((prevState) =>
-                prevState
-                    .map((item) =>
-                        item._id === conversationId
-                            ? { ...item, lastMessage: message, lastMessageSentAt: message.createdAt }
-                            : item
-                    )
-                    .sort(getSortedFeedByLastMessage)
-            );
+        socket?.on(FEED_EVENTS.CREATE_MESSAGE, ({ message, id }: { message: IMessage; id: string }) => {
+            updateFeed({ lastMessage: message, lastActionAt: message.createdAt }, id, true);
         });
 
-        socket?.on(FEED_EVENTS.EDIT_MESSAGE, ({ message, conversationId }: { message: IMessage; conversationId: string }) => {
-            setLocalResults((prevState) =>
-                prevState
-                    .map((item) =>
-                        item._id === conversationId
-                            ? { ...item, lastMessage: message, lastMessageSentAt: message.createdAt }
-                            : item
-                    )
-                    .sort(getSortedFeedByLastMessage)
-            );
+        socket?.on(FEED_EVENTS.EDIT_MESSAGE, ({ message, id }: { message: IMessage; id: string }) => {
+            updateFeed({ lastMessage: message, lastActionAt: message.createdAt }, id);
         })
 
-        socket?.on(FEED_EVENTS.DELETE_MESSAGE, ({ lastMessage, lastMessageSentAt, conversationId }: DeleteMessageEventParams) => {
-            setLocalResults((prevState) =>
-                prevState
-                    .map((item) =>
-                        item._id === conversationId ? { ...item, lastMessage, lastMessageSentAt } : item
-                    )
-                    .sort(getSortedFeedByLastMessage)
-            );
+        socket?.on(FEED_EVENTS.DELETE_MESSAGE, ({ lastMessage, lastMessageSentAt, id }: DeleteMessageEventParams) => {
+            updateFeed({ lastMessage, lastActionAt: lastMessageSentAt }, id, true);
         });
 
-        socket?.on(FEED_EVENTS.DELETE_CONVERSATION, (conversationId: string) => {
-            setLocalResults((prevState) => prevState.filter((item) => item._id !== conversationId).sort(getSortedFeedByLastMessage));
+        socket?.on(FEED_EVENTS.DELETE_CONVERSATION, (id: string) => {
+            setLocalResults((prevState) => prevState.filter((item) => item._id !== id).sort(getSortedFeedByLastMessage));
         })
         
         socket?.on(FEED_EVENTS.USER_ONLINE, (recipientId: string) => {
@@ -92,5 +78,5 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
             socket?.off(FEED_EVENTS.CREATE_MESSAGE);
             socket?.off(FEED_EVENTS.DELETE_MESSAGE);
         };
-    }, [socket]);
+    }, [socket, updateFeed]);
 }

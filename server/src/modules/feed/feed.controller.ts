@@ -4,16 +4,9 @@ import { Pagination, RequestWithUser, Routes } from 'src/utils/types';
 import { FeedService } from './feed.service';
 import { Pagination as PaginationDecorator } from 'src/utils/decorators/pagination';
 import { PaginationResolver } from 'src/utils/services/pagination/patination.resolver';
-import { User } from '../user/schemas/user.schema';
-import { Group } from '../group/schemas/group.schema';
 
 @Controller(Routes.FEED)
 export class FeedController extends PaginationResolver {
-    private readonly types: Record<string, string> = {
-        [`${User.name}s`.toLowerCase()]: 'user',
-        [`${Group.name}s`.toLowerCase()]: 'group',
-    };
-
     constructor(private readonly feedService: FeedService) {
         super();
     }
@@ -34,7 +27,7 @@ export class FeedController extends PaginationResolver {
             items: [...users, ...groups],
             onSuccess: (items) => items.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).map((item) => ({ 
                 ...item.toObject(), 
-                type: this.types[item.collection.name] 
+                type: item.collection.name[0].toUpperCase() + item.collection.name.slice(1, -1)
             }))
         });
     }

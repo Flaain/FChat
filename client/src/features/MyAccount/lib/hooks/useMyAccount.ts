@@ -6,7 +6,7 @@ import { MAX_STATUS_SIZE, STOP_SIZE, imageValidators } from '../../model/constan
 import { toast } from 'sonner';
 
 export const useMyAccount = () => {
-    const { profile: { status, avatar }, setProfile } = useProfile();
+    const { profile: { status }, setProfile } = useProfile();
 
     const [symbolsLeft, setSymbolsLeft] = React.useState(MAX_STATUS_SIZE - (status?.length ?? 0));
     const [statusValue, setStatusValue] = React.useState(status ?? '');
@@ -49,18 +49,11 @@ export const useMyAccount = () => {
 
             form.append('image', blob);
             
-            const { data: { url } } = await api.user.avatar(form);
+            const { data } = await api.user.avatar(form);
 
-            avatar && URL.revokeObjectURL(avatar);
-            
-            const imageURL = URL.createObjectURL(await (await fetch(url)).blob());
-
-            setProfile((prevState) => ({ ...prevState, avatar: imageURL }));
+            setProfile((prevState) => ({ ...prevState, avatar: data }));
         } catch (error) {
             console.error(error);
-
-            setProfile((prevState) => ({ ...prevState, avatar: undefined }));
-
             toast.error('Cannot upload image', { position: 'top-center' });
         } finally {
             setIsUploading(false);

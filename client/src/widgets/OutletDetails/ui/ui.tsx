@@ -5,9 +5,9 @@ import { FeedTypes } from '@/shared/model/types';
 import { Button } from '@/shared/ui/Button';
 import { X } from 'lucide-react';
 
-const titles: Record<Exclude<FeedTypes, 'user'>, string> = {
-    conversation: 'User Info',
-    group: 'Group Info'
+const titles: Record<Exclude<FeedTypes, 'User'>, string> = {
+    Conversation: 'User Info',
+    Group: 'Group Info'
 };
 
 const OutletDetails = ({

@@ -4,9 +4,9 @@ import { User } from '../lib/contexts/profile/types';
 import { MarkdownToJSX } from "markdown-to-jsx";
 
 export enum FeedTypes {
-    CONVERSATION = 'conversation',
-    GROUP = 'group',
-    USER = 'user'
+    CONVERSATION = 'Conversation',
+    GROUP = 'Group',
+    USER = 'User'
 }
 
 export enum OutletDetailsTypes {
@@ -97,7 +97,7 @@ export interface GroupParticipant {
     userId: string;
 }
 
-export interface ConversationParticipant extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence' | 'status'> {}
+export interface ConversationParticipant extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence' | 'status' | 'avatar'> {}
 
 export interface Conversation {
     _id: string;
@@ -199,11 +199,13 @@ export type Feed = Array<ConversationFeed | GroupFeed | UserFeed>;
 
 export type FeedItem = ConversationFeed | GroupFeed | UserFeed;
 
-export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'recipient'> & {
+export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'recipient'> & {
+    lastActionAt: string;
     type: FeedTypes.CONVERSATION;
 };
 
-export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'lastMessageSentAt' | 'isOfficial' | 'name' | 'login'> & {
+export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'isOfficial' | 'name' | 'login'> & {
+    lastActionAt: string;
     type: FeedTypes.GROUP;
 };
 
@@ -259,7 +261,7 @@ export interface GetConversationsRes {
 export interface DeleteMessageEventParams {
     lastMessage: IMessage;
     lastMessageSentAt: string;
-    conversationId: string;
+    id: string;
 }
 
 export enum UserCheckType {

@@ -1,5 +1,5 @@
 import { API } from './API';
-import { Profile } from '../lib/contexts/profile/types';
+import { Avatar, Profile } from '../lib/contexts/profile/types';
 import { BasicAPIResponse, SearchUser, UserPasswordParams } from '../model/types';
 import { AppException } from './error';
 
@@ -43,7 +43,7 @@ export class UserAPI extends API {
             body: form
         };
 
-        return this._checkResponse<{ url: string }>(await fetch(this._baseUrl + '/user/avatar', request), request);
+        return this._checkResponse<Avatar>(await fetch(this._baseUrl + '/user/avatar', request), request);
     }
 
     search = async ({ query, page = 0, limit = 10 }: { query: string; page?: number; limit?: number }) => {

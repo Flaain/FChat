@@ -12,6 +12,9 @@ export class File implements Omit<IFile, '_id'> {
     @Prop({ type: Number, required: true })
     size: number;
 
+    @Prop({ type: String })
+    url?: string;
+
     @Prop({ type: Date })
     createdAt?: Date;
 

@@ -6,13 +6,13 @@ export const useMessagesList = ({ messages, getPreviousMessages, canFetch }: Use
     const listRef = React.useRef<HTMLUListElement | null>(null);
     const lastMessageRef = React.useRef<HTMLLIElement | null>(null);
 
-    const groupedMessages = React.useMemo(() => messages.reduce((acc, message) => {
+    const groupedMessages = React.useMemo(() => messages.reduce<Array<Array<IMessage>>>((acc, message) => {
         const lastGroup = acc[acc.length - 1];
 
         lastGroup && lastGroup[0].sender._id === message.sender._id ? lastGroup.push(message) : acc.push([message]);
 
         return acc;
-    }, [] as Array<Array<IMessage>>), [messages]);
+    }, []), [messages]);
 
     React.useEffect(() => {
         if (!listRef.current || !canFetch) return;

@@ -1,4 +1,4 @@
-import { IMessage } from '@/shared/model/types';
+import { FeedTypes, IMessage } from '@/shared/model/types';
 
 export interface MessagesListProps {
     messages: Array<IMessage>;
@@ -6,7 +6,7 @@ export interface MessagesListProps {
     canFetch: boolean;
     isFetchingPreviousMessages: boolean;
     nextCursor: string | null;
-    type: 'conversation' | 'group';
+    type: Exclude<FeedTypes, FeedTypes.USER>;
 }
 
 export interface UseMEssagesListParams {

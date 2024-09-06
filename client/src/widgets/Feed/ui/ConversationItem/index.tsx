@@ -29,7 +29,16 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                     )
                 }
             >
-                <AvatarByName name={recipient.name} size='lg' isOnline={recipient.presence === PRESENCE.ONLINE} />
+                {recipient.avatar ? (
+                    <span className='relative w-[50px] h-[50px]'>
+                        <img src={recipient.avatar.url} className='object-cover min-w-[50px] max-w-[50px] h-[50px] rounded-full' />
+                        {recipient.presence === PRESENCE.ONLINE && (
+                            <span className='absolute right-0 bottom-0 h-3 w-3 rounded-full bg-green-500 border-2 border-solid dark:border-primary-dark-50'></span>
+                        )}
+                    </span>
+                ) : (
+                    <AvatarByName name={recipient.name} size='lg' isOnline={recipient.presence === PRESENCE.ONLINE} />
+                )}
                 <div className='flex flex-col items-start w-full overflow-hidden'>
                     <Typography as='h2' weight='medium' className={cn(recipient.isOfficial && 'flex items-center')}>
                         {recipient.name}
@@ -50,9 +59,12 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                         !!conversation.lastMessage && (
                             <div className='flex items-center w-full gap-5'>
                                 <Typography className='break-all dark:text-primary-white/30 text-primary-gray line-clamp-1'>
-                                    {markdownCompiler(conversation.lastMessage.sender._id === userId
+                                    {markdownCompiler(
+                                        conversation.lastMessage.sender._id === userId
                                             ? `You: ${conversation.lastMessage.text}`
-                                            : conversation.lastMessage.text, PartOfCompilerUse.FEED)}
+                                            : conversation.lastMessage.text,
+                                        PartOfCompilerUse.FEED
+                                    )}
                                 </Typography>
                                 <Typography className='ml-auto' variant='secondary'>
                                     {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(

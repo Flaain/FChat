@@ -3,7 +3,7 @@ import { useSession } from "@/entities/session/lib/hooks/useSession";
 import { SessionTypes } from "@/entities/session/model/types";
 import { api } from "@/shared/api";
 import { useProfile } from "@/shared/lib/hooks/useProfile";
-import { ConversationFeed, FeedItem, FeedTypes, GroupFeed, Meta, UserFeed } from "@/shared/model/types";
+import { ConversationFeed, FeedItem, FeedTypes, GroupFeed, UserFeed, WithMeta } from "@/shared/model/types";
 import { debounce } from "@/shared/lib/utils/debounce";
 import { useSidebarEvents } from "./useSidebarEvents";
 import { MIN_USER_SEARCH_LENGTH } from "@/shared/constants";
@@ -12,30 +12,29 @@ export const useSidebar = () => {
     const { setProfile } = useProfile();
     const { dispatch } = useSession();
     
-    const [globalResults, setGlobalResults] = React.useState<Array<UserFeed | GroupFeed>>([]);
+    const [globalResults, setGlobalResults] = React.useState<WithMeta<Array<UserFeed | GroupFeed>> | null>(null);
     const [localResults, setLocalResults] = React.useState<Array<ConversationFeed | GroupFeed>>([]);
     const [searchLoading, setSearchLoading] = React.useState(false);
     const [searchValue, setSearchValue] = React.useState('');
 
     const trimmedSearchValue = searchValue.trim().toLowerCase();
-    const searchMeta = React.useRef<Meta | null>(null);
 
-    const localFilters: Record<Exclude<FeedTypes, 'user'>, (item: FeedItem) => boolean> = {
-        conversation: (item: FeedItem) =>
+    const localFilters: Record<Exclude<FeedTypes, 'User'>, (item: FeedItem) => boolean> = {
+        Conversation: (item: FeedItem) =>
             (item as ConversationFeed).recipient.name.toLowerCase().includes(trimmedSearchValue) ||
             (item as ConversationFeed).recipient.login.toLowerCase().includes(trimmedSearchValue),
-        group: (item: FeedItem) =>
+        Group: (item: FeedItem) =>
             (item as GroupFeed).name.toLowerCase().includes(trimmedSearchValue) ||
             (item as GroupFeed).login.toLowerCase().includes(trimmedSearchValue)
     };
 
-    const globalFilters: Record<Exclude<FeedTypes, 'conversation'>, (item: FeedItem) => boolean> = {
-        user: (item: FeedItem) => localResults.some((localItem) => localItem.type === FeedTypes.CONVERSATION && localItem.recipient._id === item._id),
-        group: (item: FeedItem) => localResults.some((localItem) => localItem._id === item._id)
+    const globalFilters: Record<Exclude<FeedTypes, 'Conversation'>, (item: FeedItem) => boolean> = {
+        User: (item: FeedItem) => localResults.some((localItem) => localItem.type === FeedTypes.CONVERSATION && localItem.recipient._id === item._id),
+        Group: (item: FeedItem) => localResults.some((localItem) => localItem._id === item._id)
     };
 
     const filteredLocalResults = localResults.filter((item) => localFilters[item.type](item));
-    const filteredGlobalResults = globalResults.filter((item) => !globalFilters[item.type](item));
+    const filteredGlobalResults = globalResults?.items.filter((item) => !globalFilters[item.type](item));
     
     useSidebarEvents({ setLocalResults });
     
@@ -55,7 +54,7 @@ export const useSidebar = () => {
 
     const resetSearch = () => {
         setSearchValue('');
-        setGlobalResults([]);
+        setGlobalResults(null);
     }
 
     const handleLogout = React.useCallback(async () => {
@@ -68,7 +67,7 @@ export const useSidebar = () => {
     const handleSearch = React.useCallback(({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         if (!value) {
             setSearchValue('');
-            setGlobalResults([]);
+            setGlobalResults(null);
             return;
         }
 
@@ -84,14 +83,12 @@ export const useSidebar = () => {
 
     const handleSearchDelay = React.useCallback(debounce(async (value: string) => {
         try {
-            const { data: { items, ...rest } } = await api.feed.search({ query: value });
+            const { data } = await api.feed.search({ query: value });
 
-            searchMeta.current = rest;
-
-            setGlobalResults(items);
+            setGlobalResults(data);
         } catch (error) {
             console.error(error);
-            setGlobalResults([]);
+            setGlobalResults(null);
         } finally {
             setSearchLoading(false);
         }
@@ -101,8 +98,8 @@ export const useSidebar = () => {
         feed: {
             filteredLocalResults,
             filteredGlobalResults,
-            isFeedEmpty: !trimmedSearchValue.length && !localResults.length && !globalResults.length,
-            searchValue,
+            isFeedEmpty: !trimmedSearchValue.length && !localResults.length && !globalResults?.items.length,
+            searchValue: trimmedSearchValue,
             searchLoading,
         },
         handleSearch,

@@ -71,8 +71,9 @@ export class MessageService extends BaseService<MessageDocument, Message> {
         const newMessage = await this.create({ sender: initiator._id, text: message.trim() });
 
         const updateQuery = { lastMessage: newMessage._id, lastMessageSentAt: newMessage.createdAt }
-        const createFeed = { item: ctx.conversation._id, type: FEED_TYPE.CONVERSATION, user: initiator._id, lastActionAt: newMessage.createdAt };
-        const updateFeed = { filter: { user: initiator._id, item: ctx.conversation._id }, update: { lastActionAt: newMessage.createdAt } }
+        
+        const createFeed = { item: ctx.conversation._id, type: FEED_TYPE.CONVERSATION, users: [initiator._id, recipient._id], lastActionAt: newMessage.createdAt };
+        const updateFeed = { filter: { users: { $in: initiator._id }, item: ctx.conversation._id }, update: { lastActionAt: newMessage.createdAt } }
         
         Object.assign(ctx.conversation, updateQuery);
         

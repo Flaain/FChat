@@ -144,7 +144,7 @@ export const useConversation = () => {
                 recipientId: recipientId!, 
                 signal: abortControllerRef.current.signal 
             });
-
+            
             setConversation(response);
             setStatus('idle');
             setError(null);

@@ -4,8 +4,8 @@ import { FEED_TYPE, IFeed } from '../types';
 
 @Schema({ timestamps: true })
 export class Feed implements Omit<IFeed, '_id'> {
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-    user: mongoose.Types.ObjectId;
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId }], ref: 'User', required: true })
+    users: Array<mongoose.Types.ObjectId>;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, refPath: 'type', required: true })
     item: mongoose.Types.ObjectId;
@@ -23,4 +23,4 @@ export class Feed implements Omit<IFeed, '_id'> {
     updatedAt?: Date;
 }
 
-export const FeedSchema = SchemaFactory.createForClass(Feed)
+export const FeedSchema = SchemaFactory.createForClass(Feed);

@@ -10,7 +10,7 @@ export enum FEED_TYPE {
 
 export interface IFeed {
     _id: Types.ObjectId;
-    user: Types.ObjectId;
+    users: Array<Types.ObjectId>;
     item: Types.ObjectId;
     type: FEED_TYPE;
     createdAt?: Date;

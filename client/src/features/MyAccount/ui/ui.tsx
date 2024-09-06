@@ -45,7 +45,7 @@ const MyAccount = () => {
         <div className='flex flex-col'>
             <div className='flex flex-col items-center justify-center pt-5 px-5'>
                 <div className='relative'>
-                    {profile.avatar ? <img src={profile.avatar} className='size-24 rounded-full' /> : <AvatarByName name={profile.name} size='4xl' />}
+                    {profile.avatar ? <img src={profile.avatar.url} className='object-cover size-24 rounded-full' /> : <AvatarByName name={profile.name} size='4xl' />}
                     <label aria-disabled={isUploading} className='aria-[disabled="false"]:hover:dark:bg-slate-200 transition-colors duration-200 ease-in-out aria-[disabled="false"]:cursor-pointer size-8 flex items-center justify-center rounded-full border border-solid dark:bg-slate-100 bg-primary-dark-50 dark:border-primary-dark-50 border-primary-white absolute bottom-0 right-0'>
                         {isUploading ? <Loader2 className='w-5 h-6 animate-spin' /> : <Camera className='w-5 h-5' />}
                         <Input disabled={isUploading} type='file' className='sr-only' onChange={handleChangeAvatar} />
