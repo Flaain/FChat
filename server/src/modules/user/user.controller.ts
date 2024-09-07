@@ -8,9 +8,9 @@ import { UserNameDto } from './dtos/user.name.dto';
 import { PaginationResolver } from 'src/utils/services/pagination/patination.resolver';
 import { Pagination as PaginationDecorator } from 'src/utils/decorators/pagination';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { STATIC_CONVERSATION_EVENTS, USER_EVENTS } from '../gateway/types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { filePipe } from './constants';
+import { CONVERSATION_EVENTS } from '../gateway/types';
 
 @Controller(Routes.USER)
 export class UserController extends PaginationResolver implements IUserController {
@@ -51,7 +51,7 @@ export class UserController extends PaginationResolver implements IUserControlle
     async block(@Req() req: RequestWithUser, @Param('id') id: string) {
         const { recipientId } = await this.userService.block({ initiator: req.user.doc, recipientId: id });
 
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.BLOCK, {
+        this.eventEmitter.emit(CONVERSATION_EVENTS.USER_BLOCK, {
             recipientId,
             initiatorId: req.user.doc._id.toString(),
         });
@@ -64,7 +64,7 @@ export class UserController extends PaginationResolver implements IUserControlle
     async unblock(@Req() req: RequestWithUser, @Param('id') id: string) {
         const { recipientId } = await this.userService.unblock({ initiator: req.user.doc, recipientId: id });
 
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.UNBLOCK, {
+        this.eventEmitter.emit(CONVERSATION_EVENTS.USER_UNBLOCK, {
             recipientId,
             initiatorId: req.user.doc._id.toString(),
         });

@@ -5,11 +5,11 @@ import { RequestWithUser, Routes } from 'src/utils/types';
 import { MessageDeleteDTO } from './dtos/message.delete.dto';
 import { MessageEditDTO } from './dtos/message.edit.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { STATIC_CONVERSATION_EVENTS } from '../gateway/types';
 import { IMessageController } from './types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
 import { MessageReplyDTO } from './dtos/message.reply.dto';
 import { Throttle } from '@nestjs/throttler';
+import { CONVERSATION_EVENTS } from '../gateway/types';
 
 @Throttle({ default: { limit: 50, ttl: 60000 } })
 @Controller(Routes.MESSAGE)
@@ -24,14 +24,14 @@ export class MessageController implements IMessageController {
     async send(@Req() req: RequestWithUser, @Body() dto: MessageSendDTO, @Param('recipientId') recipientId: string) {
         const { recipient, message, conversation, isNewConversation } = await this.messageService.send({ ...dto, recipientId, initiator: req.user.doc });
 
-       isNewConversation && this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.CREATED, {
+       isNewConversation && this.eventEmitter.emit(CONVERSATION_EVENTS.CREATED, {
             recipient: recipient.toObject(),
             initiatorId: req.user.doc._id.toString(),
             conversationId: conversation._id,
             lastMessageSentAt: conversation.lastMessageSentAt,
         });
 
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.SEND_MESSAGE, {
+        this.eventEmitter.emit(CONVERSATION_EVENTS.MESSAGE_SEND, {
             message,
             recipientId,
             conversationId: conversation._id,
@@ -46,7 +46,7 @@ export class MessageController implements IMessageController {
     async reply(@Req() req: RequestWithUser, @Body() dto: MessageReplyDTO, @Param('messageId') messageId: string) {
         const { message, conversationId } = await this.messageService.reply({ ...dto, messageId, initiator: req.user.doc });
 
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.SEND_MESSAGE, {
+        this.eventEmitter.emit(CONVERSATION_EVENTS.MESSAGE_SEND, {
             message,
             recipientId: dto.recipientId,
             conversationId,
@@ -61,7 +61,7 @@ export class MessageController implements IMessageController {
     async edit(@Req() req: RequestWithUser, @Body() dto: MessageEditDTO, @Param('messageId') messageId: string) {
         const { message, conversationId, isLastMessage } = await this.messageService.edit({ ...dto, messageId, initiatorId: req.user.doc._id });
 
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.EDIT_MESSAGE, { 
+        this.eventEmitter.emit(CONVERSATION_EVENTS.MESSAGE_EDIT, { 
             message, 
             isLastMessage,
             conversationId,
@@ -77,7 +77,7 @@ export class MessageController implements IMessageController {
     async deleteMessage(@Req() req: RequestWithUser, @Body() dto: MessageDeleteDTO, @Param('messageId') messageId: string) {
         const message = await this.messageService.deleteMessage({ ...dto, messageId, initiatorId: req.user.doc._id });
 
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.DELETE_MESSAGE, { messageId, initiatorId: req.user.doc._id.toString(), ...dto, ...message })
+        this.eventEmitter.emit(CONVERSATION_EVENTS.MESSAGE_DELETE, { messageId, initiatorId: req.user.doc._id.toString(), ...dto, ...message })
 
         return message;
     }

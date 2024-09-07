@@ -18,7 +18,7 @@ const MessageGroup = ({ messages, isLastGroup, lastMessageRef, type }: MessageGr
                 ) : (
                     <AvatarByName name={sender.name} className='sticky bottom-0' />
                 ))}
-            <ul className='flex flex-col gap-2'>
+            <ul className='flex flex-col gap-1'>
                 {messages.map((message, index, array) => (
                     <Message
                         type={type}

@@ -82,7 +82,12 @@ export class MessageService extends BaseService<MessageDocument, Message> {
             ctx.conversation.updateOne({ ...updateQuery, $push: { messages: newMessage._id } }),
         ]);
 
-        const populatedMessage = await newMessage.populate([{ path: 'sender', model: 'User', select: 'name email official' }]);
+        const populatedMessage = await newMessage.populate({
+            path: 'sender',
+            model: 'User',
+            select: 'name email official avatar',
+            populate: { path: 'avatar', model: 'File', select: 'url' },
+        });
 
         return { ...ctx, message: populatedMessage, recipient };
     };

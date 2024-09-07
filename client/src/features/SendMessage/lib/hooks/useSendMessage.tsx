@@ -7,7 +7,7 @@ import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { APIData, EmojiData, IMessage, MessageFormState } from '@/shared/model/types';
 import { UseMessageParams } from '../../model/types';
 
-export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
+export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) => {
     const { openModal, closeModal, setIsAsyncActionLoading } = useModal();
     const { drafts, setDrafts, textareaRef } = useLayoutContext();
 
@@ -41,9 +41,10 @@ export const useSendMessage = ({ type, queryId }: UseMessageParams) => {
 
     const handleChange = React.useCallback(({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>) => {
         const trimmedValue = value.trim();
-
+        
+        onChange?.(trimmedValue);
         setValue(!trimmedValue.length ? '' : value);
-    }, []);
+    }, [onChange]);
 
     const setDefaultState = React.useCallback(() => {
         setDrafts((prevState) => {

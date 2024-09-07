@@ -9,5 +9,6 @@ export interface MessageTopBarProps {
 
 export interface UseMessageParams {
     type: 'conversation' | 'group';
+    onChange?: (value: string) => void;
     queryId: string;
 }

@@ -11,6 +11,7 @@ import { BaseService } from 'src/utils/services/base/base.service';
 import { MESSAGES_BATCH } from './constants';
 import { Providers } from 'src/utils/types';
 import { S3Client } from '@aws-sdk/client-s3';
+import { User } from '../user/schemas/user.schema';
 
 @Injectable()
 export class ConversationService extends BaseService<ConversationDocument, Conversation> implements IConversationService {
@@ -97,6 +98,8 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
 
         const isInitiatorBlocked = !!recipient.blockList.length;
         const isRecipientBlocked = !!initiator.blockList.find((id) => id.toString() === recipientId);
+        
+        const { blockList, ...restRecipient } = recipient.toObject<User>();
       
         if (!conversation && recipient.isPrivate) throw new AppException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
 
@@ -105,8 +108,8 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
         return {
             conversation: {
                 _id: conversation?._id, 
-                recipient, 
-                messages: conversation.messages.reverse() ?? [],
+                recipient: restRecipient, 
+                messages: conversation?.messages.reverse() ?? [],
                 isInitiatorBlocked, 
                 isRecipientBlocked 
             },

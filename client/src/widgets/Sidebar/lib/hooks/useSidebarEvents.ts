@@ -68,6 +68,32 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
             }));
         })
 
+        socket?.on(FEED_EVENTS.CONVERSATION_START_TYPING, (id: string) => {
+            setLocalResults((prevState) => prevState.map((item) => {
+                if (item._id === id) {
+                    return {
+                        ...item, 
+                        isRecipientTyping: true
+                    }
+                }
+
+                return item;
+            }));
+        })
+
+        socket?.on(FEED_EVENTS.CONVERSATION_STOP_TYPING, (id: string) => {
+            setLocalResults((prevState) => prevState.map((item) => {
+                if (item._id === id) {
+                    return {
+                        ...item, 
+                        isRecipientTyping: false
+                    }
+                }
+
+                return item;
+            }));
+        })
+
         return () => {
             socket?.off(FEED_EVENTS.USER_ONLINE);
             socket?.off(FEED_EVENTS.USER_OFFLINE);
@@ -77,6 +103,9 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
             
             socket?.off(FEED_EVENTS.CREATE_MESSAGE);
             socket?.off(FEED_EVENTS.DELETE_MESSAGE);
+
+            socket?.off(FEED_EVENTS.CONVERSATION_START_TYPING);
+            socket?.off(FEED_EVENTS.CONVERSATION_STOP_TYPING);
         };
     }, [socket, updateFeed]);
 }

@@ -11,7 +11,10 @@ export interface ConversationContextProps {
     data: ConversationWithMeta;
     status: ConversationStatuses;
     isPreviousMessagesLoading: boolean;
+    isRecipientTyping: boolean;
+    handleTypingStatus: () => void;
     getPreviousMessages: () => Promise<void>;
+    getConversationDescription: (shouldDisplayTyping?: boolean) => string;
     error: string | null;
     isRefetching: boolean;
     refetch: () => Promise<void>;

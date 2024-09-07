@@ -1,10 +1,10 @@
 import { Controller, Delete, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
-import { RequestWithUser, Routes, THROTTLERS } from 'src/utils/types';
+import { RequestWithUser, Routes } from 'src/utils/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IConversationController } from './types';
-import { STATIC_CONVERSATION_EVENTS } from '../gateway/types';
 import { AccessGuard } from 'src/utils/guards/access.guard';
+import { CONVERSATION_EVENTS } from '../gateway/types';
 
 @Controller(Routes.CONVERSATION)
 export class ConversationController implements IConversationController {
@@ -18,7 +18,7 @@ export class ConversationController implements IConversationController {
     async delete(@Req() req: RequestWithUser, @Param('id') id: string) {
         const { _id, recipientId } = await this.conversationService.deleteConversation({ initiatorId: req.user.doc._id, recipientId: id });
         
-        this.eventEmitter.emit(STATIC_CONVERSATION_EVENTS.DELETED, { 
+        this.eventEmitter.emit(CONVERSATION_EVENTS.DELETED, { 
             recipientId,
             initiatorId: req.user.doc._id.toString(), 
             conversationId: _id.toString()

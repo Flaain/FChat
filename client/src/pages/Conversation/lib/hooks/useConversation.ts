@@ -6,22 +6,49 @@ import { Conversation, IMessage, CONVERSATION_EVENTS, PRESENCE } from '@/shared/
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { AppException } from '@/shared/api/error';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
+import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
 
 export const useConversation = () => {
     const { id: recipientId } = useParams<{ id: string }>();
     const { profile } = useProfile();
     const { socket } = useLayoutContext();
 
-    
     const [searchParams, setSearchParams] = useSearchParams();
     const [data, setConversation] = React.useState<ConversationWithMeta>(null!);
     const [status, setStatus] = React.useState<ConversationStatuses>('loading');
     const [error, setError] = React.useState<string | null>(null);
     const [isRefetching, setIsRefetching] = React.useState(false);
     const [isPreviousMessagesLoading, setIsPreviousMessagesLoading] = React.useState(false);
+    const [isTyping, setIsTyping] = React.useState(false);
+    const [isRecipientTyping, setIsRecipientTyping] = React.useState(false);
     const [showRecipientDetails, setShowRecipientDetails] = React.useState(searchParams.get('details') === 'open');
 
     const abortControllerRef = React.useRef<AbortController | null>(null);
+    const typingTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const isRecipientOnline = data?.conversation.recipient.presence === PRESENCE.ONLINE; 
+
+    const handleTypingStatus = () => {
+        if (!isTyping) {
+            setIsTyping(true);
+            
+            socket?.emit(CONVERSATION_EVENTS.START_TYPING, { conversationId: data.conversation._id, recipientId });
+        } else {
+            clearTimeout(typingTimeoutRef.current!);
+        }
+
+        typingTimeoutRef.current = setTimeout(() => {
+            setIsTyping(false);
+            socket?.emit(CONVERSATION_EVENTS.STOP_TYPING, { conversationId: data.conversation._id, recipientId });
+        }, 5000);
+    };
+    
+    const getConversationDescription = (shouldDisplayTypingStatus = true) => {
+        if (data.conversation.isInitiatorBlocked || data.conversation.isRecipientBlocked) return 'last seen recently';
+        if (isRecipientTyping && isRecipientOnline && shouldDisplayTypingStatus) return `typing...`;
+
+        return isRecipientOnline ? 'online' : `last seen ${getRelativeTimeString(data.conversation.recipient.lastSeenAt, 'en-US')}`;
+    }
 
     const openDetails = React.useCallback(() => {
         setShowRecipientDetails(true);
@@ -168,7 +195,6 @@ export const useConversation = () => {
         
         socket?.io.on('reconnect', () => {
             socket?.emit(CONVERSATION_EVENTS.JOIN, { recipientId });
-            // getConversation('refetch');
         })
         socket?.on(CONVERSATION_EVENTS.USER_PRESENCE, onUserPresence);
         socket?.on(CONVERSATION_EVENTS.USER_BLOCK, onBlock);
@@ -180,6 +206,9 @@ export const useConversation = () => {
         
         socket?.on(CONVERSATION_EVENTS.CREATED, onCreateConversation);
         socket?.on(CONVERSATION_EVENTS.DELETED, () => navigate('/'));
+
+        socket?.on(CONVERSATION_EVENTS.START_TYPING, () => setIsRecipientTyping(true));
+        socket?.on(CONVERSATION_EVENTS.STOP_TYPING, () => setIsRecipientTyping(false));
 
         return () => {
             abortControllerRef.current?.abort('Signal aborted due to new incoming request');
@@ -196,6 +225,9 @@ export const useConversation = () => {
             
             socket?.off(CONVERSATION_EVENTS.CREATED);
             socket?.off(CONVERSATION_EVENTS.DELETED);
+
+            socket?.off(CONVERSATION_EVENTS.START_TYPING);
+            socket?.off(CONVERSATION_EVENTS.STOP_TYPING);
             
             socket?.off('reconnect');
         };
@@ -206,9 +238,12 @@ export const useConversation = () => {
         status,
         error,
         isRefetching,
+        isRecipientTyping,
         isPreviousMessagesLoading,
         openDetails,
         closeDetails,
+        handleTypingStatus,
+        getConversationDescription,
         setShowRecipientDetails,
         setConversation,
         showRecipientDetails,

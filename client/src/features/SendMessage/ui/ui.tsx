@@ -11,7 +11,7 @@ import { UseMessageParams } from '../model/types';
 import { MessageFormState } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 
-const SendMessage = ({ type, queryId }: UseMessageParams) => {
+const SendMessage = ({ type, queryId, onChange }: UseMessageParams) => {
     const {
         handleSubmitMessage,
         onKeyDown,
@@ -24,7 +24,7 @@ const SendMessage = ({ type, queryId }: UseMessageParams) => {
         isLoading,
         currentDraft,
         value
-    } = useSendMessage({ type, queryId });
+    } = useSendMessage({ type, queryId, onChange });
     const { textareaRef } = useLayoutContext();
 
     const trimmedValueLength = value.trim().length;

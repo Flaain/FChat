@@ -3,17 +3,19 @@ import { PRESENCE, UserDocument } from 'src/modules/user/types';
 import { Socket,  } from 'socket.io';
 import { DefaultEventsMap  } from 'socket.io/dist/typed-events';
 
-export enum STATIC_CONVERSATION_EVENTS {
+export enum CONVERSATION_EVENTS {
     JOIN = 'conversation.join',
     LEAVE = 'conversation.leave',
-    SEND_MESSAGE = 'conversation.message.send',
-    EDIT_MESSAGE = 'conversation.message.edit',
-    DELETE_MESSAGE = 'conversation.message.delete',
+    MESSAGE_SEND = 'conversation.message.send',
+    MESSAGE_EDIT = 'conversation.message.edit',
+    MESSAGE_DELETE = 'conversation.message.delete',
     CREATED = 'conversation.created',
     DELETED = 'conversation.deleted',
     PRESENCE = 'conversation.user.presence',
-    BLOCK = 'conversation.user.block',
-    UNBLOCK = 'conversation.user.unblock',
+    USER_BLOCK = 'conversation.user.block',
+    USER_UNBLOCK = 'conversation.user.unblock',
+    START_TYPING = 'conversation.start.typing',
+    STOP_TYPING = 'conversation.stop.typing',
 }
 
 export enum USER_EVENTS {
@@ -30,6 +32,8 @@ export enum FEED_EVENTS {
     DELETE_CONVERSATION = 'feed.delete.conversation',
     USER_ONLINE = 'feed.user.online',
     USER_OFFLINE = 'feed.user.offline',
+    CONVERSATION_START_TYPING = 'feed.conversation.start.typing',
+    CONVERSATION_STOP_TYPING = 'feed.conversation.stop.typing',
 }
 
 export interface ConversationDeleteMessageParams {

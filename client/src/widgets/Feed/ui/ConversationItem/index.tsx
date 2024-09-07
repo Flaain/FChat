@@ -31,7 +31,10 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
             >
                 {recipient.avatar ? (
                     <span className='relative w-[50px] h-[50px]'>
-                        <img src={recipient.avatar.url} className='object-cover min-w-[50px] max-w-[50px] h-[50px] rounded-full' />
+                        <img
+                            src={recipient.avatar.url}
+                            className='object-cover min-w-[50px] max-w-[50px] h-[50px] rounded-full'
+                        />
                         {recipient.presence === PRESENCE.ONLINE && (
                             <span className='absolute right-0 bottom-0 h-3 w-3 rounded-full bg-green-500 border-2 border-solid dark:border-primary-dark-50'></span>
                         )}
@@ -48,7 +51,11 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                             </Typography>
                         )}
                     </Typography>
-                    {draft?.state === 'send' ? (
+                    {conversation.isRecipientTyping ? (
+                        <Typography as='p' variant='secondary' className='line-clamp-1'>
+                            typing...
+                        </Typography>
+                    ) : draft?.state === 'send' ? (
                         <Typography as='p' variant='secondary' className='line-clamp-1'>
                             <Typography as='span' variant='error'>
                                 Draft:&nbsp;

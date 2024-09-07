@@ -201,6 +201,7 @@ export type FeedItem = ConversationFeed | GroupFeed | UserFeed;
 
 export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'recipient'> & {
     lastActionAt: string;
+    isRecipientTyping?: boolean;
     type: FeedTypes.CONVERSATION;
 };
 
@@ -227,7 +228,9 @@ export enum CONVERSATION_EVENTS {
     MESSAGE_DELETE = 'conversation.message.delete',
     USER_PRESENCE = 'conversation.user.presence',
     USER_BLOCK = 'conversation.user.block',
-    USER_UNBLOCK = 'conversation.user.unblock'
+    USER_UNBLOCK = 'conversation.user.unblock',
+    START_TYPING = 'conversation.start.typing',
+    STOP_TYPING = 'conversation.stop.typing',
 }
 
 export enum FEED_EVENTS {
@@ -237,7 +240,9 @@ export enum FEED_EVENTS {
     CREATE_CONVERSATION = 'feed.create.conversation',
     DELETE_CONVERSATION = 'feed.delete.conversation',
     USER_ONLINE = 'feed.user.online',
-    USER_OFFLINE = 'feed.user.offline'
+    USER_OFFLINE = 'feed.user.offline',
+    CONVERSATION_START_TYPING = 'feed.conversation.start.typing',
+    CONVERSATION_STOP_TYPING = 'feed.conversation.stop.typing'
 }
 
 export enum USER_EVENTS {

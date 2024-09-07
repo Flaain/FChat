@@ -12,8 +12,7 @@ import { useConversationContext } from '../lib/hooks/useConversationContext';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { ConversationStatuses } from '../model/types';
-import { FeedTypes, PRESENCE } from '@/shared/model/types';
-import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
+import { FeedTypes } from '@/shared/model/types';
 
 const Conversation = () => {
     const {
@@ -23,7 +22,10 @@ const Conversation = () => {
         status,
         isRefetching,
         getPreviousMessages,
+        getConversationDescription,
+        handleTypingStatus,
         isPreviousMessagesLoading,
+        isRecipientTyping,
         closeDetails,
         openDetails,
         showRecipientDetails
@@ -44,8 +46,6 @@ const Conversation = () => {
         loading: <ConversationSkeleton />
     };
 
-    const isOnline = data?.conversation.recipient.presence === PRESENCE.ONLINE;
-
     return (
         components[status as keyof typeof components] ?? (
             <OutletContainer>
@@ -53,13 +53,7 @@ const Conversation = () => {
                     <OutletHeader
                         name={data.conversation.recipient.name}
                         isOfficial={data.conversation.recipient.isOfficial}
-                        description={
-                            data.conversation.isInitiatorBlocked || data.conversation.isRecipientBlocked
-                                ? 'last seen recently'
-                                : isOnline
-                                ? 'online'
-                                : `last seen ${getRelativeTimeString(data.conversation.recipient.lastSeenAt, 'en-US')}`
-                        }
+                        description={getConversationDescription()}
                         dropdownMenu={<ConversationDDM />}
                         onClick={openDetails}
                     />
@@ -89,19 +83,17 @@ const Conversation = () => {
                             </Typography>
                         </div>
                     ) : (
-                        <SendMessage type='conversation' queryId={data.conversation.recipient._id} />
+                        <SendMessage
+                            type='conversation'
+                            onChange={handleTypingStatus}
+                            queryId={data.conversation.recipient._id}
+                        />
                     )}
                 </div>
                 {showRecipientDetails && (
                     <OutletDetails
                         name={data.conversation.recipient.name}
-                        description={
-                            data.conversation.isInitiatorBlocked || data.conversation.isRecipientBlocked
-                            ? 'last seen recently'
-                            : isOnline
-                            ? 'online'
-                            : `last seen ${getRelativeTimeString(data.conversation.recipient.lastSeenAt, 'en-US')}`
-                        }
+                        description={getConversationDescription(false)}
                         info={<RecipientDetails recipient={data.conversation.recipient} />}
                         shouldCloseOnClickOutside={false}
                         type={FeedTypes.CONVERSATION}
