@@ -56,7 +56,7 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                             typing...
                         </Typography>
                     ) : draft?.state === 'send' ? (
-                        <Typography as='p' variant='secondary' className='line-clamp-1'>
+                        <Typography as='p' variant='secondary' className='line-clamp-1 break-all'>
                             <Typography as='span' variant='error'>
                                 Draft:&nbsp;
                             </Typography>

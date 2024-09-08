@@ -142,13 +142,18 @@ export type TypographySize = 'base' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' 
 export type TypographyWeight = 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
 export type TypographyAlign = 'left' | 'center' | 'right';
 
+export interface TypingParticipant {
+    _id: string;
+    name: string;
+}
+
 export interface TypographyVariants {
     variant: Record<TypographyVariant, string>;
     size: Record<TypographySize, string>;
     weight: Record<TypographyWeight, string>;
 }
 
-interface BaseTypographyProps {
+export interface BaseTypographyProps {
     variant?: TypographyVariant;
     size?: TypographySize;
     weight?: TypographyWeight;
@@ -157,9 +162,9 @@ interface BaseTypographyProps {
 
 export type PolymorphicRef<T extends React.ElementType> = React.ComponentPropsWithRef<T>['ref'];
 
-type PropsOf<T extends React.ElementType> = React.ComponentPropsWithRef<T>;
+export type PropsOf<T extends React.ElementType> = React.ComponentPropsWithRef<T>;
 
-type PolymorphicProps<T extends React.ElementType = React.ElementType, TProps = object> = {
+export type PolymorphicProps<T extends React.ElementType = React.ElementType, TProps = object> = {
     as?: T;
 } & TProps &
     Omit<PropsOf<T>, keyof TProps | 'as' | 'ref'> & { ref?: PolymorphicRef<T> };
@@ -201,12 +206,13 @@ export type FeedItem = ConversationFeed | GroupFeed | UserFeed;
 
 export type ConversationFeed = Pick<Conversation, '_id' | 'lastMessage' | 'recipient'> & {
     lastActionAt: string;
-    isRecipientTyping?: boolean;
+    participantsTyping?: Array<TypingParticipant>;
     type: FeedTypes.CONVERSATION;
 };
 
 export type GroupFeed = Pick<Group, '_id' | 'lastMessage' | 'isOfficial' | 'name' | 'login'> & {
     lastActionAt: string;
+    participantsTyping?: Array<TypingParticipant>;
     type: FeedTypes.GROUP;
 };
 
@@ -241,8 +247,8 @@ export enum FEED_EVENTS {
     DELETE_CONVERSATION = 'feed.delete.conversation',
     USER_ONLINE = 'feed.user.online',
     USER_OFFLINE = 'feed.user.offline',
-    CONVERSATION_START_TYPING = 'feed.conversation.start.typing',
-    CONVERSATION_STOP_TYPING = 'feed.conversation.stop.typing'
+    START_TYPING = 'feed.start.typing',
+    STOP_TYPING = 'feed.stop.typing'
 }
 
 export enum USER_EVENTS {

@@ -1,3 +1,4 @@
+import React from 'react';
 import Typography from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { X } from 'lucide-react';
@@ -13,6 +14,21 @@ const MessageTopBar = ({
     description,
     preventClose
 }: MessageTopBarProps) => {
+    
+    React.useEffect(() => {
+        const handleClose = (event: KeyboardEvent) => {
+            event.stopImmediatePropagation();
+
+            !preventClose && event.key === 'Escape' && onClose();
+        }
+
+        document.addEventListener('keydown', handleClose);
+
+        return () => {
+            document.removeEventListener('keydown', handleClose)
+        };
+    }, [])
+
     return (
         <div className='overscroll-contain border-b border-solid dark:border-primary-dark-50 border-primary-gray w-full flex items-center dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out py-3 px-4 gap-4 box-border'>
             {mainIconSlot}

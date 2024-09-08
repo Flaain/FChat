@@ -1,9 +1,8 @@
 import React from 'react';
 import EmojiPickerFallback from '@emoji-mart/react';
 import MessageTopBar from './MessageTopBar';
-import { cn } from '@/shared/lib/utils/cn';
 import { Button } from '@/shared/ui/Button';
-import { Edit2Icon, Paperclip, Reply, SendHorizonal, Smile } from 'lucide-react';
+import { ArrowDown, Edit2Icon, Paperclip, Reply, SendHorizonal, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSendMessage } from '../lib/hooks/useSendMessage';
 import { EmojiPicker } from '@/shared/model/view';
@@ -11,7 +10,7 @@ import { UseMessageParams } from '../model/types';
 import { MessageFormState } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 
-const SendMessage = ({ type, queryId, onChange }: UseMessageParams) => {
+const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick }: UseMessageParams) => {
     const {
         handleSubmitMessage,
         onKeyDown,
@@ -29,7 +28,7 @@ const SendMessage = ({ type, queryId, onChange }: UseMessageParams) => {
 
     const trimmedValueLength = value.trim().length;
 
-    const messageBars: Record<Exclude<MessageFormState, "send">, React.ReactNode> = {
+    const messageBars: Record<Exclude<MessageFormState, 'send'>, React.ReactNode> = {
         edit: (
             <MessageTopBar
                 title='Edit message'
@@ -61,7 +60,7 @@ const SendMessage = ({ type, queryId, onChange }: UseMessageParams) => {
                     variant='text'
                     size='icon'
                     type='button'
-                    className='px-4'
+                    className='px-5'
                     disabled={isLoading}
                     onClick={() => toast.info('Coming soon!', { position: 'top-center' })}
                 >
@@ -78,16 +77,28 @@ const SendMessage = ({ type, queryId, onChange }: UseMessageParams) => {
                     placeholder='Write a message...'
                     className='overscroll-contain disabled:opacity-50 leading-5 py-[25px] min-h-[70px] scrollbar-hide max-h-[120px] overflow-auto flex box-border w-full transition-colors duration-200 ease-in-out resize-none appearance-none ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none focus:placeholder:opacity-0 focus:placeholder:translate-x-2 outline-none ring-0 placeholder:transition-all placeholder:duration-300 placeholder:ease-in-out dark:bg-primary-dark-100 border-none text-white dark:placeholder:text-white placeholder:opacity-50'
                 ></textarea>
+                {showAnchor && (
+                    <Button
+                        onClick={onAnchorClick}
+                        disabled={!showAnchor}
+                        variant='text'
+                        type='button'
+                        size='icon'
+                        className='pl-4'
+                    >
+                        <ArrowDown className='w-6 h-6' />
+                    </Button>
+                )}
                 <Button
                     variant='text'
                     type='button'
                     size='icon'
                     disabled={isLoading}
-                    className={cn('px-4 transition-transform duration-200 ease-in-out', {
-                        'translate-x-10': !trimmedValueLength,
-                        'translate-x-0': trimmedValueLength || currentDraft?.state === 'edit'
-                    })}
-                    onClick={(e) => {e.stopPropagation(); setIsEmojiPickerOpen((prev) => !prev)}}
+                    className='px-4'
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEmojiPickerOpen((prev) => !prev);
+                    }}
                 >
                     <Smile className='w-6 h-6' />
                 </Button>
@@ -104,12 +115,9 @@ const SendMessage = ({ type, queryId, onChange }: UseMessageParams) => {
                 <Button
                     variant='text'
                     size='icon'
-                    disabled={(!trimmedValueLength && currentDraft?.state === 'send') || isLoading}
-                    className={cn(
-                        'px-4 opacity-0 pointer-events-none invisible scale-50 transition-all duration-100 ease-in-out',
-                        (!!trimmedValueLength || currentDraft?.state === 'edit') &&
-                            'opacity-100 visible scale-100 pointer-events-auto'
-                    )}
+                    type='submit'
+                    disabled={!trimmedValueLength && currentDraft?.state !== 'edit' || isLoading}
+                    className='pr-5'
                 >
                     <SendHorizonal className='w-6 h-6' />
                 </Button>

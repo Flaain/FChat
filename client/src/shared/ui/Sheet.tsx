@@ -27,18 +27,22 @@ const SheetHeader = ({ title, closeHandler }: Pick<SheetProps, 'title' | 'closeH
 
 const SheetContainer = ({ children, direction = 'left', closeHandler }: Omit<SheetProps, 'title' | 'withHeader'> & { direction?: 'left' | 'right' }) => {
     React.useEffect(() => {
-        const handleKeyUp = ({ key }: KeyboardEvent) => {
-            key === 'Escape' && closeHandler();
+        const handleKeyDown = (event: KeyboardEvent) => {
+            event.stopImmediatePropagation();
+            
+            event.key === 'Escape' && closeHandler();
         };
 
         document.body.style.paddingRight = window.innerWidth - document.body.offsetWidth + 'px';
         document.body.classList.add('overflow-hidden');
-        document.addEventListener('keyup', handleKeyUp);
+
+        document.addEventListener('keydown', handleKeyDown, true);
 
         return () => {
             document.body.classList.remove('overflow-hidden');
             document.body.style.paddingRight = '0';
-            document.removeEventListener('keyup', handleKeyUp);
+
+            document.removeEventListener('keydown', handleKeyDown, true);
         };
     }, [closeHandler]);
 

@@ -2,10 +2,9 @@ import React from 'react';
 import { IMessage } from '@/shared/model/types';
 import { UseMEssagesListParams } from '../../model/types';
 
-export const useMessagesList = ({ messages, getPreviousMessages, canFetch }: UseMEssagesListParams) => {
-    const listRef = React.useRef<HTMLUListElement | null>(null);
+export const useMessagesList = ({ messages, getPreviousMessages, setShowAnchor, canFetch, listRef }: UseMEssagesListParams) => {
     const lastMessageRef = React.useRef<HTMLLIElement | null>(null);
-
+    
     const groupedMessages = React.useMemo(() => messages.reduce<Array<Array<IMessage>>>((acc, message) => {
         const lastGroup = acc[acc.length - 1];
 
@@ -15,12 +14,15 @@ export const useMessagesList = ({ messages, getPreviousMessages, canFetch }: Use
     }, []), [messages]);
 
     React.useEffect(() => {
-        if (!listRef.current || !canFetch) return;
+        if (!listRef.current) return;
 
         const handleScrollContainer = () => {
             const { scrollTop } = listRef.current as HTMLUListElement;
+            const scrollBottom = listRef.current!.scrollHeight - listRef.current!.scrollTop - listRef.current!.clientHeight;
 
-            !scrollTop && getPreviousMessages();
+            canFetch && !scrollTop && getPreviousMessages();
+
+            scrollBottom >= 300 ? setShowAnchor(true) : setShowAnchor(false);
         };
 
         listRef.current.addEventListener('scroll', handleScrollContainer);

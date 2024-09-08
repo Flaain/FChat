@@ -77,12 +77,7 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
             setIsAsyncActionLoading(false);
         }
     }, [currentDraft, queryId]);
-
-    const onCloseDeleteConfirmation = () => {
-        setValue(currentDraft!.selectedMessage!.text);
-        closeModal();
-    };
-
+    
     const onBlur = React.useCallback(({ target: { value } }: React.FocusEvent<HTMLTextAreaElement, Element>) => {
         const trimmedValue = value.trim();
 
@@ -110,14 +105,15 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
                 return openModal({
                     content: (
                         <Confirm
-                            onCancel={onCloseDeleteConfirmation}
+                            onCancel={closeModal}
                             onConfirm={handleDeleteConversationMessage}
                             onConfirmText='Delete'
                             text='Are you sure you want to delete this message?'
+                            onConfirmButtonVariant='destructive'
                         />
                     ),
-                    title: 'Delete message',
-                    size: 'fit'
+                    withHeader: false,
+                    bodyClassName: 'h-auto p-5 w-[400px]'
                 });
 
             if (trimmedValue === currentDraft!.selectedMessage!.text) return;
@@ -146,6 +142,8 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
         try {
             const trimmedValue = value.trim();
 
+            if (!trimmedValue.length) return;
+
             const actions: Record<typeof type, (message: string) => Promise<void>> = {
                 conversation: onSendConversationMessage,
                 group: onSendGroupMessage
@@ -161,6 +159,8 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
     const onReplyMessage = async () => {
         try {
             const trimmedValue = value.trim();
+
+            if (!trimmedValue.length) return;
 
             const actions: Record<typeof type, (message: string) => Promise<void | APIData<IMessage>>> = {
                 conversation: (message: string) => api.message.reply({ 
@@ -179,11 +179,9 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
     } 
 
     const handleSubmitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-        if (!value.trim().length) return;
-
         try {
+            event.preventDefault();
+
             setIsLoading(true);
 
             const actions: Record<MessageFormState, () => Promise<void>> = {

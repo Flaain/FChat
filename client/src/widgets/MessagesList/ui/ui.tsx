@@ -4,11 +4,26 @@ import { Loader2 } from 'lucide-react';
 import { MessagesListProps } from '../model/types';
 import { useMessagesList } from '../lib/hooks/useMessagesList';
 
-const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCursor, isFetchingPreviousMessages, type }: MessagesListProps) => {
-    const { groupedMessages, listRef, lastMessageRef } = useMessagesList({ messages, canFetch, getPreviousMessages });
+const MessagesList = ({
+    messages,
+    canFetch,
+    getPreviousMessages,
+    setShowAnchor,
+    nextCursor,
+    isFetchingPreviousMessages,
+    type,
+    listRef
+}: MessagesListProps) => {
+    const { groupedMessages, lastMessageRef } = useMessagesList({
+        messages,
+        canFetch,
+        getPreviousMessages,
+        setShowAnchor,
+        listRef
+    });
     
     return (
-        <ul ref={listRef} className='flex flex-col w-full px-5 mb-auto gap-5 h-svh overflow-auto outline-none'>
+        <ul ref={listRef} className='relative flex flex-col flex-1 w-full px-5 mb-auto gap-5 overflow-auto outline-none'>
             {nextCursor && (
                 <li className='flex justify-center items-center'>
                     <Button

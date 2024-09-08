@@ -34,16 +34,18 @@ const OutletDetails = ({
             target instanceof Node && !containerRef.current?.contains(target) && onClose();
         };
 
-        const handleKeyup = ({ key }: KeyboardEvent) => {
-            key === 'Escape' && onClose();
+        const handleKeyDown = (event: KeyboardEvent) => {
+            event.stopImmediatePropagation();
+
+            event.key === 'Escape' && onClose();
         };
 
-        document.addEventListener('keyup', handleKeyup);
+        document.addEventListener('keydown', handleKeyDown);
         shouldCloseOnClickOutside && document.addEventListener('click', handleClick);
 
         return () => {
             document.removeEventListener('click', handleClick);
-            document.removeEventListener('keyup', handleKeyup);
+            document.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
 

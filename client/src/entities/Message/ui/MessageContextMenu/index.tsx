@@ -59,14 +59,14 @@ const MessageContextMenu = ({ message, isMessageFromMe }: { message: IMessage; i
             asChild
             loop
             className='z-[999] w-52 dark:bg-primary-dark-150 bg-primary-white border border-solid dark:border-primary-dark-200 border-primary-white rounded-md flex flex-col gap-2 p-1'
-        >
+            >
             <ul>
                 {contextMenu.map(({ text, icon, onClick, condition }, index) => condition && (
                     <ContextMenuItem
-                        asChild
-                        key={index}
-                        className='flex items-center gap-5 dark:text-primary-white text-primary-dark-200 rounded-md dark:hover:bg-primary-dark-200 focus:bg-primary-gray dark:focus:bg-primary-dark-200 hover:bg-primary-gray'
-                        onClick={onClick}
+                    asChild
+                    key={index}
+                    className='flex items-center gap-5 dark:text-primary-white text-primary-dark-200 rounded-md dark:hover:bg-primary-dark-200 focus:bg-primary-gray dark:focus:bg-primary-dark-200 hover:bg-primary-gray'
+                    onClick={onClick}
                     >
                         <li>
                             {icon}

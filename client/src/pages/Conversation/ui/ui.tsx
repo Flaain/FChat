@@ -20,12 +20,15 @@ const Conversation = () => {
         refetch,
         error,
         status,
+        listRef,
         isRefetching,
         getPreviousMessages,
         getConversationDescription,
         handleTypingStatus,
+        handleAnchorClick,
+        setShowAnchor,
+        showAcnhor,
         isPreviousMessagesLoading,
-        isRecipientTyping,
         closeDetails,
         openDetails,
         showRecipientDetails
@@ -59,12 +62,14 @@ const Conversation = () => {
                     />
                     {data.conversation.messages.length ? (
                         <MessagesList
+                            listRef={listRef} // passing as mutable ref cuz we need to mutate in scroll listener
                             type={FeedTypes.CONVERSATION}
                             messages={data.conversation.messages}
                             getPreviousMessages={getPreviousMessages}
                             isFetchingPreviousMessages={isPreviousMessagesLoading}
                             nextCursor={data.nextCursor}
                             canFetch={!isPreviousMessagesLoading && !!data.nextCursor}
+                            setShowAnchor={setShowAnchor}
                         />
                     ) : (
                         <Typography
@@ -85,6 +90,8 @@ const Conversation = () => {
                     ) : (
                         <SendMessage
                             type='conversation'
+                            showAnchor={showAcnhor}
+                            onAnchorClick={handleAnchorClick}
                             onChange={handleTypingStatus}
                             queryId={data.conversation.recipient._id}
                         />

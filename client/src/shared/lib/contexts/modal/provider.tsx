@@ -24,7 +24,6 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         if (!bodyRef.current) return;
 
         event.preventDefault();
-        event.stopPropagation();
 
         focusableElements.current = Array.from(
             bodyRef.current.querySelectorAll(
@@ -39,19 +38,21 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         focusableElements.current[activeIndex.current]?.focus?.();
     };
 
-    const handleEscapeDown = ({ key }: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
-        !isAsyncActionLoading && key === 'Escape' && closeModal();
+    const handleEscapeDown = (event: KeyboardEvent) => {
+        !isAsyncActionLoading && event.key === 'Escape' && closeModal();
     };
 
 
-    const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+        event.stopImmediatePropagation();
+        
         const keyListeners = {
             Tab: handleTabDown,
             Escape: handleEscapeDown,
         };
 
         keyListeners[event.key as keyof typeof keyListeners]?.(event);
-    }, []);
+    };
 
     React.useEffect(() => {
         if (!modals.length || !bodyRef.current) return;
@@ -61,22 +62,17 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         document.body.style.paddingRight = window.innerWidth - document.body.offsetWidth + 'px';
         document.body.classList.add('overflow-hidden');
 
-        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keydown', handleKeyDown, true);
 
         return () => {
             document.body.classList.remove('overflow-hidden');
             document.body.style.paddingRight = '0';
         
-            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keydown', handleKeyDown, true);
         };
-    }, [isAsyncActionLoading, modals]);
+    }, [isAsyncActionLoading, modals, handleKeyDown]);
 
-    const value = React.useMemo(() => ({
-        isAsyncActionLoading,
-        setIsAsyncActionLoading,
-        openModal,
-        closeModal
-    }), [closeModal, isAsyncActionLoading, openModal]);
+    const value = React.useMemo(() => ({ isAsyncActionLoading, setIsAsyncActionLoading, openModal, closeModal }), [isAsyncActionLoading]);
 
     return (
         <ModalContext.Provider value={value}>

@@ -1,7 +1,7 @@
 import React from "react";
 import { useLayoutContext } from "@/shared/lib/hooks/useLayoutContext";
 import { getSortedFeedByLastMessage } from "@/shared/lib/utils/getSortedFeedByLastMessage";
-import { ConversationFeed, DeleteMessageEventParams, FEED_EVENTS, FeedTypes, GroupFeed, IMessage, PRESENCE } from "@/shared/model/types";
+import { ConversationFeed, DeleteMessageEventParams, FEED_EVENTS, FeedTypes, GroupFeed, IMessage, PRESENCE, TypingParticipant } from "@/shared/model/types";
 import { UseSidebarEventsProps } from "../../model/types";
 
 export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => {
@@ -68,12 +68,12 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
             }));
         })
 
-        socket?.on(FEED_EVENTS.CONVERSATION_START_TYPING, (id: string) => {
+        socket?.on(FEED_EVENTS.START_TYPING, (data: { _id: string; participant: TypingParticipant }) => {
             setLocalResults((prevState) => prevState.map((item) => {
-                if (item._id === id) {
+                if (item._id === data._id) {
                     return {
                         ...item, 
-                        isRecipientTyping: true
+                        participantsTyping: item.participantsTyping ? [...item.participantsTyping, data.participant] : [data.participant]
                     }
                 }
 
@@ -81,12 +81,12 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
             }));
         })
 
-        socket?.on(FEED_EVENTS.CONVERSATION_STOP_TYPING, (id: string) => {
+        socket?.on(FEED_EVENTS.STOP_TYPING, (data: { _id: string; participant: TypingParticipant }) => {
             setLocalResults((prevState) => prevState.map((item) => {
-                if (item._id === id) {
+                if (item._id === data._id) {
                     return {
                         ...item, 
-                        isRecipientTyping: false
+                        participantsTyping: item.participantsTyping?.filter((participant) => participant._id !== data.participant._id)
                     }
                 }
 
@@ -104,8 +104,8 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
             socket?.off(FEED_EVENTS.CREATE_MESSAGE);
             socket?.off(FEED_EVENTS.DELETE_MESSAGE);
 
-            socket?.off(FEED_EVENTS.CONVERSATION_START_TYPING);
-            socket?.off(FEED_EVENTS.CONVERSATION_STOP_TYPING);
+            socket?.off(FEED_EVENTS.START_TYPING);
+            socket?.off(FEED_EVENTS.STOP_TYPING);
         };
     }, [socket, updateFeed]);
 }

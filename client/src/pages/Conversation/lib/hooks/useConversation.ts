@@ -22,7 +22,9 @@ export const useConversation = () => {
     const [isTyping, setIsTyping] = React.useState(false);
     const [isRecipientTyping, setIsRecipientTyping] = React.useState(false);
     const [showRecipientDetails, setShowRecipientDetails] = React.useState(searchParams.get('details') === 'open');
+    const [showAcnhor, setShowAnchor] = React.useState(false);
 
+    const listRef = React.useRef<HTMLUListElement | null>(null);
     const abortControllerRef = React.useRef<AbortController | null>(null);
     const typingTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -43,6 +45,10 @@ export const useConversation = () => {
         }, 5000);
     };
     
+    const handleAnchorClick = React.useCallback(() => {
+        listRef.current?.scrollTo({ left: 0, top: listRef.current.scrollHeight - listRef.current.clientHeight, behavior: 'smooth' });
+    }, []);
+
     const getConversationDescription = (shouldDisplayTypingStatus = true) => {
         if (data.conversation.isInitiatorBlocked || data.conversation.isRecipientBlocked) return 'last seen recently';
         if (isRecipientTyping && isRecipientOnline && shouldDisplayTypingStatus) return `typing...`;
@@ -237,12 +243,16 @@ export const useConversation = () => {
         data,
         status,
         error,
+        listRef,
         isRefetching,
         isRecipientTyping,
         isPreviousMessagesLoading,
+        showAcnhor,
+        setShowAnchor,
         openDetails,
         closeDetails,
         handleTypingStatus,
+        handleAnchorClick,
         getConversationDescription,
         setShowRecipientDetails,
         setConversation,
