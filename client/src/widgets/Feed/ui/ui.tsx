@@ -26,7 +26,7 @@ const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, search
     ) : (
         <>
             {!!filteredLocalResults.length && (
-                <ul className='flex flex-col gap-1 px-3 overflow-auto'>
+                <ul className='flex flex-col px-3 overflow-auto'>
                     {filteredLocalResults.map((item) => feedItems[item.type](item))}
                 </ul>
             )}
@@ -38,7 +38,7 @@ const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, search
                         <Typography as='h3' variant='secondary' className='px-3 py-2 rounded bg-primary-dark-200'>
                             Global results
                         </Typography>
-                        <ul className='flex flex-col gap-5 overflow-auto px-3'>
+                        <ul className='flex flex-col overflow-auto px-3'>
                             {filteredGlobalResults.map((item) => feedItems[item.type](item))}
                         </ul>
                     </div>

@@ -1,5 +1,5 @@
-import { Conversation } from "@/shared/model/types";
 import React from "react";
+import { Conversation } from "@/shared/model/types";
 
 export type ConversationStatuses = "idle" | "loading" | "error";
 

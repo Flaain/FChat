@@ -3,8 +3,11 @@ import ReactDOM from 'react-dom';
 import Modal from '@/shared/ui/Modal';
 import { ModalContext } from './context';
 import { ModalConfig } from './types';
+import { useDomEvents } from '../../hooks/useDomEvents';
 
 export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
+    const { addEventListener } = useDomEvents();
+
     const [modals, setModals] = React.useState<Array<ModalConfig>>([]);
     const [isAsyncActionLoading, setIsAsyncActionLoading] = React.useState(false);
     
@@ -22,6 +25,8 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
 
     const handleTabDown = (event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
         if (!bodyRef.current) return;
+
+        bodyRef.current.focus();
 
         event.preventDefault();
 
@@ -62,13 +67,13 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         document.body.style.paddingRight = window.innerWidth - document.body.offsetWidth + 'px';
         document.body.classList.add('overflow-hidden');
 
-        document.addEventListener('keydown', handleKeyDown, true);
+        const removeEventListener = addEventListener('keydown', handleKeyDown);
 
         return () => {
             document.body.classList.remove('overflow-hidden');
             document.body.style.paddingRight = '0';
         
-            document.removeEventListener('keydown', handleKeyDown, true);
+            removeEventListener();
         };
     }, [isAsyncActionLoading, modals, handleKeyDown]);
 

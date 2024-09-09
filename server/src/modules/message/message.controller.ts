@@ -26,7 +26,7 @@ export class MessageController implements IMessageController {
 
        isNewConversation && this.eventEmitter.emit(CONVERSATION_EVENTS.CREATED, {
             recipient: recipient.toObject(),
-            initiatorId: req.user.doc._id.toString(),
+            initiator: req.user.doc,
             conversationId: conversation._id,
             lastMessageSentAt: conversation.lastMessageSentAt,
         });

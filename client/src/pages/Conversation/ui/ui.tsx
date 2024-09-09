@@ -8,6 +8,7 @@ import ConversationDDM from '@/features/ConversationDDM/ui/ui';
 import OutletHeader from '@/widgets/OutletHeader/ui/ui';
 import OutletDetails from '@/widgets/OutletDetails/ui/ui';
 import RecipientDetails from '@/widgets/RecipientDetails/ui/ui';
+import AvatarByName from '@/shared/ui/AvatarByName';
 import { useConversationContext } from '../lib/hooks/useConversationContext';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
@@ -100,6 +101,13 @@ const Conversation = () => {
                 {showRecipientDetails && (
                     <OutletDetails
                         name={data.conversation.recipient.name}
+                        avatarSlot={
+                            data.conversation.recipient.avatar ? (
+                                <img src={data.conversation.recipient.avatar.url} className='object-cover object-center size-28 rounded-full' />
+                            ) : (
+                                <AvatarByName name={data.conversation.recipient.name} size='5xl' />
+                            )
+                        }
                         description={getConversationDescription(false)}
                         info={<RecipientDetails recipient={data.conversation.recipient} />}
                         shouldCloseOnClickOutside={false}

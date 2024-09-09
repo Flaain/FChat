@@ -7,11 +7,13 @@ import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { AppException } from '@/shared/api/error';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
+import { useDomEvents } from '@/shared/lib/hooks/useDomEvents';
 
 export const useConversation = () => {
     const { id: recipientId } = useParams<{ id: string }>();
     const { profile } = useProfile();
     const { socket } = useLayoutContext();
+    const { addEventListener } = useDomEvents();
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [data, setConversation] = React.useState<ConversationWithMeta>(null!);
@@ -31,17 +33,20 @@ export const useConversation = () => {
     const isRecipientOnline = data?.conversation.recipient.presence === PRESENCE.ONLINE; 
 
     const handleTypingStatus = () => {
+        const typingData = { conversationId: data.conversation._id, recipientId };
+
         if (!isTyping) {
             setIsTyping(true);
             
-            socket?.emit(CONVERSATION_EVENTS.START_TYPING, { conversationId: data.conversation._id, recipientId });
+            socket?.emit(CONVERSATION_EVENTS.START_TYPING, typingData);
         } else {
             clearTimeout(typingTimeoutRef.current!);
         }
 
         typingTimeoutRef.current = setTimeout(() => {
             setIsTyping(false);
-            socket?.emit(CONVERSATION_EVENTS.STOP_TYPING, { conversationId: data.conversation._id, recipientId });
+            
+            socket?.emit(CONVERSATION_EVENTS.STOP_TYPING, typingData);
         }, 5000);
     };
     
@@ -185,9 +190,10 @@ export const useConversation = () => {
             console.error(error);
             
             if (error instanceof AppException) {
+                error.statusCode === 404 && navigate('/');
+
                 setStatus('error');
                 setError(error.message);
-                error.statusCode === 404 && navigate('/');
             }
         } finally {
             setIsRefetching(false);
@@ -196,6 +202,10 @@ export const useConversation = () => {
 
     React.useEffect(() => {
         getConversation('init');
+
+        const removeEventListener = addEventListener('keydown', (event) => {
+            event.key === 'Escape' && navigate('/');
+        })
 
         socket?.emit(CONVERSATION_EVENTS.JOIN, { recipientId });
         
@@ -217,6 +227,8 @@ export const useConversation = () => {
         socket?.on(CONVERSATION_EVENTS.STOP_TYPING, () => setIsRecipientTyping(false));
 
         return () => {
+            removeEventListener();
+            
             abortControllerRef.current?.abort('Signal aborted due to new incoming request');
 
             socket?.emit(CONVERSATION_EVENTS.LEAVE, { recipientId });

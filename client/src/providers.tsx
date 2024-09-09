@@ -2,6 +2,7 @@ import { SessionProvider } from './entities/session/model/provider';
 import { SessionProviderProps } from './entities/session/model/types';
 import { ThemeProvider } from './entities/theme/model/provider';
 import { ThemeProviderProps } from './entities/theme/model/types';
+import { DomEventsProvider } from './shared/lib/contexts/domEvents/provider';
 import { ProfileProvider } from './shared/lib/contexts/profile/provider';
 import { ProfileProviderProps } from './shared/lib/contexts/profile/types';
 
@@ -14,11 +15,13 @@ export interface ProvidersProps {
 
 const Providers = ({ profile, session, theme, children }: ProvidersProps) => {
     return (
-        <ThemeProvider {...theme}>
-            <SessionProvider {...session}>
-                <ProfileProvider {...profile}>{children}</ProfileProvider>
-            </SessionProvider>
-        </ThemeProvider>
+        <DomEventsProvider>
+            <ThemeProvider {...theme}>
+                <SessionProvider {...session}>
+                    <ProfileProvider {...profile}>{children}</ProfileProvider>
+                </SessionProvider>
+            </ThemeProvider>
+        </DomEventsProvider>
     );
 };
 

@@ -26,8 +26,6 @@ export const useMessage = (message: IMessage) => {
                 conversationId: conversation._id,
                 recipientId: conversation.recipient._id
             });
-            
-            toast.success('Message deleted', { position: 'top-center' });
         } catch (error) {
             console.error(error);
             toast.error('Cannot delete message', { position: 'top-center' });

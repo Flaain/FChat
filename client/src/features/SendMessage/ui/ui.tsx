@@ -32,7 +32,7 @@ const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick }: Use
         edit: (
             <MessageTopBar
                 title='Edit message'
-                mainIconSlot={<Edit2Icon className='dark:text-primary-white text-primary-gray' />}
+                mainIconSlot={<Edit2Icon className='dark:text-primary-white text-primary-gray min-w-5 h-5' />}
                 onClose={setDefaultState}
                 description={currentDraft?.selectedMessage?.text}
                 preventClose={isLoading}
@@ -41,7 +41,7 @@ const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick }: Use
         reply: (
             <MessageTopBar
                 title={`Reply to ${currentDraft?.selectedMessage?.sender?.name}`}
-                mainIconSlot={<Reply className='dark:text-primary-white text-primary-gray' />}
+                mainIconSlot={<Reply className='dark:text-primary-white text-primary-gray min-w-5 h-5' />}
                 onClose={setDefaultState}
                 description={currentDraft?.selectedMessage?.text}
                 preventClose={isLoading}

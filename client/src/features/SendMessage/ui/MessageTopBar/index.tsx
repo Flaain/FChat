@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { MessageTopBarProps } from '../../model/types';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 import { PartOfCompilerUse } from '@/shared/model/types';
+import { useDomEvents } from '@/shared/lib/hooks/useDomEvents';
 
 const MessageTopBar = ({
     onClose,
@@ -14,18 +15,17 @@ const MessageTopBar = ({
     description,
     preventClose
 }: MessageTopBarProps) => {
-    
+    const { addEventListener } = useDomEvents();
+
     React.useEffect(() => {
-        const handleClose = (event: KeyboardEvent) => {
+        const removeEventListener = addEventListener('keydown', (event) => {
             event.stopImmediatePropagation();
 
             !preventClose && event.key === 'Escape' && onClose();
-        }
-
-        document.addEventListener('keydown', handleClose);
+        });
 
         return () => {
-            document.removeEventListener('keydown', handleClose)
+            removeEventListener();
         };
     }, [])
 

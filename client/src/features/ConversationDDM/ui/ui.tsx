@@ -13,7 +13,7 @@ const ConversationDDM = () => {
                 <EllipsisVertical className='dark:text-primary-white text-primary-dark-50' />
             </DropdownMenuTrigger>
             <DropdownMenuContent
-                onKeyUp={(event) => event.stopPropagation()}
+                onEscapeKeyDown={(event) => event.stopPropagation()}
                 loop
                 align='end'
                 className='border-none rounded-md w-[200px] h-auto dark:bg-primary-dark-50 z-[999]'

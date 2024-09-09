@@ -11,6 +11,8 @@ import { getBubblesStyles } from '../lib/helpers/getBubblesStyles';
 
 const Message = React.forwardRef<HTMLLIElement, MessageProps>(
     ({ message, isFirst, isLast, isMessageFromMe, className, ...rest }, ref) => {
+        const [isContextMenuOpen, setIsContextMenuOpen] = React.useState(false);
+
         const { createdAt, updatedAt, sender, text, hasBeenRead, hasBeenEdited, replyTo } = message;
 
         const createTime = new Date(createdAt);
@@ -24,7 +26,7 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
         );
 
         return (
-            <ContextMenu>
+            <ContextMenu onOpenChange={setIsContextMenuOpen}>
                 <ContextMenuTrigger asChild>
                     <li
                         {...rest}
@@ -111,7 +113,7 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                         </div>
                     </li>
                 </ContextMenuTrigger>
-                <MessageContextMenu message={message} isMessageFromMe={isMessageFromMe} />
+                {isContextMenuOpen && <MessageContextMenu closeContextMenu={() => setIsContextMenuOpen(false)} message={message} isMessageFromMe={isMessageFromMe} />}
             </ContextMenu>
         );
     }

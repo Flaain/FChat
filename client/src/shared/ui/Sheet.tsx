@@ -3,6 +3,7 @@ import Typography from './Typography';
 import { SheetProps } from '@/shared/model/types';
 import { XIcon } from 'lucide-react';
 import { cn } from '../lib/utils/cn';
+import { useDomEvents } from '../lib/hooks/useDomEvents';
 
 const SheetHeader = ({ title, closeHandler }: Pick<SheetProps, 'title' | 'closeHandler'>) => {
     return (
@@ -26,23 +27,14 @@ const SheetHeader = ({ title, closeHandler }: Pick<SheetProps, 'title' | 'closeH
 };
 
 const SheetContainer = ({ children, direction = 'left', closeHandler }: Omit<SheetProps, 'title' | 'withHeader'> & { direction?: 'left' | 'right' }) => {
+    
     React.useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            event.stopImmediatePropagation();
-            
-            event.key === 'Escape' && closeHandler();
-        };
-
         document.body.style.paddingRight = window.innerWidth - document.body.offsetWidth + 'px';
         document.body.classList.add('overflow-hidden');
-
-        document.addEventListener('keydown', handleKeyDown, true);
 
         return () => {
             document.body.classList.remove('overflow-hidden');
             document.body.style.paddingRight = '0';
-
-            document.removeEventListener('keydown', handleKeyDown, true);
         };
     }, [closeHandler]);
 
@@ -63,13 +55,17 @@ const SheetContainer = ({ children, direction = 'left', closeHandler }: Omit<She
     );
 };
 
-const SheetBody = ({ children, className, ...rest }: Omit<SheetProps, 'closeHandler'> & HTMLAttributes<HTMLDivElement>) => {
+const SheetBody = ({ children, closeHandler, className, ...rest }: SheetProps & HTMLAttributes<HTMLDivElement>) => {
+    const { addEventListener } = useDomEvents();
+
     const bodyRef = React.useRef<HTMLDivElement | null>(null);
     const focusableElements = React.useRef<Array<HTMLElement>>([]);
     const activeIndex = React.useRef(-1);
 
-    const handleTabDown = (event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
+    const handleTabDown = (event: KeyboardEvent) => {
         if (!bodyRef.current) return;
+
+        bodyRef.current.focus();
 
         event.preventDefault();
         event.stopPropagation();
@@ -88,8 +84,15 @@ const SheetBody = ({ children, className, ...rest }: Omit<SheetProps, 'closeHand
         focusableElements.current[activeIndex.current]?.focus?.();
     };
 
-    const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
+    const handleEscapeDown = (event: KeyboardEvent) => {
+        event.stopImmediatePropagation();
+
+        event.key === 'Escape' && closeHandler();
+    }
+
+    const handleKeyDown = React.useCallback((event: KeyboardEvent) => {
         const keyListeners = {
+            Escape: handleEscapeDown,
             Tab: handleTabDown
         };
 
@@ -97,17 +100,16 @@ const SheetBody = ({ children, className, ...rest }: Omit<SheetProps, 'closeHand
     }, []);
 
     React.useEffect(() => {
-        document.addEventListener('keydown', handleKeyDown);
+        const removeEventListener = addEventListener('keydown', handleKeyDown);
 
         return () => {
-            document.removeEventListener('keydown', handleKeyDown);
+            removeEventListener();
         };
     }, [handleKeyDown]);
 
     return (
         <div
             ref={bodyRef}
-            onKeyDown={handleKeyDown}
             className={cn(
                 'flex flex-col w-full max-w-[300px] h-svh gap-5 overflow-auto shadow-md dark:shadow-primary-dark-150 shadow-primary-white dark:bg-primary-dark-100 bg-white box-border',
                 className
@@ -122,7 +124,7 @@ const SheetBody = ({ children, className, ...rest }: Omit<SheetProps, 'closeHand
 const Sheet = ({ direction, withHeader = true, closeHandler, title, children }: SheetProps) => {
     return (
         <SheetContainer direction={direction} closeHandler={closeHandler}>
-            <SheetBody>
+            <SheetBody closeHandler={closeHandler}>
                 {withHeader && <SheetHeader title={title} closeHandler={closeHandler} />}
                 {children}
             </SheetBody>

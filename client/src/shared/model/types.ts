@@ -245,8 +245,7 @@ export enum FEED_EVENTS {
     DELETE_MESSAGE = 'feed.delete.message',
     CREATE_CONVERSATION = 'feed.create.conversation',
     DELETE_CONVERSATION = 'feed.delete.conversation',
-    USER_ONLINE = 'feed.user.online',
-    USER_OFFLINE = 'feed.user.offline',
+    USER_PRESENCE = 'feed.user.presence',
     START_TYPING = 'feed.start.typing',
     STOP_TYPING = 'feed.stop.typing'
 }

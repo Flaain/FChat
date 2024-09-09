@@ -30,10 +30,9 @@ export enum FEED_EVENTS {
     DELETE_MESSAGE = 'feed.delete.message',
     CREATE_CONVERSATION = 'feed.create.conversation',
     DELETE_CONVERSATION = 'feed.delete.conversation',
-    USER_ONLINE = 'feed.user.online',
-    USER_OFFLINE = 'feed.user.offline',
-    CONVERSATION_START_TYPING = 'feed.conversation.start.typing',
-    CONVERSATION_STOP_TYPING = 'feed.conversation.stop.typing',
+    START_TYPING = 'feed.start.typing',
+    STOP_TYPING = 'feed.stop.typing',
+    USER_PRESENCE = 'feed.user.presence',
 }
 
 export interface ConversationDeleteMessageParams {
@@ -58,7 +57,7 @@ export interface ConversationEditMessageParams extends ConversationSendMessagePa
 }
 
 export interface ConversationCreateParams {
-    initiatorId: string;
+    initiator: UserDocument;
     conversationId: string;
     recipient: Pick<UserDocument, 'name' | 'email' | '_id'>;
     lastMessageSentAt: Date;

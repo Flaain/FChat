@@ -4,6 +4,7 @@ import AvatarByName from '@/shared/ui/AvatarByName';
 import { FeedTypes } from '@/shared/model/types';
 import { Button } from '@/shared/ui/Button';
 import { X } from 'lucide-react';
+import { useDomEvents } from '@/shared/lib/hooks/useDomEvents';
 
 const titles: Record<Exclude<FeedTypes, 'User'>, string> = {
     Conversation: 'User Info',
@@ -12,40 +13,36 @@ const titles: Record<Exclude<FeedTypes, 'User'>, string> = {
 
 const OutletDetails = ({
     onClose,
+    avatarSlot,
     name,
     description,
     type,
     info,
     shouldCloseOnClickOutside = true
 }: {
+    name: string;
     description?: string;
     info?: React.ReactNode;
-    name: string;
+    avatarSlot: React.ReactNode;
     type: FeedTypes;
     onClose: () => void;
     shouldCloseOnClickOutside?: boolean;
 }) => {
+    const { addEventListener } = useDomEvents();
+
     const containerRef = React.useRef<HTMLDivElement | null>(null);
 
     React.useEffect(() => {
         if (!containerRef.current) return;
 
-        const handleClick = ({ target }: MouseEvent) => {
-            target instanceof Node && !containerRef.current?.contains(target) && onClose();
-        };
-
-        const handleKeyDown = (event: KeyboardEvent) => {
+        const removeEventListener = addEventListener('keydown', (event) => {
             event.stopImmediatePropagation();
 
             event.key === 'Escape' && onClose();
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        shouldCloseOnClickOutside && document.addEventListener('click', handleClick);
+        });
 
         return () => {
-            document.removeEventListener('click', handleClick);
-            document.removeEventListener('keydown', handleKeyDown);
+            removeEventListener();
         };
     }, []);
 
@@ -63,7 +60,7 @@ const OutletDetails = ({
                 </Typography>
             </div>
             <div className='flex flex-col items-center justify-center'>
-                <AvatarByName name={name} size='5xl' />
+                {avatarSlot}
                 <Typography weight='semibold' size='xl' className='mt-2'>
                     {name}
                 </Typography>

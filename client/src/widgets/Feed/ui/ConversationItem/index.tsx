@@ -51,7 +51,7 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                             </Typography>
                         )}
                     </Typography>
-                    {conversation.isRecipientTyping ? (
+                    {!!conversation.participantsTyping?.length ? (
                         <Typography as='p' variant='secondary' className='line-clamp-1'>
                             typing...
                         </Typography>

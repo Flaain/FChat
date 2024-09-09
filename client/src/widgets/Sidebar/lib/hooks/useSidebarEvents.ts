@@ -36,34 +36,12 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
             setLocalResults((prevState) => prevState.filter((item) => item._id !== id).sort(getSortedFeedByLastMessage));
         })
         
-        socket?.on(FEED_EVENTS.USER_ONLINE, (recipientId: string) => {
+        socket?.on(FEED_EVENTS.USER_PRESENCE, ({ recipientId, presence }: { recipientId: string; presence: PRESENCE }) => {
             setLocalResults((prevState) => prevState.map((item) => {
                 if (FeedTypes.CONVERSATION === item.type && item.recipient._id === recipientId) {
-                    return {
-                        ...item,
-                        recipient: {
-                            ...item.recipient,
-                            presence: PRESENCE.ONLINE,
-                        }
-                    }
+                    return { ...item, recipient: { ...item.recipient, presence } };
                 }
                 
-                return item;
-            }));
-        })
-
-        socket?.on(FEED_EVENTS.USER_OFFLINE, (recipientId: string) => {
-            setLocalResults((prevState) => prevState.map((item) => {
-                if (FeedTypes.CONVERSATION === item.type && item.recipient._id === recipientId) {
-                    return {
-                        ...item,
-                        recipient: {
-                            ...item.recipient,
-                            presence: PRESENCE.OFFLINE,
-                        }
-                    }
-                }
-
                 return item;
             }));
         })
@@ -81,7 +59,7 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
             }));
         })
 
-        socket?.on(FEED_EVENTS.STOP_TYPING, (data: { _id: string; participant: TypingParticipant }) => {
+        socket?.on(FEED_EVENTS.STOP_TYPING, (data: { _id: string; participant: Omit<TypingParticipant, 'name'> }) => {
             setLocalResults((prevState) => prevState.map((item) => {
                 if (item._id === data._id) {
                     return {
@@ -95,9 +73,6 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
         })
 
         return () => {
-            socket?.off(FEED_EVENTS.USER_ONLINE);
-            socket?.off(FEED_EVENTS.USER_OFFLINE);
-            
             socket?.off(FEED_EVENTS.CREATE_CONVERSATION);
             socket?.off(FEED_EVENTS.DELETE_CONVERSATION);
             
@@ -106,6 +81,8 @@ export const useSidebarEvents = ({ setLocalResults }: UseSidebarEventsProps) => 
 
             socket?.off(FEED_EVENTS.START_TYPING);
             socket?.off(FEED_EVENTS.STOP_TYPING);
+
+            socket?.off(FEED_EVENTS.USER_PRESENCE);
         };
     }, [socket, updateFeed]);
 }
