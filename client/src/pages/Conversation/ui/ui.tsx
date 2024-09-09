@@ -110,7 +110,6 @@ const Conversation = () => {
                         }
                         description={getConversationDescription(false)}
                         info={<RecipientDetails recipient={data.conversation.recipient} />}
-                        shouldCloseOnClickOutside={false}
                         type={FeedTypes.CONVERSATION}
                         onClose={closeDetails}
                     />

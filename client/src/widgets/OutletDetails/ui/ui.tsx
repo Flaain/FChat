@@ -1,6 +1,5 @@
 import React from 'react';
 import Typography from '@/shared/ui/Typography';
-import AvatarByName from '@/shared/ui/AvatarByName';
 import { FeedTypes } from '@/shared/model/types';
 import { Button } from '@/shared/ui/Button';
 import { X } from 'lucide-react';
@@ -18,7 +17,6 @@ const OutletDetails = ({
     description,
     type,
     info,
-    shouldCloseOnClickOutside = true
 }: {
     name: string;
     description?: string;
@@ -26,7 +24,6 @@ const OutletDetails = ({
     avatarSlot: React.ReactNode;
     type: FeedTypes;
     onClose: () => void;
-    shouldCloseOnClickOutside?: boolean;
 }) => {
     const { addEventListener } = useDomEvents();
 
