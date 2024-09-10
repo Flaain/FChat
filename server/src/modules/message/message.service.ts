@@ -72,8 +72,17 @@ export class MessageService extends BaseService<MessageDocument, Message> {
 
         const updateQuery = { lastMessage: newMessage._id, lastMessageSentAt: newMessage.createdAt }
         
-        const createFeed = { item: ctx.conversation._id, type: FEED_TYPE.CONVERSATION, users: [initiator._id, recipient._id], lastActionAt: newMessage.createdAt };
-        const updateFeed = { filter: { users: { $in: initiator._id }, item: ctx.conversation._id }, update: { lastActionAt: newMessage.createdAt } }
+        const createFeed = {
+            item: ctx.conversation._id,
+            type: FEED_TYPE.CONVERSATION,
+            users: [initiator._id, recipient._id],
+            lastActionAt: newMessage.createdAt,
+        };
+        
+        const updateFeed = {
+            filter: { item: ctx.conversation._id, type: FEED_TYPE.CONVERSATION },
+            update: { lastActionAt: newMessage.createdAt },
+        };
         
         Object.assign(ctx.conversation, updateQuery);
         
@@ -119,6 +128,7 @@ export class MessageService extends BaseService<MessageDocument, Message> {
             ]),
             replyMessage.updateOne({ $push: { replies: newMessage._id } }),
             conversation.updateOne({ lastMessage: newMessage._id, lastMessageSentAt: newMessage.createdAt, $push: { messages: newMessage._id } }),
+            this.feedService.updateOne({ filter: { item: conversation._id, type: FEED_TYPE.CONVERSATION }, update: { lastActionAt: newMessage.createdAt } })
         ]);
 
         return { message: populatedMessage, conversationId: conversation._id.toString() };
@@ -191,21 +201,26 @@ export class MessageService extends BaseService<MessageDocument, Message> {
                 },
             },
         }) : undefined;
+        const lastMessageSentAt = (lastMessage as Message)?.createdAt ?? conversation.createdAt;
 
         await Promise.all([
             message.deleteOne(),
             conversation.updateOne({
+                lastMessageSentAt,
                 lastMessage: lastMessage?._id,
-                lastMessageSentAt: (lastMessage as Message)?.createdAt ?? conversation.createdAt,
                 $set: { messages: filteredMessages },
             }),
+            this.feedService.updateOne({
+                filter: { item: conversation._id, type: FEED_TYPE.CONVERSATION },
+                update: { lastActionAt: lastMessageSentAt },
+            }),
         ]);
-        
+
         return {
             lastMessage,
             isLastMessage,
+            lastMessageSentAt,
             conversationId: conversation._id.toString(),
-            lastMessageSentAt: conversation.lastMessageSentAt
         };
     };
 }

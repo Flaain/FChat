@@ -156,7 +156,7 @@ export class AuthService implements IAuthService {
     };
 
     profile = async (user: UserDocument) => {
-        const { password: _, ...rest } = user.toObject();
+        const { password, blockList, ...rest } = user.toObject<User>();
 
         return { ...rest };
     };

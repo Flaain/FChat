@@ -42,28 +42,25 @@ export class FeedService extends BaseService<FeedDocument, Feed> {
         ]);
     };
 
-    getFeed = async ({ initiatorId, cursor, existingIds = [] }: GetFeedParams) => {
+    getFeed = async ({ initiatorId, cursor }: GetFeedParams) => {
         const BATCH_SIZE = 10;
         let nextCursor: string | null = null;
 
         const feed = await this.find({
             filter: {
-                _id: { $nin: existingIds },
                 users: { $in: initiatorId },
-                ...(cursor && { lastActionAt: { $lt: cursor } }),
+                ...(cursor && { lastActionAt: { $lt: cursor }, updatedAt: { $lt: cursor } }),
             },
             projection: { item: 1, type: 1, lastActionAt: 1 },
             options: { limit: BATCH_SIZE, sort: { lastActionAt: -1 } },
         });
 
-        const populatedFeed = await Promise.all(
-            feed.map(async (item: FeedDocument) => {
-                const itemHandlers = feedHandlers[item.type];
-                const populatedItem = await item.populate(itemHandlers.populate(initiatorId));
+        const populatedFeed = await Promise.all(feed.map(async (item: FeedDocument) => {
+            const itemHandlers = feedHandlers[item.type];
+            const populatedItem = await item.populate(itemHandlers.populate(initiatorId));
 
-                return itemHandlers.returnObject(populatedItem.toObject());
-            }),
-        );
+            return itemHandlers.returnObject(populatedItem.toObject());
+        }));
 
         feed.length === BATCH_SIZE && (nextCursor = feed[BATCH_SIZE - 1].lastActionAt.toISOString());
 

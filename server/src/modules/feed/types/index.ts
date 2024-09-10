@@ -22,7 +22,6 @@ export type FeedDocument = Feed & Document & SchemaTimestampsConfig;
 export interface GetFeedParams {
     initiatorId: Types.ObjectId;
     cursor?: string;
-    existingIds?: Array<string>;
 }
 
 export interface FeedHandlers {
