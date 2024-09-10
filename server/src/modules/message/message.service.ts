@@ -161,19 +161,19 @@ export class MessageService extends BaseService<MessageDocument, Message> {
         };
     };
 
-    deleteMessage = async ({ conversationId, messageId, initiatorId }: DeleteMessageType) => {
+    deleteMessage = async ({ messageId, initiatorId, recipientId }: DeleteMessageType) => {
         const message = await this.findOne({ filter: { _id: messageId, sender: initiatorId } });
 
         if (!message) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
 
         const conversation = await this.conversationService.findOne({
-            filter: { _id: conversationId, participants: { $in: initiatorId }, messages: { $in: message._id } },
+            filter: { participants: { $all: [initiatorId, recipientId] }, messages: { $in: message._id } },
             projection: { _id: 1, lastMessage: 1, lastMessageSentAt: 1, messages: 1, createdAt: 1 },
             options: {
                 populate: {
                     path: 'lastMessage',
                     model: 'Message',
-                    populate: { path: 'sender', model: 'User', select: 'name' },
+                    populate: { path: 'sender', model: 'User', select: 'name' }
                 },
             },
         });
@@ -204,7 +204,8 @@ export class MessageService extends BaseService<MessageDocument, Message> {
         return {
             lastMessage,
             isLastMessage,
-            lastMessageSentAt: conversation.lastMessageSentAt,
+            conversationId: conversation._id.toString(),
+            lastMessageSentAt: conversation.lastMessageSentAt
         };
     };
 }

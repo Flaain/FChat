@@ -32,11 +32,9 @@ import { HttpStatus } from '@nestjs/common';
 import { CookiesService } from 'src/utils/services/cookies/cookies.service';
 import { JWT_KEYS } from 'src/utils/types';
 import { ConversationService } from '../conversation/conversation.service';
-import { config } from 'src/config';
 import { PRESENCE } from '../user/types';
-import { Types } from 'mongoose';
 
-@WebSocketGateway({ cors: { origin: config().CLIENT_URL, credentials: true } })
+@WebSocketGateway({ cors: { origin: ['http://localhost:4173', 'http://localhost:5173'], credentials: true } })
 export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     private server: Server;
