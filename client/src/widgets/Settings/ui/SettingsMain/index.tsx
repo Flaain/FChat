@@ -5,6 +5,7 @@ import { cn } from '@/shared/lib/utils/cn';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { useSettings } from '../../lib/hooks/useSettings';
 import { LockKeyholeIcon, UserCircle2 } from 'lucide-react';
+import Image from '@/shared/ui/Image';
 
 const SettingsMain = () => {
     const { profile } = useProfile();
@@ -12,7 +13,7 @@ const SettingsMain = () => {
 
     const list: Array<{ icon: React.ReactNode; title: string; action: () => void }> = [
         {
-            title: "My Account",
+            title: 'My Account',
             icon: <UserCircle2 className='w-5 h-5' />,
             action: () => onMenuChange('myAccount')
         },
@@ -27,7 +28,11 @@ const SettingsMain = () => {
         <>
             <div className='border-b-8 dark:border-b-primary-dark-50'>
                 <div className='flex items-center gap-5 p-5'>
-                    {profile.avatar ? <img src={profile.avatar.url} className='object-cover size-16 rounded-full' /> : <AvatarByName name={profile.name} size='2xl' />}
+                    <Image
+                        src={profile.avatar?.url}
+                        skeleton={<AvatarByName name={profile.name} size='2xl' />}
+                        className='object-cover size-16 rounded-full'
+                    />
                     <div className='flex flex-col'>
                         <Typography
                             as='h2'

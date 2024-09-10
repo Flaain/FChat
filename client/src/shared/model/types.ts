@@ -2,6 +2,7 @@ import { Session } from '@/entities/session/model/types';
 import { ModalConfig } from '../lib/contexts/modal/types';
 import { User } from '../lib/contexts/profile/types';
 import { MarkdownToJSX } from "markdown-to-jsx";
+import React from 'react';
 
 export enum FeedTypes {
     CONVERSATION = 'Conversation',
@@ -407,4 +408,12 @@ export interface Skin {
 export interface Sheet {
     cols: number;
     rows: number;
+}
+
+export interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+    skeleton?: React.ReactNode;
+}
+
+export interface PreAnimatedSkeletonProps extends React.HTMLAttributes<HTMLSpanElement> {
+    animate?: boolean;
 }

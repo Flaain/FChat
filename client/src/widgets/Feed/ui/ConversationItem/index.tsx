@@ -1,5 +1,7 @@
 import AvatarByName from '@/shared/ui/AvatarByName';
 import Typography from '@/shared/ui/Typography';
+import Image from '@/shared/ui/Image';
+import OnlineStatus from '@/shared/ui/OnlineStatus';
 import { cn } from '@/shared/lib/utils/cn';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { Verified } from 'lucide-react';
@@ -9,7 +11,9 @@ import { ConversationFeed, PRESENCE, PartOfCompilerUse } from '@/shared/model/ty
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 
 const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
-    const { state: { userId } } = useSession();
+    const {
+        state: { userId }
+    } = useSession();
     const { drafts } = useLayoutContext();
 
     const recipient = conversation.recipient;
@@ -31,13 +35,12 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
             >
                 {recipient.avatar ? (
                     <span className='relative w-[50px] h-[50px]'>
-                        <img
+                        <Image
                             src={recipient.avatar.url}
+                            skeleton={<AvatarByName name={recipient.name} size='lg' />}
                             className='object-cover min-w-[50px] max-w-[50px] h-[50px] rounded-full'
                         />
-                        {recipient.presence === PRESENCE.ONLINE && (
-                            <span className='absolute right-0 bottom-0 h-3 w-3 rounded-full bg-green-500 border-2 border-solid dark:border-primary-dark-50'></span>
-                        )}
+                        {recipient.presence === PRESENCE.ONLINE && <OnlineStatus />}
                     </span>
                 ) : (
                     <AvatarByName name={recipient.name} size='lg' isOnline={recipient.presence === PRESENCE.ONLINE} />

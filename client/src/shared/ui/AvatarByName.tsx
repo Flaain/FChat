@@ -2,6 +2,7 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../lib/utils/cn';
 import { AvatarByNameProps } from '../model/types';
 import { User } from 'lucide-react';
+import OnlineStatus from './OnlineStatus';
 
 const avatarVariants = cva(
     'flex flex-grow-0 flex-shrink-0 basis-auto justify-center items-center rounded-full dark:bg-primary-white bg-primary-dark-100 font-bold dark:text-primary-dark-200 text-primary-white',
@@ -45,9 +46,7 @@ const AvatarByName = ({ name, className, children, size, isOnline, ...rest }: Av
                     {lastNameInitial.toUpperCase()}
                 </>
             )}
-            {isOnline && (
-                <span className='absolute right-0 bottom-0 h-3 w-3 rounded-full bg-green-500 border-2 border-solid dark:border-primary-dark-50'></span>
-            )}
+            {isOnline && <OnlineStatus />}
         </span>
     );
 };

@@ -1,4 +1,5 @@
 import Typography from '@/shared/ui/Typography';
+import PreAnimatedSkeleton from '@/shared/ui/PreAnimatedSkeleton';
 import { cn } from '@/shared/lib/utils/cn';
 import { ConversationParticipant, UserFeed } from '@/shared/model/types';
 import { Verified } from 'lucide-react';
@@ -34,12 +35,12 @@ const ConversationSkeleton = () => {
                         className={cn('flex items-center w-full gap-5', index % 2 ? 'justify-end' : 'justify-start')}
                     >
                         {!(index % 2) && (
-                            <span className='self-end dark:bg-primary-dark-50 min-w-[50px] h-[50px] space-y-5 rounded-full relative before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-gray-200/10 before:to-transparent overflow-hidden isolate before:border-t before:border-primary-gray/30'></span>
+                            <PreAnimatedSkeleton className='self-end dark:bg-primary-dark-50/50 min-w-[50px] h-[50px] space-y-5 rounded-full' />
                         )}
-                        <span
+                        <PreAnimatedSkeleton
                             style={{ height: `${Math.floor(Math.random() * 101) + 35}px` }}
-                            className='box-border pl-5 pr-12 py-1 mt-2 max-w-[500px] flex items-end gap-3 self-start dark:bg-primary-dark-50 w-full space-y-5 rounded-xl relative before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-gray-200/10 before:to-transparent overflow-hidden isolate before:border-t before:border-primary-gray/30'
-                        ></span>
+                            className='dark:bg-primary-dark-50/50 box-border pl-5 pr-12 py-1 mt-2 w-full rounded-xl max-w-[500px] flex items-end gap-3 self-start'
+                        />
                     </li>
                 ))}
             </ul>

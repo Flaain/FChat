@@ -1,8 +1,10 @@
-import AvatarByName from "@/shared/ui/AvatarByName";
-import Typography from "@/shared/ui/Typography";
-import { useProfile } from "@/shared/lib/hooks/useProfile";
-import { cn } from "@/shared/lib/utils/cn";
-import { Verified } from "lucide-react";
+import AvatarByName from '@/shared/ui/AvatarByName';
+import Typography from '@/shared/ui/Typography';
+import PreAnimatedSkeleton from '@/shared/ui/PreAnimatedSkeleton';
+import { useProfile } from '@/shared/lib/hooks/useProfile';
+import { cn } from '@/shared/lib/utils/cn';
+import { Verified } from 'lucide-react';
+import Image from '@/shared/ui/Image';
 
 const LayoutSheetSkeleton = () => {
     const { profile } = useProfile();
@@ -10,7 +12,11 @@ const LayoutSheetSkeleton = () => {
     return (
         <div className='flex flex-col py-8 h-full'>
             <div className='flex flex-col gap-2 items-start px-4'>
-                {profile.avatar ? <img src={profile.avatar.url} className='size-[50px] rounded-full' /> : <AvatarByName name={profile.name} size='lg' />}
+                <Image
+                    src={profile.avatar?.url}
+                    skeleton={<AvatarByName name={profile.name} size='lg' />}
+                    className='size-[50px] rounded-full'
+                />
                 <Typography as='h2' size='lg' weight='medium' className={cn(profile.isOfficial && 'flex items-center')}>
                     {profile.name}
                     {profile.isOfficial && (
@@ -26,7 +32,7 @@ const LayoutSheetSkeleton = () => {
                         key={index}
                         className='flex first:my-4 first:py-1 first:border-y dark:first:border-primary-dark-50 first:border-primary-dark-200'
                     >
-                        <span className='dark:bg-primary-dark-50 w-full h-[30px] space-y-5 relative before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-gray-200/10 before:to-transparent overflow-hidden isolate before:border-t before:border-primary-gray/30'></span>
+                        <PreAnimatedSkeleton className='dark:bg-primary-dark-50 w-full h-[30px] space-y-5' />
                     </li>
                 ))}
             </ul>

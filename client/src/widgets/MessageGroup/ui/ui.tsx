@@ -1,5 +1,6 @@
 import Message from '@/entities/Message/ui/ui';
 import AvatarByName from '@/shared/ui/AvatarByName';
+import Image from '@/shared/ui/Image';
 import { MessageGroupProps } from '../model/types';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { cn } from '@/shared/lib/utils/cn';
@@ -12,12 +13,13 @@ const MessageGroup = ({ messages, isLastGroup, lastMessageRef, type }: MessageGr
 
     return (
         <li className={cn('flex items-end gap-3', isMessageFromMe ? 'self-end' : 'self-start')}>
-            {!isMessageFromMe &&
-                (sender.avatar ? (
-                    <img className='object-cover size-10 sticky bottom-0 rounded-full' src={sender.avatar.url} />
-                ) : (
-                    <AvatarByName name={sender.name} className='sticky bottom-0' />
-                ))}
+            {!isMessageFromMe && (
+                <Image
+                    src={sender.avatar?.url}
+                    skeleton={<AvatarByName name={sender.name} className='sticky bottom-0' />}
+                    className='object-cover size-10 sticky bottom-0 rounded-full'
+                />
+            )}
             <ul className='flex flex-col gap-1'>
                 {messages.map((message, index, array) => (
                     <Message

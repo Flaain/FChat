@@ -13,6 +13,7 @@ import { cn } from '@/shared/lib/utils/cn';
 import { ModalConfig } from '@/shared/lib/contexts/modal/types';
 import { SettingsProvider } from '@/widgets/Settings/lib/contexts/provider';
 import { CreateGroupProvider } from '@/features/CreateGroup/model/provider';
+import Image from '@/shared/ui/Image';
 
 const listIconStyle = 'dark:text-primary-white text-primary-dark-200 w-5 h-5';
 
@@ -65,7 +66,11 @@ const LayoutSheet = ({ setSheetOpen }: { setSheetOpen: React.Dispatch<React.SetS
     return (
         <div className='flex flex-col py-8 h-full'>
             <div className='flex flex-col gap-2 items-start px-4'>
-                {profile.avatar ? <img src={profile.avatar.url} className='object-cover size-[50px] rounded-full' /> : <AvatarByName name={profile.name} size='lg' />}
+                <Image
+                    src={profile.avatar?.url}
+                    skeleton={<AvatarByName name={profile.name} size='lg' />}
+                    className='object-cover size-[50px] rounded-full'
+                />
                 <Typography as='h2' size='lg' weight='medium' className={cn(profile.isOfficial && 'flex items-center')}>
                     {profile.name}
                     {profile.isOfficial && (
