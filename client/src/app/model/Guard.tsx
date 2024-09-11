@@ -7,12 +7,12 @@ const Guard = ({ type, children, fallback }: { type: 'auth' | 'guest'; children:
 
     if (isAuthInProgress) return fallback;
 
-    const actions: Record<typeof type, React.ReactNode> = {
+    const guards: Record<typeof type, React.ReactNode> = {
         auth: isAuthorized ? <Navigate to={routerList.HOME} replace /> : children,
         guest: isAuthorized ? children : <Navigate to={routerList.AUTH} replace />
     }
     
-    return actions[type];
+    return guards[type];
 };
 
 export default Guard;
