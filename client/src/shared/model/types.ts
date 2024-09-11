@@ -1,8 +1,7 @@
-import { Session } from '@/entities/session/model/types';
-import { ModalConfig } from '../lib/contexts/modal/types';
-import { User } from '../lib/contexts/profile/types';
-import { MarkdownToJSX } from "markdown-to-jsx";
 import React from 'react';
+import { Session } from '@/entities/session/model/types';
+import { MarkdownToJSX } from "markdown-to-jsx";
+import { User } from '@/entities/profile/model/types';
 
 export enum FeedTypes {
     CONVERSATION = 'Conversation',
@@ -27,7 +26,6 @@ export enum PartOfCompilerUse {
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams; signal?: AbortSignal };
-export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
 export type MessageFormState = 'send' | 'edit' | 'reply';
 
 export interface CompilerOptions extends MarkdownToJSX.Options {
@@ -125,11 +123,6 @@ export interface Group {
     updatedAt: string;
 }
 
-export interface ModalProps extends Omit<ModalConfig, 'content'> {
-    closeHandler: () => void;
-    children: React.ReactNode;
-}
-
 export interface SheetProps {
     children: React.ReactNode;
     closeHandler: () => void;
@@ -182,12 +175,6 @@ export interface SearchUser {
     isOfficial: boolean;
     presence: PRESENCE;
     login: string;
-}
-
-export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
-    children: React.ReactNode;
-    closeHandler: () => void;
-    size?: ModalSize;
 }
 
 export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -416,4 +403,19 @@ export interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 
 export interface PreAnimatedSkeletonProps extends React.HTMLAttributes<HTMLSpanElement> {
     animate?: boolean;
+}
+
+export type Listeners = Map<keyof GlobalEventHandlersEventMap, Set<(event: GlobalEventHandlersEventMap[keyof GlobalEventHandlersEventMap]) => void>>
+
+export interface DomEventsStore {
+    listeners: Map<any, any>;
+    addEventListener<E extends keyof GlobalEventHandlersEventMap>(type: E, listener: (event: GlobalEventHandlersEventMap[E]) => void): () => void;
+}
+
+export interface LayoutStore {
+    drafts: Map<string, Draft>;
+    isSheetOpen: boolean;
+    onOpenSheet: () => void;
+    onCloseSheet: () => void;
+    setDrafts: (cb: (drafts: Map<string, Draft>) => Map<string, Draft>) => void;
 }

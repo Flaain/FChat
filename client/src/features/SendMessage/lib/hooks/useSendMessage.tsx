@@ -43,7 +43,7 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
         const trimmedValue = value.trim();
         
         onChange?.(trimmedValue);
-        setValue(!trimmedValue.length ? '' : value);
+        setValue(!trimmedValue.length ? '' : value.normalize('NFC').replace(/[\u0300-\u036f]/g, ""));
     }, [onChange]);
 
     const setDefaultState = React.useCallback(() => {
@@ -56,24 +56,23 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
         });
 
         setValue('');
+
+        textareaRef.current?.focus();
     }, []);
 
     const handleDeleteConversationMessage = React.useCallback(async () => {
         try {
-            const messageId = currentDraft?.selectedMessage?._id;
-            
-            if (!messageId) throw new Error('Please select a message to delete');
-            
             setIsAsyncActionLoading(true);
             
-            await api.message.delete({ messageId, recipientId: queryId });
+            await api.message.delete({ messageId: currentDraft?.selectedMessage?._id!, recipientId: queryId });
 
             toast.success('Message deleted', { position: 'top-center' });
         } catch (error) {
             console.error(error);
+            textareaRef.current?.focus();
             toast.error('Cannot delete message', { position: 'top-center' }) 
         } finally {
-            setDefaultState();
+            closeModal();
             setIsAsyncActionLoading(false);
         }
     }, [currentDraft, queryId]);
@@ -195,7 +194,6 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
             console.error(error);
         } finally {
             setIsLoading(false);
-            setDefaultState();
             setTimeout(() => textareaRef.current?.focus(), 0); // kludge, .focus() doesn't work cuz of disabled textarea on loading
         }
     };

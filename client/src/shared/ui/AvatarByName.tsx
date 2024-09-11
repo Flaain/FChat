@@ -2,7 +2,7 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../lib/utils/cn';
 import { AvatarByNameProps } from '../model/types';
 import { User } from 'lucide-react';
-import OnlineStatus from './OnlineStatus';
+import OnlineStatus from './ProfileIndicator';
 
 const avatarVariants = cva(
     'flex flex-grow-0 flex-shrink-0 basis-auto justify-center items-center rounded-full dark:bg-primary-white bg-primary-dark-100 font-bold dark:text-primary-dark-200 text-primary-white',

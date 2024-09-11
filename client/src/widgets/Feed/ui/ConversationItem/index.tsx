@@ -1,9 +1,8 @@
 import AvatarByName from '@/shared/ui/AvatarByName';
 import Typography from '@/shared/ui/Typography';
 import Image from '@/shared/ui/Image';
-import OnlineStatus from '@/shared/ui/OnlineStatus';
+import ProfileIndicator from '@/shared/ui/ProfileIndicator';
 import { cn } from '@/shared/lib/utils/cn';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
@@ -11,9 +10,6 @@ import { ConversationFeed, PRESENCE, PartOfCompilerUse } from '@/shared/model/ty
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 
 const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
-    const {
-        state: { userId }
-    } = useSession();
     const { drafts } = useLayoutContext();
 
     const recipient = conversation.recipient;
@@ -38,9 +34,9 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                         <Image
                             src={recipient.avatar.url}
                             skeleton={<AvatarByName name={recipient.name} size='lg' />}
-                            className='object-cover min-w-[50px] max-w-[50px] h-[50px] rounded-full'
+                            className='object-cover object-center min-w-[50px] max-w-[50px] h-[50px] rounded-full'
                         />
-                        {recipient.presence === PRESENCE.ONLINE && <OnlineStatus />}
+                        {recipient.presence === PRESENCE.ONLINE && <ProfileIndicator />}
                     </span>
                 ) : (
                     <AvatarByName name={recipient.name} size='lg' isOnline={recipient.presence === PRESENCE.ONLINE} />
@@ -69,21 +65,13 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
                         !!conversation.lastMessage && (
                             <div className='flex items-center w-full gap-5'>
                                 <Typography className='break-all dark:text-primary-white/30 text-primary-gray line-clamp-1'>
-                                    {markdownCompiler(
-                                        conversation.lastMessage.sender._id === userId
-                                            ? `You: ${conversation.lastMessage.text}`
-                                            : conversation.lastMessage.text,
-                                        PartOfCompilerUse.FEED
-                                    )}
+                                    {markdownCompiler(conversation.lastMessage.text, PartOfCompilerUse.FEED)}
                                 </Typography>
                                 <Typography className='ml-auto' variant='secondary'>
-                                    {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(
-                                        navigator.language,
-                                        {
-                                            hour: 'numeric',
-                                            minute: 'numeric'
-                                        }
-                                    )}
+                                    {new Date(conversation.lastMessage.createdAt).toLocaleTimeString(navigator.language, {
+                                        hour: 'numeric',
+                                        minute: 'numeric'
+                                    })}
                                 </Typography>
                             </div>
                         )

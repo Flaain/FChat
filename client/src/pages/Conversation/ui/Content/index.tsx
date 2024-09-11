@@ -7,9 +7,9 @@ import AvatarByName from "@/shared/ui/AvatarByName";
 import RecipientDetails from "@/widgets/RecipientDetails/ui/ui";
 import ConversationDDM from "@/features/ConversationDDM/ui/ui";
 import SendMessage from "@/features/SendMessage/ui/ui";
+import Image from "@/shared/ui/Image";
 import { FeedTypes } from "@/shared/model/types";
 import { useConversationContext } from "../../lib/hooks/useConversationContext";
-import Image from "@/shared/ui/Image";
 
 const Content = () => {
     const {

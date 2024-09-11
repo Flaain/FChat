@@ -81,7 +81,7 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                                 <Typography
                                     as='p'
                                     className={cn(
-                                        'break-all',
+                                        'break-all overflow-y-hidden',
                                         isMessageFromMe ? 'dark:text-primary-dark-200' : 'text-primary-white'
                                     )}
                                 >

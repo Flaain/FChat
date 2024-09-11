@@ -1,6 +1,7 @@
 import React from 'react';
 import { IMessage } from '@/shared/model/types';
 import { UseMEssagesListParams } from '../../model/types';
+import { getScrollBottom } from '@/shared/lib/utils/getScrollBottom';
 
 export const useMessagesList = ({ messages, getPreviousMessages, setShowAnchor, canFetch, listRef }: UseMEssagesListParams) => {
     const lastMessageRef = React.useRef<HTMLLIElement | null>(null);
@@ -18,11 +19,10 @@ export const useMessagesList = ({ messages, getPreviousMessages, setShowAnchor, 
 
         const handleScrollContainer = () => {
             const { scrollTop } = listRef.current as HTMLUListElement;
-            const scrollBottom = listRef.current!.scrollHeight - listRef.current!.scrollTop - listRef.current!.clientHeight;
 
             canFetch && !scrollTop && getPreviousMessages();
 
-            scrollBottom >= 300 ? setShowAnchor(true) : setShowAnchor(false);
+            getScrollBottom(listRef.current!) >= 300 ? setShowAnchor(true) : setShowAnchor(false);
         };
 
         listRef.current.addEventListener('scroll', handleScrollContainer);
@@ -38,10 +38,10 @@ export const useMessagesList = ({ messages, getPreviousMessages, setShowAnchor, 
 
     React.useEffect(() => {
         if (!listRef.current || !lastMessageRef.current) return;
+        
+        const scrollBottom = getScrollBottom(listRef.current!);
 
-        const scrollBottom = listRef.current.scrollHeight - listRef.current.scrollTop - listRef.current.clientHeight;
-
-        scrollBottom <= 100 && lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+        scrollBottom <= 100 ? lastMessageRef.current.scrollIntoView({ behavior: 'smooth' }) : scrollBottom >= 300 && setShowAnchor(true);
     }, [messages]);
 
     return { lastMessageRef, listRef, groupedMessages };

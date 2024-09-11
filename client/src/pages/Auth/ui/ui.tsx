@@ -1,9 +1,9 @@
 import SigninForm from '@/widgets/SigninForm/ui/ui';
 import SignupForm from '@/widgets/SignupForm/ui/ui';
 import WelcomeStage from '@/widgets/WelcomeStage/ui/ui';
-import { useAuth } from '@/shared/lib/hooks/useAuth';
 import { Toaster } from 'sonner';
 import { SigninProvider } from '@/widgets/SigninForm/model/provider';
+import { useAuthStore } from '../model/store';
 
 const stages = {
     welcome: <WelcomeStage />,
@@ -16,7 +16,7 @@ const stages = {
 };
 
 const Auth = () => {
-    const { authStage } = useAuth();
+    const { authStage } = useAuthStore();
 
     return (
         <section className='w-full h-screen flex items-center px-5 justify-center bg-primary-dark-200'>

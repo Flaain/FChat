@@ -1,7 +1,7 @@
 import { API } from './API';
-import { Avatar, Profile } from '../lib/contexts/profile/types';
 import { BasicAPIResponse, SearchUser, UserPasswordParams } from '../model/types';
 import { AppException } from './error';
+import { Profile } from '@/app/providers/profile/types';
 
 export class UserAPI extends API {
     changePassword = async ({ type, ...body }: UserPasswordParams) => {

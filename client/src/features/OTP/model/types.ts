@@ -1,10 +1,24 @@
 import React from 'react';
-import { OtpType } from '@/shared/lib/contexts/otp/types';
+
+export enum OtpType {
+    EMAIL_VERIFICATION = 'email_verification',
+    PASSWORD_RESET = 'password_reset'
+}
+
+export interface Otp {
+    targetEmail: string;
+    retryDelay: number;
+    type: OtpType;
+}
+
+export interface OtpStore {
+    otp: Otp;
+    isResending: boolean;
+    setOtp: (otp: Partial<Otp>) => void;
+    onResend: () => void;
+}
 
 export interface OtpProps extends Omit<React.HTMLAttributes<HTMLInputElement>, 'onChange'> {
-    email: string;
-    type?: OtpType;
-    loading?: boolean;
-    onResend?: (retryDelay: number) => void;
+    disabled?: boolean;
     onComplete: (event?: React.FormEvent<HTMLFormElement>) => void;
 }

@@ -1,13 +1,6 @@
-import React from "react";
-
 export type Theme = "light" | "dark";
 
-export interface ThemeContextProps {
+export interface ThemeStore {
     theme: Theme;
-    setTheme: React.Dispatch<React.SetStateAction<Theme>>;
-}
-
-export interface ThemeProviderProps {
-    defaultTheme?: Theme;
-    children: React.ReactNode;
+    setTheme: (theme: Theme) => void;
 }

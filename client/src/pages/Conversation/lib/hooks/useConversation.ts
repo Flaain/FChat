@@ -8,6 +8,7 @@ import { AppException } from '@/shared/api/error';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { getRelativeTimeString } from '@/shared/lib/utils/getRelativeTimeString';
 import { useDomEvents } from '@/shared/lib/hooks/useDomEvents';
+import { getScrollBottom } from '@/shared/lib/utils/getScrollBottom';
 
 export const useConversation = () => {
     const { id: recipientId } = useParams<{ id: string }>();
@@ -51,7 +52,7 @@ export const useConversation = () => {
     };
     
     const handleAnchorClick = React.useCallback(() => {
-        listRef.current?.scrollTo({ left: 0, top: listRef.current.scrollHeight - listRef.current.clientHeight, behavior: 'smooth' });
+        listRef.current?.scrollTo({ left: 0, top: getScrollBottom(listRef.current!), behavior: 'smooth' });
     }, []);
 
     const getConversationDescription = (shouldDisplayTypingStatus = true) => {
