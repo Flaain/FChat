@@ -1,15 +1,15 @@
 import React from 'react';
 import Typography from '@/shared/ui/Typography';
-import MessageContextMenu from './MessageContextMenu';
 import { cn } from '@/shared/lib/utils/cn';
+import { MessageContextMenu } from './ContextMenu';
 import { Check, CheckCheck } from 'lucide-react';
 import { ContextMenu, ContextMenuTrigger } from '@/shared/ui/context-menu';
 import { MessageProps } from '../model/types';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 import { PartOfCompilerUse } from '@/shared/model/types';
-import { getBubblesStyles } from '../lib/helpers/getBubblesStyles';
+import { getBubblesStyles } from '../lib/getBubblesStyles';
 
-const Message = React.forwardRef<HTMLLIElement, MessageProps>(
+export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
     ({ message, isFirst, isLast, isMessageFromMe, className, ...rest }, ref) => {
         const [isContextMenuOpen, setIsContextMenuOpen] = React.useState(false);
 
@@ -46,7 +46,7 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                         <div
                             className={cn(
                                 'py-2 px-3 relative max-w-[500px]',
-                                replyTo === null || (!!replyTo && 'flex flex-col gap-2'),
+                                (replyTo === null || !!replyTo) && 'flex flex-col gap-2',
                                 getBubblesStyles({
                                     isFirst,
                                     isLast,
@@ -62,7 +62,11 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                                         'line-clamp-1 dark:text-primary-blue text-xs flex flex-col py-1 px-2 w-full rounded bg-primary-blue/10 border-l-4 border-solid border-primary-blue'
                                     )}
                                 >
-                                    {replyTo === null ? 'Deleted Message' : replyTo.sender.name}
+                                    {replyTo === null
+                                        ? 'Deleted Message'
+                                        : replyTo.refPath === 'User'
+                                        ? replyTo.sender.name
+                                        : replyTo.sender.name || replyTo.sender.user.name}
                                     {!!replyTo && (
                                         <Typography
                                             className={cn(
@@ -113,10 +117,14 @@ const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                         </div>
                     </li>
                 </ContextMenuTrigger>
-                {isContextMenuOpen && <MessageContextMenu closeContextMenu={() => setIsContextMenuOpen(false)} message={message} isMessageFromMe={isMessageFromMe} />}
+                {isContextMenuOpen && (
+                    <MessageContextMenu
+                        message={message}
+                        isMessageFromMe={isMessageFromMe}
+                        onClose={() => setIsContextMenuOpen(false)}
+                    />
+                )}
             </ContextMenu>
         );
     }
 );
-
-export default Message;

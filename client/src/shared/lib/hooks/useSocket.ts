@@ -1,32 +1,4 @@
 import React from 'react';
-import { PRESENCE, USER_EVENTS } from '@/shared/model/types';
-import { Socket, io } from 'socket.io-client';
+import { SocketContext } from '../providers/socket/context';
 
-export const useSocket = () => {
-    const [socket, setSocket] = React.useState<Socket | null>(null);
-    const [isConnected, setIsConnected] = React.useState(false);
-
-    React.useEffect(() => {
-        const socket = io(import.meta.env.VITE_BASE_URL, {
-            withCredentials: true,
-        });
-
-        socket.on('connect', () => {
-            setIsConnected(true);
-
-            socket.emit(USER_EVENTS.PRESENCE, { presence: PRESENCE.ONLINE });
-        });
-
-        socket.on('disconnect', () => {
-            setIsConnected(false);
-        });
-
-        setSocket(socket);
-
-        return () => {
-            socket.disconnect();
-        };
-    }, []);
-
-    return { socket, isConnected };
-};
+export const useSocket = () => React.useContext(SocketContext);

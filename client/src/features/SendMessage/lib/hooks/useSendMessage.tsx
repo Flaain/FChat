@@ -200,9 +200,7 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
 
     return {
         isLoading,
-        textareaRef,
         value,
-        currentDraft,
         isEmojiPickerOpen,
         setIsEmojiPickerOpen,
         onKeyDown,

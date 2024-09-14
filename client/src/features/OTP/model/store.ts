@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { OtpStore } from './types';
-import { api } from '@/shared/api';
 import { toast } from 'sonner';
+import { otpAPI } from '../api';
 
 export const useOtp = create<OtpStore>((set, get) => ({
     otp: null!,
@@ -11,7 +11,7 @@ export const useOtp = create<OtpStore>((set, get) => ({
             set({ isResending: true });
 
             const { otp } = get();
-            const { data: { retryDelay } } = await api.otp.create({ email: otp.targetEmail, type: otp.type });
+            const { data: { retryDelay } } = await otpAPI.create({ email: otp.targetEmail, type: otp.type });
 
             set((prevState) => ({ otp: { ...prevState.otp, retryDelay } }));
         } catch (error) {

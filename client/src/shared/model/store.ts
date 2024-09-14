@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { DomEventsStore, LayoutStore } from './types';
+import { DomEventsStore, LayoutStore, SendMessageStore } from './types';
+import { createRef } from 'react';
 
 export const useDomEvents = create<DomEventsStore>((set) => ({
     listeners: new Map(),
@@ -31,4 +32,10 @@ export const useLayout = create<LayoutStore>((set) => ({
     onOpenSheet: () => set({ isSheetOpen: true }),
     onCloseSheet: () => set({ isSheetOpen: false }),
     setDrafts: (cb) => set((prevState) => ({ drafts: cb(prevState.drafts) })),
+}));
+
+export const useSendMessage = create<SendMessageStore>((set) => ({
+    showAnchor: false,
+    ref: createRef<HTMLTextAreaElement>(),
+    changeAnchorVisibility: (value) => set({ showAnchor: value })
 }));

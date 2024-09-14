@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message } from './schemas/message.schema';
 import { Model, Types, isValidObjectId } from 'mongoose';
-import { DeleteMessageType, EditMessageParams, MessageDocument, SendMessageParams } from './types';
+import { DeleteMessageType, EditMessageParams, MessageDocument, MessageRefPath, SendMessageParams } from './types';
 import { ConversationService } from '../conversation/conversation.service';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { BaseService } from 'src/utils/services/base/base.service';
@@ -68,7 +68,7 @@ export class MessageService extends BaseService<MessageDocument, Message> {
             ctx.conversation = await this.conversationService.create({ participants: [recipient._id, initiator._id] });
         };
 
-        const newMessage = await this.create({ sender: initiator._id, text: message.trim() });
+        const newMessage = await this.create({ sender: initiator._id, text: message.trim(), refPath: MessageRefPath.USER });
 
         const updateQuery = { lastMessage: newMessage._id, lastMessageSentAt: newMessage.createdAt }
         
@@ -119,7 +119,7 @@ export class MessageService extends BaseService<MessageDocument, Message> {
 
         if (!conversation) throw new AppException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
 
-        const newMessage = await this.create({ sender: initiator._id, text: message.trim(), replyTo: replyMessage._id });
+        const newMessage = await this.create({ sender: initiator._id, text: message.trim(), replyTo: replyMessage._id, refPath: MessageRefPath.USER });
 
         const { 0: populatedMessage } = await Promise.all([
             newMessage.populate([

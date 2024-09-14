@@ -8,7 +8,7 @@ import RecipientDetails from "@/widgets/RecipientDetails/ui/ui";
 import ConversationDDM from "@/features/ConversationDDM/ui/ui";
 import SendMessage from "@/features/SendMessage/ui/ui";
 import Image from "@/shared/ui/Image";
-import { FeedTypes } from "@/shared/model/types";
+import { ChatType, FeedTypes } from "@/shared/model/types";
 import { useConversationContext } from "../../lib/hooks/useConversationContext";
 
 const Content = () => {
@@ -40,12 +40,12 @@ const Content = () => {
                 {data.conversation.messages.length ? (
                     <MessagesList
                         listRef={listRef}
-                        type={FeedTypes.CONVERSATION}
                         messages={data.conversation.messages}
                         getPreviousMessages={getPreviousMessages}
                         isFetchingPreviousMessages={isPreviousMessagesLoading}
                         nextCursor={data.nextCursor}
                         canFetch={!isPreviousMessagesLoading && !!data.nextCursor}
+                        isContextActionsBlocked={data.conversation.isInitiatorBlocked || data.conversation.isRecipientBlocked} // TODO: think about how to remove this props drilling
                         setShowAnchor={setShowAnchor}
                     />
                 ) : (

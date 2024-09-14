@@ -1,29 +1,14 @@
-import MessageGroup from '@/widgets/MessageGroup/ui/ui';
+import MessageGroup from '@/features/MessageGroup/ui/ui';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { MessagesListProps } from '../model/types';
-import { useMessagesList } from '../lib/hooks/useMessagesList';
+import { useMessagesList } from '../lib/useMessagesList';
 
-const MessagesList = ({
-    messages,
-    canFetch,
-    getPreviousMessages,
-    setShowAnchor,
-    nextCursor,
-    isFetchingPreviousMessages,
-    type,
-    listRef
-}: MessagesListProps) => {
-    const { groupedMessages, lastMessageRef } = useMessagesList({
-        messages,
-        canFetch,
-        getPreviousMessages,
-        setShowAnchor,
-        listRef
-    });
+const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCursor, isContextActionsBlocked, isFetchingPreviousMessages }: MessagesListProps) => {
+    const { groupedMessages, lastMessageRef, ref } = useMessagesList({ messages, canFetch, getPreviousMessages });
     
     return (
-        <ul ref={listRef} className='relative flex flex-col flex-1 w-full px-5 mb-auto gap-5 overflow-auto outline-none'>
+        <ul ref={ref} className='relative flex flex-col flex-1 w-full px-5 mb-auto gap-5 overflow-auto outline-none'>
             {nextCursor && (
                 <li className='flex justify-center items-center'>
                     <Button
@@ -42,7 +27,7 @@ const MessagesList = ({
             {groupedMessages.map((messages, index, array) => (
                 <MessageGroup
                     key={messages[0]._id}
-                    type={type}
+                    isContextActionsBlocked={isContextActionsBlocked}
                     messages={messages}
                     isLastGroup={index === array.length - 1}
                     lastMessageRef={lastMessageRef}

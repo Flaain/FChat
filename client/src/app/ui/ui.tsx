@@ -1,10 +1,9 @@
 import React from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from '../model/router';
-import { api } from '@/shared/api';
-import { useTheme } from '@/entities/theme/model/store';
-import { useProfile } from '../providers/profile/store';
-import { useSession } from '@/entities/session/model/store';
+import { sessionApi, useSession } from '@/entities/session';
+import { useProfile } from '@/entities/profile';
+import { useTheme } from '@/entities/theme';
 
 const App = () => {
     const { theme } = useTheme();
@@ -29,10 +28,10 @@ const App = () => {
             resetProfile();
         };
 
-        api.user.subscribeRefreshError(onRefreshError);
+        sessionApi.subscribeRefreshError(onRefreshError);
 
         return () => {
-            api.user.unsubscribeRefreshError(onRefreshError);
+            sessionApi.unsubscribeRefreshError(onRefreshError);
         };
     }, []);
 

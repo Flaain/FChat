@@ -1,5 +1,5 @@
 import { Button } from '@/shared/ui/Button';
-import { useChangePassword } from '../lib/hooks/useChangePassword';
+import { useChangePassword } from '../lib/useChangePassword';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Input } from '@/shared/ui/Input';
 

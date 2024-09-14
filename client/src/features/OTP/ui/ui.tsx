@@ -8,7 +8,7 @@ import { OtpProps } from '../model/types';
 import { LoaderCircle } from 'lucide-react';
 import { useOtp } from '../model/store';
 
-const OTP = React.forwardRef<HTMLInputElement, OtpProps>(({ onComplete, disabled, ...rest }, ref) => {
+export const OTP = React.forwardRef<HTMLInputElement, OtpProps>(({ onComplete, disabled, ...rest }, ref) => {
     const { isResending, otp: { retryDelay }, setOtp, onResend } = useOtp();
 
     const timerRef = React.useRef<NodeJS.Timeout>();
@@ -69,5 +69,3 @@ const OTP = React.forwardRef<HTMLInputElement, OtpProps>(({ onComplete, disabled
         );
     }
 );
-
-export default OTP;

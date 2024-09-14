@@ -1,4 +1,4 @@
-import ConversationSkeleton from './Skeletons/ConversationSkeleton';
+import ConversationSkeleton from './Skeleton';
 import OutletError from '@/shared/ui/OutletError';
 import Content from './Content';
 import { useConversationContext } from '../lib/hooks/useConversationContext';
@@ -6,7 +6,7 @@ import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { ConversationStatuses } from '../model/types';
 
-const Conversation = () => {
+export const Conversation = () => {
     const { refetch, error, status, isRefetching } = useConversationContext();
 
     const components: Record<ConversationStatuses, React.ReactNode> = {
@@ -27,5 +27,3 @@ const Conversation = () => {
 
     return components[status];
 };
-
-export default Conversation;

@@ -9,6 +9,11 @@ export enum FeedTypes {
     USER = 'User'
 }
 
+export enum ChatType {
+    CONVERSATION = 'conversation',
+    GROUP = 'group',
+}
+
 export enum OutletDetailsTypes {
     EMAIL = 'email',
     PHONE = 'phone',
@@ -75,18 +80,6 @@ export interface IAppException {
     headers: Record<string, string>;
     errors?: Array<{ path: string; message: string }>;
     errorCode?: AppExceptionCode;
-}
-
-export interface IMessage {
-    _id: string;
-    sender: ConversationParticipant;
-    hasBeenRead: boolean;
-    hasBeenEdited: boolean;
-    text: string;
-    replyTo?: Pick<IMessage, '_id' | 'text'> & { sender: Pick<ConversationParticipant, 'name'> } | null;
-    createdAt: string;
-    updatedAt: string;
-    sendingInProgress?: boolean;
 }
 
 export interface GroupParticipant {
@@ -271,24 +264,9 @@ export type UserCheckParams =
     | { type: UserCheckType.EMAIL; email: string }
     | { type: UserCheckType.LOGIN; login: string };
 
-export enum ActionPasswordType {
-    SET = 'set',
-    CHECK = 'check'
-}
-
-export type UserPasswordParams =
-    | { type: ActionPasswordType.SET; currentPassword: string; newPassword: string }
-    | { type: ActionPasswordType.CHECK; currentPassword: string };
-
 export interface GetConversation {
     conversation: Pick<Conversation, '_id' | 'recipient' | 'messages' | 'createdAt'>;
     nextCursor: string;
-}
-
-export interface DeleteMessageRes {
-    isLastMessage: boolean;
-    lastMessage: IMessage;
-    lastMessageSentAt: string;
 }
 
 export interface GetSessionsReturn {
@@ -418,4 +396,10 @@ export interface LayoutStore {
     onOpenSheet: () => void;
     onCloseSheet: () => void;
     setDrafts: (cb: (drafts: Map<string, Draft>) => Map<string, Draft>) => void;
+}
+
+export interface SendMessageStore {
+    showAnchor: boolean;
+    changeAnchorVisibility: (value: boolean) => void;
+    ref: React.RefObject<HTMLTextAreaElement>;
 }

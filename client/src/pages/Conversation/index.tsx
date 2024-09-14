@@ -1,5 +1,5 @@
 import React from 'react';
-import ConversationSkeleton from './ui/Skeletons/ConversationSkeleton';
+import ConversationSkeleton from './ui/Skeleton';
 import OutletError from '@/shared/ui/OutletError';
 import { routerList } from '@/shared/constants';
 import { RouteObject } from 'react-router-dom';

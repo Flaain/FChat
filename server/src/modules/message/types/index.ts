@@ -6,6 +6,11 @@ import { MessageEditDTO } from '../dtos/message.edit.dto';
 import { RequestWithUser } from "src/utils/types";
 import { UserDocument } from "src/modules/user/types";
 
+export enum MessageRefPath {
+    USER = 'User',
+    PARTICIPANT = 'Participant'
+}
+
 export interface IMessage {
     _id: Types.ObjectId;
     sender: Types.ObjectId
