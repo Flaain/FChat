@@ -7,16 +7,17 @@ import { UseFormReturn } from 'react-hook-form';
 export type CreateGroupType = z.infer<typeof createGroupSchema>;
 export type CreateGroupParams = Omit<z.infer<typeof createGroupSchema>, 'username'> & { participants: Array<string> };
 
-export interface CreateGroupContextProps {
+export interface CreateGroupStore {
     form: UseFormReturn<CreateGroupType>;
     step: number;
     selectedUsers: Map<string, SearchUser>;
     searchedUsers: Array<SearchUser>;
-    isNextButtonDisabled: boolean;
+    isNextButtonDisabled: () => boolean;
     onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
     handleSelect: (user: SearchUser) => void;
     handleRemove: (id: string) => void;
     handleSearchUser: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    handleSearchDelay: (value: string) => void;
     handleBack: () => void;
 }
 

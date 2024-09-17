@@ -1,5 +1,5 @@
 import AvatarByName from '@/shared/ui/AvatarByName';
-import Typography from '@/shared/ui/Typography';
+import { Typography } from '@/shared/ui/Typography';
 import EditName from '@/features/EditName/ui/ui';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { useProfile } from '@/shared/lib/hooks/useProfile';

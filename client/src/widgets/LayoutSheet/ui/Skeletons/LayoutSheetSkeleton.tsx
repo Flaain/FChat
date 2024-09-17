@@ -1,10 +1,10 @@
-import AvatarByName from '@/shared/ui/AvatarByName';
-import Typography from '@/shared/ui/Typography';
-import PreAnimatedSkeleton from '@/shared/ui/PreAnimatedSkeleton';
+import { AvatarByName } from '@/shared/ui/AvatarByName';
+import { Typography } from '@/shared/ui/Typography';
+import { PreAnimatedSkeleton } from '@/shared/ui/PreAnimatedSkeleton';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { cn } from '@/shared/lib/utils/cn';
 import { Verified } from 'lucide-react';
-import Image from '@/shared/ui/Image';
+import { Image } from '@/shared/ui/Image';
 
 const LayoutSheetSkeleton = () => {
     const { profile } = useProfile();

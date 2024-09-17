@@ -1,6 +1,5 @@
 import React from "react";
 import { useSession } from "@/entities/session/lib/hooks/useSession";
-import { SessionTypes } from "@/entities/session/model/types";
 import { api } from "@/shared/api";
 import { useProfile } from "@/shared/lib/hooks/useProfile";
 import { ConversationFeed, FeedItem, FeedTypes, GroupFeed, UserFeed, WithMeta } from "@/shared/model/types";
@@ -61,7 +60,6 @@ export const useSidebar = () => {
         await api.user.logout();
 
         setProfile(undefined!);
-        dispatch({ type: SessionTypes.SET_ON_LOGOUT });
     }, []);
 
     const handleSearch = React.useCallback(({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {

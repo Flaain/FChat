@@ -1,6 +1,6 @@
 import React from 'react';
 
-const OutletContainer = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
+export const OutletContainer = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
     return (
         <section
             ref={ref}
@@ -10,5 +10,3 @@ const OutletContainer = React.forwardRef<HTMLDivElement, { children: React.React
         </section>
     );
 });
-
-export default OutletContainer;

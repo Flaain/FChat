@@ -1,8 +1,8 @@
-import Typography from './Typography';
 import { Link, LucideIcon, Mail, Phone, Info, AtSign } from 'lucide-react';
 import { Button } from './Button';
 import { toast } from 'sonner';
 import { OutletDetailsButtonProps, OutletDetailsTypes } from '../model/types';
+import { Typography } from './Typography';
 
 const toastTitle: Record<OutletDetailsTypes, string> = {
     email: 'Email copied to clipboard',
@@ -20,7 +20,7 @@ const iconMap: Record<OutletDetailsTypes, LucideIcon> = {
     login: AtSign
 }
 
-const OutletDetailsButton = ({ data, type }: OutletDetailsButtonProps) => {
+export const OutletDetailsButton = ({ data, type }: OutletDetailsButtonProps) => {
     const Icon = iconMap[type];
 
     const onCopyToClipboard = () => {
@@ -41,5 +41,3 @@ const OutletDetailsButton = ({ data, type }: OutletDetailsButtonProps) => {
         </Button>
     );
 };
-
-export default OutletDetailsButton;

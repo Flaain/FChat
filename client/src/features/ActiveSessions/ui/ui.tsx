@@ -1,20 +1,23 @@
-import Typography from '@/shared/ui/Typography';
-import ActiveSessionsSkeleton from './Skeletons/ActiveSessionsSkeleton';
-import Session from '@/entities/session/ui/ui';
-import Confirm from '@/widgets/Confirm/ui/ui';
-import { useActiveSessions } from '../lib/hooks/useActiveSessions';
+import { Typography } from '@/shared/ui/Typography';
+import { ActiveSessionsSkeleton } from './Skeletons/ActiveSessionsSkeleton';
+import { useActiveSessions } from '../lib/useActiveSessions';
 import { Button } from '@/shared/ui/Button';
 import { Hand, Loader2 } from 'lucide-react';
-import { useModal } from '@/shared/lib/hooks/useModal';
+import { Session } from '@/entities/session/ui/ui';
+import { useModal } from '@/shared/lib/providers/modal';
+import { Confirm } from '@/shared/ui/Confirm';
 
-const ActiveSessions = () => {
+export const ActiveSessions = () => {
     const { sessions, isLoading, isTerminating, handleTerimanteSessions, handleDropSession } = useActiveSessions();
-    const { openModal, closeModal } = useModal();
+    const { onCloseModal, onOpenModal } = useModal((state) => ({
+        onCloseModal: state.onCloseModal,
+        onOpenModal: state.onOpenModal
+    }));
 
     if (isLoading) return <ActiveSessionsSkeleton />;
 
     const onConfirm = () => {
-        closeModal();
+        onCloseModal();
         handleTerimanteSessions();
     }
 
@@ -30,13 +33,13 @@ const ActiveSessions = () => {
                         <>
                             <Button
                                 onClick={() =>
-                                    openModal({
+                                    onOpenModal({
                                         withHeader: false,
                                         bodyClassName: 'max-w-[350px] p-5 h-auto',
                                         content: (
                                             <Confirm
                                                 text='Are you sure you want to terminate all other sessions?'
-                                                onCancel={() => closeModal()}
+                                                onCancel={onCloseModal}
                                                 onConfirm={onConfirm}
                                             />
                                         )
@@ -75,5 +78,3 @@ const ActiveSessions = () => {
         </div>
     );
 };
-
-export default ActiveSessions;

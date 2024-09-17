@@ -1,36 +1,8 @@
-import { PRESENCE } from "@/shared/model/types";
-
-export interface User {
-    _id: string;
-    name: string;
-    login: string;
-    email: string;
-    presence: PRESENCE;
-    status?: string;
-    avatar?: Avatar;
-    lastSeenAt: string;
-    isOfficial: boolean;
-    isPrivate: boolean;
-    isDeleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface Avatar {
-    _id: string;
-    url: string;
-}
-
-export interface DataWithCursor<T> {
-    data: T,
-    nextCursor: string | null;
-}
-
-export interface Profile extends User {}
+import { Profile } from "@/shared/model/types";
 
 export interface ProfileStore {
     profile: Profile;
     getProfile: () => Promise<void>;
     setProfile: (profile: Partial<Profile>) => void;
-    resetProfile: () => void;
+    destroy: () => void;
 }

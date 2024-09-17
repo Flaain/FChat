@@ -1,6 +1,6 @@
 import Forgot from "@/features/Forgot/ui/ui";
 import Signin from "@/features/Signin/ui/ui";
-import Typography from "@/shared/ui/Typography";
+import { Typography } from "@/shared/ui/Typography";
 import { SigninStages } from "@/features/Signin/model/types";
 import { useSigninForm } from "../lib/hooks/useSigninForm";
 

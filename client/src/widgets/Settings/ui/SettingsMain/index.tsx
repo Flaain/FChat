@@ -1,11 +1,11 @@
-import AvatarByName from '@/shared/ui/AvatarByName';
-import Typography from '@/shared/ui/Typography';
+import { AvatarByName } from '@/shared/ui/AvatarByName';
+import { Typography } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/lib/utils/cn';
 import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { useSettings } from '../../lib/hooks/useSettings';
 import { LockKeyholeIcon, UserCircle2 } from 'lucide-react';
-import Image from '@/shared/ui/Image';
+import { Image } from '@/shared/ui/Image';
 
 const SettingsMain = () => {
     const { profile } = useProfile();

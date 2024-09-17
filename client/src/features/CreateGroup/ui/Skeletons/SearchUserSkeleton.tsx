@@ -1,6 +1,6 @@
-import PreAnimatedSkeleton from '@/shared/ui/PreAnimatedSkeleton';
+import { PreAnimatedSkeleton } from '@/shared/ui/PreAnimatedSkeleton';
 
-const SearchUserSkeleton = () => {
+export const SearchUserSkeleton = () => {
     return (
         <ul className='flex flex-col gap-5 overflow-auto max-h-[300px]'>
             {[...new Array(2)].map((_, index, array) => (
@@ -18,5 +18,3 @@ const SearchUserSkeleton = () => {
         </ul>
     );
 };
-
-export default SearchUserSkeleton;

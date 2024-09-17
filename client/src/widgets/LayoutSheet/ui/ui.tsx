@@ -1,9 +1,9 @@
 import Switch from '@/shared/ui/Switch';
-import Typography from '@/shared/ui/Typography';
-import AvatarByName from '@/shared/ui/AvatarByName';
+import { Typography } from '@/shared/ui/Typography';
+import { AvatarByName } from '@/shared/ui/AvatarByName';
 import CreateGroup from '@/features/CreateGroup/ui/ui';
 import Settings from '@/widgets/Settings/ui/ui';
-import Image from '@/shared/ui/Image';
+import { Image } from '@/shared/ui/Image';
 import { Button } from '@/shared/ui/Button';
 import { Archive, Moon, Users, Settings as SettingsIcon, Verified } from 'lucide-react';
 import { cn } from '@/shared/lib/utils/cn';

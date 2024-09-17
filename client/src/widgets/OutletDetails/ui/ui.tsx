@@ -1,16 +1,16 @@
 import React from 'react';
-import Typography from '@/shared/ui/Typography';
 import { FeedTypes } from '@/shared/model/types';
 import { Button } from '@/shared/ui/Button';
 import { X } from 'lucide-react';
-import { useDomEvents } from '@/shared/lib/hooks/useDomEvents';
+import { useDomEvents } from '@/shared/model/store';
+import { Typography } from '@/shared/ui/Typography';
 
 const titles: Record<Exclude<FeedTypes, 'User'>, string> = {
     Conversation: 'User Info',
     Group: 'Group Info'
 };
 
-const OutletDetails = ({
+export const OutletDetails = ({
     onClose,
     avatarSlot,
     name,
@@ -25,7 +25,7 @@ const OutletDetails = ({
     type: FeedTypes;
     onClose: () => void;
 }) => {
-    const { addEventListener } = useDomEvents();
+    const addEventListener = useDomEvents((state) => state.addEventListener);
 
     const containerRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -71,5 +71,3 @@ const OutletDetails = ({
         </div>
     );
 };
-
-export default OutletDetails;

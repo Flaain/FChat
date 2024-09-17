@@ -4,7 +4,6 @@ export interface MessagesListProps {
     messages: Array<Message>;
     getPreviousMessages: () => void;
     canFetch: boolean;
-    isContextActionsBlocked?: boolean;
     isFetchingPreviousMessages: boolean;
     nextCursor: string | null;
 }

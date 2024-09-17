@@ -1,5 +1,5 @@
 import React from 'react';
-import Typography from '@/shared/ui/Typography';
+import { Typography } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { X } from 'lucide-react';
 import { MessageTopBarProps } from '../../model/types';

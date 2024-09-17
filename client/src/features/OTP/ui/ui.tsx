@@ -1,5 +1,5 @@
 import React from 'react';
-import Typography from '@/shared/ui/Typography';
+import { Typography } from '@/shared/ui/Typography';
 import { getOtpRetryTime } from '../lib/utils/getOtpRetryTime';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/shared/ui/input-otp';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';

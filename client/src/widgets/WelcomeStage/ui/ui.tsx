@@ -1,9 +1,9 @@
-import Typography from "@/shared/ui/Typography";
+import { useAuthStore } from "@/pages/Auth/model/store";
 import { Button } from "@/shared/ui/Button";
-import { useAuth } from "@/shared/lib/hooks/useAuth";
+import { Typography } from "@/shared/ui/Typography";
 
-const WelcomeStage = () => {
-    const { setAuthStage } = useAuth();
+export const WelcomeStage = () => {
+    const changeAuthStage = useAuthStore((state) => state.changeAuthStage);
 
     return (
         <div className="flex flex-col items-center justify-center w-full gap-5 px-4">
@@ -12,13 +12,11 @@ const WelcomeStage = () => {
                 <Typography variant="secondary" as="p" size="lg" className="max-lg:text-lg max-md:text-lg">What's up?</Typography>
             </div>
             <div className='max-w-[320px] w-full flex flex-col gap-3'>
-                <Button onClick={() => setAuthStage("signUp")}>Create new account</Button>
-                <Button variant='secondary' onClick={() => setAuthStage("signIn")}>
+                <Button onClick={() => changeAuthStage("signUp")}>Create new account</Button>
+                <Button variant='secondary' onClick={() => changeAuthStage("signIn")}>
                     Sign in
                 </Button>
             </div>
         </div>
     );
 };
-
-export default WelcomeStage;

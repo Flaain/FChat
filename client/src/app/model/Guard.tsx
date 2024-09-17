@@ -3,7 +3,7 @@ import { routerList } from '../../shared/constants';
 import { useSession } from '@/entities/session/model/store';
 import { GUARD_TYPE, GuardProps } from './types';
 
-const Guard = ({ type, children, fallback }: GuardProps) => {
+export const Guard = ({ type, children, fallback }: GuardProps) => {
     const { isAuthInProgress, isAuthorized } = useSession();
 
     if (isAuthInProgress) return fallback;
@@ -15,5 +15,3 @@ const Guard = ({ type, children, fallback }: GuardProps) => {
 
     return guards[type];
 };
-
-export default Guard;

@@ -1,7 +1,4 @@
-export enum GUARD_TYPE {
-    AUTH = 'auth',
-    GUEST = 'guest'
-}
+export type GUARD_TYPE = 'auth' | 'guest';
 
 export interface GuardProps {
     type: GUARD_TYPE;

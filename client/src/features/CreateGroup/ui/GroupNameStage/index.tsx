@@ -1,10 +1,10 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Input } from '@/shared/ui/Input';
-import { useCreateGroupContext } from '../../lib/hooks/useCreateGroupContext';
+import { useCreateGroup } from '../../model/store';
 
-const GroupNameStage = () => {
-    const { form } = useCreateGroupContext();
-
+export const GroupNameStage = () => {
+    const form = useCreateGroup((state) => state.form);
+    
     return (
         <FormField
             name='name'
@@ -25,5 +25,3 @@ const GroupNameStage = () => {
         />
     );
 };
-
-export default GroupNameStage;

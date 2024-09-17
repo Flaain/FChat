@@ -1,9 +1,9 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
-import { useCreateGroupContext } from '../../lib/hooks/useCreateGroupContext';
 import { Input } from '@/shared/ui/Input';
+import { useCreateGroup } from '../../model/store';
 
-const LinkStage = () => {
-    const { form } = useCreateGroupContext();
+export const LinkStage = () => {
+    const form = useCreateGroup((state) => state.form);
 
     return (
         <FormField
@@ -11,9 +11,7 @@ const LinkStage = () => {
             control={form.control}
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel className='text-white'>
-                        Unique login
-                    </FormLabel>
+                    <FormLabel className='text-white'>Unique login</FormLabel>
                     <FormControl>
                         <Input
                             {...field}
@@ -27,5 +25,3 @@ const LinkStage = () => {
         />
     );
 };
-
-export default LinkStage;

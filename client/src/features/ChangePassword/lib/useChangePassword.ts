@@ -1,13 +1,12 @@
 import React from 'react';
 import { FieldPath, useForm } from 'react-hook-form';
-import { ChangePasswordSchemaType } from '../model/types';
+import { ActionPasswordType, ChangePasswordSchemaType } from '../model/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { api } from '@/shared/api';
-import { ActionPasswordType } from '@/shared/model/types';
-import { AppException } from '@/shared/api/error';
 import { toast } from 'sonner';
-import { useModal } from '@/shared/lib/hooks/useModal';
 import { changePasswordSchema } from '../model/schema';
+import { useModal } from '@/shared/lib/providers/modal';
+import { changePasswordAPI } from '../api';
+import { checkFormErrors } from '@/shared/lib/utils/checkFormErrors';
 
 const steps: Array<{ fields: Array<FieldPath<ChangePasswordSchemaType>> }> = [
     { fields: ['currentPassword'] },
@@ -15,10 +14,10 @@ const steps: Array<{ fields: Array<FieldPath<ChangePasswordSchemaType>> }> = [
 ];
 
 export const useChangePassword = () => {
-    const { closeModal } = useModal();
-
     const [step, setStep] = React.useState(0);
     const [isLoading, setIsLoading] = React.useState(false);
+
+    const onAsyncActionModal = useModal((state) => state.onAsyncActionModal);
 
     const form = useForm<ChangePasswordSchemaType>({
         resolver: zodResolver(changePasswordSchema),
@@ -47,31 +46,20 @@ export const useChangePassword = () => {
             setIsLoading(true);
 
             const actions = {
-                0: async () => {
-                    await api.user.changePassword({ type: ActionPasswordType.CHECK, currentPassword });
-
-                    setStep((prevState) => prevState + 1);
-                },
-                1: async () => {
-                    await api.user.changePassword({ type: ActionPasswordType.SET, currentPassword, newPassword });
-
-                    closeModal();
-                    toast.success('Password changed successfully', { position: 'top-center' });
-                }
+                0: () => onAsyncActionModal(() => changePasswordAPI.changePassword({ type: ActionPasswordType.CHECK, currentPassword }), {
+                        onReject: (error) => checkFormErrors({ error, form, step, steps }),
+                        onResolve: () => setStep((prevState) => prevState + 1),
+                        closeOnSuccess: false
+                    }),
+                1: () => onAsyncActionModal(() => changePasswordAPI.changePassword({ type: ActionPasswordType.SET, currentPassword, newPassword }), {
+                        onReject: (error) => checkFormErrors({ error, form, step, steps }),
+                        onResolve: () => toast.success('Password changed successfully', { position: 'top-center' })
+                    }),
             };
 
             await actions[step as keyof typeof actions]();
         } catch (error) {
             console.error(error);
-            if (error instanceof AppException) {
-                error.errors?.forEach(({ path, message }) => {
-                    if (steps[step].fields.includes(path as FieldPath<ChangePasswordSchemaType>)) {
-                        form.setError(path as FieldPath<ChangePasswordSchemaType>, { message }, { shouldFocus: true });
-                    }
-                });
-
-                !error.errors && error.toastError();
-            }
         } finally {
             setIsLoading(false);
         }

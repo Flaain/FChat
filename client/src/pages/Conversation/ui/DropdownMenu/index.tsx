@@ -1,14 +1,14 @@
 import { EllipsisVertical, Lock, Trash } from 'lucide-react';
-import { useConversationDDM } from '../lib/hooks/useConversationDDM';
+import { useConversationDDM } from '../../lib/useConversationDDM';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu';
-import { useConversationContext } from '@/pages/Conversation/lib/hooks/useConversationContext';
+import { useConversationStore } from '../../model/store';
 
-const ConversationDDM = () => {
-    const { data: { conversation: { _id, isRecipientBlocked } } } = useConversationContext();
-    const { isMenuOpen, onClickDeleteConversation, setIsMenuOpen, onBlockRecipient, handleUnblockRecipient } = useConversationDDM();
+export const ConversationDDM = () => {
+    const { conversation: { _id, isRecipientBlocked } } = useConversationStore((state) => state.data)
+    const { handleBlockRecipient, handleDeleteConversation, handleUnblockRecipient } = useConversationDDM();
 
     return (
-        <DropdownMenu onOpenChange={setIsMenuOpen} open={isMenuOpen}>
+        <DropdownMenu>
             <DropdownMenuTrigger className='hover:opacity-50 transition-opacity ease-in-out duration-200 outline-none'>
                 <EllipsisVertical className='dark:text-primary-white text-primary-dark-50' />
             </DropdownMenuTrigger>
@@ -40,7 +40,7 @@ const ConversationDDM = () => {
                     </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
-                    onClick={isRecipientBlocked ? handleUnblockRecipient : onBlockRecipient}
+                    onClick={isRecipientBlocked ? handleUnblockRecipient : handleBlockRecipient}
                     className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-primary-dark-100/20 text-primary-white'
                 >
                     <Lock className='w-5 h-5' />
@@ -48,7 +48,7 @@ const ConversationDDM = () => {
                 </DropdownMenuItem>
                 {_id && (
                     <DropdownMenuItem
-                        onClick={onClickDeleteConversation}
+                        onClick={handleDeleteConversation}
                         className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-primary-destructive/10 text-primary-destructive'
                     >
                         <Trash className='w-5 h-5' /> Delete conversation
@@ -58,5 +58,3 @@ const ConversationDDM = () => {
         </DropdownMenu>
     );
 };
-
-export default ConversationDDM;

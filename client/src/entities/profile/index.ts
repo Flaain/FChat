@@ -1,2 +1,2 @@
-export { profileApi } from './api';
+export { profileAPI } from './api';
 export { useProfile } from './model/store';

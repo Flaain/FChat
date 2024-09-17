@@ -1,31 +1,37 @@
-import OutletContainer from "@/shared/ui/OutletContainer";
-import Typography from "@/shared/ui/Typography";
-import MessagesList from "@/widgets/MessagesList/ui/ui";
-import OutletHeader from "@/widgets/OutletHeader/ui/ui";
-import OutletDetails from "@/widgets/OutletDetails/ui/ui";
-import AvatarByName from "@/shared/ui/AvatarByName";
-import RecipientDetails from "@/widgets/RecipientDetails/ui/ui";
-import ConversationDDM from "@/features/ConversationDDM/ui/ui";
-import SendMessage from "@/features/SendMessage/ui/ui";
-import Image from "@/shared/ui/Image";
-import { ChatType, FeedTypes } from "@/shared/model/types";
-import { useConversationContext } from "../../lib/hooks/useConversationContext";
+import { MessagesList } from '@/widgets/MessagesList/ui/ui';
+import { OutletHeader } from '@/widgets/OutletHeader/ui/ui';
+import { OutletDetails } from '@/widgets/OutletDetails/ui/ui';
+import { AvatarByName } from '@/shared/ui/AvatarByName';
+import { SendMessage } from '@/features/SendMessage/ui/ui';
+import { Image } from '@/shared/ui/Image';
+import { FeedTypes } from '@/shared/model/types';
+import { useConversationStore } from '../../model/store';
+import { getConversationDescription } from '../../lib/getConversationDescription';
+import { useConversation } from '../../lib/useConversation';
+import { OutletContainer } from '@/shared/ui/OutletContainer';
+import { Typography } from '@/shared/ui/Typography';
+import { RecipientDetails } from '../RecipientDetails';
+import { ConversationDDM } from '../DropdownMenu';
 
-const Content = () => {
+export const Content = () => {
     const {
         data,
-        listRef,
+        isRecipientTyping,
         getPreviousMessages,
         isPreviousMessagesLoading,
-        getConversationDescription,
-        setShowAnchor,
         openDetails,
-        showRecipientDetails,
         closeDetails,
-        showAcnhor,
-        handleAnchorClick,
-        handleTypingStatus
-    } = useConversationContext();
+        showRecipientDetails
+    } = useConversationStore((state) => ({
+        data: state.data,
+        isRecipientTyping: state.isRecipientTyping,
+        getPreviousMessages: state.getPreviousMessages,
+        isPreviousMessagesLoading: state.isPreviousMessagesLoading,
+        openDetails: state.openDetails,
+        closeDetails: state.closeDetails,
+        showRecipientDetails: state.showRecipientDetails
+    }));
+    const { handleTypingStatus } = useConversation();
 
     return (
         <OutletContainer>
@@ -33,20 +39,17 @@ const Content = () => {
                 <OutletHeader
                     name={data.conversation.recipient.name}
                     isOfficial={data.conversation.recipient.isOfficial}
-                    description={getConversationDescription()}
+                    description={getConversationDescription({ data, isRecipientTyping })}
                     dropdownMenu={<ConversationDDM />}
                     onClick={openDetails}
                 />
                 {data.conversation.messages.length ? (
                     <MessagesList
-                        listRef={listRef}
                         messages={data.conversation.messages}
                         getPreviousMessages={getPreviousMessages}
                         isFetchingPreviousMessages={isPreviousMessagesLoading}
                         nextCursor={data.nextCursor}
                         canFetch={!isPreviousMessagesLoading && !!data.nextCursor}
-                        isContextActionsBlocked={data.conversation.isInitiatorBlocked || data.conversation.isRecipientBlocked} // TODO: think about how to remove this props drilling
-                        setShowAnchor={setShowAnchor}
                     />
                 ) : (
                     <Typography
@@ -67,8 +70,6 @@ const Content = () => {
                 ) : (
                     <SendMessage
                         type='conversation'
-                        showAnchor={showAcnhor}
-                        onAnchorClick={handleAnchorClick}
                         onChange={handleTypingStatus}
                         queryId={data.conversation.recipient._id}
                     />
@@ -84,7 +85,11 @@ const Content = () => {
                             className='object-cover object-center size-28 rounded-full'
                         />
                     }
-                    description={getConversationDescription(false)}
+                    description={getConversationDescription({
+                        data,
+                        isRecipientTyping,
+                        shouldDisplayTypingStatus: false
+                    })}
                     info={<RecipientDetails recipient={data.conversation.recipient} />}
                     type={FeedTypes.CONVERSATION}
                     onClose={closeDetails}
@@ -93,5 +98,3 @@ const Content = () => {
         </OutletContainer>
     );
 };
-
-export default Content;

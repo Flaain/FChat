@@ -1,7 +1,7 @@
-import AvatarByName from '@/shared/ui/AvatarByName';
-import Typography from '@/shared/ui/Typography';
-import Image from '@/shared/ui/Image';
-import ProfileIndicator from '@/shared/ui/ProfileIndicator';
+import { AvatarByName } from '@/shared/ui/AvatarByName';
+import { Typography } from '@/shared/ui/Typography';
+import { Image } from '@/shared/ui/Image';
+import { ProfileIndicator } from '@/shared/ui/ProfileIndicator';
 import { cn } from '@/shared/lib/utils/cn';
 import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';

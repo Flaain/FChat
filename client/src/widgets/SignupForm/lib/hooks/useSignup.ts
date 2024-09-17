@@ -6,7 +6,6 @@ import { useSession } from "@/entities/session/lib/hooks/useSession";
 import { signupSchema } from "../../model/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserCheckType } from "@/shared/model/types";
-import { SessionTypes } from "@/entities/session/model/types";
 import { AppException } from "@/shared/api/error";
 import { OtpType } from "@/shared/lib/contexts/otp/types";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
@@ -95,7 +94,6 @@ export const useSignup = () => {
                     const { data: profile } = await signupAPI.signup(rest);
 
                     setProfile(profile);
-                    dispatch({ type: SessionTypes.SET_ON_AUTH, payload: { userId: profile._id } });
                 }
             };
 

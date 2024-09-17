@@ -10,7 +10,7 @@ import { UseMessageParams } from '../model/types';
 import { MessageFormState } from '@/shared/model/types';
 import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 
-const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick }: UseMessageParams) => {
+export const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick }: UseMessageParams) => {
     const {
         handleSubmitMessage,
         onKeyDown,
@@ -125,5 +125,3 @@ const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick }: Use
         </div>
     );
 };
-
-export default SendMessage;

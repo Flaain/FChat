@@ -1,7 +1,13 @@
-import Typography from '@/shared/ui/Typography';
+import { useProfile } from '@/entities/profile';
+import { useSession } from '@/entities/session';
+import { Typography } from '@/shared/ui/Typography';
 import { LucideMessagesSquare } from 'lucide-react';
 
 const Home = () => {
+    const { profile } = useProfile();
+    const session = useSession();
+
+    console.log(profile, session);
     return (
         <div className='flex flex-col flex-1 gap-5 items-center justify-center dark:bg-primary-dark-200 bg-primary-white px-2'>
             <Typography as='h1' variant='primary' size='2xl' weight='bold' align='center' className='max-w-[400px]'>

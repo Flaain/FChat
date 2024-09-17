@@ -1,20 +1,40 @@
-import Typography from '@/shared/ui/Typography';
-import AvatarByName from '@/shared/ui/AvatarByName';
-import SearchUserSkeleton from '../Skeletons/SearchUserSkeleton';
+import { Typography } from '@/shared/ui/Typography';
+import { AvatarByName } from '@/shared/ui/AvatarByName';
+import { SearchUserSkeleton } from '../Skeletons/SearchUserSkeleton';
 import { Minus, Plus, UserSearch, X } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Input } from '@/shared/ui/Input';
-import { useCreateGroupContext } from '../../lib/hooks/useCreateGroupContext';
-import { useModal } from '@/shared/lib/hooks/useModal';
-import { MAX_GROUP_SIZE, MIN_USER_SEARCH_LENGTH } from '@/shared/constants';
+import { MIN_USER_SEARCH_LENGTH } from '@/shared/constants';
+import { useCreateGroup } from '../../model/store';
+import { useModal } from '@/shared/lib/providers/modal';
+import { MAX_GROUP_SIZE } from '../../model/constants';
 
-const SelectStage = () => {
-    const { isAsyncActionLoading } = useModal();
-    const { selectedUsers, searchedUsers, form, handleSearchUser, handleSelect, handleRemove } = useCreateGroupContext();
-
+export const SelectStage = () => {
+    const isModalDisabled = useModal((state) => state.isModalDisabled);
+    
+    const { form, handleSearchUser, handleSelect, handleRemove, searchedUsers, selectedUsers } = useCreateGroup((state) => ({
+        form: state.form,
+        selectedUsers: state.selectedUsers,
+        searchedUsers: state.searchedUsers,
+        handleSearchUser: state.handleSearchUser,
+        handleSelect: state.handleSelect,
+        handleRemove: state.handleRemove
+    }))
+    
     const searchQuery = form.getValues('username');
-    const isResultsEmpty = searchQuery?.trim().length! > MIN_USER_SEARCH_LENGTH && !isAsyncActionLoading && !searchedUsers.length;
+    const isResultsEmpty = searchQuery?.trim().length! > MIN_USER_SEARCH_LENGTH && !isModalDisabled && !searchedUsers.length;
+
+    if (isResultsEmpty) {
+        return (
+            <>
+                <UserSearch className='dark:text-primary-white w-10 h-10 self-center' />
+                <Typography as='p' variant='secondary' className='self-center text-center'>
+                    There were no results for "{searchQuery}".
+                </Typography>
+            </>
+        );
+    }
 
     return (
         <>
@@ -41,14 +61,7 @@ const SelectStage = () => {
                     </FormItem>
                 )}
             />
-            {isResultsEmpty ? (
-                <>
-                    <UserSearch className='dark:text-primary-white w-10 h-10 self-center' />
-                    <Typography as='p' variant='secondary' className='self-center text-center'>
-                        There were no results for "{searchQuery}".
-                    </Typography>
-                </>
-            ) : isAsyncActionLoading ? (
+            {isModalDisabled ? (
                 <SearchUserSkeleton />
             ) : (
                 !!searchedUsers.length && (
@@ -131,5 +144,3 @@ const SelectStage = () => {
         </>
     );
 };
-
-export default SelectStage;

@@ -1,4 +1,4 @@
-import Typography from '@/shared/ui/Typography';
+import { Typography } from '@/shared/ui/Typography';
 import FeedSkeleton from './Skeletons/FeedSkeleton';
 import ConversationItem from './ConversationItem';
 import UserItem from './UserItem';

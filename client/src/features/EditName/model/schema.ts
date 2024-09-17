@@ -1,6 +1,4 @@
-import { nameForSchema } from '@/shared/constants';
 import { z } from 'zod';
+import { nameForSchema } from '@/shared/constants';
 
-export const editNameSchema = z.object({
-    name: nameForSchema
-});
+export const editNameSchema = z.object({ name: nameForSchema });

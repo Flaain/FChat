@@ -1,7 +1,9 @@
-import { API } from './API';
-import { Conversation, GetConversation, IMessage, WithParams, WithRequired } from '../model/types';
+import { Message } from "@/entities/Message/model/types";
+import { API } from "@/shared/api/API";
+import { WithParams, WithRequired } from "@/shared/model/types";
+import { Conversation, ConversationWithMeta, IConversationAPI } from "../model/types";
 
-export class ConversationAPI extends API {
+class ConversationAPI extends API implements IConversationAPI {
     create = async (body: { recipientId: string }) => {
         const request: RequestInit = {
             method: 'POST',
@@ -17,7 +19,7 @@ export class ConversationAPI extends API {
         const url = new URL(this._baseUrl + `/conversation/${body.recipientId}`);
         const request: RequestInit = { credentials: this._cretedentials, headers: this._headers, signal: body.signal };
 
-        return this._checkResponse<GetConversation>(await fetch(url, request), request);
+        return this._checkResponse<ConversationWithMeta>(await fetch(url, request), request);
     };
 
     getPreviousMessages = async (body: WithRequired<WithParams<{ recipientId: string }>, 'params'>) => {
@@ -28,16 +30,18 @@ export class ConversationAPI extends API {
             url.searchParams.append(key, value);
         });
 
-        return this._checkResponse<{ messages: Array<IMessage>, nextCursor: string | null }>(await fetch(url, request), request);
+        return this._checkResponse<{ messages: Array<Message>, nextCursor: string | null }>(await fetch(url, request), request);
     };
 
     delete = async (recipientId: string) => {
         const request: RequestInit = {
             method: 'DELETE',
             credentials: this._cretedentials,
-            headers: this._headers,
+            headers: this._headers
         };
 
         return this._checkResponse<{ conversationId: string }>(await fetch(this._baseUrl + `/conversation/delete/${recipientId}`, request), request);
     };
 }
+
+export const conversationAPI = new ConversationAPI()

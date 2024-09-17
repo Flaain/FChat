@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { MessagesListProps } from '../model/types';
 import { useMessagesList } from '../lib/useMessagesList';
 
-const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCursor, isContextActionsBlocked, isFetchingPreviousMessages }: MessagesListProps) => {
+export const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCursor, isFetchingPreviousMessages }: MessagesListProps) => {
     const { groupedMessages, lastMessageRef, ref } = useMessagesList({ messages, canFetch, getPreviousMessages });
     
     return (
@@ -27,7 +27,6 @@ const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCursor, isC
             {groupedMessages.map((messages, index, array) => (
                 <MessageGroup
                     key={messages[0]._id}
-                    isContextActionsBlocked={isContextActionsBlocked}
                     messages={messages}
                     isLastGroup={index === array.length - 1}
                     lastMessageRef={lastMessageRef}
@@ -36,5 +35,3 @@ const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCursor, isC
         </ul>
     );
 };
-
-export default MessagesList;

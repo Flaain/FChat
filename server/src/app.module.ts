@@ -10,7 +10,6 @@ import { MessageModule } from './modules/message/message.module';
 import { GatewayModule } from './modules/gateway/gateway.module';
 import { ParticipantModule } from './modules/participant/participant.module';
 import { GroupModule } from './modules/group/group.module';
-import { GroupMessageModule } from './modules/group-message/group-message.module';
 import { SessionModule } from './modules/session/session.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { FeedModule } from './modules/feed/feed.module';
@@ -43,7 +42,6 @@ import { FileModule } from './modules/file/file.module';
         GatewayModule,
         ParticipantModule,
         GroupModule,
-        GroupMessageModule,
         SessionModule,
         OtpModule,
     ],

@@ -1,7 +1,7 @@
-import Typography from '@/shared/ui/Typography';
+import { Typography } from '@/shared/ui/Typography';
 import SignupCredentials from '@/features/SignupCredentials/ui/ui';
 import SignupProfile from '@/features/SignupProfile/ui/ui';
-import OTP from '@/features/OTP/ui/ui';
+import { OTP } from '@/features/OTP/ui/ui';
 import { useSignup } from '../lib/hooks/useSignup';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Button } from '@/shared/ui/Button';

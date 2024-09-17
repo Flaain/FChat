@@ -1,5 +1,5 @@
-import AvatarByName from '@/shared/ui/AvatarByName';
-import Typography from '@/shared/ui/Typography';
+import { AvatarByName } from '@/shared/ui/AvatarByName';
+import { Typography } from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
 import { useSession } from '@/entities/session/lib/hooks/useSession';
 import { Verified } from 'lucide-react';

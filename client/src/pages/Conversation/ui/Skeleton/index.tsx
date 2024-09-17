@@ -1,12 +1,12 @@
-import Typography from '@/shared/ui/Typography';
-import PreAnimatedSkeleton from '@/shared/ui/PreAnimatedSkeleton';
 import { cn } from '@/shared/lib/utils/cn';
-import { ConversationParticipant, UserFeed } from '@/shared/model/types';
+import { Recipient, UserFeed } from '@/shared/model/types';
 import { Verified } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { Typography } from '@/shared/ui/Typography';
+import { PreAnimatedSkeleton } from '@/shared/ui/PreAnimatedSkeleton';
 
-const ConversationSkeleton = () => {
-    const { state } = useLocation<ConversationParticipant | UserFeed>();
+export const ConversationSkeleton = () => {
+    const { state } = useLocation<Recipient | UserFeed>();
 
     return (
         <div className='flex flex-col flex-1 h-svh overflow-hidden gap-5 items-center justify-start dark:bg-primary-dark-200 bg-primary-white'>
@@ -48,5 +48,3 @@ const ConversationSkeleton = () => {
         </div>
     );
 };
-
-export default ConversationSkeleton;

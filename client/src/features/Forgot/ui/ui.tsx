@@ -1,4 +1,4 @@
-import OTP from '@/features/OTP/ui/ui';
+import { OTP } from '@/features/OTP/ui/ui';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Button } from '@/shared/ui/Button';
 import { LoaderCircle } from 'lucide-react';

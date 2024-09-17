@@ -1,5 +1,5 @@
 import React from 'react';
-import Typography from '@/shared/ui/Typography';
+import { Typography } from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
 import { MessageContextMenu } from './ContextMenu';
 import { Check, CheckCheck } from 'lucide-react';

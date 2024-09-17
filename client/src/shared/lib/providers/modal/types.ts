@@ -13,6 +13,7 @@ export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export interface AsyncActionOptions<T> {
     closeOnError?: boolean;
+    closeOnSuccess?: boolean;
     disableOnPending?: boolean;
     onResolve?: (data: T) => void;
     onReject?: (error: unknown) => void;
@@ -23,7 +24,7 @@ export interface ModalStore {
     modals: Array<ModalConfig>;
     onOpenModal: (config: ModalConfig) => void;
     onCloseModal: () => void;
-    onAsyncActionModal: <T>(cb: () => Promise<T>, options?: AsyncActionOptions<T>) => Promise<T | void>;
+    onAsyncActionModal: <T>(cb: () => Promise<T>, options?: AsyncActionOptions<T>) => Promise<void>;
 }
 
 export interface ModalConfig {

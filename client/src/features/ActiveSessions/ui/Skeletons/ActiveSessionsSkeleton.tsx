@@ -1,6 +1,6 @@
-import PreAnimatedSkeleton from '@/shared/ui/PreAnimatedSkeleton';
+import { PreAnimatedSkeleton } from '@/shared/ui/PreAnimatedSkeleton';
 
-const ActiveSessionsSkeleton = () => {
+export const ActiveSessionsSkeleton = () => {
     return (
         <ul className='flex flex-col gap-5 overflow-auto pt-5 px-3'>
             {[...new Array(3)].map((_, index, array) => (
@@ -21,5 +21,3 @@ const ActiveSessionsSkeleton = () => {
         </ul>
     );
 };
-
-export default ActiveSessionsSkeleton;

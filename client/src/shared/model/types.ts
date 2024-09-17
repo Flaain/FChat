@@ -1,7 +1,6 @@
 import React from 'react';
-import { Session } from '@/entities/session/model/types';
 import { MarkdownToJSX } from "markdown-to-jsx";
-import { User } from '@/entities/profile/model/types';
+import { FieldPath, FieldValues, UseFormReturn } from 'react-hook-form';
 
 export enum FeedTypes {
     CONVERSATION = 'Conversation',
@@ -29,9 +28,31 @@ export enum PartOfCompilerUse {
     MESSAGE_TOP_BAR = 'messageTopBar',
 }
 
+export type Recipient = Pick<Profile, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence' | 'status' | 'avatar'>;
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams; signal?: AbortSignal };
 export type MessageFormState = 'send' | 'edit' | 'reply';
+
+export interface Avatar {
+    _id: string;
+    url: string;
+}
+
+export interface Profile {
+    _id: string;
+    name: string;
+    login: string;
+    email: string;
+    presence: PRESENCE;
+    status?: string;
+    avatar?: Avatar;
+    lastSeenAt: string;
+    isOfficial: boolean;
+    isPrivate: boolean;
+    isDeleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
 
 export interface CompilerOptions extends MarkdownToJSX.Options {
     shouldStayRaw?: Array<keyof HTMLElementTagNameMap>;
@@ -64,7 +85,6 @@ export interface APIData<T> {
     data: T;
     statusCode: Response['status'];
     headers: Record<string, string>;
-    message: string;
 }
 
 export enum AppExceptionCode {
@@ -87,20 +107,6 @@ export interface GroupParticipant {
     name: string;
     email: string;
     userId: string;
-}
-
-export interface ConversationParticipant extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence' | 'status' | 'avatar'> {}
-
-export interface Conversation {
-    _id: string;
-    recipient: ConversationParticipant;
-    messages: Array<IMessage>;
-    lastMessage?: IMessage;
-    lastMessageSentAt: string;
-    createdAt: string;
-    updatedAt: string;
-    isInitiatorBlocked?: boolean;
-    isRecipientBlocked?: boolean;
 }
 
 export interface Group {
@@ -205,21 +211,6 @@ export interface Draft {
     selectedMessage?: IMessage;
 }
 
-export enum CONVERSATION_EVENTS {
-    JOIN = 'conversation.join',
-    LEAVE = 'conversation.leave',
-    CREATED = 'conversation.created',
-    DELETED = 'conversation.deleted',
-    MESSAGE_SEND = 'conversation.message.send',
-    MESSAGE_EDIT = 'conversation.message.edit',
-    MESSAGE_DELETE = 'conversation.message.delete',
-    USER_PRESENCE = 'conversation.user.presence',
-    USER_BLOCK = 'conversation.user.block',
-    USER_UNBLOCK = 'conversation.user.unblock',
-    START_TYPING = 'conversation.start.typing',
-    STOP_TYPING = 'conversation.stop.typing',
-}
-
 export enum FEED_EVENTS {
     CREATE_MESSAGE = 'feed.create.message',
     EDIT_MESSAGE = 'feed.edit.message',
@@ -242,13 +233,6 @@ export enum PRESENCE {
     OFFLINE = 'offline'
 }
 
-export interface GetConversationsRes {
-    conversations: Array<
-        Omit<ConversationFeed, 'type' | 'recipient'> & { participants: Array<ConversationParticipant> }
-    >;
-    nextCursor: string;
-}
-
 export interface DeleteMessageEventParams {
     lastMessage: IMessage;
     lastMessageSentAt: string;
@@ -263,56 +247,6 @@ export enum UserCheckType {
 export type UserCheckParams =
     | { type: UserCheckType.EMAIL; email: string }
     | { type: UserCheckType.LOGIN; login: string };
-
-export interface GetConversation {
-    conversation: Pick<Conversation, '_id' | 'recipient' | 'messages' | 'createdAt'>;
-    nextCursor: string;
-}
-
-export interface GetSessionsReturn {
-    currentSession: {
-        _id: string;
-        userAgent: ParsedSession;
-        createdAt: string;
-        expiresAt: string;
-    };
-    sessions: Array<Session>;
-}
-
-export interface ParsedSession {
-    ua: string;
-    browser: IBrowser;
-    device: IDevice;
-    engine: IEngine;
-    os: IOS;
-    cpu: ICPU;
-}
-
-export interface IBrowser {
-    name: string | undefined;
-    version: string | undefined;
-    major: string | undefined;
-}
-
-export interface IDevice {
-    model: string | undefined;
-    type: string | undefined;
-    vendor: string | undefined;
-}
-
-export interface IEngine {
-    name: string | undefined;
-    version: string | undefined;
-}
-
-export interface IOS {
-    name: string | undefined;
-    version: string | undefined;
-}
-
-export interface ICPU {
-    architecture: string | undefined;
-}
 
 export interface Meta {
     total_items: number;
@@ -402,4 +336,11 @@ export interface SendMessageStore {
     showAnchor: boolean;
     changeAnchorVisibility: (value: boolean) => void;
     ref: React.RefObject<HTMLTextAreaElement>;
+}
+
+export interface CheckFormErrorsParams<T extends FieldValues> {
+    error: unknown;
+    form: UseFormReturn<T>;
+    step: number;
+    steps: Array<{ fields: Array<FieldPath<T>> }>;
 }

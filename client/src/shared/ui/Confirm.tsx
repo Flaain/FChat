@@ -1,7 +1,7 @@
-import Typography from '@/shared/ui/Typography';
 import { Loader2 } from 'lucide-react';
 import { Button, ButtonProps } from '@/shared/ui/Button';
 import { useModal } from '@/shared/lib/providers/modal';
+import { Typography } from './Typography';
 
 export const Confirm = ({
     text,
@@ -11,7 +11,7 @@ export const Confirm = ({
     onConfirmText = 'Confirm',
     onConfirmButtonVariant = 'default'
 }: {
-    onConfirm: () => void | Promise<void>;
+    onConfirm: <T>() => void | T | Promise<void | T | any>;
     onCancel: () => void;
     text: string;
     onConfirmText?: string;

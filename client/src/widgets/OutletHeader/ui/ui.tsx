@@ -1,11 +1,11 @@
-import Typography from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
 import { Loader2, Verified } from 'lucide-react';
 import { OutletHeaderProps } from '../model/types';
-import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
+import { useSocket } from '@/shared/lib/hooks/useSocket';
+import { Typography } from '@/shared/ui/Typography';
 
-const OutletHeader = ({ name, isOfficial, description, dropdownMenu, ...rest }: OutletHeaderProps) => {
-    const { isConnected } = useLayoutContext();
+export const OutletHeader = ({ name, isOfficial, description, dropdownMenu, ...rest }: OutletHeaderProps) => {
+    const { isConnected } = useSocket();
 
     return (
         <div
@@ -44,5 +44,3 @@ const OutletHeader = ({ name, isOfficial, description, dropdownMenu, ...rest }: 
         </div>
     );
 };
-
-export default OutletHeader;

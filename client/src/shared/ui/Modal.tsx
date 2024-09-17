@@ -1,8 +1,8 @@
 import React from 'react';
-import Typography from './Typography';
 import { XIcon } from 'lucide-react';
 import { cn } from '../lib/utils/cn';
-import { ModalBodyProps, ModalProps } from '../lib/contexts/modal/types';
+import { Typography } from './Typography';
+import { ModalBodyProps, ModalProps } from '../lib/providers/modal/types';
 
 const ModalHeader = ({
     title,
@@ -64,7 +64,7 @@ const ModalBody = React.forwardRef<HTMLDivElement, ModalBodyProps>(({ children, 
     );
 })
 
-const Modal = React.forwardRef<HTMLDivElement, ModalProps>(({ closeHandler, children, withHeader = true, withCloseButton = true, ...config }, ref) => {
+export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(({ closeHandler, children, withHeader = true, withCloseButton = true, ...config }, ref) => {
     return (
         <ModalContainer closeHandler={closeHandler}>
             <ModalBody ref={ref} className={config.bodyClassName}>
@@ -74,5 +74,3 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(({ closeHandler, chil
         </ModalContainer>
     );
 })
-
-export default Modal;

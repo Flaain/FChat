@@ -2,7 +2,7 @@ import { API } from '@/shared/api/API';
 import { BasicAPIResponse } from '@/shared/model/types';
 import { UserPasswordParams } from '../model/types';
 
-export class ChangePasswordAPI extends API {
+class ChangePasswordAPI extends API {
     changePassword = async ({ type, ...body }: UserPasswordParams) => {
         const request: RequestInit = {
             method: 'POST',
@@ -18,3 +18,5 @@ export class ChangePasswordAPI extends API {
         return this._checkResponse<BasicAPIResponse>(await fetch(url, request), request);
     };
 }
+
+export const changePasswordAPI = new ChangePasswordAPI();

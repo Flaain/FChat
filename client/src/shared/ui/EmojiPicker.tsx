@@ -1,8 +1,8 @@
 import Picker from '@emoji-mart/react';
-import { useTheme } from '@/entities/theme/lib/hooks/useTheme';
 import { EmojiData } from '../model/types';
+import { useTheme } from '@/entities/theme';
 
-const EmojiPicker = ({
+export const EmojiPicker = ({
     onClickOutside,
     onEmojiSelect
 }: {
@@ -17,5 +17,3 @@ const EmojiPicker = ({
         return response.json();
       }} onEmojiSelect={onEmojiSelect} onClickOutside={onClickOutside} />;
 };
-
-export default EmojiPicker;

@@ -3,7 +3,7 @@ import Privacy from '@/features/Privacy/ui/ui';
 import SettingsMain from './SettingsMain';
 import ActiveSessions from '@/features/ActiveSessions/ui/ui';
 import ChangePassword from '@/features/ChangePassword/ui/ui';
-import Typography from '@/shared/ui/Typography';
+import { Typography } from '@/shared/ui/Typography';
 import { useSettings } from '../lib/hooks/useSettings';
 import { ArrowLeft, X } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';

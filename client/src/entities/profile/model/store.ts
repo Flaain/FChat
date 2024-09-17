@@ -1,12 +1,13 @@
-import { create } from 'zustand';
 import { ProfileStore } from './types';
 import { useSession } from '@/entities/session/model/store';
 import { profileApi } from '../api';
+import { createWithEqualityFn } from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
 
-export const useProfile = create<ProfileStore>((set) => ({
+export const useProfile = createWithEqualityFn<ProfileStore>((set) => ({
     profile: null!,
     setProfile: (profile) => set((prevState) => ({ profile: { ...prevState.profile, ...profile } })),
-    resetProfile: () => set({ profile: null! }),
+    destroy: () => set({}, true),
     getProfile: async () => {
         try {
             const { data } = await profileApi.getProfile();
@@ -19,4 +20,4 @@ export const useProfile = create<ProfileStore>((set) => ({
             useSession.getState().onLogout();
         }
     }
-}));
+}), shallow);
