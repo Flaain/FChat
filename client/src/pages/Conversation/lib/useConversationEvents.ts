@@ -1,6 +1,6 @@
 import React from "react"
 import { PRESENCE } from "@/shared/model/types"
-import { useConversationStore } from "../model/store"
+import { useConversationCtx } from "../model/context"
 import { useNavigate, useParams } from "react-router-dom"
 import { useSession } from "@/entities/session"
 import { Message } from "@/entities/Message/model/types"
@@ -12,8 +12,7 @@ export const useConversationEvents = () => {
     const { id: recipientId } = useParams();
     const { socket } = useSocket();
     const { addEventListener } = useDomEvents();
-    const { destroy, setConversation, getConversation, setIsRecipientTyping, abortController } = useConversationStore((state) => ({ 
-        destroy: state.destroy,
+    const { setConversation, getConversation, setIsRecipientTyping, abortController } = useConversationCtx((state) => ({ 
         setConversation: state.setConversation, 
         getConversation: state.getConversation,
         setIsRecipientTyping: state.setIsRecipientTyping,
@@ -119,8 +118,6 @@ export const useConversationEvents = () => {
         return () => {
             removeEventListener();
             
-            destroy();
-
             abortController.current?.abort('Signal aborted due to new incoming request');
 
             socket?.emit(CONVERSATION_EVENTS.LEAVE, { recipientId });

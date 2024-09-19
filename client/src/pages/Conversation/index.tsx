@@ -5,12 +5,15 @@ import { View } from './model/view';
 import { Button } from '@/shared/ui/Button';
 import { ConversationSkeleton } from './ui/Skeleton';
 import { OutletError } from '@/shared/ui/OutletError';
+import { ConversationProvider } from './model/context';
 
 export const ConversationPage: RouteObject = {
     path: routerList.CONVERSATION,
     element: (
         <React.Suspense fallback={<ConversationSkeleton />}>
-            <View />
+            <ConversationProvider>
+                <View />
+            </ConversationProvider>
         </React.Suspense>
     ),
     errorElement: (

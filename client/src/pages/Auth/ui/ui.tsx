@@ -1,17 +1,22 @@
-import SigninForm from '@/widgets/SigninForm/ui/ui';
 import SignupForm from '@/widgets/SignupForm/ui/ui';
-import { WelcomeStage } from '@/widgets/WelcomeStage/ui/ui';
+import { SigninForm } from '@/widgets/SigninForm/ui/ui';
 import { Toaster } from 'sonner';
-import { useAuthStore } from '../model/store';
+import { useAuth } from '../model/context';
+import { Welcome } from './Welcome';
+import { SigninFormProvider } from '@/widgets/SigninForm/model/context';
 
 const stages = {
-    welcome: <WelcomeStage />,
-    signIn: <SigninForm />,
+    welcome: <Welcome />,
+    signIn: (
+        <SigninFormProvider>
+            <SigninForm />
+        </SigninFormProvider>
+    ),
     signUp: <SignupForm />
 };
 
-const Auth = () => {
-    const { authStage } = useAuthStore();
+export const Auth = () => {
+    const authStage = useAuth((state) => state.authStage);
 
     return (
         <section className='w-full h-screen flex items-center px-5 justify-center bg-primary-dark-200'>
@@ -20,5 +25,3 @@ const Auth = () => {
         </section>
     );
 };
-
-export default Auth;

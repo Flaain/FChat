@@ -9,6 +9,7 @@ import { Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { SessionProps } from '../model/types';
 import { sessionAPI } from '../api';
+import { useModal } from '@/shared/lib/providers/modal';
 
 const iconStyles = 'w-7 h-7 dark:fill-primary-white fill-primary-dark-50';
 
@@ -22,24 +23,23 @@ const iconsMap = {
 export const Session = ({ session, withDropButton, dropButtonDisabled, onDrop }: SessionProps) => {
     const [isDroping, setIsDroping] = React.useState(false);
 
+    const onAsyncActionModal = useModal((state) => state.onAsyncActionModal);
+
     const browser = session.userAgent?.browser;
     const OS = session.userAgent?.os;
 
     const handleDrop = async () => {
-        try {
-            setIsDroping(true);
-
-            await sessionAPI.dropSession(session._id);
-
-            onDrop?.(session);
-
-            toast.success('Session dropped', { position: 'top-center' });
-        } catch (error) {
-            console.error(error);
-            toast.error('Failed to drop session', { position: 'top-center' });
-        } finally {
-            setIsDroping(false);
-        }
+        setIsDroping(true);
+        
+        await onAsyncActionModal(() => sessionAPI.dropSession(session._id), {
+            onResolve: () => {
+                onDrop?.(session);
+                toast.success('Session dropped', { position: 'top-center' });
+            },
+            onReject: () => toast.error('Failed to drop session'),
+        })
+        
+        setIsDroping(false);
     };
 
     return (

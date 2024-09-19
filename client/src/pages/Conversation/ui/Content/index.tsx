@@ -1,11 +1,11 @@
-import { MessagesList } from '@/widgets/MessagesList/ui/ui';
-import { OutletHeader } from '@/widgets/OutletHeader/ui/ui';
-import { OutletDetails } from '@/widgets/OutletDetails/ui/ui';
+import { MessagesList } from '@/widgets/MessagesList';
+import { OutletHeader } from '@/widgets/OutletHeader';
+import { OutletDetails } from '@/widgets/OutletDetails';
 import { AvatarByName } from '@/shared/ui/AvatarByName';
 import { SendMessage } from '@/features/SendMessage/ui/ui';
 import { Image } from '@/shared/ui/Image';
 import { FeedTypes } from '@/shared/model/types';
-import { useConversationStore } from '../../model/store';
+import { useConversationCtx } from '../../model/context';
 import { getConversationDescription } from '../../lib/getConversationDescription';
 import { useConversation } from '../../lib/useConversation';
 import { OutletContainer } from '@/shared/ui/OutletContainer';
@@ -22,7 +22,7 @@ export const Content = () => {
         openDetails,
         closeDetails,
         showRecipientDetails
-    } = useConversationStore((state) => ({
+    } = useConversationCtx((state) => ({
         data: state.data,
         isRecipientTyping: state.isRecipientTyping,
         getPreviousMessages: state.getPreviousMessages,

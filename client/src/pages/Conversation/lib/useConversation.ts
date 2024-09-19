@@ -1,9 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { CONVERSATION_EVENTS } from '../model/types';
-import { useConversationStore } from '../model/store';
 import { useSocket } from '@/shared/lib/hooks/useSocket';
 import { useConversationEvents } from './useConversationEvents';
+import { useConversationCtx } from '../model/context';
 
 export const useConversation = () => {
     const { socket } = useSocket();
@@ -13,7 +13,7 @@ export const useConversation = () => {
     
     const [isTyping, setIsTyping] = React.useState(false);
 
-    const data = useConversationStore((state) => state.data);
+    const data = useConversationCtx((state) => state.data);
     const typingTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     
     const handleTypingStatus = () => {

@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { ConversationStatuses } from '../model/types';
 import { ConversationSkeleton } from './Skeleton';
 import { Content } from '@radix-ui/react-context-menu';
-import { useConversationStore } from '../model/store';
+import { useConversationStore } from '../model/context';
 import { OutletError } from '@/shared/ui/OutletError';
 
 export const Conversation = () => {

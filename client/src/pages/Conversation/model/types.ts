@@ -44,7 +44,6 @@ export interface ConversationStore {
     setIsRecipientTyping: (value: boolean) => void;
     openDetails: () => void;
     closeDetails: () => void;
-    destroy: () => void;
     showRecipientDetails: boolean;
 }
 

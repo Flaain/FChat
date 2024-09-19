@@ -1,27 +1,27 @@
-import Switch from '@/shared/ui/Switch';
+import { Switch } from '@/shared/ui/Switch';
 import { Typography } from '@/shared/ui/Typography';
 import { AvatarByName } from '@/shared/ui/AvatarByName';
-import CreateGroup from '@/features/CreateGroup/ui/ui';
-import Settings from '@/widgets/Settings/ui/ui';
+import { Settings } from '@/widgets/Settings/ui/ui';
 import { Image } from '@/shared/ui/Image';
 import { Button } from '@/shared/ui/Button';
 import { Archive, Moon, Users, Settings as SettingsIcon, Verified } from 'lucide-react';
 import { cn } from '@/shared/lib/utils/cn';
-import { SettingsProvider } from '@/widgets/Settings/lib/contexts/provider';
-import { CreateGroupProvider } from '@/features/CreateGroup/model/provider';
 import { useProfile } from '@/entities/profile/model/store';
-import { useModal } from '@/app/providers/modal/store';
 import { useTheme } from '@/entities/theme/model/store';
-import { ModalConfig } from '@/app/providers/modal/types';
 import { useLayout } from '@/shared/model/store';
+import { ModalConfig, useModal } from '@/shared/lib/providers/modal';
+import { CreateGroup } from '@/features/CreateGroup';
+import { CreateGroupProvider } from '@/features/CreateGroup/model/context';
+import { SettingsProvider } from '@/widgets/Settings/model/context';
 
 const listIconStyle = 'dark:text-primary-white text-primary-dark-200 w-5 h-5';
 
-const LayoutSheet = () => {
-    const { profile } = useProfile();
-    const { onOpenModal  } = useModal();
+export const LayoutSheet = () => {
     const { setTheme, theme } = useTheme();
     const { onCloseSheet } = useLayout();
+
+    const profile = useProfile((state) => state.profile);
+    const onOpenModal = useModal((state) => state.onOpenModal);
 
     const onSheetAction = (modal: ModalConfig) => {
         onCloseSheet();
@@ -105,5 +105,3 @@ const LayoutSheet = () => {
         </div>
     );
 };
-
-export default LayoutSheet;

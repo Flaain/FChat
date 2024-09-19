@@ -1,13 +1,13 @@
 import { AvatarByName } from '@/shared/ui/AvatarByName';
 import { Typography } from '@/shared/ui/Typography';
 import { PreAnimatedSkeleton } from '@/shared/ui/PreAnimatedSkeleton';
-import { useProfile } from '@/shared/lib/hooks/useProfile';
 import { cn } from '@/shared/lib/utils/cn';
 import { Verified } from 'lucide-react';
 import { Image } from '@/shared/ui/Image';
+import { useProfile } from '@/entities/profile';
 
-const LayoutSheetSkeleton = () => {
-    const { profile } = useProfile();
+export const LayoutSheetSkeleton = () => {
+    const profile = useProfile((state) => state.profile);
 
     return (
         <div className='flex flex-col py-8 h-full'>
@@ -42,5 +42,3 @@ const LayoutSheetSkeleton = () => {
         </div>
     );
 };
-
-export default LayoutSheetSkeleton;

@@ -25,10 +25,12 @@ export const useEditName = () => {
     }, []);
 
     const onSubmit = async (data: EditNameType) => {
-        if (data.name.trim() === profile.name) return;
+        const name = data.name.trim();
 
-        onAsyncActionModal(() => profileAPI.name({ name: data.name.trim() }), {
-            onResolve: () => setProfile({ ...profile, name: data.name.trim() }),
+        if (name === profile.name) return;
+
+        onAsyncActionModal(() => profileAPI.name({ name }), {
+            onResolve: () => setProfile({ name }),
             onReject: () => toast.error('Failed to change name'),
             closeOnError: true
         });

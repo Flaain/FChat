@@ -29,7 +29,7 @@ class SessionAPI extends API {
             credentials: this._cretedentials
         };
 
-        return this._checkResponse(await fetch(`${this._baseUrl}/session/${sessionId}`, requestInit), requestInit);
+        return this._checkResponse<BasicAPIResponse>(await fetch(`${this._baseUrl}/session/${sessionId}`, requestInit), requestInit);
     };
 
     terminateAllSessions = async () => {

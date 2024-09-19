@@ -1,8 +1,8 @@
-import MessageGroup from '@/features/MessageGroup/ui/ui';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { MessagesListProps } from '../model/types';
 import { useMessagesList } from '../lib/useMessagesList';
+import { GroupedMessages } from '@/features/GroupedMessages/ui/ui';
 
 export const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCursor, isFetchingPreviousMessages }: MessagesListProps) => {
     const { groupedMessages, lastMessageRef, ref } = useMessagesList({ messages, canFetch, getPreviousMessages });
@@ -25,7 +25,7 @@ export const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCurs
                 </li>
             )}
             {groupedMessages.map((messages, index, array) => (
-                <MessageGroup
+                <GroupedMessages
                     key={messages[0]._id}
                     messages={messages}
                     isLastGroup={index === array.length - 1}

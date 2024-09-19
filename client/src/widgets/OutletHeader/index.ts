@@ -1,0 +1,1 @@
+export { OutletHeader } from './ui/ui';

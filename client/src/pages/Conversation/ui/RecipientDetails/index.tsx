@@ -1,6 +1,5 @@
 import { OutletDetailsButton } from '@/shared/ui/OutletDetailsButton';
-import { Recipient } from '../../model/types';
-import { OutletDetailsTypes } from '@/shared/model/types';
+import { OutletDetailsTypes, Recipient } from '@/shared/model/types';
 
 export const RecipientDetails = ({ recipient }: { recipient: Recipient }) => (
     <div className='flex flex-col'>

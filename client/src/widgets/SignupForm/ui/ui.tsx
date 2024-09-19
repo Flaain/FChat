@@ -23,7 +23,7 @@ const SignupForm = () => {
                         <FormItem className='relative'>
                             <FormLabel className='text-white'>Enter verification code</FormLabel>
                             <FormControl>
-                                <OTP {...field} email={form.getValues('email')} onComplete={onSubmit} />
+                                <OTP {...field} onComplete={onSubmit} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

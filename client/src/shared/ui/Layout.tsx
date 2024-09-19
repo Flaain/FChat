@@ -2,14 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Sheet } from './Sheet';
 import Sidebar from '@/widgets/Sidebar/ui/ui';
-import LayoutSheetSkeleton from '@/widgets/LayoutSheet/ui/Skeletons/LayoutSheetSkeleton';
+import { LayoutSheetSkeleton } from '@/widgets/LayoutSheet/ui/Skeletons/LayoutSheetSkeleton';
 import { Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { LayoutSheetView } from '@/widgets/LayoutSheet/model/view';
+import { LayoutSheetView } from '@/widgets/LayoutSheet';
 import { useLayout } from '../model/store';
 
 export const Layout = () => {
-    const { isSheetOpen, onCloseSheet } = useLayout();
+    const { isSheetOpen, onCloseSheet } = useLayout((state) => ({
+        isSheetOpen: state.isSheetOpen,
+        onCloseSheet: state.onCloseSheet
+    }));
 
     return (
         <main className='flex h-full dark:bg-primary-dark-200 w-full'>
@@ -23,7 +26,6 @@ export const Layout = () => {
                     </Sheet>,
                     document.querySelector('#modal-root')!
                 )}
-
             <Sidebar />
             <Outlet />
         </main>

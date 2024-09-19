@@ -1,14 +1,17 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Button } from '@/shared/ui/Button';
 import { LoaderCircle } from 'lucide-react';
-import { useSignin } from '../lib/hooks/useSignin';
+import { useSignin } from '../lib/useSignin';
 import { Input } from '@/shared/ui/Input';
 import { PasswordInput } from '@/shared/ui/PasswordInput';
-import { useSigninForm } from '@/widgets/SigninForm/lib/hooks/useSigninForm';
+import { useSigninForm } from '@/widgets/SigninForm/model/context';
+import { useAuth } from '@/pages/Auth';
 
-const Signin = () => {
-    const { setStage } = useSigninForm();
-    const { form, isSubmitButtonDisabled, onSubmit, onBack, loading } = useSignin();
+export const Signin = () => {
+    const { form, isSubmitButtonDisabled, onSubmit, loading } = useSignin();
+
+    const changeAuthStage = useAuth((state) => state.changeAuthStage);
+    const setStage = useSigninForm((state) => state.setStage);
 
     return (
         <Form {...form}>
@@ -63,7 +66,13 @@ const Signin = () => {
                         )}
                     />
                     <div className='flex w-full items-center justify-between'>
-                        <Button type='button' variant='secondary' className='w-24' onClick={onBack} disabled={loading}>
+                        <Button
+                            type='button'
+                            variant='secondary'
+                            className='w-24'
+                            onClick={() => changeAuthStage('welcome')}
+                            disabled={loading}
+                        >
                             Back
                         </Button>
                         <Button className='w-24' disabled={isSubmitButtonDisabled}>
@@ -75,5 +84,3 @@ const Signin = () => {
         </Form>
     );
 };
-
-export default Signin;

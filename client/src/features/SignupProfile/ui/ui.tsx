@@ -2,7 +2,7 @@ import { Input } from "@/shared/ui/Input";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/Form";
 import { SignupFormReturn } from "@/widgets/SignupForm/model/types";
 
-const SignupProfile = ({ form }: { form: SignupFormReturn }) => {
+export const SignupProfile = ({ form }: { form: SignupFormReturn }) => {
     return (
         <>
             <FormField
@@ -60,5 +60,3 @@ const SignupProfile = ({ form }: { form: SignupFormReturn }) => {
         </>
     );
 };
-
-export default SignupProfile;

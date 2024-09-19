@@ -1,5 +1,5 @@
 import React from 'react';
-import { FieldPath, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { ActionPasswordType, ChangePasswordSchemaType } from '../model/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -7,11 +7,7 @@ import { changePasswordSchema } from '../model/schema';
 import { useModal } from '@/shared/lib/providers/modal';
 import { changePasswordAPI } from '../api';
 import { checkFormErrors } from '@/shared/lib/utils/checkFormErrors';
-
-const steps: Array<{ fields: Array<FieldPath<ChangePasswordSchemaType>> }> = [
-    { fields: ['currentPassword'] },
-    { fields: ['newPassword'] }
-];
+import { steps } from '../model/constants';
 
 export const useChangePassword = () => {
     const [step, setStep] = React.useState(0);

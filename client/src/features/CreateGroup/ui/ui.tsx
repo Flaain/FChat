@@ -6,8 +6,8 @@ import { Button } from '@/shared/ui/Button';
 import { LoaderCircle } from 'lucide-react';
 import { Form } from '@/shared/ui/Form';
 import { useModal } from '@/shared/lib/providers/modal';
-import { useCreateGroup } from '../model/store';
 import { steps } from '../model/constants';
+import { useCreateGroup } from '../model/context';
 
 const stages: Record<number, React.ReactNode> = {
     0: <GroupNameStage />,
@@ -26,7 +26,7 @@ export const CreateGroup = () => {
         step: state.step,
         handleBack: state.handleBack,
         onSubmit: state.onSubmit,
-        isNextButtonDisabled: state.isNextButtonDisabled
+        isNextButtonDisabled: state.isNextButtonDisabled,
     }));
 
     React.useEffect(() => {

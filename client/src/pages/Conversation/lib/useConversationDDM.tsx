@@ -1,31 +1,32 @@
-import { api } from '@/shared/api';
 import { useModal } from '@/shared/lib/providers/modal';
 import { Confirm } from '@/shared/ui/Confirm';
 import { toast } from 'sonner';
 import { conversationAPI } from '../api';
-import { useConversationStore } from '../model/store';
+import { useConversationCtx} from '../model/context';
+import { profileAPI } from '@/entities/profile';
 
 export const useConversationDDM = () => {
-    const { conversation: { recipient } } = useConversationStore((state) => state.data);
     const { onAsyncActionModal, onCloseModal, onOpenModal } = useModal((state) => ({
         onAsyncActionModal: state.onAsyncActionModal,
         onCloseModal: state.onCloseModal,
         onOpenModal: state.onOpenModal
     }));
 
+    const recipient = useConversationCtx((state) => state.data.conversation.recipient);
+
     const handleUnblockRecipient = async () => {
         onOpenModal({
             content: (
                 <Confirm
-                    onConfirm={() => onAsyncActionModal(() => api.user.unblock({ recipientId: recipient._id }), {
+                    onConfirm={() => onAsyncActionModal(() => profileAPI.unblock({ recipientId: recipient._id }), {
+                        closeOnError: true,
                         onReject: () => {
                             toast.error('Failed to unblock user');
                         }
                     })}
                     onCancel={onCloseModal}
                     text={`Are you sure you want to unblock ${recipient.name}?`}
-                    onConfirmText='Block'
-                    onConfirmButtonVariant='destructive'
+                    onConfirmText='Unblock'
                 />
             ),
             withHeader: false,
@@ -37,13 +38,14 @@ export const useConversationDDM = () => {
             content: (
                 <Confirm
                     onConfirm={() => onAsyncActionModal(() => conversationAPI.delete(recipient._id), {
+                        closeOnError: true,
                         onReject: () => {
                             toast.error('Failed to delete conversation');
                         }
                     })}
                     onCancel={onCloseModal}
                     text={`Are you sure you want to delete conversation with ${recipient.name}?`}
-                    onConfirmText='Block'
+                    onConfirmText='Delete'
                     onConfirmButtonVariant='destructive'
                 />
             ),
@@ -56,7 +58,8 @@ export const useConversationDDM = () => {
         onOpenModal({
             content: (
                 <Confirm
-                    onConfirm={() => onAsyncActionModal(() => api.user.block({ recipientId: recipient._id }), {
+                    onConfirm={() => onAsyncActionModal(() => profileAPI.block({ recipientId: recipient._id }), {
+                        closeOnError: true,
                         onReject: () => {
                             toast.error('Failed to block user');
                         }

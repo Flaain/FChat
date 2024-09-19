@@ -3,7 +3,7 @@ export type SettingMenu = 'main' | PrivacyMenu | MyAccountMenu;
 export type PrivacyMenu = 'privacy' | 'sessions' | 'changePassword' | 'deleteAccount';
 export type MyAccountMenu = 'myAccount' | 'deleteAccount';
 
-export interface SettingsContextProps {
+export interface SettingsStore {
     currentMenu: SettingMenu;
     onMenuChange: (menu: SettingMenu) => void;
     onBack: () => void;
