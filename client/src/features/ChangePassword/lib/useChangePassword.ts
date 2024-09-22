@@ -4,16 +4,16 @@ import { ActionPasswordType, ChangePasswordSchemaType } from '../model/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { changePasswordSchema } from '../model/schema';
-import { useModal } from '@/shared/lib/providers/modal';
 import { changePasswordAPI } from '../api';
 import { checkFormErrors } from '@/shared/lib/utils/checkFormErrors';
 import { steps } from '../model/constants';
+import { useModal } from '@/shared/lib/providers/modal';
 
 export const useChangePassword = () => {
+    const { onAsyncActionModal } = useModal();
+
     const [step, setStep] = React.useState(0);
     const [isLoading, setIsLoading] = React.useState(false);
-
-    const onAsyncActionModal = useModal((state) => state.onAsyncActionModal);
 
     const form = useForm<ChangePasswordSchemaType>({
         resolver: zodResolver(changePasswordSchema),
@@ -43,12 +43,12 @@ export const useChangePassword = () => {
 
             const actions = {
                 0: () => onAsyncActionModal(() => changePasswordAPI.changePassword({ type: ActionPasswordType.CHECK, currentPassword }), {
-                        onReject: (error) => checkFormErrors({ error, form, step, steps }),
+                        onReject: (error) => checkFormErrors({ error, form, fields: steps[step].fields }),
                         onResolve: () => setStep((prevState) => prevState + 1),
                         closeOnSuccess: false
                     }),
                 1: () => onAsyncActionModal(() => changePasswordAPI.changePassword({ type: ActionPasswordType.SET, currentPassword, newPassword }), {
-                        onReject: (error) => checkFormErrors({ error, form, step, steps }),
+                        onReject: (error) => checkFormErrors({ error, form, fields: steps[step].fields }),
                         onResolve: () => toast.success('Password changed successfully', { position: 'top-center' })
                     }),
             };

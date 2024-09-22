@@ -1,37 +1,20 @@
 import { Typography } from '@/shared/ui/Typography';
-import SignupCredentials from '@/features/SignupCredentials/ui/ui';
-import SignupProfile from '@/features/SignupProfile/ui/ui';
+import { SignupProfile } from '@/widgets/SignupForm/ui/SignupProfile';
 import { OTP } from '@/features/OTP/ui/ui';
-import { useSignup } from '../lib/hooks/useSignup';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Button } from '@/shared/ui/Button';
 import { LoaderCircle } from 'lucide-react';
+import { SignupCredentials } from './SignupCredentials';
+import { steps } from '../model/constants';
+import { useSignup } from '../model/context';
 
-const SignupForm = () => {
-    const { form, isLastStep, loading, isNextButtonDisabled, step, stepsLength, onSubmit, onBack } = useSignup();
+const components = {
+    0: <SignupCredentials />,
+    1: <SignupProfile />
+};
 
-    const components = {
-        0: <SignupCredentials form={form} />,
-        1: <SignupProfile form={form} />,
-        2: (
-            <FormField
-                name='otp'
-                control={form.control}
-                render={({ field }) => {
-                    console.log(field);
-                    return (
-                        <FormItem className='relative'>
-                            <FormLabel className='text-white'>Enter verification code</FormLabel>
-                            <FormControl>
-                                <OTP {...field} onComplete={onSubmit} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )
-                }}
-            />
-        )
-    };
+export const SignupForm = () => {
+    const { form, step, loading, isLastStep, onSubmit, onBack, isNextButtonDisabled } = useSignup();
 
     return (
         <div className='flex items-center w-full h-full max-w-[1230px] box-border gap-5'>
@@ -61,9 +44,25 @@ const SignupForm = () => {
                         className='flex flex-col gap-4 h-full justify-center md:min-w-[400px] max-w-[560px] w-full'
                     >
                         <Typography variant='primary' weight='medium' className='mb-5'>
-                            Step {step + 1} of {stepsLength}
+                            Step {step + 1} of {steps.length}
                         </Typography>
-                        {components[step as keyof typeof components]}
+                        {isLastStep ? (
+                            <FormField
+                                name='otp'
+                                control={form.control}
+                                render={({ field }) => (
+                                    <FormItem className='relative'>
+                                        <FormLabel className='text-white'>Enter verification code</FormLabel>
+                                        <FormControl>
+                                            <OTP {...field} onComplete={onSubmit} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        ) : (
+                            components[step as keyof typeof components]
+                        )}
                         <div className='flex w-full items-center justify-between mt-5'>
                             <Button
                                 type='button'
@@ -86,5 +85,3 @@ const SignupForm = () => {
         </div>
     );
 };
-
-export default SignupForm;

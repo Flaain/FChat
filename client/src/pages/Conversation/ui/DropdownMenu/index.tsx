@@ -1,10 +1,10 @@
 import { EllipsisVertical, Lock, Trash } from 'lucide-react';
 import { useConversationDDM } from '../../lib/useConversationDDM';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu';
-import { useConversationCtx } from '../../model/context';
+import { useConversation } from '../../model/context';
 
 export const ConversationDDM = () => {
-    const { _id, isRecipientBlocked } = useConversationCtx((state) => state.data.conversation)
+    const { data: { conversation: { _id, isRecipientBlocked } } } = useConversation();
     const { handleBlockRecipient, handleDeleteConversation, handleUnblockRecipient } = useConversationDDM();
 
     return (

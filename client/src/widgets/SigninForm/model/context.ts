@@ -1,8 +1,9 @@
-import { createStore } from 'zustand';
-import { SigninStore } from './types';
-import { createZustandContext } from '@/shared/lib/utils/createZustandContext';
+import React from 'react';
+import { ISigninContext } from './types';
 
-export const { Provider: SigninFormProvider, useContext: useSigninForm } = createZustandContext<SigninStore>(() => createStore((set) => ({
+export const SigninContext = React.createContext<ISigninContext>({
     stage: 'signin',
-    setStage: (stage) => set({ stage })
-})));
+    setStage: () => {}
+});
+
+export const useSigninForm = () => React.useContext(SigninContext)

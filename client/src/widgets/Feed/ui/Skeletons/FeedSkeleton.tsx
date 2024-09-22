@@ -1,4 +1,4 @@
-import PreAnimatedSkeleton from '@/shared/ui/PreAnimatedSkeleton';
+import { PreAnimatedSkeleton } from '@/shared/ui/PreAnimatedSkeleton';
 
 const FeedSkeleton = ({ skeletonsCount = 5, animate = false }: { animate?: boolean; skeletonsCount?: number }) => {
     return (

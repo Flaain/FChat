@@ -1,6 +1,6 @@
-export type Theme = "light" | "dark";
+export type Theme = 'light' | 'dark';
 
-export interface ThemeStore {
+export interface IThemeContext {
     theme: Theme;
-    setTheme: (theme: Theme) => void;
+    setTheme: React.Dispatch<React.SetStateAction<Theme>>;
 }

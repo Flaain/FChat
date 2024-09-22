@@ -8,10 +8,9 @@ import { useSigninForm } from '@/widgets/SigninForm/model/context';
 import { useAuth } from '@/pages/Auth';
 
 export const Signin = () => {
+    const { changeAuthStage } = useAuth();
+    const { setStage } = useSigninForm();
     const { form, isSubmitButtonDisabled, onSubmit, loading } = useSignin();
-
-    const changeAuthStage = useAuth((state) => state.changeAuthStage);
-    const setStage = useSigninForm((state) => state.setStage);
 
     return (
         <Form {...form}>

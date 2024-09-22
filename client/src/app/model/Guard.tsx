@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router';
 import { routerList } from '../../shared/constants';
-import { useSession } from '@/entities/session/model/store';
+import { useSession } from '@/entities/session/model/context';
 import { GUARD_TYPE, GuardProps } from './types';
 
 export const Guard = ({ type, children, fallback }: GuardProps) => {

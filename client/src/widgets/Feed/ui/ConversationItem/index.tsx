@@ -5,12 +5,12 @@ import { ProfileIndicator } from '@/shared/ui/ProfileIndicator';
 import { cn } from '@/shared/lib/utils/cn';
 import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
-import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { ConversationFeed, PRESENCE, PartOfCompilerUse } from '@/shared/model/types';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
+import { useLayout } from '@/shared/model/store';
 
 const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
-    const { drafts } = useLayoutContext();
+    const drafts = useLayout((state) => state.drafts);
 
     const recipient = conversation.recipient;
     const draft = drafts.get(recipient._id);

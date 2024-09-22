@@ -5,13 +5,13 @@ import { AvatarByName } from '@/shared/ui/AvatarByName';
 import { SendMessage } from '@/features/SendMessage/ui/ui';
 import { Image } from '@/shared/ui/Image';
 import { FeedTypes } from '@/shared/model/types';
-import { useConversationCtx } from '../../model/context';
+import { useConversation } from '../../model/context';
 import { getConversationDescription } from '../../lib/getConversationDescription';
-import { useConversation } from '../../lib/useConversation';
 import { OutletContainer } from '@/shared/ui/OutletContainer';
 import { Typography } from '@/shared/ui/Typography';
 import { RecipientDetails } from '../RecipientDetails';
 import { ConversationDDM } from '../DropdownMenu';
+import { getScrollBottom } from '@/shared/lib/utils/getScrollBottom';
 
 export const Content = () => {
     const {
@@ -19,20 +19,13 @@ export const Content = () => {
         isRecipientTyping,
         getPreviousMessages,
         isPreviousMessagesLoading,
-        openDetails,
-        closeDetails,
-        showRecipientDetails
-    } = useConversationCtx((state) => ({
-        data: state.data,
-        isRecipientTyping: state.isRecipientTyping,
-        getPreviousMessages: state.getPreviousMessages,
-        isPreviousMessagesLoading: state.isPreviousMessagesLoading,
-        openDetails: state.openDetails,
-        closeDetails: state.closeDetails,
-        showRecipientDetails: state.showRecipientDetails
-    }));
-    const { handleTypingStatus } = useConversation();
-
+        showRecipientDetails,
+        handleTypingStatus,
+        onDetails,
+        lastMessageRef,
+        listRef
+    } = useConversation();
+    
     return (
         <OutletContainer>
             <div className='w-full h-svh flex flex-col gap-5'>
@@ -41,10 +34,12 @@ export const Content = () => {
                     isOfficial={data.conversation.recipient.isOfficial}
                     description={getConversationDescription({ data, isRecipientTyping })}
                     dropdownMenu={<ConversationDDM />}
-                    onClick={openDetails}
+                    onClick={() => onDetails(true)}
                 />
                 {data.conversation.messages.length ? (
                     <MessagesList
+                        listRef={listRef}
+                        lastMessageRef={lastMessageRef}
                         messages={data.conversation.messages}
                         getPreviousMessages={getPreviousMessages}
                         isFetchingPreviousMessages={isPreviousMessagesLoading}
@@ -70,6 +65,7 @@ export const Content = () => {
                 ) : (
                     <SendMessage
                         type='conversation'
+                        onAnchorClick={() => listRef.current?.scrollTo({ top: getScrollBottom(listRef.current!), left: 0, behavior: 'smooth' })}
                         onChange={handleTypingStatus}
                         queryId={data.conversation.recipient._id}
                     />
@@ -92,7 +88,7 @@ export const Content = () => {
                     })}
                     info={<RecipientDetails recipient={data.conversation.recipient} />}
                     type={FeedTypes.CONVERSATION}
-                    onClose={closeDetails}
+                    onClose={() => onDetails(false)}
                 />
             )}
         </OutletContainer>

@@ -2,17 +2,12 @@ import { useModal } from '@/shared/lib/providers/modal';
 import { Confirm } from '@/shared/ui/Confirm';
 import { toast } from 'sonner';
 import { conversationAPI } from '../api';
-import { useConversationCtx} from '../model/context';
 import { profileAPI } from '@/entities/profile';
+import { useConversation } from '../model/context';
 
 export const useConversationDDM = () => {
-    const { onAsyncActionModal, onCloseModal, onOpenModal } = useModal((state) => ({
-        onAsyncActionModal: state.onAsyncActionModal,
-        onCloseModal: state.onCloseModal,
-        onOpenModal: state.onOpenModal
-    }));
-
-    const recipient = useConversationCtx((state) => state.data.conversation.recipient);
+    const { onAsyncActionModal, onCloseModal, onOpenModal } = useModal();
+    const { data: { conversation: { recipient } } } = useConversation();
 
     const handleUnblockRecipient = async () => {
         onOpenModal({

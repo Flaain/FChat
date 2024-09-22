@@ -6,7 +6,7 @@ import { Message } from '@/entities/Message';
 import { useSession } from '@/entities/session';
 
 export const GroupedMessages = ({ messages, isLastGroup, lastMessageRef }: MessageGroupProps) => {
-    const { userId } = useSession();
+    const { state: { userId } } = useSession();
     
     const message = messages[0];
     const isUser = message.refPath === 'User';

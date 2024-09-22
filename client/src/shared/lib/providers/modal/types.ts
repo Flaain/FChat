@@ -19,8 +19,8 @@ export interface AsyncActionOptions<T> {
     onReject?: (error: unknown) => void;
 }
 
-export interface ModalStore {
-    isModalDisabled?: boolean;
+export interface IModalContext {
+    isModalDisabled: boolean;
     modals: Array<ModalConfig>;
     onOpenModal: (config: ModalConfig) => void;
     onCloseModal: () => void;

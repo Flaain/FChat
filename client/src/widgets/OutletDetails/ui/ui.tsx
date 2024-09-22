@@ -1,13 +1,13 @@
 import React from 'react';
 import { Button } from '@/shared/ui/Button';
 import { X } from 'lucide-react';
-import { useDomEvents } from '@/shared/model/store';
 import { Typography } from '@/shared/ui/Typography';
 import { OutletDetailsProps } from '../model/types';
 import { titles } from '../model/constants';
+import { useEvents } from '@/shared/lib/providers/events/context';
 
 export const OutletDetails = ({ onClose, avatarSlot, name, description, type, info }: OutletDetailsProps) => {
-    const addEventListener = useDomEvents((state) => state.addEventListener);
+    const { addEventListener } = useEvents();
 
     React.useEffect(() => {
         const removeEventListener = addEventListener('keydown', (event) => {

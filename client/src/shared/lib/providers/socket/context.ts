@@ -1,7 +1,9 @@
 import React from 'react';
-import { SocketContextProps } from './types';
+import { ISocketContext } from './types';
 
-export const SocketContext = React.createContext<SocketContextProps>({
+export const SocketContext = React.createContext<ISocketContext>({
     socket: null!,
     isConnected: false
 });
+
+export const useSocket = () => React.useContext(SocketContext);

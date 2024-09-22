@@ -11,7 +11,7 @@ const components: Record<SigninStages, React.ReactNode> = {
 };
 
 export const SigninForm = () => {
-    const stage = useSigninForm((state) => state.stage);
+    const { stage } = useSigninForm();
     
     return (
         <div className='flex items-center w-full h-full max-w-[1230px] box-border gap-5'>

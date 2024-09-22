@@ -8,13 +8,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const [isConnected, setIsConnected] = React.useState(false);
 
     React.useEffect(() => {
-        const socket = io(import.meta.env.VITE_BASE_URL, {
-            withCredentials: true
-        });
+        const socket = io(import.meta.env.VITE_BASE_URL, { withCredentials: true });
 
         socket.on('connect', () => {
-            setIsConnected(true);
-
             socket.emit(USER_EVENTS.PRESENCE, { presence: PRESENCE.ONLINE });
         });
 
@@ -29,7 +25,5 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         };
     }, []);
 
-    const value = React.useMemo(() => ({ socket, isConnected }), [socket, isConnected]);
-
-    return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
+    return <SocketContext.Provider value={{ socket, isConnected }}>{children}</SocketContext.Provider>;
 };

@@ -47,4 +47,4 @@ class MessageApi extends API {
     };
 }
 
-export const messageApi = new MessageApi();
+export const messageAPI = new MessageApi();

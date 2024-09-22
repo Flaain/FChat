@@ -1,8 +1,8 @@
 import { cn } from '@/shared/lib/utils/cn';
 import { Loader2, Verified } from 'lucide-react';
 import { OutletHeaderProps } from '../model/types';
-import { useSocket } from '@/shared/lib/hooks/useSocket';
 import { Typography } from '@/shared/ui/Typography';
+import { useSocket } from '@/shared/lib/providers/socket/context';
 
 export const OutletHeader = ({ name, isOfficial, description, dropdownMenu, ...rest }: OutletHeaderProps) => {
     const { isConnected } = useSocket();

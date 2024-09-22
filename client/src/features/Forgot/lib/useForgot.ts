@@ -5,18 +5,19 @@ import { toast } from 'sonner';
 import { forgotAPI } from '../api';
 import { forgotSchema } from '../model/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { otpAPI, useOtp } from '@/features/OTP';
-import { OtpType } from '@/features/OTP/model/types';
+import { otpAPI } from '@/features/OTP';
 import { checkFormErrors } from '@/shared/lib/utils/checkFormErrors';
 import { useSigninForm } from '@/widgets/SigninForm/model/context';
 import { steps } from '../model/constants';
+import { OtpType } from '@/shared/lib/providers/otp/types';
+import { useOtp } from '@/shared/lib/providers/otp/context';
 
 export const useForgot = () => {
+    const { setStage } = useSigninForm();
+    const { setOtp } = useOtp();
+
     const [step, setStep] = React.useState(0);
     const [isLoading, setIsLoading] = React.useState(false);
-    
-    const setOtp = useOtp((state) => state.setOtp);
-    const setStage = useSigninForm((state) => state.setStage);
 
     const form = useForm<ForgotSchemaType>({
         resolver: zodResolver(forgotSchema),
@@ -34,12 +35,10 @@ export const useForgot = () => {
         setTimeout(form.setFocus, 0, steps[step].fields[0]);
     }, [])
 
-    const checkNextAvailability = () => {
-        return (
-            !form.getValues(steps[step].fields).every(Boolean) ||
-            !!Object.entries(form.formState.errors).some(([key]) => steps[step].fields.includes(key as FieldPath<ForgotSchemaType>)) || isLoading
-        );
-    };
+    const isNextButtonDisabled = (
+        !form.getValues(steps[step].fields).every(Boolean) ||
+        !!Object.entries(form.formState.errors).some(([key]) => steps[step].fields.includes(key as FieldPath<ForgotSchemaType>)) || isLoading
+    );
 
     const onSubmit = async (event?: React.FormEvent<HTMLFormElement>) => {
         try {
@@ -57,7 +56,7 @@ export const useForgot = () => {
                 0: async () => {
                     const { data: { retryDelay } } = await forgotAPI.forgot({ email });
 
-                    setOtp({ retryDelay, type: OtpType.PASSWORD_RESET });
+                    setOtp({ targetEmail: email, type: OtpType.PASSWORD_RESET, retryDelay });
                     setStep((prevState) => prevState + 1);
                 },
                 1: async () => {
@@ -80,7 +79,7 @@ export const useForgot = () => {
             await actions[step as keyof typeof actions]();
         } catch (error) {
             console.error(error);
-            checkFormErrors({ error, form, step, steps });
+            checkFormErrors({ error, form, fields: steps[step].fields });
         } finally {
             setIsLoading(false);
         }
@@ -90,5 +89,5 @@ export const useForgot = () => {
         !step ? setStage('signin') : setStep((prevState) => prevState - 1)
     }, [step]);
 
-    return { form, step, isLoading, onSubmit, onBack, isNextButtonDisabled: checkNextAvailability() };
+    return { form, step, isLoading, onSubmit, onBack, isNextButtonDisabled };
 };

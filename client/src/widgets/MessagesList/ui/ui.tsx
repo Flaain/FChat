@@ -1,19 +1,27 @@
+import React from 'react';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { MessagesListProps } from '../model/types';
-import { useMessagesList } from '../lib/useMessagesList';
 import { GroupedMessages } from '@/features/GroupedMessages/ui/ui';
+import { Message } from '@/entities/Message/model/types';
 
-export const MessagesList = ({ messages, canFetch, getPreviousMessages, nextCursor, isFetchingPreviousMessages }: MessagesListProps) => {
-    const { groupedMessages, lastMessageRef, ref } = useMessagesList({ messages, canFetch, getPreviousMessages });
-    
+export const MessagesList = ({ canFetch, messages, getPreviousMessages, nextCursor, isFetchingPreviousMessages, lastMessageRef, listRef }: MessagesListProps) => {
+    const groupedMessages = React.useMemo(() => messages.reduce<Array<Array<Message>>>((acc, message) => {
+        const lastGroup = acc[acc.length - 1];
+
+        lastGroup && lastGroup[0].sender._id === message.sender._id ? lastGroup.push(message) : acc.push([message]);
+
+        return acc;
+    }, []), [messages])
+
     return (
-        <ul ref={ref} className='relative flex flex-col flex-1 w-full px-5 mb-auto gap-5 overflow-auto outline-none'>
+        <ul ref={listRef} className='relative flex flex-col flex-1 w-full px-5 mb-auto gap-5 overflow-auto outline-none'>
             {nextCursor && (
                 <li className='flex justify-center items-center'>
                     <Button
                         variant='text'
                         className='p-0 dark:text-primary-white/30 text-primary-white'
+                        disabled={!canFetch}
                         onClick={getPreviousMessages}
                     >
                         {isFetchingPreviousMessages ? (

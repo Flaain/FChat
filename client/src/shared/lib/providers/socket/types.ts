@@ -1,6 +1,6 @@
 import { Socket } from "socket.io-client";
 
-export interface SocketContextProps {
+export interface ISocketContext {
     socket: Socket;
     isConnected: boolean;
 }

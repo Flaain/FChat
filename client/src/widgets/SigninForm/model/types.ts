@@ -1,6 +1,6 @@
 import { SigninStages } from '@/features/Signin/model/types';
 
-export interface SigninStore {
+export interface ISigninContext {
     stage: SigninStages;
     setStage: (stage: SigninStages) => void;
 }

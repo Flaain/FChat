@@ -1,8 +1,9 @@
-import { createZustandContext } from '@/shared/lib/utils/createZustandContext';
-import { createStore } from 'zustand';
-import { AuthStore } from './types';
+import React from 'react';
+import { IAuthContext } from './types';
 
-export const { Provider: AuthProvider, useContext: useAuth } = createZustandContext<AuthStore>(() => createStore((set) => ({
+export const AuthContext = React.createContext<IAuthContext>({
     authStage: 'welcome',
-    changeAuthStage: (stage) => set({ authStage: stage })
-})));
+    changeAuthStage: () => {}
+});
+
+export const useAuth = () => React.useContext(AuthContext);

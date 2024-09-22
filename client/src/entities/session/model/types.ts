@@ -40,12 +40,9 @@ export interface CurrentSession {
     expiresAt: string;
 }
 
-export interface SessionStore {
-    userId: string;
-    isAuthorized: boolean;
-    isAuthInProgress: boolean;
-    onAuth: (userId: string) => void;
-    onLogout: () => void;
+export interface ISessionContext {
+    state: SessionState;
+    dispatch: React.Dispatch<SessionAction>;
 }
 
 export interface Session {
@@ -65,4 +62,21 @@ export interface SessionProps {
 export interface GetSessionsReturn {
     currentSession: CurrentSession;
     sessions: Array<Session>;
+}
+
+export enum SessionTypes {
+    AUTH_IN_PROGRESS = 'AUTH_IN_PROGRESS',
+    AUTH = 'AUTH',
+    LOGOUT = 'LOGOUT'
+}
+
+export type SessionAction =
+    | { type: SessionTypes.AUTH_IN_PROGRESS; payload: { isAuthInProgress: boolean } }
+    | { type: SessionTypes.AUTH; payload: { userId: string } }
+    | { type: SessionTypes.LOGOUT };
+
+export interface SessionState {
+    userId: string;
+    isAuthorized: boolean;
+    isAuthInProgress: boolean;
 }

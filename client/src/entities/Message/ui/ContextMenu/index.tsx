@@ -5,14 +5,15 @@ import { Copy, Edit2, Reply, Trash2 } from 'lucide-react';
 import { useMessage } from '../../lib/useMessage';
 import { ContextMenuProps } from '../../model/types';
 import { ModalConfig, useModal } from '@/shared/lib/providers/modal';
-import { useDomEvents, useSendMessage } from '@/shared/model/store';
+import { useSendMessage } from '@/shared/model/store';
 import { Confirm } from '@/shared/ui/Confirm';
+import { useEvents } from '@/shared/lib/providers/events/context';
 
 export const MessageContextMenu = ({ message, isMessageFromMe, onClose }: ContextMenuProps) => {
     const { handleCopyToClipboard, handleMessageDelete, handleContextAction } = useMessage(message);
     const { ref: textareaRef } = useSendMessage();
     const { onOpenModal, onCloseModal } = useModal();
-    const { addEventListener } = useDomEvents();
+    const { addEventListener } = useEvents();
 
     const confirmationConfig: ModalConfig = {
         content: (

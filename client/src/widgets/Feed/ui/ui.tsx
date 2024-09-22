@@ -7,14 +7,14 @@ import { UserSearch } from 'lucide-react';
 import { FeedProps } from '../model/types';
 import { ConversationFeed, FeedItem, FeedTypes, GroupFeed, UserFeed } from '@/shared/model/types';
 
-const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, searchLoading, searchValue }: FeedProps) => {
-    if (isFeedEmpty) return <FeedSkeleton skeletonsCount={3} />;
+const feedItems: Record<FeedTypes, (item: FeedItem) => React.ReactNode> = {
+    Conversation: (item) => <ConversationItem key={item._id} conversation={item as ConversationFeed} />,
+    User: (item) => <UserItem user={item as UserFeed} key={item._id} />,
+    Group: (item) => <GroupItem group={item as GroupFeed} key={item._id} />
+}
 
-    const feedItems: Record<FeedTypes, (item: FeedItem) => React.ReactNode> = {
-        Conversation: (item) => <ConversationItem key={item._id} conversation={item as ConversationFeed} />,
-        User: (item) => <UserItem user={item as UserFeed} key={item._id} />,
-        Group: (item) => <GroupItem group={item as GroupFeed} key={item._id} />
-    }
+export const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, searchLoading, searchValue }: FeedProps) => {
+    if (isFeedEmpty) return <FeedSkeleton skeletonsCount={3} />;
 
     return !searchLoading && !filteredLocalResults.length && !filteredGlobalResults?.length ? (
         <>
@@ -47,5 +47,3 @@ const Feed = ({ isFeedEmpty, filteredLocalResults, filteredGlobalResults, search
         </>
     );
 };
-
-export default Feed;

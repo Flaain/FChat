@@ -1,19 +1,20 @@
-import Feed from '@/widgets/Feed/ui/ui';
-import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
+import { Feed } from '@/widgets/Feed/ui/ui';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { AlignJustifyIcon, X } from 'lucide-react';
 import { SidebarProps } from '../model/types';
-import { useSidebar } from '../lib/hooks/useSidebar';
+import { useSidebar } from '../lib/useSidebar';
+import { useLayout } from '@/shared/model/store';
 
-const Sidebar = (props: SidebarProps) => {
-    const { setOpenSheet } = useLayoutContext();
+export const Sidebar = (props: SidebarProps) => {
     const { handleSearch, searchInputRef, handleLogout, resetSearch, feed } = useSidebar();
+    
+    const onOpenSheet = useLayout((state) => state.onOpenSheet);
 
     return (
         <aside className='flex flex-col h-screen sticky top-0 gap-2 dark:bg-primary-dark-150 bg-primary-white max-w-[420px] w-full border-r-2 border-r-primary-dark-50 border-solid'>
             <div className='flex items-center justify-between gap-5 sticky top-0 py-4 px-3'>
-                <Button variant='text' size='icon' onClick={() => setOpenSheet(true)} className='opacity-30'>
+                <Button variant='text' size='icon' onClick={onOpenSheet} className='opacity-30'>
                     <AlignJustifyIcon />
                 </Button>
                 <Input
@@ -38,5 +39,3 @@ const Sidebar = (props: SidebarProps) => {
         </aside>
     );
 };
-
-export default Sidebar;

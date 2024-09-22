@@ -1,16 +1,49 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Modal } from '@/shared/ui/Modal';
-import { useModal } from './store';
-import { useDomEvents } from '@/shared/model/store';
+import { useEvents } from '../events/context';
+import { ModalConfig } from '.';
+import { AsyncActionOptions, IModalContext } from './types';
+import { ModalContext } from './context';
 
 export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
-    const { addEventListener } = useDomEvents();
-    const { modals, onCloseModal, isModalDisabled } = useModal();
+    const { addEventListener } = useEvents();
+
+    const [modals, setModals] = React.useState<Array<ModalConfig>>([]);
+    const [isModalDisabled, setIsModalDisabled] = React.useState(false);
 
     const bodyRef = React.useRef<HTMLDivElement | null>(null);
     const focusableElements = React.useRef<Array<HTMLElement>>([]);
     const activeIndex = React.useRef(-1);
+
+    const onCloseModal = () => setModals((prevState) => prevState.slice(0, -1));
+
+    const onOpenModal = (config: ModalConfig) => setModals((prevState) => [...prevState, config]);
+
+    const onAsyncActionModal = async <T,>(
+        cb: () => Promise<T>,
+        {
+            closeOnError = false,
+            closeOnSuccess = true,
+            disableOnPending = true,
+            onResolve,
+            onReject
+        }: AsyncActionOptions<T> = {}
+    ) => {
+        try {
+            setIsModalDisabled(disableOnPending);
+
+            const data = await cb();
+
+            onResolve?.(data);
+            closeOnSuccess && onCloseModal();
+        } catch (error) {
+            onReject?.(error);
+            closeOnError && onCloseModal();
+        } finally {
+            setIsModalDisabled(false);
+        }
+    };
 
     const handleTabDown = (event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
         if (!bodyRef.current) return;
@@ -28,7 +61,7 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         const total = focusableElements.current.length;
         const currentIndex = activeIndex.current;
         activeIndex.current = total ? (currentIndex + (event.shiftKey ? -1 : 1) + total) % total : -1;
-        
+
         focusableElements.current[activeIndex.current]?.focus?.();
     };
 
@@ -36,13 +69,12 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         !isModalDisabled && event.key === 'Escape' && onCloseModal();
     };
 
-
     const handleKeyDown = (event: KeyboardEvent) => {
         event.stopImmediatePropagation();
-        
+
         const keyListeners = {
             Tab: handleTabDown,
-            Escape: handleEscapeDown,
+            Escape: handleEscapeDown
         };
 
         keyListeners[event.key as keyof typeof keyListeners]?.(event);
@@ -61,14 +93,22 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         return () => {
             document.body.classList.remove('overflow-hidden');
             document.body.style.paddingRight = '0';
-        
+
             removeEventListener();
         };
     }, [modals, handleKeyDown]);
 
+    const value: IModalContext = {
+        modals,
+        onAsyncActionModal,
+        onOpenModal,
+        onCloseModal,
+        isModalDisabled
+    };
+
     return (
-        <React.Fragment>
-            {modals.map(({ content, ...modal }, index, array) =>
+        <ModalContext.Provider value={value}>
+            {modals.map((modal, index, array) =>
                 ReactDOM.createPortal(
                     <Modal
                         key={index}
@@ -77,12 +117,12 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
                         ref={index === array.length - 1 ? bodyRef : null}
                         {...modal}
                     >
-                        {content}
+                        {modal.content}
                     </Modal>,
                     document.querySelector('#modal-root')!
                 )
             )}
             {children}
-        </React.Fragment>
+        </ModalContext.Provider>
     );
 };

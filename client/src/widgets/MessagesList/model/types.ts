@@ -6,10 +6,8 @@ export interface MessagesListProps {
     canFetch: boolean;
     isFetchingPreviousMessages: boolean;
     nextCursor: string | null;
+    listRef: React.RefObject<HTMLUListElement>;
+    lastMessageRef: React.RefObject<HTMLLIElement>;
 }
 
 export interface UseMessagesListParams extends Pick<MessagesListProps, 'messages' | 'getPreviousMessages' | 'canFetch'> {}
-
-export interface MessagesListStore {
-    ref: React.RefObject<HTMLUListElement>;
-}

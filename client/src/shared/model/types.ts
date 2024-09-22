@@ -1,6 +1,8 @@
 import React from 'react';
 import { MarkdownToJSX } from "markdown-to-jsx";
 import { FieldPath, FieldValues, UseFormReturn } from 'react-hook-form';
+import { Message } from '@/entities/Message/model/types';
+import { Conversation } from '@/pages/Conversation/model/types';
 
 export enum FeedTypes {
     CONVERSATION = 'Conversation',
@@ -115,8 +117,8 @@ export interface Group {
     login: string;
     participants: Array<GroupParticipant>;
     isOfficial?: boolean;
-    messages: Array<IMessage>;
-    lastMessage?: IMessage;
+    messages: Array<Message>;
+    lastMessage?: Message;
     lastMessageSentAt: string;
     createdAt: string;
     updatedAt: string;
@@ -208,7 +210,7 @@ export type UserFeed = SearchUser & { type: FeedTypes.USER };
 export interface Draft {
     value: string;
     state: MessageFormState;
-    selectedMessage?: IMessage;
+    selectedMessage?: Message;
 }
 
 export enum FEED_EVENTS {
@@ -234,7 +236,7 @@ export enum PRESENCE {
 }
 
 export interface DeleteMessageEventParams {
-    lastMessage: IMessage;
+    lastMessage: Message;
     lastMessageSentAt: string;
     id: string;
 }
@@ -265,50 +267,6 @@ export interface Pagination {
     limit?: number;
 }
 
-export interface EmojiMartData {
-    categories: Category[];
-    emojis: { [key: string]: Emoji };
-    aliases: { [key: string]: string };
-    sheet: Sheet;
-}
-
-export interface Category {
-    id: string;
-    emojis: string[];
-}
-
-export interface EmojiData {
-    aliases: Array<string>;
-    id: string;
-    keywords: Array<string>;
-    name: string;
-    native: string;
-    shortcodes: string;
-    skin: number;
-    unified: string;
-}
-
-export interface Emoji {
-    id: string;
-    name: string;
-    keywords: string[];
-    skins: Skin[];
-    version: number;
-    emoticons?: string[];
-}
-
-export interface Skin {
-    unified: string;
-    native: string;
-    x?: number;
-    y?: number;
-}
-
-export interface Sheet {
-    cols: number;
-    rows: number;
-}
-
 export interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
     skeleton?: React.ReactNode;
 }
@@ -317,30 +275,8 @@ export interface PreAnimatedSkeletonProps extends React.HTMLAttributes<HTMLSpanE
     animate?: boolean;
 }
 
-export type Listeners = Map<keyof GlobalEventHandlersEventMap, Set<(event: GlobalEventHandlersEventMap[keyof GlobalEventHandlersEventMap]) => void>>
-
-export interface DomEventsStore {
-    listeners: Map<any, any>;
-    addEventListener<E extends keyof GlobalEventHandlersEventMap>(type: E, listener: (event: GlobalEventHandlersEventMap[E]) => void): () => void;
-}
-
-export interface LayoutStore {
-    drafts: Map<string, Draft>;
-    isSheetOpen: boolean;
-    onOpenSheet: () => void;
-    onCloseSheet: () => void;
-    setDrafts: (cb: (drafts: Map<string, Draft>) => Map<string, Draft>) => void;
-}
-
 export interface SendMessageStore {
     showAnchor: boolean;
     changeAnchorVisibility: (value: boolean) => void;
     ref: React.RefObject<HTMLTextAreaElement>;
-}
-
-export interface CheckFormErrorsParams<T extends FieldValues> {
-    error: unknown;
-    form: UseFormReturn<T>;
-    step: number;
-    steps: Array<{ fields: Array<FieldPath<T>> }>;
 }

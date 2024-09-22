@@ -2,17 +2,12 @@ import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { ConversationStatuses } from '../model/types';
 import { ConversationSkeleton } from './Skeleton';
-import { Content } from '@radix-ui/react-context-menu';
-import { useConversationStore } from '../model/context';
 import { OutletError } from '@/shared/ui/OutletError';
+import { useConversation } from '../model/context';
+import { Content } from './Content';
 
 export const Conversation = () => {
-    const { status, error, refetch, isRefetching } = useConversationStore((state) => ({
-        status: state.status,
-        error: state.error,
-        refetch: state.refetch,
-        isRefetching: state.isRefetching
-    }));
+    const { status, error, refetch, isRefetching } = useConversation();
 
     const components: Record<ConversationStatuses, React.ReactNode> = {
         error: (

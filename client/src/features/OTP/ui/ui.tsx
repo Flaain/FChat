@@ -4,29 +4,12 @@ import { getOtpRetryTime } from '../lib/getOtpRetryTime';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/shared/ui/input-otp';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { Button } from '@/shared/ui/Button';
-import { OtpProps } from '../model/types';
 import { LoaderCircle } from 'lucide-react';
-import { useOtp } from '../model/store';
+import { OtpProps } from '@/shared/lib/providers/otp/types';
+import { useOtp } from '@/shared/lib/providers/otp/context';
 
 export const OTP = React.forwardRef<HTMLInputElement, OtpProps>(({ onComplete, disabled, ...rest }, ref) => {
-    const { isResending, otp: { retryDelay }, setOtp, onResend } = useOtp();
-
-    const timerRef = React.useRef<NodeJS.Timeout>();
-
-    React.useEffect(() => {
-        if (!retryDelay) return;
-      
-        timerRef.current = setInterval(() => {
-          if (retryDelay <= 0) {
-            clearInterval(timerRef.current!);
-            setOtp({ retryDelay: 0 });
-          } else {
-            setOtp({ retryDelay: retryDelay - 1000 });
-          }
-        }, 1000);
-      
-        return () => clearInterval(timerRef.current);
-      }, [!!retryDelay]);
+    const { isResending, otp: { retryDelay }, onResend } = useOtp();
 
         return (
             <div className='flex flex-col gap-2'>

@@ -29,22 +29,21 @@ export enum CONVERSATION_EVENTS {
     STOP_TYPING = 'conversation.stop.typing'
 }
 
-export interface ConversationStore {
+export interface IConversationContext {
     data: ConversationWithMeta;
-    abortController: { current: AbortController | null };
     status: ConversationStatuses;
     isPreviousMessagesLoading: boolean;
-    getConversation: (action: 'init' | 'refetch') => Promise<void>;
-    getPreviousMessages: () => Promise<void>;
+    showRecipientDetails: boolean;
     error: string | null;
     isRecipientTyping: boolean;
     isRefetching: boolean;
+    isTyping: boolean;
+    listRef: React.RefObject<HTMLUListElement>;
+    lastMessageRef: React.RefObject<HTMLLIElement>;
+    getPreviousMessages: () => Promise<void>;
     refetch: () => Promise<void>;
-    setConversation: (cb: (prevState: ConversationWithMeta) => ConversationWithMeta) => void;
-    setIsRecipientTyping: (value: boolean) => void;
-    openDetails: () => void;
-    closeDetails: () => void;
-    showRecipientDetails: boolean;
+    handleTypingStatus: () => void;
+    onDetails: (open: boolean) => void;
 }
 
 export interface Conversation {

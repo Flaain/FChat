@@ -4,11 +4,11 @@ import MessageTopBar from './MessageTopBar';
 import { Button } from '@/shared/ui/Button';
 import { ArrowDown, Edit2Icon, Paperclip, Reply, SendHorizonal, Smile } from 'lucide-react';
 import { toast } from 'sonner';
-import { useSendMessage } from '../lib/hooks/useSendMessage';
+import { useSendMessage } from '../lib/useSendMessage';
 import { EmojiPicker } from '@/shared/model/view';
 import { UseMessageParams } from '../model/types';
 import { MessageFormState } from '@/shared/model/types';
-import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
+import { useLayout } from '@/shared/lib/providers/layout/context';
 
 export const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick }: UseMessageParams) => {
     const {
@@ -21,11 +21,11 @@ export const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick
         onEmojiSelect,
         isEmojiPickerOpen,
         isLoading,
-        currentDraft,
         value
     } = useSendMessage({ type, queryId, onChange });
-    const { textareaRef } = useLayoutContext();
+    const { drafts, textareaRef } = useLayout();
 
+    const currentDraft = drafts.get(queryId!);
     const trimmedValueLength = value.trim().length;
 
     const messageBars: Record<Exclude<MessageFormState, 'send'>, React.ReactNode> = {
