@@ -5,22 +5,13 @@ import { X } from 'lucide-react';
 import { MessageTopBarProps } from '../../model/types';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 import { PartOfCompilerUse } from '@/shared/model/types';
-import { useDomEvents } from '@/shared/lib/hooks/useDomEvents';
+import { useEvents } from '@/shared/lib/providers/events/context';
 
-const MessageTopBar = ({
-    onClose,
-    title,
-    mainIconSlot,
-    closeIconSlot,
-    description,
-    preventClose
-}: MessageTopBarProps) => {
-    const { addEventListener } = useDomEvents();
+export const MessageTopBar = ({ onClose, title, mainIconSlot, closeIconSlot, description, preventClose }: MessageTopBarProps) => {
+    const { addEventListener } = useEvents();
 
     React.useEffect(() => {
         const removeEventListener = addEventListener('keydown', (event) => {
-            event.stopImmediatePropagation();
-
             !preventClose && event.key === 'Escape' && onClose();
         });
 
@@ -48,5 +39,3 @@ const MessageTopBar = ({
         </div>
     );
 };
-
-export default MessageTopBar;

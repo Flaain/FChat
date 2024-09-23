@@ -1,23 +1,15 @@
 import React from 'react';
 import { toast } from 'sonner';
 import { Draft } from '@/shared/model/types';
-import { useLayout } from '@/shared/model/store';
 import { useModal } from '@/shared/lib/providers/modal';
-import { messageApi } from '../api';
 import { Message } from '../model/types';
 import { useParams } from 'react-router-dom';
-import { useMessageStore } from '../model/store';
-
-const apiQueries: Record<'User' | 'Participant', string> = {
-    User: 'message',
-    Participant: 'message/group'
-}
+import { useLayout } from '@/shared/lib/providers/layout/context';
 
 export const useMessage = (message: Message) => {
     const { id } = useParams() as { id: string };
     const { setDrafts } = useLayout();
     const { onAsyncActionModal } = useModal();
-    const { isContextActionsDisabled } = useMessageStore();
 
     const handleCopyToClipboard = React.useCallback(() => {
         navigator.clipboard.writeText(message.text);

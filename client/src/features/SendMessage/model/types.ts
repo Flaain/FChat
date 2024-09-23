@@ -12,7 +12,11 @@ export interface UseMessageParams {
     showAnchor?: boolean;
     onChange?: (value: string) => void;
     onAnchorClick?: () => void;
-    queryId: string;
+    params: {
+        id: string;
+        apiUrl: string;
+        query: Record<string, any>;
+    }
 }
 
 export interface EmojiMartData {

@@ -1,33 +1,21 @@
 import React from 'react';
 import { toast } from 'sonner';
-import { api } from '@/shared/api';
-import { APIData, MessageFormState } from '@/shared/model/types';
+import { MessageFormState } from '@/shared/model/types';
 import { EmojiData, UseMessageParams } from '../model/types';
 import { useModal } from '@/shared/lib/providers/modal';
 import { useLayout } from '@/shared/lib/providers/layout/context';
 import { Confirm } from '@/shared/ui/Confirm';
-import { Message } from '@/entities/Message/model/types';
 import { messageAPI } from '@/entities/Message/api';
 
-export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) => {
+export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
     const { onCloseModal, onOpenModal, onAsyncActionModal } = useModal();
     const { drafts, setDrafts, textareaRef } = useLayout();
 
+    const currentDraft = drafts.get(params.id);
+
     const [isLoading, setIsLoading] = React.useState(false);
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false);
-    const [value, setValue] = React.useState(drafts.get(queryId!)?.value ?? '');
-
-    const currentDraft = drafts.get(queryId);
-
-    const resetDraft = () => {
-        setDrafts((prevState) => {
-            const newState = new Map([...prevState]);
-            
-            newState.delete(queryId);
-            
-            return newState
-        })
-    }
+    const [value, setValue] = React.useState(currentDraft?.value ?? '');
 
     const onEmojiSelect = React.useCallback(({ native }: EmojiData) => {
         setValue((prev) => prev + native);
@@ -62,7 +50,7 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
         setDrafts((prevState) => {
             const newState = new Map([...prevState]);
 
-            newState.delete(queryId);
+            newState.delete(params.id);
 
             return newState;
         });
@@ -72,22 +60,22 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
         textareaRef.current?.focus();
     }, []);
 
-    const handleDeleteConversationMessage = React.useCallback(async () => {
+    const handleDeleteMessage = React.useCallback(async () => {
         onAsyncActionModal(() => messageAPI.delete({ 
-            query: `message/delete/${currentDraft?.selectedMessage?._id!}`, 
-            body: JSON.stringify({ recipientId: queryId }) 
+            query: `${params.apiUrl}/delete/${currentDraft?.selectedMessage?._id!}`, 
+            body: JSON.stringify(params.query) 
         }), {
             closeOnError: true,
             onResolve: () => {
                 toast.success('Message deleted', { position: 'top-center' });
-                resetDraft();
+                setDefaultState();
             },
             onReject: () => {
                 toast.error('Cannot delete message', { position: 'top-center' });
                 textareaRef.current?.focus();
             }
         })
-    }, [currentDraft, queryId]);
+    }, [currentDraft, params.id]);
     
     const onBlur = React.useCallback(({ target: { value } }: React.FocusEvent<HTMLTextAreaElement, Element>) => {
         const trimmedValue = value.trim();
@@ -98,25 +86,23 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
             const newState = new Map([...prevState]);
             const isEmpty = !trimmedValue.length && currentDraft?.state === 'send';
 
-            isEmpty ? newState.delete(queryId) : newState.set(queryId, currentDraft ? { ...currentDraft, value: trimmedValue } : { 
+            isEmpty ? newState.delete(params.id) : newState.set(params.id, currentDraft ? { ...currentDraft, value: trimmedValue } : { 
                 state: 'send', 
                 value: trimmedValue 
             });
 
             return newState;
         });
-    }, [queryId, currentDraft]);
+    }, [params.id, currentDraft]);
 
-    const onSendEditedMessage = async () => {
+    const onSendEditedMessage = async (message: string) => {
         try {
-            const trimmedValue = value.trim();
-
-            if (!trimmedValue.length)
+            if (!message.length)
                 return onOpenModal({
                     content: (
                         <Confirm
                             onCancel={onCloseModal}
-                            onConfirm={handleDeleteConversationMessage}
+                            onConfirm={handleDeleteMessage}
                             onConfirmText='Delete'
                             text='Are you sure you want to delete this message?'
                             onConfirmButtonVariant='destructive'
@@ -126,58 +112,37 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
                     bodyClassName: 'h-auto p-5 w-[400px]'
                 });
 
-            if (trimmedValue === currentDraft!.selectedMessage!.text) return;
+            if (message === currentDraft!.selectedMessage!.text) return;
 
-            const actions: Record<typeof type, (params: { messageId: string; message: string }) => Promise<APIData<Message>>> = {
-                conversation: ({ messageId, message }) => messageAPI.edit({ 
-                    query: `message/edit/${messageId}`, 
-                    body: JSON.stringify({ message, recipientId: queryId }) 
-                }),
-                group: async () => null!
-            };
-
-            await actions[type]({ messageId: currentDraft!.selectedMessage!._id, message: trimmedValue });
+            await messageAPI.edit({ 
+                query: `${params.apiUrl}/edit/${currentDraft!.selectedMessage!._id}`,
+                body: JSON.stringify({ message, ...params.query })
+             })
         } catch (error) {
             console.error(error);
             toast.error('Cannot edit message', { position: 'top-center' });
         }
     };
 
-    const onSendMessage = async () => {
+    const onSendMessage = async (message: string) => {
         try {
-            const trimmedValue = value.trim();
+            if (!message.length) return;
 
-            if (!trimmedValue.length) return;
-
-            const actions: Record<typeof type, (message: string) => Promise<void | APIData<Message>>> = {
-                conversation: (message) => messageAPI.send({ query: `message/send/${queryId}`, body: JSON.stringify({ message }) }),
-                group: async (message) => {
-                    toast.info('Not implemented', { position: 'top-center', description: message });
-                }
-            };
-
-            await actions[type](trimmedValue);
+            await messageAPI.send({ query: `${params.apiUrl}/send/${params.id}`, body: JSON.stringify({ message }) })
         } catch (error) {
             console.error(error);
             toast.error('Cannot send message', { position: 'top-center' });
         }
     };
 
-    const onReplyMessage = async () => {
+    const onReplyMessage = async (message: string) => {
         try {
-            const trimmedValue = value.trim();
+            if (!message.length) return;
 
-            if (!trimmedValue.length) return;
-
-            const actions: Record<typeof type, (message: string) => Promise<void | APIData<Message>>> = {
-                conversation: (message: string) => messageAPI.reply({ 
-                    query: `message/reply/${currentDraft!.selectedMessage!._id}`,
-                    body: JSON.stringify({ message, recipientId: queryId })
-                }),
-                group: async (message: string) => {}
-            };
-
-            await actions[type](trimmedValue);
+            await messageAPI.reply({ 
+                query: `${params.apiUrl}/reply/${currentDraft!.selectedMessage!._id}`,
+                body: JSON.stringify({ message, ...params.query })
+             })
         } catch (error) {
             console.error(error);
             toast.error('Cannot reply message', { position: 'top-center' });
@@ -190,13 +155,13 @@ export const useSendMessage = ({ type, queryId, onChange }: UseMessageParams) =>
 
             setIsLoading(true);
 
-            const actions: Record<MessageFormState, () => Promise<void>> = {
+            const actions: Record<MessageFormState, (message: string) => Promise<void>> = {
                 send: onSendMessage,
                 edit: onSendEditedMessage,
                 reply: onReplyMessage
             };
 
-            await actions[currentDraft?.state ?? 'send']();
+            await actions[currentDraft?.state ?? 'send'](value.trim());
         } catch (error) {
             console.error(error);
         } finally {

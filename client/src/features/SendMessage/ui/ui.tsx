@@ -1,6 +1,6 @@
 import React from 'react';
 import EmojiPickerFallback from '@emoji-mart/react';
-import MessageTopBar from './MessageTopBar';
+import { MessageTopBar } from './MessageTopBar';
 import { Button } from '@/shared/ui/Button';
 import { ArrowDown, Edit2Icon, Paperclip, Reply, SendHorizonal, Smile } from 'lucide-react';
 import { toast } from 'sonner';
@@ -10,7 +10,7 @@ import { UseMessageParams } from '../model/types';
 import { MessageFormState } from '@/shared/model/types';
 import { useLayout } from '@/shared/lib/providers/layout/context';
 
-export const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick }: UseMessageParams) => {
+export const SendMessage = ({ type, params, onChange, showAnchor, onAnchorClick }: UseMessageParams) => {
     const {
         handleSubmitMessage,
         onKeyDown,
@@ -22,11 +22,10 @@ export const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick
         isEmojiPickerOpen,
         isLoading,
         value
-    } = useSendMessage({ type, queryId, onChange });
+    } = useSendMessage({ type, params, onChange });
     const { drafts, textareaRef } = useLayout();
 
-    const currentDraft = drafts.get(queryId!);
-    const trimmedValueLength = value.trim().length;
+    const currentDraft = drafts.get(params.id);
 
     const messageBars: Record<Exclude<MessageFormState, 'send'>, React.ReactNode> = {
         edit: (
@@ -116,7 +115,7 @@ export const SendMessage = ({ type, queryId, onChange, showAnchor, onAnchorClick
                     variant='text'
                     size='icon'
                     type='submit'
-                    disabled={!trimmedValueLength && currentDraft?.state !== 'edit' || isLoading}
+                    disabled={!value.trim().length && currentDraft?.state !== 'edit' || isLoading}
                     className='pr-5'
                 >
                     <SendHorizonal className='w-6 h-6' />

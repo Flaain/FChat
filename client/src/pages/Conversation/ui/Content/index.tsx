@@ -67,7 +67,11 @@ export const Content = () => {
                         type='conversation'
                         onAnchorClick={() => listRef.current?.scrollTo({ top: getScrollBottom(listRef.current!), left: 0, behavior: 'smooth' })}
                         onChange={handleTypingStatus}
-                        queryId={data.conversation.recipient._id}
+                        params={{ 
+                            apiUrl: 'message', 
+                            id: data.conversation.recipient._id, 
+                            query: { recipientId: data.conversation.recipient._id } 
+                        }}
                     />
                 )}
             </div>
