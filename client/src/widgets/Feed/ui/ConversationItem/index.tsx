@@ -7,10 +7,10 @@ import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { ConversationFeed, PRESENCE, PartOfCompilerUse } from '@/shared/model/types';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
-import { useLayout } from '@/shared/model/store';
+import { useLayout } from '@/shared/lib/providers/layout/context';
 
 const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
-    const drafts = useLayout((state) => state.drafts);
+    const { drafts } = useLayout();
 
     const recipient = conversation.recipient;
     const draft = drafts.get(recipient._id);

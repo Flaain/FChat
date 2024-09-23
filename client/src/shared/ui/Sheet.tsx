@@ -3,7 +3,7 @@ import { SheetProps } from '@/shared/model/types';
 import { XIcon } from 'lucide-react';
 import { cn } from '../lib/utils/cn';
 import { Typography } from './Typography';
-import { useDomEvents } from '../model/store';
+import { useEvents } from '../lib/providers/events/context';
 
 const SheetHeader = ({ title, closeHandler }: Pick<SheetProps, 'title' | 'closeHandler'>) => {
     return (
@@ -56,7 +56,7 @@ const SheetContainer = ({ children, direction = 'left', closeHandler }: Omit<She
 };
 
 const SheetBody = ({ children, closeHandler, className, ...rest }: SheetProps & React.HTMLAttributes<HTMLDivElement>) => {
-    const { addEventListener } = useDomEvents();
+    const { addEventListener } = useEvents();
 
     const bodyRef = React.useRef<HTMLDivElement | null>(null);
     const focusableElements = React.useRef<Array<HTMLElement>>([]);

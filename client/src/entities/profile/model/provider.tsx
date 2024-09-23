@@ -6,6 +6,7 @@ import { SessionTypes } from '@/entities/session/model/types';
 import { imageValidators } from './constants';
 import { toast } from 'sonner';
 import { ProfileContext } from './context';
+import { debounce } from '@/shared/lib/utils/debounce';
 
 export const ProfileProvider = ({ children }: { children: React.ReactNode }) => {
     const { dispatch } = useSession();
@@ -63,12 +64,24 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
         }
     };
 
+    const handleSetStatus = React.useCallback(debounce(async (value: string) => {
+        try {
+            await profileAPI.status({ status: value });
+
+            setProfile((prevState) => ({ ...prevState, status: value }));
+        } catch (error) {
+            console.error(error);
+        }
+    }, 500), []);
+
     return (
         <ProfileContext.Provider
             value={{
                 profile,
                 isUploadingAvatar,
-                handleUploadAvatar
+                handleUploadAvatar,
+                handleSetStatus,
+                setProfile
             }}
         >
             {children}

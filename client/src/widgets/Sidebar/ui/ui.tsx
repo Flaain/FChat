@@ -4,17 +4,17 @@ import { Input } from '@/shared/ui/Input';
 import { AlignJustifyIcon, X } from 'lucide-react';
 import { SidebarProps } from '../model/types';
 import { useSidebar } from '../lib/useSidebar';
-import { useLayout } from '@/shared/model/store';
+import { useLayout } from '@/shared/lib/providers/layout/context';
 
 export const Sidebar = (props: SidebarProps) => {
     const { handleSearch, searchInputRef, handleLogout, resetSearch, feed } = useSidebar();
+    const { onSheet } = useLayout();
     
-    const onOpenSheet = useLayout((state) => state.onOpenSheet);
 
     return (
         <aside className='flex flex-col h-screen sticky top-0 gap-2 dark:bg-primary-dark-150 bg-primary-white max-w-[420px] w-full border-r-2 border-r-primary-dark-50 border-solid'>
             <div className='flex items-center justify-between gap-5 sticky top-0 py-4 px-3'>
-                <Button variant='text' size='icon' onClick={onOpenSheet} className='opacity-30'>
+                <Button variant='text' size='icon' onClick={() => onSheet(true)} className='opacity-30'>
                     <AlignJustifyIcon />
                 </Button>
                 <Input

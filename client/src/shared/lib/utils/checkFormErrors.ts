@@ -5,12 +5,16 @@ export interface CheckFormErrorsParams<T extends FieldValues> {
     error: unknown;
     form: UseFormReturn<T>;
     fields: Array<FieldPath<T>>;
+    cb?: (error: { path : string, message: string }) => void;
 }
 
-export const checkFormErrors = <T extends FieldValues>({ error, form, fields }: CheckFormErrorsParams<T>) => {
+export const checkFormErrors = <T extends FieldValues>({ error, form, fields, cb }: CheckFormErrorsParams<T>) => {
     if (error instanceof AppException) {
         error.errors?.forEach(({ path, message }) => {
-            fields.includes(path as FieldPath<T>) && form.setError(path as FieldPath<T>, { message }, { shouldFocus: true });
+            if (fields.includes(path as FieldPath<T>)) {
+                form.setError(path as FieldPath<T>, { message }, { shouldFocus: true });
+                cb?.({ path, message });
+            }
         });
 
         !error.errors && error.toastError();

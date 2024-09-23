@@ -21,25 +21,25 @@ const components: Record<Exclude<SettingMenu, 'deleteAccount'>, React.ReactNode>
 };
 
 export const Settings = () => {
-    const { closeModal, isModalDisabled } = useModal((state) => ({ closeModal: state.onCloseModal, isModalDisabled: state.isModalDisabled }));
-    const { currentMenu, onBack } = useSettings((state) => ({ currentMenu: state.currentMenu, onBack: state.onBack }));
+    const { onCloseModal, isModalDisabled } = useModal();
+    const { menu, onBack } = useSettings();
 
     return (
         <div className='flex flex-col py-5'>
             <div className='flex items-center px-5 gap-5'>
-                {currentMenu !== 'main' && (
+                {menu !== 'main' && (
                     <Button variant='text' size='icon' className='h-auto p-0' onClick={onBack} disabled={isModalDisabled}>
                         <ArrowLeft className='w-6 h-6' />
                     </Button>
                 )}
                 <Typography as='h1' variant='primary' size='xl' weight='medium' className='self-start'>
-                    {titles[currentMenu]}
+                    {titles[menu]}
                 </Typography>
-                <Button variant='text' size='icon' className='h-auto p-0 ml-auto' onClick={() => closeModal()} disabled={isModalDisabled}>
+                <Button variant='text' size='icon' className='h-auto p-0 ml-auto' onClick={onCloseModal} disabled={isModalDisabled}>
                     <X className='w-6 h-6' />
                 </Button>
             </div>
-            {components[currentMenu as keyof typeof components]}
+            {components[menu as keyof typeof components]}
         </div>
     );
 };

@@ -10,7 +10,7 @@ import { UseMessageParams } from '../model/types';
 import { MessageFormState } from '@/shared/model/types';
 import { useLayout } from '@/shared/lib/providers/layout/context';
 
-export const SendMessage = ({ type, params, onChange, showAnchor, onAnchorClick }: UseMessageParams) => {
+export const SendMessage = ({ params, onChange, showAnchor, onAnchorClick }: UseMessageParams) => {
     const {
         handleSubmitMessage,
         onKeyDown,
@@ -22,7 +22,7 @@ export const SendMessage = ({ type, params, onChange, showAnchor, onAnchorClick 
         isEmojiPickerOpen,
         isLoading,
         value
-    } = useSendMessage({ type, params, onChange });
+    } = useSendMessage({ params, onChange });
     const { drafts, textareaRef } = useLayout();
 
     const currentDraft = drafts.get(params.id);

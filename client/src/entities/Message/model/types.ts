@@ -7,16 +7,20 @@ export interface REMOVE_THIS_LATER {
     user: Recipient;
 }
 
+export type MessageSender =
+    | { sender: Recipient; refPath: 'User' }
+    | { sender: REMOVE_THIS_LATER; refPath: 'Participant' };
+
 export type Message = {
     _id: string;
     hasBeenRead: boolean;
     hasBeenEdited: boolean;
     text: string;
-    replyTo?: Pick<Message, '_id' | 'text'> & ({ sender: Recipient; refPath: "User" } | { sender: REMOVE_THIS_LATER; refPath: "Participant" }) | null;
+    replyTo?: Pick<Message, '_id' | 'text'> & MessageSender | null;
     createdAt: string;
     updatedAt: string;
     sendingInProgress?: boolean;
-} & ({ sender: Recipient; refPath: "User" } | { sender: REMOVE_THIS_LATER; refPath: "Participant" });
+} & MessageSender;
 
 export interface UseMessageProps {
     message: Message;
@@ -44,8 +48,4 @@ export interface DeleteMessageRes {
 export interface DefaultParamsAPI {
     query: string;
     body: string;
-}
-
-export interface MessageStore {
-    isContextActionsDisabled: boolean;
 }

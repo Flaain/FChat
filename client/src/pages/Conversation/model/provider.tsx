@@ -248,6 +248,7 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
     const value: IConversationContext = {
         data,
         status,
+        showAnchor,
         isPreviousMessagesLoading,
         showRecipientDetails,
         error,

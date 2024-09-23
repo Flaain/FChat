@@ -3,7 +3,7 @@ import { useSettings } from '@/widgets/Settings/model/context';
 import { LockKeyhole, MonitorSmartphone } from 'lucide-react';
 
 const Privacy = () => {
-    const onMenuChange = useSettings((state) => state.onMenuChange);
+    const { onMenuChange } = useSettings();
     
     return (
         <ul className='flex flex-col pt-5'>

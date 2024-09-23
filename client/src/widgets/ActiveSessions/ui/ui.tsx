@@ -9,10 +9,7 @@ import { Confirm } from '@/shared/ui/Confirm';
 
 export const ActiveSessions = () => {
     const { sessions, isLoading, isTerminating, handleTerimanteSessions, handleDropSession } = useActiveSessions();
-    const { onCloseModal, onOpenModal } = useModal((state) => ({
-        onCloseModal: state.onCloseModal,
-        onOpenModal: state.onOpenModal
-    }));
+    const { onCloseModal, onOpenModal } = useModal();
 
     if (isLoading) return <ActiveSessionsSkeleton />;
 

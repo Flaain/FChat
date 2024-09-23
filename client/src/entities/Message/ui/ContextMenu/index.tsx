@@ -5,13 +5,13 @@ import { Copy, Edit2, Reply, Trash2 } from 'lucide-react';
 import { useMessage } from '../../lib/useMessage';
 import { ContextMenuProps } from '../../model/types';
 import { ModalConfig, useModal } from '@/shared/lib/providers/modal';
-import { useSendMessage } from '@/shared/model/store';
 import { Confirm } from '@/shared/ui/Confirm';
 import { useEvents } from '@/shared/lib/providers/events/context';
+import { useLayout } from '@/shared/lib/providers/layout/context';
 
 export const MessageContextMenu = ({ message, isMessageFromMe, onClose }: ContextMenuProps) => {
     const { handleCopyToClipboard, handleMessageDelete, handleContextAction } = useMessage(message);
-    const { ref: textareaRef } = useSendMessage();
+    const { textareaRef } = useLayout();
     const { onOpenModal, onCloseModal } = useModal();
     const { addEventListener } = useEvents();
 
@@ -31,8 +31,6 @@ export const MessageContextMenu = ({ message, isMessageFromMe, onClose }: Contex
 
     React.useEffect(() => {
         const removeEventListener = addEventListener('keydown', (event) => {
-            event.stopImmediatePropagation();
-
             event.key === 'Escape' && onClose();
         });
 
@@ -70,7 +68,7 @@ export const MessageContextMenu = ({ message, isMessageFromMe, onClose }: Contex
                         <Typography size='sm'>Copy</Typography>
                     </li>
                 </ContextMenuItem>
-                {message.refPath === 'User' && isMessageFromMe && (
+                {isMessageFromMe && (
                     <>
                         <ContextMenuItem
                             asChild

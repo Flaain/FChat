@@ -3,7 +3,7 @@ import { useProfile } from '@/entities/profile';
 import { MAX_STATUS_SIZE, STOP_SIZE } from '@/entities/profile/model/constants';
 
 export const useMyAccount = () => {
-    const { profile: { status }, handleChangeStatus } = useProfile((state) => ({ profile: state.profile, handleChangeStatus: state.handleChangeStatus }));
+    const { profile: { status }, handleSetStatus } = useProfile();
     
     const [symbolsLeft, setSymbolsLeft] = React.useState(MAX_STATUS_SIZE - (status?.length ?? 0));
     const [statusValue, setStatusValue] = React.useState(status ?? '');
@@ -16,7 +16,7 @@ export const useMyAccount = () => {
         setStatusValue(value);
         setSymbolsLeft(MAX_STATUS_SIZE - value.length);
 
-        trimmedValue.length <= MAX_STATUS_SIZE && handleChangeStatus(trimmedValue);
+        trimmedValue.length <= MAX_STATUS_SIZE && handleSetStatus(trimmedValue);
     };
 
     return {

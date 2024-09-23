@@ -13,7 +13,7 @@ export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
     ({ message, isFirst, isLast, isMessageFromMe, className, ...rest }, ref) => {
         const [isContextMenuOpen, setIsContextMenuOpen] = React.useState(false);
 
-        const { createdAt, updatedAt, sender, text, hasBeenRead, hasBeenEdited, replyTo } = message;
+        const { createdAt, refPath, updatedAt, sender, text, hasBeenRead, hasBeenEdited, replyTo } = message;
 
         const createTime = new Date(createdAt);
         const editTime = new Date(updatedAt);
@@ -40,7 +40,7 @@ export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                     >
                         {!isMessageFromMe && isFirst && (
                             <Typography variant='primary' weight='semibold'>
-                                {sender.name}
+                                {refPath === "User" ? sender.name : (sender.name || sender.user.name)}
                             </Typography>
                         )}
                         <div
@@ -62,11 +62,7 @@ export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                                         'line-clamp-1 dark:text-primary-blue text-xs flex flex-col py-1 px-2 w-full rounded bg-primary-blue/10 border-l-4 border-solid border-primary-blue'
                                     )}
                                 >
-                                    {replyTo === null
-                                        ? 'Deleted Message'
-                                        : replyTo.refPath === 'User'
-                                        ? replyTo.sender.name
-                                        : replyTo.sender.name || replyTo.sender.user.name}
+                                    {replyTo === null ? 'Deleted Message' : replyTo.refPath === 'User' ? replyTo.sender.name : (replyTo.sender.name || replyTo.sender.user.name)}
                                     {!!replyTo && (
                                         <Typography
                                             className={cn(

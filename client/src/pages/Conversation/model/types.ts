@@ -34,6 +34,7 @@ export interface IConversationContext {
     status: ConversationStatuses;
     isPreviousMessagesLoading: boolean;
     showRecipientDetails: boolean;
+    showAnchor: boolean;
     error: string | null;
     isRecipientTyping: boolean;
     isRefetching: boolean;
@@ -59,7 +60,9 @@ export interface Conversation {
 }
 
 export interface GetDescriptionParams {
-    data: Pick<ConversationWithMeta, 'conversation'>;
+    data: {
+        recipient: Pick<Recipient, 'presence' | 'lastSeenAt'>
+    } & Pick<Conversation, 'isInitiatorBlocked' | 'isRecipientBlocked'>;
     shouldDisplayTypingStatus?: boolean;
     isRecipientTyping: boolean;
 }

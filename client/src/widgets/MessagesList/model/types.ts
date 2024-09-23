@@ -6,8 +6,16 @@ export interface MessagesListProps {
     canFetch: boolean;
     isFetchingPreviousMessages: boolean;
     nextCursor: string | null;
-    listRef: React.RefObject<HTMLUListElement>;
+}
+
+export interface IMessagesListContext {
     lastMessageRef: React.RefObject<HTMLLIElement>;
+    isContextActionsBlocked?: boolean;
+    params: {
+        id: string;
+        apiUrl: string;
+        query: Record<string, any>;
+    }
 }
 
 export interface UseMessagesListParams extends Pick<MessagesListProps, 'messages' | 'getPreviousMessages' | 'canFetch'> {}

@@ -6,14 +6,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "./schema";
 import { signupAPI } from "../api";
 import { UserCheckType } from "@/shared/model/types";
-import { otpAPI, useOtp } from "@/features/OTP";
-import { OtpType } from "@/features/OTP/model/types";
+import { otpAPI } from "@/features/OTP";
 import { useProfile } from "@/entities/profile";
 import { useSession } from "@/entities/session";
 import { checkFormErrors } from "@/shared/lib/utils/checkFormErrors";
 import { SignupContext } from "./context";
+import { useOtp } from "@/shared/lib/providers/otp/context";
+import { OtpType } from "@/shared/lib/providers/otp/types";
+import { useAuth } from "@/pages/Auth";
+import { SessionTypes } from "@/entities/session/model/types";
 
 export const SignupProvider = ({ children }: { children: React.ReactNode; }) => {
+    const { setOtp } = useOtp();
+    const { changeAuthStage } = useAuth();
+    const { setProfile } = useProfile();
+    const { dispatch } = useSession();
+
     const [step, setStep] = React.useState(0);
     const [loading, setLoading] = React.useState(false);
 
@@ -68,22 +76,26 @@ export const SignupProvider = ({ children }: { children: React.ReactNode; }) => 
                     const { data: { retryDelay } } = await otpAPI.create({ email: data.email, type: OtpType.EMAIL_VERIFICATION });
                     
                     setStep((prevState) => prevState + 1);
-
-                    useOtp.getState().setOtp({ targetEmail: data.email, type: OtpType.EMAIL_VERIFICATION, retryDelay });
+                    setOtp({ targetEmail: data.email, type: OtpType.EMAIL_VERIFICATION, retryDelay });
                 },
                 2: async () => {
                     const { confirmPassword, ...rest } = data;
                     
                     const { data: profile } = await signupAPI.signup(rest);
 
-                    useProfile.getState().setProfile(profile);
-                    useSession.getState().onAuth(profile._id);
+                    setProfile(profile);
+                    dispatch({ type: SessionTypes.AUTH, payload: { userId: profile._id } });
                 }
             };
 
             await actions[step as keyof typeof actions]();
         } catch (error) {
-            checkFormErrors({ error, form, fields: steps[step].fields });
+            checkFormErrors({
+                error,
+                form,
+                fields: steps[step].fields,
+                cb: ({ path }) => path === 'otp' && form.resetField('otp', { keepError: true })
+            });
         } finally {
             setLoading(false);
         }

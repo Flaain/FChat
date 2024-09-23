@@ -21,9 +21,9 @@ const iconsMap = {
 };
 
 export const Session = ({ session, withDropButton, dropButtonDisabled, onDrop }: SessionProps) => {
-    const [isDroping, setIsDroping] = React.useState(false);
+    const { onAsyncActionModal } = useModal();
 
-    const onAsyncActionModal = useModal((state) => state.onAsyncActionModal);
+    const [isDroping, setIsDroping] = React.useState(false);
 
     const browser = session.userAgent?.browser;
     const OS = session.userAgent?.os;

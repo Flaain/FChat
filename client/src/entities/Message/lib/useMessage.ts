@@ -3,13 +3,14 @@ import { toast } from 'sonner';
 import { Draft } from '@/shared/model/types';
 import { useModal } from '@/shared/lib/providers/modal';
 import { Message } from '../model/types';
-import { useParams } from 'react-router-dom';
 import { useLayout } from '@/shared/lib/providers/layout/context';
+import { messageAPI } from '../api';
+import { useMessagesList } from '@/widgets/MessagesList/model/context';
 
 export const useMessage = (message: Message) => {
-    const { id } = useParams() as { id: string };
     const { setDrafts } = useLayout();
     const { onAsyncActionModal } = useModal();
+    const { isContextActionsBlocked, params } = useMessagesList();
 
     const handleCopyToClipboard = React.useCallback(() => {
         navigator.clipboard.writeText(message.text);
@@ -17,24 +18,27 @@ export const useMessage = (message: Message) => {
     }, []);
 
     const handleMessageDelete = React.useCallback(async () => {
-        await onAsyncActionModal(() => messageApi.delete({ query: `${apiQueries[message.refPath]}/delete/${message._id}`, body: JSON.stringify({ id }) }), {
+        onAsyncActionModal(() => messageAPI.delete({ 
+            query: `${params.apiUrl}/delete/${message._id}`, 
+            body: JSON.stringify(params.query) 
+        }), {
             onReject: () => {
                 toast.error('Cannot delete message', { position: 'top-center' });
             }
         });
-    }, [id, message]);
+    }, [params.id, message]);
 
     const handleContextAction = React.useCallback((draft: Draft) => {
-        if (isContextActionsDisabled) return;
+        if (isContextActionsBlocked) return;
         
         setDrafts((prevState) => {
             const newState = new Map([...prevState]);
 
-            newState.set(id, draft);
+            newState.set(params.id, draft);
 
             return newState;
         })
-    }, [isContextActionsDisabled]);
+    }, [isContextActionsBlocked]);
 
     return {
         handleCopyToClipboard,

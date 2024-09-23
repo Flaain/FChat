@@ -8,8 +8,8 @@ import { useSettings } from '../../model/context';
 import { useProfile } from '@/entities/profile';
 
 export const SettingsMain = () => {
-    const profile = useProfile((state) => state.profile);
-    const onMenuChange = useSettings((state) => state.onMenuChange);
+    const { profile } = useProfile();
+    const { onMenuChange } = useSettings();
 
     return (
         <>

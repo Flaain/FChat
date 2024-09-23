@@ -274,9 +274,3 @@ export interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 export interface PreAnimatedSkeletonProps extends React.HTMLAttributes<HTMLSpanElement> {
     animate?: boolean;
 }
-
-export interface SendMessageStore {
-    showAnchor: boolean;
-    changeAnchorVisibility: (value: boolean) => void;
-    ref: React.RefObject<HTMLTextAreaElement>;
-}

@@ -12,6 +12,7 @@ export const ConversationContext = React.createContext<IConversationContext>({
     isPreviousMessagesLoading: false,
     refetch: async () => {},
     showRecipientDetails: false,
+    showAnchor: false,
     status: 'loading',
     isRefetching: false,
     isTyping: false,

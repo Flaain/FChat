@@ -4,9 +4,11 @@ import { MessageGroupProps } from '../model/types';
 import { cn } from '@/shared/lib/utils/cn';
 import { Message } from '@/entities/Message';
 import { useSession } from '@/entities/session';
+import { useMessagesList } from '@/widgets/MessagesList/model/context';
 
-export const GroupedMessages = ({ messages, isLastGroup, lastMessageRef }: MessageGroupProps) => {
+export const GroupedMessages = ({ messages, isLastGroup }: MessageGroupProps) => {
     const { state: { userId } } = useSession();
+    const { lastMessageRef } = useMessagesList();
     
     const message = messages[0];
     const isUser = message.refPath === 'User';

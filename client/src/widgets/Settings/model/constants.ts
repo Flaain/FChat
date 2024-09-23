@@ -1,11 +1,11 @@
-import { PrivacyMenu, SettingMenu, SettingsMenu } from "./types";
+import { PrivacyMenu, SettingMenu } from "./types";
 
 export const prevMenu: Record<Exclude<SettingMenu | PrivacyMenu, 'main'>, SettingMenu | PrivacyMenu> = {
-    privacy: SettingsMenu.MAIN,
-    sessions: SettingsMenu.PRIVACY,
-    changePassword: SettingsMenu.PRIVACY,
-    deleteAccount: SettingsMenu.PRIVACY,
-    myAccount: SettingsMenu.MAIN
+    privacy: 'main',
+    sessions: 'privacy',
+    changePassword: 'privacy',
+    deleteAccount: 'privacy',
+    myAccount: 'main'
 }
 
 export const titles: Record<SettingMenu | PrivacyMenu, string> = {

@@ -4,10 +4,12 @@ import { cn } from '@/shared/lib/utils/cn';
 import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { PRESENCE, UserFeed } from '@/shared/model/types';
-import { useLayout } from '@/shared/model/store';
+import { useLayout } from '@/shared/lib/providers/layout/context';
 
 const UserItem = ({ user }: { user: UserFeed }) => {
-    const draft = useLayout((state) => state.drafts)?.get(user._id);
+    const { drafts } = useLayout();
+
+    const draft = drafts.get(user._id);
 
     return (
         <li>

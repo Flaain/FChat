@@ -26,19 +26,22 @@ export const OtpProvider = ({ children }: { children: React.ReactNode }) => {
     const timerRef = React.useRef<NodeJS.Timeout>();
 
     React.useEffect(() => {
-        if (!otp.retryDelay) return;
+        if (!otp?.retryDelay) return;
       
         timerRef.current = setInterval(() => {
-          if (otp.retryDelay <= 0) {
-            clearInterval(timerRef.current!);
-            setOtp((prevState) => ({ ...prevState, retryDelay: 0 }));
-          } else {
-            setOtp((prevState) => ({ ...prevState, retryDelay: prevState.retryDelay - 1000 }));
-          }
+          setOtp((prevState) => ({ ...prevState, retryDelay: prevState.retryDelay - 1000 }));
         }, 1000);
       
         return () => clearInterval(timerRef.current);
-      }, [!!otp.retryDelay]);
+      }, [!!otp?.retryDelay]);
+
+    React.useEffect(() => {
+        if (otp?.retryDelay <= 0) {
+          clearInterval(timerRef.current);
+          setOtp((prevState) => ({ ...prevState, retryDelay: 0 }));
+          console.log('change state');
+        }
+      }, [otp?.retryDelay]);
 
     return (
         <OtpContext.Provider value={{ otp, isResending, setOtp, onResend }}>

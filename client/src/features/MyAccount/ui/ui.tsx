@@ -8,18 +8,14 @@ import { Input } from '@/shared/ui/Input';
 import { Image } from '@/shared/ui/Image';
 import { useModal } from '@/shared/lib/providers/modal';
 import { useProfile } from '@/entities/profile';
-import { useSocket } from '@/shared/lib/hooks/useSocket';
+import { useSocket } from '@/shared/lib/providers/socket/context';
 
 export const MyAccount = () => {
+    const { onOpenModal } = useModal();
+
     const { isConnected } = useSocket();
     const { statusValue, symbolsLeft, onChangeStatus } = useMyAccount();
-    const { profile, isUploadingAvatar, handleUploadAvatar } = useProfile((state) => ({
-        profile: state.profile,
-        isUploadingAvatar: state.isUploadingAvatar,
-        handleUploadAvatar: state.handleUploadAvatar
-    }));
-
-    const onOpenModal = useModal((state) => state.onOpenModal);
+    const { profile, isUploadingAvatar, handleUploadAvatar } = useProfile();
 
     return (
         <div className='flex flex-col'>
