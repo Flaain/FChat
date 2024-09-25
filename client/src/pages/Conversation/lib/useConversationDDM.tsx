@@ -9,27 +9,29 @@ export const useConversationDDM = () => {
     const { onAsyncActionModal, onCloseModal, onOpenModal } = useModal();
     const { data: { conversation: { recipient } } } = useConversation();
 
-    const handleUnblockRecipient = async (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleBlockRecipient = async (type: 'block' | 'unblock', event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         event.stopPropagation();
 
         onOpenModal({
             content: (
                 <Confirm
-                    onConfirm={() => onAsyncActionModal(() => profileAPI.unblock({ recipientId: recipient._id }), {
+                    onConfirm={() => onAsyncActionModal(() => profileAPI[type]({ recipientId: recipient._id }), {
                         closeOnError: true,
                         onReject: () => {
-                            toast.error('Failed to unblock user');
+                            toast.error(`Failed to ${type} user`);
                         }
                     })}
                     onCancel={onCloseModal}
-                    text={`Are you sure you want to unblock ${recipient.name}?`}
-                    onConfirmText='Unblock'
+                    text={`Are you sure you want to ${type} ${recipient.name}?`}
+                    onConfirmText={type}
+                    onConfirmButtonVariant={type === 'block' ? 'destructive' : 'default'}
                 />
             ),
             withHeader: false,
-            bodyClassName: 'h-auto p-5 w-[400px]'
+            bodyClassName: 'h-auto p-5 w-fit'
         });        
     }
+
     const handleDeleteConversation = async (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         event.stopPropagation();
 
@@ -49,36 +51,12 @@ export const useConversationDDM = () => {
                 />
             ),
             withHeader: false,
-            bodyClassName: 'h-auto p-5 w-[400px]'
+            bodyClassName: 'h-auto p-5 w-fit'
         });   
     };
-
-    const handleBlockRecipient = async (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        event.stopPropagation();
-        
-        onOpenModal({
-            content: (
-                <Confirm
-                    onConfirm={() => onAsyncActionModal(() => profileAPI.block({ recipientId: recipient._id }), {
-                        closeOnError: true,
-                        onReject: () => {
-                            toast.error('Failed to block user');
-                        }
-                    })}
-                    onCancel={onCloseModal}
-                    text={`Are you sure you want to block ${recipient.name}?`}
-                    onConfirmText='Block'
-                    onConfirmButtonVariant='destructive'
-                />
-            ),
-            withHeader: false,
-            bodyClassName: 'h-auto p-5 w-[400px]'
-        });  
-    }
 
     return {
         handleBlockRecipient,
         handleDeleteConversation,
-        handleUnblockRecipient,
     };
 };

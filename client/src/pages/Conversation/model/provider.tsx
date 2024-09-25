@@ -234,10 +234,6 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
     }, [data?.nextCursor, isPreviousMessagesLoading]);
 
     React.useEffect(() => {
-        lastMessageRef.current?.scrollIntoView({ behavior: 'instant' });
-    }, [])
-
-    React.useEffect(() => {
         if (!listRef.current || !lastMessageRef.current) return;
         
         const scrollBottom = getScrollBottom(listRef.current!);

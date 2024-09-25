@@ -5,7 +5,7 @@ import { useConversation } from '../../model/context';
 
 export const ConversationDDM = () => {
     const { data: { conversation: { _id, isRecipientBlocked } } } = useConversation();
-    const { handleBlockRecipient, handleDeleteConversation, handleUnblockRecipient } = useConversationDDM();
+    const { handleBlockRecipient, handleDeleteConversation } = useConversationDDM();
 
     return (
         <DropdownMenu>
@@ -40,7 +40,7 @@ export const ConversationDDM = () => {
                     </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
-                    onClick={isRecipientBlocked ? handleUnblockRecipient : handleBlockRecipient}
+                    onClick={(event) => handleBlockRecipient(isRecipientBlocked ? 'unblock' : 'block', event)}
                     className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-primary-dark-100/20 text-primary-white'
                 >
                     <Lock className='w-5 h-5' />
