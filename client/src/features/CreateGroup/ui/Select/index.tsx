@@ -17,17 +17,6 @@ export const Select = () => {
     const searchQuery = form.getValues('username');
     const isResultsEmpty = searchQuery?.trim().length! > MIN_USER_SEARCH_LENGTH && !isModalDisabled && !searchedUsers.length;
 
-    if (isResultsEmpty) {
-        return (
-            <>
-                <UserSearch className='dark:text-primary-white w-10 h-10 self-center' />
-                <Typography as='p' variant='secondary' className='self-center text-center'>
-                    There were no results for "{searchQuery}".
-                </Typography>
-            </>
-        );
-    }
-
     return (
         <>
             <FormField
@@ -55,6 +44,13 @@ export const Select = () => {
             />
             {isModalDisabled ? (
                 <SearchUserSkeleton />
+            ) : isResultsEmpty ? (
+                <>
+                    <UserSearch className='dark:text-primary-white w-10 h-10 self-center' />
+                    <Typography as='p' variant='secondary' className='self-center text-center'>
+                        There were no results for "{searchQuery}".
+                    </Typography>
+                </>
             ) : (
                 !!searchedUsers.length && (
                     <>

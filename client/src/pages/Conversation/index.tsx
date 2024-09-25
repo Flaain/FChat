@@ -21,7 +21,7 @@ export const ConversationPage: RouteObject = {
             title='Failed to load conversation'
             description='Please try to refresh the page'
             callToAction={
-                <Button className='mt-3' onClick={window.location.reload}>
+                <Button className='mt-3' onClick={() => window.location.reload()}>
                     Refresh page
                 </Button>
             }

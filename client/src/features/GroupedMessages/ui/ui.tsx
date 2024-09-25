@@ -15,14 +15,12 @@ export const GroupedMessages = ({ messages, isLastGroup }: MessageGroupProps) =>
     const isMessageFromMe = isUser ? message.sender._id === userId : false; // TODO: add participant store
     
     return (
-        <li className={cn('flex items-end gap-3', isMessageFromMe ? 'self-end' : 'self-start')}>
-            {!isMessageFromMe && (
-                <Image
-                    src={isUser ? message.sender.avatar?.url : (message.sender.avatar?.url || message.sender.user.avatar?.url)}
-                    skeleton={<AvatarByName name={isUser ? message.sender.name : (message.sender.name || message.sender.user.name)} className='sticky bottom-0' />}
-                    className='object-cover size-10 sticky bottom-0 rounded-full'
-                />
-            )}
+        <li className={cn('flex items-end gap-3 xl:self-start', isMessageFromMe ? 'self-end' : 'self-start')}>
+            <Image
+                src={isUser ? message.sender.avatar?.url : (message.sender.avatar?.url || message.sender.user.avatar?.url)}
+                skeleton={<AvatarByName name={isUser ? message.sender.name : (message.sender.name || message.sender.user.name)} className='sticky bottom-0 max-xl:hidden' />}
+                className='object-cover size-10 sticky bottom-0 rounded-full max-xl:hidden'
+            />
             <ul className='flex flex-col gap-1'>
                 {messages.map((message, index, array) => (
                     <Message

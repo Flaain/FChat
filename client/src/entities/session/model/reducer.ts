@@ -8,12 +8,14 @@ export const sessionReducer = (state: SessionState, action: SessionAction) => {
             return {
                 ...state,
                 isAuthorized: true,
+                isAuthInProgress: false,
                 userId: action.payload.userId
             };
         case SessionTypes.LOGOUT:
             return {
                 ...state,
                 isAuthorized: false,
+                isAuthInProgress: false,
                 userId: null!
             };
         default:

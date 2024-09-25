@@ -7,9 +7,12 @@ import { signinSchema } from "../model/schema";
 import { api } from "../api";
 import { toast } from "sonner";
 import { useProfile } from "@/entities/profile";
+import { useSession } from "@/entities/session";
+import { SessionTypes } from "@/entities/session/model/types";
 
 export const useSignin = () => {
-    const setProfile = useProfile((state) => state.setProfile);
+    const { setProfile } = useProfile();
+    const { dispatch } = useSession();
 
     const [loading, setLoading] = React.useState(false);
 
@@ -35,6 +38,7 @@ export const useSignin = () => {
             const { data: profile } = await api.signin(data);
 
             setProfile(profile);
+            dispatch({ type: SessionTypes.AUTH, payload: { userId: profile._id } });
         } catch (error) {
             console.error(error);
             error instanceof AppException ? error.toastError() : toast.error('Cannot signin. Please try again later', { position: 'top-center' });

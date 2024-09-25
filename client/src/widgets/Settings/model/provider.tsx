@@ -12,7 +12,7 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
 
     const onBack = React.useCallback(() => {
         setMenu(prevMenu[menu as keyof typeof prevMenu]);
-    }, []);
+    }, [menu]);
 
     return <SettingsContext.Provider value={{ menu, onMenuChange, onBack }}>{children}</SettingsContext.Provider>;
 };

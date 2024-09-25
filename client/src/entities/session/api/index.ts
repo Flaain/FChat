@@ -7,7 +7,8 @@ class SessionAPI extends API {
     logout = async () => {
         const request: RequestInit = {
             headers: this._headers,
-            credentials: this._cretedentials
+            credentials: this._cretedentials,
+            keepalive: true
         };
 
         return this._checkResponse<BasicAPIResponse>(await fetch(this._baseUrl + '/auth/logout', request), request);

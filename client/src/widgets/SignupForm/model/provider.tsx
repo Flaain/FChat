@@ -55,9 +55,7 @@ export const SignupProvider = ({ children }: { children: React.ReactNode; }) => 
             event?.preventDefault?.();
             
             const data = form.getValues();
-
-            if (step === 2 && data.otp.length !== 6) return;
-
+            
             const isValid = await form.trigger(steps[step].fields, { shouldFocus: true });
             
             if (!isValid) return;

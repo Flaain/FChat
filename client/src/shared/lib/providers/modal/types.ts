@@ -24,6 +24,7 @@ export interface IModalContext {
     modals: Array<ModalConfig>;
     onOpenModal: (config: ModalConfig) => void;
     onCloseModal: () => void;
+    setIsModalDisabled: React.Dispatch<React.SetStateAction<boolean>>;
     onAsyncActionModal: <T>(cb: () => Promise<T>, options?: AsyncActionOptions<T>) => Promise<void>;
 }
 

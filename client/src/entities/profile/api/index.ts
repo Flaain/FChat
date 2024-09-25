@@ -1,11 +1,12 @@
 import { API } from '@/shared/api/API';
-import { Avatar, BasicAPIResponse, Profile, SearchUser } from '@/shared/model/types';
+import { Avatar, BasicAPIResponse, Profile, SearchUser, WrappedInPagination } from '@/shared/model/types';
 
 class ProfileApi extends API {
     getProfile = async () => {
         const request: RequestInit = {
             headers: this._headers,
-            credentials: this._cretedentials
+            credentials: this._cretedentials,
+            cache: 'no-store'
         };
 
         return this._checkResponse<Profile>(await fetch(this._baseUrl + '/auth/me', request), request);
@@ -51,7 +52,7 @@ class ProfileApi extends API {
         url.searchParams.append('page', page.toString());
         url.searchParams.append('limit', limit.toString());
 
-        return this._checkResponse<Array<SearchUser>>(await fetch(url, request), request);
+        return this._checkResponse<WrappedInPagination<SearchUser>>(await fetch(url, request), request);
     };
 
     block = async ({ recipientId }: { recipientId: string }) => {

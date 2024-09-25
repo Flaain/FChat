@@ -267,6 +267,14 @@ export interface Pagination {
     limit?: number;
 }
 
+export interface WrappedInPagination<T> {
+    items: Array<T>;
+    total_items: number;
+    current_page: number;
+    total_pages: number;
+    remaining_items: number;
+}
+
 export interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
     skeleton?: React.ReactNode;
 }

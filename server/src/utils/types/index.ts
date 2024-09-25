@@ -77,6 +77,10 @@ export interface PaginationWrapper<T> {
     onSuccess?: (items: Array<T>) => Array<any>;
 }
 
+export interface IPaginationResolver {
+    wrapPagination: <T>({ page, limit, items, onSuccess }: PaginationWrapper<T>) => WrappedInPagination<T>;
+}
+
 export interface WrappedInPagination<T> {
     items: Array<T>;
     total_items: number;

@@ -7,7 +7,7 @@ import { Image } from '@/shared/ui/Image';
 import { useProfile } from '@/entities/profile';
 
 export const LayoutSheetSkeleton = () => {
-    const profile = useProfile((state) => state.profile);
+    const { profile } = useProfile();
 
     return (
         <div className='flex flex-col py-8 h-full'>

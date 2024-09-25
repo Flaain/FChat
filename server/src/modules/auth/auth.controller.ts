@@ -71,9 +71,9 @@ export class AuthController implements IAuthController {
     @Get('logout')
     @UseGuards(AccessGuard)
     async logout(@Req() req: RequestWithUser, @Res({ passthrough: true }) res: Response) {
-        const status = await this.authService.logout({ user: req.user.doc, sessionId: req.user.sessionId });
-
         this.cookiesService.removeAuthCookies(res);
+
+        const status = await this.authService.logout({ user: req.user.doc, sessionId: req.user.sessionId });
 
         return status;
     }

@@ -6,6 +6,7 @@ export const ModalContext = React.createContext<IModalContext>({
     onAsyncActionModal: async () => {},
     onCloseModal: () => {},
     onOpenModal: () => {},
+    setIsModalDisabled: () => {},
     isModalDisabled: false
 });
 

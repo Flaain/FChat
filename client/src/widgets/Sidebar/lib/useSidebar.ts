@@ -147,7 +147,7 @@ export const useSidebar = () => {
     }
 
     const handleLogout = React.useCallback(async () => {
-        sessionAPI.logout();
+        await sessionAPI.logout();
         dispatch({ type: SessionTypes.LOGOUT });
     }, []);
 

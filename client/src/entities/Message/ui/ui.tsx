@@ -32,15 +32,33 @@ export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                         {...rest}
                         ref={ref}
                         className={cn(
-                            'flex gap-2',
+                            'flex gap-2 xl:self-start relative',
                             isMessageFromMe ? 'self-end' : 'self-start',
                             !isMessageFromMe && isFirst && 'flex-col',
                             className
                         )}
                     >
-                        {!isMessageFromMe && isFirst && (
+                        {isLast && (
+                            <svg
+                                width='11'
+                                height='20'
+                                viewBox='0 0 11 20'
+                                fill='currentColor'
+                                className={cn('absolute z-[999] bottom-0 w-[11px] h-5 block', {
+                                    ['-right-[11px] xl:-left-[11px] dark:text-primary-white text-primary-gray max-xl:scale-x-[-1]']: isMessageFromMe,
+                                    ['dark:text-primary-dark-50 text-primary-gray -left-[11px]']: !isMessageFromMe
+                                })}
+                                xmlns='http://www.w3.org/2000/svg'
+                            >
+                                <path
+                                    d='M11 0C11 6.42858 7.76471 15.3571 1.29412 17.1429C1.29412 17.1429 0 17.1429 0 18.5714C0 20 1.29412 20 1.29412 20L11 20V0Z'
+                                    fill='currentColor'
+                                />
+                            </svg>
+                        )}
+                        {!isMessageFromMe && isFirst && refPath === 'Participant' && (
                             <Typography variant='primary' weight='semibold'>
-                                {refPath === "User" ? sender.name : (sender.name || sender.user.name)}
+                                {sender.name || sender.user.name}
                             </Typography>
                         )}
                         <div
@@ -62,7 +80,11 @@ export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                                         'line-clamp-1 dark:text-primary-blue text-xs flex flex-col py-1 px-2 w-full rounded bg-primary-blue/10 border-l-4 border-solid border-primary-blue'
                                     )}
                                 >
-                                    {replyTo === null ? 'Deleted Message' : replyTo.refPath === 'User' ? replyTo.sender.name : (replyTo.sender.name || replyTo.sender.user.name)}
+                                    {replyTo === null
+                                        ? 'Deleted Message'
+                                        : replyTo.refPath === 'User'
+                                        ? replyTo.sender.name
+                                        : replyTo.sender.name || replyTo.sender.user.name}
                                     {!!replyTo && (
                                         <Typography
                                             className={cn(

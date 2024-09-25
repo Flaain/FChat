@@ -96,13 +96,14 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
 
             removeEventListener();
         };
-    }, [modals, handleKeyDown]);
+    }, [modals]);
 
     const value: IModalContext = {
         modals,
         onAsyncActionModal,
         onOpenModal,
         onCloseModal,
+        setIsModalDisabled,
         isModalDisabled
     };
 

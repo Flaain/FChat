@@ -231,7 +231,7 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
         return () => {
             listRef.current?.removeEventListener('scroll', handleScrollContainer);
         };
-    }, [data.nextCursor, isPreviousMessagesLoading]);
+    }, [data?.nextCursor, isPreviousMessagesLoading]);
 
     React.useEffect(() => {
         lastMessageRef.current?.scrollIntoView({ behavior: 'instant' });
@@ -243,7 +243,7 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
         const scrollBottom = getScrollBottom(listRef.current!);
 
         scrollBottom <= MIN_SCROLL_BOTTOM ? lastMessageRef.current.scrollIntoView({ behavior: 'smooth' }) : scrollBottom >= MAX_SCROLL_BOTTOM && setShowAnchor(true);
-    }, [data.conversation.messages]);
+    }, [data?.conversation.messages]);
 
     const value: IConversationContext = {
         data,

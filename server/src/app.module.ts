@@ -20,6 +20,7 @@ import { FileModule } from './modules/file/file.module';
 
 @Module({
     imports: [
+        ConfigModule.forRoot({ isGlobal: true, expandVariables: true }),
         AuthModule,
         UserModule,
         FeedModule,
@@ -32,7 +33,6 @@ import { FileModule } from './modules/file/file.module';
                 secretAccessKey: process.env.BUCKET_SECRET,
             },
         }),
-        ConfigModule.forRoot({ isGlobal: true, expandVariables: true }),
         MongooseModule.forRoot(process.env.DATABASE_URI, { retryWrites: true }),
         ThrottlerModule.forRoot([{ limit: 10, ttl: 60000 }]),
         EventEmitterModule.forRoot({ global: true }),

@@ -15,7 +15,7 @@ import { createGroupAPI } from "../api";
 import { CreateGroupContext } from "./context";
 
 export const CreateGroupProvider = ({ children }: { children: React.ReactNode }) => {
-    const { isModalDisabled, onAsyncActionModal } = useModal();
+    const { isModalDisabled, onAsyncActionModal, setIsModalDisabled } = useModal();
 
     const [step, setStep] = React.useState(0);
     const [selectedUsers, setSelectedUsers] = React.useState<Map<string, SearchUser>>(new Map());
@@ -56,14 +56,14 @@ export const CreateGroupProvider = ({ children }: { children: React.ReactNode })
         return newState;
     })
 
-    const handleSearchDelay = debounce(async (value: string) => {
+    const handleSearchDelay = React.useCallback(debounce(async (value: string) => {
         onAsyncActionModal(() => profileAPI.search({ query: value }), {
             onReject: () => setSearchedUsers([]),
-            onResolve: ({ data }) => setSearchedUsers(data),
+            onResolve: ({ data: { items } }) => setSearchedUsers(items),
             closeOnError: false,
             closeOnSuccess: false
         });
-    }, 500)
+    }, 500), []);
 
     const handleSearchUser = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         const trimmedValue = value.trim();
@@ -71,6 +71,7 @@ export const CreateGroupProvider = ({ children }: { children: React.ReactNode })
         if (!value || !trimmedValue.length) return setSearchedUsers([]);
 
         if (trimmedValue.length > MIN_USER_SEARCH_LENGTH) {
+            setIsModalDisabled(true);
             handleSearchDelay(trimmedValue);
         }
     }

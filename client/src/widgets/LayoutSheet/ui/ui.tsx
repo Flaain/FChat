@@ -61,7 +61,7 @@ export const LayoutSheet = () => {
                                         <CreateGroup />
                                     </CreateGroupProvider>
                                 ),
-                                bodyClassName: 'max-w-[450px] p-5 h-auto'
+                                bodyClassName: 'w-[450px] p-3 h-auto'
                             })
                         }
                     >
@@ -80,7 +80,7 @@ export const LayoutSheet = () => {
                                         <Settings />
                                     </SettingsProvider>
                                 ),
-                                bodyClassName: 'max-w-[450px] p-0 h-auto',
+                                bodyClassName: 'w-[450px] p-0 h-auto',
                                 withHeader: false
                             })
                         }

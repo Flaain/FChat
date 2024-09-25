@@ -1,2 +1,2 @@
-export { messageApi } from "./api";
+export { messageAPI } from "./api";
 export { Message } from "./ui/ui";

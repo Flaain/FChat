@@ -9,7 +9,9 @@ export const useConversationDDM = () => {
     const { onAsyncActionModal, onCloseModal, onOpenModal } = useModal();
     const { data: { conversation: { recipient } } } = useConversation();
 
-    const handleUnblockRecipient = async () => {
+    const handleUnblockRecipient = async (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        event.stopPropagation();
+
         onOpenModal({
             content: (
                 <Confirm
@@ -28,7 +30,9 @@ export const useConversationDDM = () => {
             bodyClassName: 'h-auto p-5 w-[400px]'
         });        
     }
-    const handleDeleteConversation = async () => {
+    const handleDeleteConversation = async (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        event.stopPropagation();
+
         onOpenModal({
             content: (
                 <Confirm
@@ -49,7 +53,9 @@ export const useConversationDDM = () => {
         });   
     };
 
-    const handleBlockRecipient = async () => {
+    const handleBlockRecipient = async (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        event.stopPropagation();
+        
         onOpenModal({
             content: (
                 <Confirm

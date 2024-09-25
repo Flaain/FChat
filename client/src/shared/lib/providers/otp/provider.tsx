@@ -39,7 +39,6 @@ export const OtpProvider = ({ children }: { children: React.ReactNode }) => {
         if (otp?.retryDelay <= 0) {
           clearInterval(timerRef.current);
           setOtp((prevState) => ({ ...prevState, retryDelay: 0 }));
-          console.log('change state');
         }
       }, [otp?.retryDelay]);
 

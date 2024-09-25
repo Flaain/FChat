@@ -11,6 +11,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         const socket = io(import.meta.env.VITE_BASE_URL, { withCredentials: true });
 
         socket.on('connect', () => {
+            setIsConnected(true);
+            
             socket.emit(USER_EVENTS.PRESENCE, { presence: PRESENCE.ONLINE });
         });
 

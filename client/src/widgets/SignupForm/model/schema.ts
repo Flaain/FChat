@@ -44,7 +44,7 @@ export const secondStepSignUpSchema = z.object({
 });
 
 export const thirdStepSignUpSchema = z.object({
-    otp: z.string()
+    otp: z.string().min(6, ' '),
 });
 
 export const signupSchema = firstStepSignUpSchema.and(secondStepSignUpSchema).and(thirdStepSignUpSchema);

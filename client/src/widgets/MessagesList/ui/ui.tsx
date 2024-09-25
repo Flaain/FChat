@@ -23,7 +23,7 @@ export const MessagesList = React.forwardRef<HTMLUListElement, MessagesListProps
     return (
         <ul
             ref={ref}
-            className='relative flex flex-col flex-1 w-full px-5 mb-auto gap-5 overflow-auto outline-none'
+            className='relative flex flex-col flex-1 w-full px-5 mb-auto max-xl:gap-5 gap-3 overflow-auto outline-none'
         >
             {nextCursor && (
                 <li className='flex justify-center items-center'>

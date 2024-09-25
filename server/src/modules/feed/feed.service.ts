@@ -43,16 +43,12 @@ export class FeedService extends BaseService<FeedDocument, Feed> {
     };
 
     getFeed = async ({ initiatorId, cursor }: GetFeedParams) => {
-        const BATCH_SIZE = 10;
-        let nextCursor: string | null = null;
+        const config = { limit: 10, nextCursor: null };
 
         const feed = await this.find({
-            filter: {
-                users: { $in: initiatorId },
-                ...(cursor && { lastActionAt: { $lt: cursor }, updatedAt: { $lt: cursor } }),
-            },
+            filter: { users: { $in: initiatorId }, ...(cursor && { lastActionAt: { $lt: cursor } }) },
             projection: { item: 1, type: 1, lastActionAt: 1 },
-            options: { limit: BATCH_SIZE, sort: { lastActionAt: -1 } },
+            options: { limit: config.limit, sort: { lastActionAt: -1 } },
         });
 
         const populatedFeed = await Promise.all(feed.map(async (item: FeedDocument) => {
@@ -62,8 +58,8 @@ export class FeedService extends BaseService<FeedDocument, Feed> {
             return itemHandlers.returnObject(populatedItem.toObject());
         }));
 
-        feed.length === BATCH_SIZE && (nextCursor = feed[BATCH_SIZE - 1].lastActionAt.toISOString());
+        feed.length === config.limit && (config.nextCursor = feed[config.limit - 1].lastActionAt.toISOString());
 
-        return { feed: populatedFeed, nextCursor };
+        return { feed: populatedFeed, nextCursor: config.nextCursor };
     };
 }

@@ -6,6 +6,8 @@ export const Image = ({ skeleton, className, ...rest }: ImageProps) => {
     const [imageLoaded, setImageLoaded] = React.useState(false);
     const [error, setError] = React.useState(false);
 
+    if (!rest.src) return skeleton;
+
     return (
         <>
             {!imageLoaded && skeleton}

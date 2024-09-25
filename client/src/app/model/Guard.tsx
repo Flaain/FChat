@@ -4,7 +4,7 @@ import { useSession } from '@/entities/session/model/context';
 import { GUARD_TYPE, GuardProps } from './types';
 
 export const Guard = ({ type, children, fallback }: GuardProps) => {
-    const { isAuthInProgress, isAuthorized } = useSession();
+    const { state: { isAuthInProgress, isAuthorized } } = useSession();
 
     if (isAuthInProgress) return fallback;
 

@@ -47,7 +47,7 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
             const validator = imageValidators.find(({ isValid }) => !isValid(file));
 
             if (validator) return toast.error(validator.message, { position: 'top-center' });
-
+            
             const form = new FormData();
             const blob = new Blob([file], { type: file.type });
 
@@ -59,6 +59,8 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
         } catch (error) {
             console.error(error);
             toast.error('Cannot upload image', { position: 'top-center' });
+            
+            event.target.value = '' // reset value to prevent caching
         } finally {
             setIsUploadingAvatar(false);
         }
