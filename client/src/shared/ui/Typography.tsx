@@ -38,8 +38,7 @@ const typographyVariants = cva(undefined, {
     }
 });
 
-export const Typography: TypographyComponent = React.forwardRef(
-    <T extends React.ElementType = 'span'>(props: TypographyProps<T>, ref: PolymorphicRef<T>) => {
+export const Typography: TypographyComponent = React.forwardRef(<T extends React.ElementType = 'span'>(props: TypographyProps<T>, ref: PolymorphicRef<T>) => {
         const { as, variant, size, children, weight, className, ...rest } = props;
 
         const Component = as ?? 'span';

@@ -8,13 +8,17 @@ import { MessageProps } from '../model/types';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 import { PartOfCompilerUse } from '@/shared/model/types';
 import { getBubblesStyles } from '../lib/getBubblesStyles';
+import { useMessagesList } from '@/widgets/MessagesList/model/context';
 
 export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
     ({ message, isFirst, isLast, isMessageFromMe, className, ...rest }, ref) => {
+        const { selectedMessages } = useMessagesList();
+
         const [isContextMenuOpen, setIsContextMenuOpen] = React.useState(false);
 
         const { createdAt, refPath, updatedAt, sender, text, hasBeenRead, hasBeenEdited, replyTo } = message;
 
+        const isSelected = selectedMessages.has(message._id);
         const createTime = new Date(createdAt);
         const editTime = new Date(updatedAt);
 
@@ -32,9 +36,9 @@ export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                         {...rest}
                         ref={ref}
                         className={cn(
-                            'flex gap-2 xl:self-start relative',
-                            isMessageFromMe ? 'self-end' : 'self-start',
+                            'flex gap-2 relative w-full z-10',
                             !isMessageFromMe && isFirst && 'flex-col',
+                            isSelected && 'xl:after:-left-1/2 after:-right-1/2 after:w-[200%] after:z-[-1] after:absolute after:-top-1 after:bottom-0 after:dark:bg-primary-dark-50',
                             className
                         )}
                     >
@@ -63,7 +67,8 @@ export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                         )}
                         <div
                             className={cn(
-                                'py-2 px-3 relative max-w-[500px]',
+                                'py-2 px-3 xl:m-0 relative max-w-[500px]',
+                                isMessageFromMe ? 'ml-auto' : 'mr-auto',
                                 (replyTo === null || !!replyTo) && 'flex flex-col gap-2',
                                 getBubblesStyles({
                                     isFirst,

@@ -172,12 +172,12 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
             }));
         });
 
-        socket?.on(CONVERSATION_EVENTS.MESSAGE_DELETE, (messageId: string) => {
+        socket?.on(CONVERSATION_EVENTS.MESSAGE_DELETE, (messageIds: Array<string>) => {
             setData((prevState) => ({
                 ...prevState,
                 conversation: {
                     ...prevState.conversation,
-                    messages: prevState.conversation.messages.filter((message) => message._id !== messageId)
+                    messages: prevState.conversation.messages.filter((message) => !messageIds.includes(message._id))
                 }
             }))
         });

@@ -7,7 +7,7 @@ import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 import { PartOfCompilerUse } from '@/shared/model/types';
 import { useEvents } from '@/shared/lib/providers/events/context';
 
-export const MessageTopBar = ({ onClose, title, mainIconSlot, closeIconSlot, description, preventClose }: MessageTopBarProps) => {
+export const TopBar = ({ onClose, title, mainIconSlot, closeIconSlot, description, preventClose }: MessageTopBarProps) => {
     const { addEventListener } = useEvents();
 
     React.useEffect(() => {

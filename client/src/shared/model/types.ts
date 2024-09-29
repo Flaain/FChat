@@ -1,6 +1,5 @@
 import React from 'react';
 import { MarkdownToJSX } from "markdown-to-jsx";
-import { FieldPath, FieldValues, UseFormReturn } from 'react-hook-form';
 import { Message } from '@/entities/Message/model/types';
 import { Conversation } from '@/pages/Conversation/model/types';
 

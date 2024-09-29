@@ -1,6 +1,6 @@
 import React from 'react';
 
-export interface OutletHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface OutletHeaderProps {
     name: string;
     description?: string;
     isOfficial?: boolean;

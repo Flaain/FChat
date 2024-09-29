@@ -19,8 +19,8 @@ export const useMessage = (message: Message) => {
 
     const handleMessageDelete = React.useCallback(async () => {
         onAsyncActionModal(() => messageAPI.delete({ 
-            query: `${params.apiUrl}/delete/${message._id}`, 
-            body: JSON.stringify(params.query) 
+            query: `${params.apiUrl}/delete`, 
+            body: JSON.stringify({ ...params.query, messageIds: [message._id] }) 
         }), {
             onReject: () => {
                 toast.error('Cannot delete message', { position: 'top-center' });

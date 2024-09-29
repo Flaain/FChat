@@ -1,3 +1,4 @@
+import { useSelectMessage } from '@/entities/Message';
 import { Message } from '@/entities/Message/model/types';
 
 export interface MessagesListProps {
@@ -8,7 +9,7 @@ export interface MessagesListProps {
     nextCursor: string | null;
 }
 
-export interface IMessagesListContext {
+export interface IMessagesListContext extends ReturnType<typeof useSelectMessage>{
     lastMessageRef: React.RefObject<HTMLLIElement>;
     isContextActionsBlocked?: boolean;
     params: {

@@ -62,8 +62,8 @@ export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
 
     const handleDeleteMessage = React.useCallback(async () => {
         onAsyncActionModal(() => messageAPI.delete({ 
-            query: `${params.apiUrl}/delete/${currentDraft?.selectedMessage?._id!}`, 
-            body: JSON.stringify(params.query) 
+            query: `${params.apiUrl}/delete`, 
+            body: JSON.stringify({ ...params.query, messageIds: [currentDraft!.selectedMessage!._id] }) 
         }), {
             closeOnError: true,
             onResolve: () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import EmojiPickerFallback from '@emoji-mart/react';
-import { MessageTopBar } from './MessageTopBar';
+import { TopBar } from './TopBar';
 import { Button } from '@/shared/ui/Button';
 import { ArrowDown, Edit2Icon, Paperclip, Reply, SendHorizonal, Smile } from 'lucide-react';
 import { toast } from 'sonner';
@@ -27,9 +27,9 @@ export const SendMessage = ({ params, onChange, showAnchor, onAnchorClick }: Use
 
     const currentDraft = drafts.get(params.id);
 
-    const messageBars: Record<Exclude<MessageFormState, 'send'>, React.ReactNode> = {
+    const bars: Record<Exclude<MessageFormState, 'send'>, React.ReactNode> = {
         edit: (
-            <MessageTopBar
+            <TopBar
                 title='Edit message'
                 mainIconSlot={<Edit2Icon className='dark:text-primary-white text-primary-gray min-w-5 h-5' />}
                 onClose={setDefaultState}
@@ -38,7 +38,7 @@ export const SendMessage = ({ params, onChange, showAnchor, onAnchorClick }: Use
             />
         ),
         reply: (
-            <MessageTopBar
+            <TopBar
                 title={`Reply to ${currentDraft?.selectedMessage?.sender?.name}`}
                 mainIconSlot={<Reply className='dark:text-primary-white text-primary-gray min-w-5 h-5' />}
                 onClose={setDefaultState}
@@ -49,8 +49,8 @@ export const SendMessage = ({ params, onChange, showAnchor, onAnchorClick }: Use
     };
 
     return (
-        <div className='flex flex-col sticky bottom-0 w-full'>
-            {messageBars[currentDraft?.state as keyof typeof messageBars]}
+        <>
+            {bars[currentDraft?.state as keyof typeof bars]}
             <form
                 className='w-full max-h-[120px] overflow-hidden flex items-center dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out box-border'
                 onSubmit={handleSubmitMessage}
@@ -115,12 +115,12 @@ export const SendMessage = ({ params, onChange, showAnchor, onAnchorClick }: Use
                     variant='text'
                     size='icon'
                     type='submit'
-                    disabled={!value.trim().length && currentDraft?.state !== 'edit' || isLoading}
+                    disabled={(!value.trim().length && currentDraft?.state !== 'edit') || isLoading}
                     className='pr-5'
                 >
                     <SendHorizonal className='w-6 h-6' />
                 </Button>
             </form>
-        </div>
+        </>
     );
 };

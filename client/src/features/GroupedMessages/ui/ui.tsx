@@ -8,20 +8,20 @@ import { useMessagesList } from '@/widgets/MessagesList/model/context';
 
 export const GroupedMessages = ({ messages, isLastGroup }: MessageGroupProps) => {
     const { state: { userId } } = useSession();
-    const { lastMessageRef } = useMessagesList();
+    const { lastMessageRef, isSelecting, handleSelectMessage } = useMessagesList();
     
     const message = messages[0];
     const isUser = message.refPath === 'User';
     const isMessageFromMe = isUser ? message.sender._id === userId : false; // TODO: add participant store
     
     return (
-        <li className={cn('flex items-end gap-3 xl:self-start', isMessageFromMe ? 'self-end' : 'self-start')}>
+        <li className={cn('flex items-end gap-3 xl:self-start w-full', isMessageFromMe ? 'self-end' : 'self-start')}>
             <Image
                 src={isUser ? message.sender.avatar?.url : (message.sender.avatar?.url || message.sender.user.avatar?.url)}
                 skeleton={<AvatarByName name={isUser ? message.sender.name : (message.sender.name || message.sender.user.name)} className='sticky bottom-0 max-xl:hidden' />}
-                className='object-cover size-10 sticky bottom-0 rounded-full max-xl:hidden'
+                className='object-cover size-10 sticky bottom-0 rounded-full max-xl:hidden z-[999]'
             />
-            <ul className='flex flex-col gap-1'>
+            <ul className='flex flex-col gap-1 w-full'>
                 {messages.map((message, index, array) => (
                     <Message
                         key={message._id}
@@ -30,6 +30,7 @@ export const GroupedMessages = ({ messages, isLastGroup }: MessageGroupProps) =>
                         isLast={index === array.length - 1}
                         message={message}
                         ref={isLastGroup && index === array.length - 1 ? lastMessageRef : null}
+                        onClick={isSelecting && isMessageFromMe ? () => handleSelectMessage(message) : undefined}
                     />
                 ))}
             </ul>
