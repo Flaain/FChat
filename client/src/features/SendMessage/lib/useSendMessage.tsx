@@ -6,9 +6,10 @@ import { useModal } from '@/shared/lib/providers/modal';
 import { useLayout } from '@/shared/lib/providers/layout/context';
 import { Confirm } from '@/shared/ui/Confirm';
 import { messageAPI } from '@/entities/Message/api';
+import { selectModalActions } from '@/shared/lib/providers/modal/store';
 
 export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
-    const { onCloseModal, onOpenModal, onAsyncActionModal } = useModal();
+    const { onCloseModal, onOpenModal, onAsyncActionModal } = useModal(selectModalActions);
     const { drafts, setDrafts, textareaRef } = useLayout();
 
     const currentDraft = drafts.get(params.id);

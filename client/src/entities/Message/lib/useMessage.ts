@@ -1,17 +1,18 @@
 import React from 'react';
 import { toast } from 'sonner';
 import { Draft } from '@/shared/model/types';
-import { useModal } from '@/shared/lib/providers/modal';
 import { Message } from '../model/types';
 import { useLayout } from '@/shared/lib/providers/layout/context';
 import { messageAPI } from '../api';
 import { useMessagesList } from '@/widgets/MessagesList/model/context';
+import { useModal } from '@/shared/lib/providers/modal';
+import { selectModalActions } from '@/shared/lib/providers/modal/store';
 
 export const useMessage = (message: Message) => {
     const { setDrafts } = useLayout();
-    const { onAsyncActionModal } = useModal();
     const { isContextActionsBlocked, params } = useMessagesList();
-
+    const { onAsyncActionModal } = useModal(selectModalActions);
+    
     const handleCopyToClipboard = React.useCallback(() => {
         navigator.clipboard.writeText(message.text);
         toast.success('Message copied to clipboard', { position: 'top-center' });

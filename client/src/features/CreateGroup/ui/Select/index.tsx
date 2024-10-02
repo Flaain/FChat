@@ -11,9 +11,9 @@ import { MAX_GROUP_SIZE } from '../../model/constants';
 import { useCreateGroup } from '../../model/context';
 
 export const Select = () => {
-    const { isModalDisabled } = useModal();
     const { form, handleSearchUser, handleSelect, handleRemove, searchedUsers, selectedUsers } = useCreateGroup();
-
+    
+    const isModalDisabled = useModal((state) => state.isModalDisabled);
     const searchQuery = form.getValues('username');
     const isResultsEmpty = searchQuery?.trim().length! > MIN_USER_SEARCH_LENGTH && !isModalDisabled && !searchedUsers.length;
 

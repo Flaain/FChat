@@ -9,11 +9,12 @@ import { Confirm } from '@/shared/ui/Confirm';
 import { useEvents } from '@/shared/lib/providers/events/context';
 import { useLayout } from '@/shared/lib/providers/layout/context';
 import { useMessagesList } from '@/widgets/MessagesList/model/context';
+import { selectModalActions } from '@/shared/lib/providers/modal/store';
 
 export const MessageContextMenu = ({ message, isMessageFromMe, onClose }: ContextMenuProps) => {
     const { handleCopyToClipboard, handleMessageDelete, handleContextAction } = useMessage(message);
     const { textareaRef } = useLayout();
-    const { onOpenModal, onCloseModal } = useModal();
+    const { onOpenModal, onCloseModal } = useModal(selectModalActions);
     const { addEventListener } = useEvents();
     const { handleSelectMessage } = useMessagesList();
 

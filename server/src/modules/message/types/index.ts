@@ -37,4 +37,4 @@ export type MessageDocument = Message & Document & SchemaTimestampsConfig;
 
 export type SendMessageParams = MessageSendDTO & { recipientId: string; initiator: UserDocument };
 export type EditMessageParams = MessageEditDTO & { initiatorId: Types.ObjectId, messageId: string };
-export type DeleteMessageType = MessageDeleteDTO & { messageId: string; initiatorId: Types.ObjectId };
+export type DeleteMessageParams = MessageDeleteDTO & { initiatorId: Types.ObjectId };

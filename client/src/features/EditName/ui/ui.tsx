@@ -6,7 +6,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useModal } from '@/shared/lib/providers/modal';
 
 export const EditName = () => {
-    const { isModalDisabled, onCloseModal } = useModal((state) => ({ onCloseModal: state.onCloseModal, isModalDisabled: state.isModalDisabled }));
+    const { isModalDisabled, onCloseModal } = useModal((state) => ({
+        onCloseModal: state.actions.onCloseModal,
+        isModalDisabled: state.isModalDisabled
+    }));
     const { form, onSubmit } = useEditName();
 
     return (

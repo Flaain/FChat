@@ -19,9 +19,10 @@ import { Button } from '@/shared/ui/Button';
 import { useModal } from '@/shared/lib/providers/modal';
 import { Confirm } from '@/shared/ui/Confirm';
 import { toast } from 'sonner';
+import { selectModalActions } from '@/shared/lib/providers/modal/store';
 
 export const Content = () => {
-    const { onOpenModal, onCloseModal, onAsyncActionModal } = useModal();
+    const { onOpenModal, onCloseModal, onAsyncActionModal } = useModal(selectModalActions);
     const {
         data: {
             conversation: { recipient, messages, isInitiatorBlocked, isRecipientBlocked },
@@ -51,9 +52,7 @@ export const Content = () => {
                             <Button variant='text' size='icon' className='mr-2' onClick={select.handleCancelSelecting}>
                                 <X className='w-6 h-6' />
                             </Button>
-                            <Typography>{`${select.selectedMessages.size} ${
-                                select.selectedMessages.size > 1 ? 'messages' : 'message'
-                            }`}</Typography>
+                            <Typography>{`${select.selectedMessages.size} ${select.selectedMessages.size > 1 ? 'messages' : 'message'}`}</Typography>
                             <Button
                                 onClick={() =>
                                     onOpenModal({
@@ -99,10 +98,7 @@ export const Content = () => {
                         <OutletHeader
                             name={recipient.name}
                             isOfficial={recipient.isOfficial}
-                            description={getConversationDescription({
-                                data: { recipient, isInitiatorBlocked, isRecipientBlocked },
-                                isRecipientTyping
-                            })}
+                            description={getConversationDescription({ data: { recipient, isInitiatorBlocked, isRecipientBlocked }, isRecipientTyping })}
                             dropdownMenu={<ConversationDDM />}
                         />
                     </OutletHeaderContainer>

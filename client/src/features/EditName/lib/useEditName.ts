@@ -8,9 +8,8 @@ import { useModal } from '@/shared/lib/providers/modal';
 import { profileAPI, useProfile } from '@/entities/profile';
 
 export const useEditName = () => {
-    const { profile, setProfile } = useProfile((state) => ({ profile: state.profile, setProfile: state.setProfile }));
-
-    const onAsyncActionModal = useModal((state) => state.onAsyncActionModal);
+    const profile = useProfile((state) => state.profile);
+    const onAsyncActionModal = useModal((state) => state.actions.onAsyncActionModal);
 
     const form = useForm<EditNameType>({
         resolver: zodResolver(editNameSchema),
@@ -30,7 +29,7 @@ export const useEditName = () => {
         if (name === profile.name) return;
 
         onAsyncActionModal(() => profileAPI.name({ name }), {
-            onResolve: () => setProfile({ name }),
+            onResolve: () => useProfile.setState((prevState) => ({ profile: { ...prevState.profile, name } })),
             onReject: () => toast.error('Failed to change name'),
             closeOnError: true
         });

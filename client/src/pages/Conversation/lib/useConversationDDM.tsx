@@ -4,9 +4,10 @@ import { toast } from 'sonner';
 import { conversationAPI } from '../api';
 import { profileAPI } from '@/entities/profile';
 import { useConversation } from '../model/context';
+import { selectModalActions } from '@/shared/lib/providers/modal/store';
 
 export const useConversationDDM = () => {
-    const { onAsyncActionModal, onCloseModal, onOpenModal } = useModal();
+    const { onAsyncActionModal, onCloseModal, onOpenModal } = useModal(selectModalActions);
     const { data: { conversation: { recipient } } } = useConversation();
 
     const handleBlockRecipient = async (type: 'block' | 'unblock', event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

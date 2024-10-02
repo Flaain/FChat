@@ -9,13 +9,17 @@ import { Image } from '@/shared/ui/Image';
 import { useModal } from '@/shared/lib/providers/modal';
 import { useProfile } from '@/entities/profile';
 import { useSocket } from '@/shared/lib/providers/socket/context';
+import { selectModalActions } from '@/shared/lib/providers/modal/store';
 
 export const MyAccount = () => {
-    const { onOpenModal } = useModal();
-
+    const { onOpenModal } = useModal(selectModalActions);
     const { isConnected } = useSocket();
     const { statusValue, symbolsLeft, onChangeStatus } = useMyAccount();
-    const { profile, isUploadingAvatar, handleUploadAvatar } = useProfile();
+    const { profile, isUploadingAvatar, handleUploadAvatar } = useProfile((state) => ({
+        profile: state.profile,
+        isUploadingAvatar: state.isUploadingAvatar,
+        handleUploadAvatar: state.actions.handleUploadAvatar
+    }));
 
     return (
         <div className='flex flex-col'>

@@ -15,7 +15,10 @@ import { createGroupAPI } from "../api";
 import { CreateGroupContext } from "./context";
 
 export const CreateGroupProvider = ({ children }: { children: React.ReactNode }) => {
-    const { isModalDisabled, onAsyncActionModal, setIsModalDisabled } = useModal();
+    const { isModalDisabled, onAsyncActionModal } = useModal((state) => ({
+        isModalDisabled: state.isModalDisabled,
+        onAsyncActionModal: state.actions.onAsyncActionModal
+    }));
 
     const [step, setStep] = React.useState(0);
     const [selectedUsers, setSelectedUsers] = React.useState<Map<string, SearchUser>>(new Map());
@@ -71,7 +74,7 @@ export const CreateGroupProvider = ({ children }: { children: React.ReactNode })
         if (!value || !trimmedValue.length) return setSearchedUsers([]);
 
         if (trimmedValue.length > MIN_USER_SEARCH_LENGTH) {
-            setIsModalDisabled(true);
+            useModal.setState({ isModalDisabled: true });
             handleSearchDelay(trimmedValue);
         }
     }

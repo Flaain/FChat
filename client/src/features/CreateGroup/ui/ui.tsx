@@ -8,7 +8,10 @@ import { Input } from '@/shared/ui/Input';
 import { Select } from './Select';
 
 export const CreateGroup = () => {
-    const { onCloseModal, isModalDisabled } = useModal();
+    const { onCloseModal, isModalDisabled } = useModal((state) => ({
+        onCloseModal: state.actions.onCloseModal,
+        isModalDisabled: state.isModalDisabled
+    }));
     const { form, onSubmit, isNextButtonDisabled, step, handleBack } = useCreateGroup();
 
     return (

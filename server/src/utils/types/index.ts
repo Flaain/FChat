@@ -95,8 +95,8 @@ export interface FindQuery<Doc extends Document> {
     options?: QueryOptions<Doc>
 }
 
-export interface UpdateQuery<Doc extends Document> {
+export interface UpdateQuery<Doc extends Document, Options = QueryOptions<Doc>> {
     filter: FilterQuery<Doc>,
     update?: MongooseUpdateQuery<Doc> | UpdateWithAggregationPipeline,
-    options?: MongooseUpdateQueryOptions<Doc>,
+    options?: Options,
 }

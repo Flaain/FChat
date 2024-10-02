@@ -19,13 +19,14 @@ export interface AsyncActionOptions<T> {
     onReject?: (error: unknown) => void;
 }
 
-export interface IModalContext {
+export interface ModalStore {
     isModalDisabled: boolean;
     modals: Array<ModalConfig>;
-    onOpenModal: (config: ModalConfig) => void;
-    onCloseModal: () => void;
-    setIsModalDisabled: React.Dispatch<React.SetStateAction<boolean>>;
-    onAsyncActionModal: <T>(cb: () => Promise<T>, options?: AsyncActionOptions<T>) => Promise<void>;
+    actions: {
+        onOpenModal: (config: ModalConfig) => void;
+        onCloseModal: () => void;
+        onAsyncActionModal: <T>(cb: () => Promise<T>, options?: AsyncActionOptions<T>) => Promise<void>;
+    }
 }
 
 export interface ModalConfig {

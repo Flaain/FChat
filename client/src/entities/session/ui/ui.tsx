@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { SessionProps } from '../model/types';
 import { sessionAPI } from '../api';
 import { useModal } from '@/shared/lib/providers/modal';
+import { selectModalActions } from '@/shared/lib/providers/modal/store';
 
 const iconStyles = 'w-7 h-7 dark:fill-primary-white fill-primary-dark-50';
 
@@ -21,7 +22,7 @@ const iconsMap = {
 };
 
 export const Session = ({ session, withDropButton, dropButtonDisabled, onDrop }: SessionProps) => {
-    const { onAsyncActionModal } = useModal();
+    const { onAsyncActionModal } = useModal(selectModalActions);
 
     const [isDroping, setIsDroping] = React.useState(false);
 

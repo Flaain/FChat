@@ -1,9 +1,11 @@
-import { Profile } from "@/shared/model/types";
+import { Profile } from '@/shared/model/types';
 
-export interface IProfileContext {
+export interface ProfileStore {
     profile: Profile;
     isUploadingAvatar: boolean;
-    handleUploadAvatar: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleSetStatus: (status: string) => void;
-    setProfile: React.Dispatch<React.SetStateAction<Profile>>;
+    actions: {
+        getProfile: () => Promise<void>;
+        handleUploadAvatar: (event: React.ChangeEvent<HTMLInputElement>) => void;
+        handleSetStatus: (status: string) => void;
+    };
 }
