@@ -1,5 +1,3 @@
-import React from 'react';
-
 export enum OtpType {
     EMAIL_VERIFICATION = 'email_verification',
     PASSWORD_RESET = 'password_reset'
@@ -11,10 +9,9 @@ export interface Otp {
     type: OtpType;
 }
 
-export interface IOtpContext {
+export interface OtpStore {
     otp: Otp;
     isResending: boolean;
-    setOtp: React.Dispatch<React.SetStateAction<Otp>>;
     onResend: () => Promise<void>;
 }
 

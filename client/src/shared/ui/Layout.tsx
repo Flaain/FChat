@@ -6,17 +6,17 @@ import { LayoutSheetSkeleton } from '@/widgets/LayoutSheet/ui/Skeletons/LayoutSh
 import { Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { LayoutSheetView } from '@/widgets/LayoutSheet';
-import { useLayout } from '../lib/providers/layout/context';
+import { useLayout } from '../model/store';
 
 export const Layout = () => {
-    const { isSheetOpen, onSheet } = useLayout();
+    const isSheetOpen = useLayout((state) => state.isSheetOpen);
 
     return (
         <main className='flex h-full dark:bg-primary-dark-200 w-full'>
             <Toaster />
             {isSheetOpen &&
                 ReactDOM.createPortal(
-                    <Sheet withHeader={false} closeHandler={() => onSheet(false)}>
+                    <Sheet withHeader={false} closeHandler={() => useLayout.setState({ isSheetOpen: false })}>
                         <React.Suspense fallback={<LayoutSheetSkeleton />}>
                             <LayoutSheetView />
                         </React.Suspense>

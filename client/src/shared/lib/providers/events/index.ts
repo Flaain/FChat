@@ -1,1 +1,0 @@
-export { EventsProvider } from './provider';

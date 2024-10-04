@@ -2,6 +2,7 @@ import React from 'react';
 import { MarkdownToJSX } from "markdown-to-jsx";
 import { Message } from '@/entities/Message/model/types';
 import { Conversation } from '@/pages/Conversation/model/types';
+import { Socket } from 'socket.io-client';
 
 export enum FeedTypes {
     CONVERSATION = 'Conversation',
@@ -280,4 +281,21 @@ export interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 
 export interface PreAnimatedSkeletonProps extends React.HTMLAttributes<HTMLSpanElement> {
     animate?: boolean;
+}
+
+export interface LayoutStore {
+    drafts: Map<string, Draft>;
+    isSheetOpen: boolean;
+}
+
+export type Listeners = Map<keyof GlobalEventHandlersEventMap, Set<(event: any) => void>>
+
+export interface EventsStore {
+    listeners: Map<any, any>;
+    addEventListener<E extends keyof GlobalEventHandlersEventMap>(type: E, listener: (event: GlobalEventHandlersEventMap[E]) => void): () => void;
+}
+
+export interface SocketStore {
+    socket: Socket;
+    isConnected: boolean;
 }

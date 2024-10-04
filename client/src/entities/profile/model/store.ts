@@ -62,3 +62,5 @@ export const useProfile = create<ProfileStore>((set, get) => ({
         }
     }
 }));
+
+useProfile.getState().actions.getProfile();

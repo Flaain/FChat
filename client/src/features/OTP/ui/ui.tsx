@@ -5,11 +5,30 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/shared/ui/input-otp';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { Button } from '@/shared/ui/Button';
 import { LoaderCircle } from 'lucide-react';
-import { OtpProps } from '@/shared/lib/providers/otp/types';
-import { useOtp } from '@/shared/lib/providers/otp/context';
+import { OtpProps } from '../model/types';
+import { useOtp } from '../model/store';
 
 export const OTP = React.forwardRef<HTMLInputElement, OtpProps>(({ onComplete, disabled, ...rest }, ref) => {
-    const { isResending, otp: { retryDelay }, onResend } = useOtp();
+    const { isResending, otp, onResend } = useOtp();
+
+    const timerRef = React.useRef<NodeJS.Timeout>();
+
+    React.useEffect(() => {
+        if (!otp?.retryDelay) return;
+
+        timerRef.current = setInterval(() => {
+            useOtp.setState({ otp: { ...otp, retryDelay: otp.retryDelay - 1000 } });
+        }, 1000);
+
+        return () => clearInterval(timerRef.current);
+    }, [!!otp?.retryDelay]);
+
+    React.useEffect(() => {
+        if (otp?.retryDelay <= 0) {
+            clearInterval(timerRef.current);
+            useOtp.setState({ otp: { ...otp, retryDelay: 0 } });
+        }
+    }, [otp?.retryDelay]);
 
     return (
         <div className='flex flex-col gap-2'>
@@ -32,9 +51,9 @@ export const OTP = React.forwardRef<HTMLInputElement, OtpProps>(({ onComplete, d
                     <InputOTPSlot index={5} className='size-12' />
                 </InputOTPGroup>
             </InputOTP>
-            {!!retryDelay ? (
+            {!!otp.retryDelay ? (
                 <Typography size='sm' variant='secondary'>
-                    Resend your email if it doesn’t arrive in {getOtpRetryTime(retryDelay)}
+                    Resend your email if it doesn’t arrive in {getOtpRetryTime(otp.retryDelay)}
                 </Typography>
             ) : (
                 <Button

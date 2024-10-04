@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { SessionStore } from './types';
 
-export const useSession = create<SessionStore>((set, get) => ({
+export const useSession = create<SessionStore>((set) => ({
     userId: null!,
     isAuthInProgress: true,
     isAuthorized: false,

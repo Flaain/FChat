@@ -1,10 +1,8 @@
 import React from 'react';
-import { getTheme } from '../lib/getTheme';
-import { Theme } from './types';
-import { ThemeContext } from './context';
+import { useTheme } from '..';
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-    const [theme, setTheme] = React.useState<Theme>(getTheme());
+    const { theme } = useTheme();
 
     React.useLayoutEffect(() => {
         const root = window.document.documentElement;
@@ -16,5 +14,5 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         };
     }, [theme]);
 
-    return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
+    return children;
 };

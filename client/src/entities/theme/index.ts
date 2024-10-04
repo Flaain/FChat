@@ -1,1 +1,1 @@
-export { useTheme } from './model/context';
+export { useTheme } from './model/store';
