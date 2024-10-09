@@ -149,9 +149,10 @@ export class MessageService extends BaseService<MessageDocument, Message> {
             filter: { _id: messageId, sender: initiatorId, text: { $ne: newMessage.trim() } },
             update: { text: newMessage.trim(), hasBeenEdited: true },
             options: {
+                new: true,
                 runValidators: true,
                 populate: [
-                    { path: 'sender', model: 'User', select: 'name email' },
+                    { path: 'sender', model: 'User', select: 'name email avatar', populate: { path: 'avatar', model: 'File', select: 'url' } },
                     {
                         path: 'replyTo',
                         model: 'Message',

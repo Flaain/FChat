@@ -181,11 +181,10 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
                     id: conversationId,
                 });
 
-                socket.data.user._id.toString() === recipientId &&
-                    socket.emit(FEED_EVENTS.STOP_TYPING, {
-                        _id: conversationId,
-                        participant: { _id: initiatorId },
-                    });
+                socket.data.user._id.toString() === recipientId && socket.emit(FEED_EVENTS.STOP_TYPING, {
+                    _id: conversationId,
+                    participant: { _id: initiatorId },
+                });
             }),
         );
     }
@@ -205,15 +204,10 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
 
         this.server.to(roomId).emit(CONVERSATION_EVENTS.MESSAGE_EDIT, message);
 
-        isLastMessage &&
-            [initiatorSockets, recipientSockets].forEach((sockets) =>
-                sockets?.forEach((socket) =>
-                    socket.emit(FEED_EVENTS.EDIT_MESSAGE, {
-                        message,
-                        id: conversationId,
-                    }),
-                ),
-            );
+        isLastMessage && [initiatorSockets, recipientSockets].forEach((sockets) => sockets?.forEach((socket) => socket.emit(FEED_EVENTS.EDIT_MESSAGE, {
+            message,
+            id: conversationId,
+        })));
     }
 
     @OnEvent(CONVERSATION_EVENTS.MESSAGE_DELETE)
@@ -253,8 +247,7 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
             sockets?.forEach((socket) => {
                 socket.emit(FEED_EVENTS.CREATE_CONVERSATION, {
                     ...newConversation,
-                    recipient:
-                        socket.data.user._id.toString() === recipient._id.toString() ? initiator.toObject() : recipient,
+                    recipient: socket.data.user._id.toString() === recipient._id.toString() ? initiator.toObject() : recipient,
                 });
             });
         });
@@ -307,14 +300,13 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
         const recipientSockets = this.gatewayManager.sockets.get(recipientId);
 
         recipientSockets?.forEach((socket) => {
-            !socket.rooms.has(roomId) &&
-                socket.emit(FEED_EVENTS.START_TYPING, {
-                    _id: conversationId,
-                    participant: {
-                        _id: client.data.user._id.toString(),
-                        name: client.data.user.name,
-                    },
-                });
+            !socket.rooms.has(roomId) && socket.emit(FEED_EVENTS.START_TYPING, {
+                _id: conversationId,
+                participant: {
+                    _id: client.data.user._id.toString(),
+                    name: client.data.user.name,
+                },
+            });
         });
     }
 
@@ -329,11 +321,9 @@ export class GatewayService implements OnGatewayInit, OnGatewayConnection, OnGat
 
         const recipientSockets = this.gatewayManager.sockets.get(recipientId);
 
-        recipientSockets?.forEach((socket) =>
-            socket.emit(FEED_EVENTS.STOP_TYPING, {
-                _id: conversationId,
-                participant: { _id: client.data.user._id.toString() },
-            }),
-        );
+        recipientSockets?.forEach((socket) => socket.emit(FEED_EVENTS.STOP_TYPING, {
+            _id: conversationId,
+            participant: { _id: client.data.user._id.toString() },
+        }));
     }
 }

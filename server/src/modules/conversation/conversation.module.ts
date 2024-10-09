@@ -7,11 +7,13 @@ import { UserModule } from '../user/user.module';
 import { ParticipantModule } from '../participant/participant.module';
 import { Message, MessageSchema } from '../message/schemas/message.schema';
 import { User, UserSchema } from '../user/schemas/user.schema';
+import { FeedModule } from '../feed/feed.module';
 
 @Module({
     imports: [
         UserModule,
         ParticipantModule,
+        FeedModule,
         MongooseModule.forFeature([
             { name: Conversation.name, schema: ConversationSchema },
             { name: Message.name, schema: MessageSchema },

@@ -12,6 +12,7 @@ import { MESSAGES_BATCH } from './constants';
 import { Providers } from 'src/utils/types';
 import { S3Client } from '@aws-sdk/client-s3';
 import { User } from '../user/schemas/user.schema';
+import { FeedService } from '../feed/feed.service';
 
 @Injectable()
 export class ConversationService extends BaseService<ConversationDocument, Conversation> implements IConversationService {
@@ -19,6 +20,7 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
         @InjectModel(Conversation.name) private readonly conversationModel: Model<ConversationDocument>,
         @InjectModel(Message.name) private readonly messageModel: Model<Message>,
         @Inject(Providers.S3_CLIENT) private readonly s3: S3Client,
+        private readonly feedService: FeedService,
         private readonly userService: UserService,
     ) {
         super(conversationModel);
@@ -36,7 +38,11 @@ export class ConversationService extends BaseService<ConversationDocument, Conve
 
         if (!conversation) throw new AppException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
 
-        await Promise.all([this.messageModel.deleteMany({ _id: { $in: conversation.messages } }), conversation.deleteOne()]);
+        await Promise.all([
+            this.messageModel.deleteMany({ _id: { $in: conversation.messages } }), 
+            this.feedService.findOneAndDelete({ users: { $all: [initiatorId, recipientId] }, item: conversation._id }),
+            conversation.deleteOne(),
+        ]);
 
         return { _id: conversation._id, recipientId: recipient._id.toString() };
     };
