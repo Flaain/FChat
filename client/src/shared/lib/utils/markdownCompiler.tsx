@@ -1,5 +1,5 @@
 import React from "react";
-import MessageLink from "@/shared/ui/MessageLink";
+import { MessageLink } from "@/shared/ui/MessageLink";
 import { CompilerOptions, PartOfCompilerUse } from "@/shared/model/types";
 import { compiler } from "markdown-to-jsx";
 

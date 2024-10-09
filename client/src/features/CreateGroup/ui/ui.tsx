@@ -1,49 +1,80 @@
-import LinkStage from './LinkStage';
-import GroupNameStage from './GroupNameStage';
-import SelectStage from './SelectStage';
-import { useModal } from '@/shared/lib/hooks/useModal';
 import { Button } from '@/shared/ui/Button';
 import { LoaderCircle } from 'lucide-react';
-import { Form } from '@/shared/ui/Form';
-import { useCreateGroupContext } from '../lib/hooks/useCreateGroupContext';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
+import { useModal } from '@/shared/lib/providers/modal';
+import { steps } from '../model/constants';
+import { Input } from '@/shared/ui/Input';
+import { Select } from './Select';
+import { useShallow } from 'zustand/shallow';
+import { useCreateGroup } from '../model/context';
 
-const buttonConfig = {
-    0: 'Next',
-    1: 'Next',
-    2: 'Create'
-};
-
-const stages: Record<number, React.ReactNode> = {
-    0: <GroupNameStage />,
-    1: <SelectStage />,
-    2: <LinkStage />
-};
-
-const CreateGroup = () => {
-    const { isAsyncActionLoading } = useModal();
-    const { form, step, isNextButtonDisabled, handleBack, onSubmit } = useCreateGroupContext();
-
-
-    return (
+export const CreateGroup = () => {
+    const { onCloseModal, isModalDisabled } = useModal(useShallow((state) => ({
+        onCloseModal: state.actions.onCloseModal,
+        isModalDisabled: state.isModalDisabled
+    })));
+   const { form, onSubmit, step, handleBack, isNextButtonDisabled } = useCreateGroup();
+    
+   return (
         <Form {...form}>
             <form onSubmit={onSubmit} className='flex flex-col gap-5'>
-                {stages[step]}
+                {!step && (
+                    <FormField
+                        name='name'
+                        control={form.control}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className='text-white'>Group name</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        placeholder='Enter group name'
+                                        className='box-border focus:placeholder:opacity-0 placeholder:transition-opacity placeholder:duration-300 placeholder:ease-in-out dark:ring-offset-0 dark:focus-visible:ring-primary-dark-50 dark:focus:bg-primary-dark-200 dark:bg-primary-dark-100 border-none text-white ring-1 dark:placeholder:text-white placeholder:opacity-50 dark:ring-primary-dark-50'
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
+                {step === 1 && <Select />}
+                {step === 2 && (
+                    <FormField
+                        name='login'
+                        control={form.control}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className='text-white'>Unique login</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        placeholder='Enter unique login'
+                                        className='focus:placeholder:opacity-0 placeholder:transition-opacity placeholder:duration-300 placeholder:ease-in-out dark:ring-offset-0 dark:focus-visible:ring-primary-dark-50 dark:focus:bg-primary-dark-200 dark:bg-primary-dark-100 border-none text-white ring-1 dark:placeholder:text-white placeholder:opacity-50 dark:ring-primary-dark-50'
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
                 <div className='flex items-center gap-5 justify-between'>
                     <Button
                         type='button'
                         size='lg'
                         variant='secondary'
                         className='w-1/3'
-                        onClick={handleBack}
-                        disabled={isAsyncActionLoading}
+                        onClick={!step ? onCloseModal : handleBack}
+                        disabled={isModalDisabled}
                     >
                         {!step ? 'Cancel' : 'Back'}
                     </Button>
                     <Button type='submit' className='w-full' disabled={isNextButtonDisabled}>
-                        {isAsyncActionLoading ? (
+                        {isModalDisabled ? (
                             <LoaderCircle className='w-5 h-5 animate-loading' />
+                        ) : step === steps.length - 1 ? (
+                            'Create'
                         ) : (
-                            buttonConfig[step as keyof typeof buttonConfig]
+                            'Next'
                         )}
                     </Button>
                 </div>
@@ -51,5 +82,3 @@ const CreateGroup = () => {
         </Form>
     );
 };
-
-export default CreateGroup;

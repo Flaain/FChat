@@ -1,0 +1,1 @@
+export const getScrollBottom = <T extends HTMLElement>(element: T) => element.scrollHeight - element.scrollTop - element.clientHeight;

@@ -1,6 +1,6 @@
-import { SigninStages } from "@/features/Signin/model/types";
+import { SigninStage } from '@/features/Signin/model/types';
 
-export interface SigninContextProps {
-    stage: SigninStages,
-    setStage: React.Dispatch<React.SetStateAction<SigninStages>>,
+export interface SigninStore {
+    stage: SigninStage;
+    changeSigninStage: (stage: SigninStage) => void;
 }

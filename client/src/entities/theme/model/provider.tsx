@@ -1,18 +1,18 @@
-import React from "react";
-import { Theme, ThemeProviderProps } from "./types";
-import { ThemeContext } from "./context";
+import React from 'react';
+import { useTheme } from '..';
 
-export const ThemeProvider = ({ defaultTheme = "dark", children }: ThemeProviderProps) => {
-    const [theme, setTheme] = React.useState<Theme>(defaultTheme);
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+    const { theme } = useTheme();
 
     React.useLayoutEffect(() => {
         const root = window.document.documentElement;
 
-        root.classList.remove("light", "dark");
         root.classList.add(theme);
+
+        return () => {
+            root.classList.remove('light', 'dark');
+        };
     }, [theme]);
 
-    const value = React.useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
-
-    return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+    return children;
 };

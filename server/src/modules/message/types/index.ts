@@ -6,6 +6,11 @@ import { MessageEditDTO } from '../dtos/message.edit.dto';
 import { RequestWithUser } from "src/utils/types";
 import { UserDocument } from "src/modules/user/types";
 
+export enum MessageRefPath {
+    USER = 'User',
+    PARTICIPANT = 'Participant'
+}
+
 export interface IMessage {
     _id: Types.ObjectId;
     sender: Types.ObjectId
@@ -32,4 +37,4 @@ export type MessageDocument = Message & Document & SchemaTimestampsConfig;
 
 export type SendMessageParams = MessageSendDTO & { recipientId: string; initiator: UserDocument };
 export type EditMessageParams = MessageEditDTO & { initiatorId: Types.ObjectId, messageId: string };
-export type DeleteMessageType = MessageDeleteDTO & { messageId: string; initiatorId: Types.ObjectId };
+export type DeleteMessageParams = MessageDeleteDTO & { initiatorId: Types.ObjectId };

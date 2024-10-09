@@ -1,18 +1,13 @@
-import OTP from '@/features/OTP/ui/ui';
+import { OTP } from '@/features/OTP/ui/ui';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Button } from '@/shared/ui/Button';
 import { LoaderCircle } from 'lucide-react';
 import { PasswordInput } from '@/shared/ui/PasswordInput';
-import { useForgot } from '../lib/hooks/useForgot';
-import { OtpType } from '@/shared/lib/contexts/otp/types';
+import { useForgot } from '../lib/useForgot';
 import { Input } from '@/shared/ui/Input';
+import { buttonTitles } from '../model/constants';
 
-const buttonTitles = {
-    0: 'Send email',
-    2: "Reset"
-}
-
-const Forgot = () => {
+export const Forgot = () => {
     const { form, isNextButtonDisabled, isLoading, onSubmit, onBack, step } = useForgot();
 
     return (
@@ -49,13 +44,7 @@ const Forgot = () => {
                                 <FormItem className='relative'>
                                     <FormLabel className='text-white'>Enter verification code</FormLabel>
                                     <FormControl>
-                                        <OTP
-                                            {...field}
-                                            email={form.getValues('email')}
-                                            onComplete={onSubmit}
-                                            onResend={() => form.resetField('otp')}
-                                            type={OtpType.PASSWORD_RESET}
-                                        />
+                                        <OTP {...field} onComplete={onSubmit} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -123,5 +112,3 @@ const Forgot = () => {
         </Form>
     );
 };
-
-export default Forgot;

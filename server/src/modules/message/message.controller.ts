@@ -72,16 +72,16 @@ export class MessageController implements IMessageController {
         return message;
     }
 
-    @Delete('delete/:messageId')
+    @Delete('delete')
     @UseGuards(AccessGuard)
-    async deleteMessage(@Req() req: RequestWithUser, @Body() dto: MessageDeleteDTO, @Param('messageId') messageId: string) {
-        const { conversationId, ...message } = await this.messageService.deleteMessage({ ...dto, messageId, initiatorId: req.user.doc._id });
+    async delete(@Req() req: RequestWithUser, @Body() dto: MessageDeleteDTO) {
+        const { conversationId, findedMessageIds, ...message } = await this.messageService.delete({ ...dto, initiatorId: req.user.doc._id });
 
         this.eventEmitter.emit(CONVERSATION_EVENTS.MESSAGE_DELETE, { 
-            ...dto, 
-            ...message, 
+            ...message,
+            recipientId: dto.recipientId,
+            messageIds: findedMessageIds,
             conversationId, 
-            messageId,
             initiatorId: req.user.doc._id.toString() 
         })
 

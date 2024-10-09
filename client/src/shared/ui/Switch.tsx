@@ -1,7 +1,7 @@
 import { HTMLAttributes } from 'react';
 import { cn } from '../lib/utils/cn';
 
-const Switch = ({
+export const Switch = ({
     onChange,
     checked,
     children,
@@ -20,5 +20,3 @@ const Switch = ({
         </label>
     );
 };
-
-export default Switch;

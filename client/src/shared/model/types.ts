@@ -1,13 +1,18 @@
-import { Session } from '@/entities/session/model/types';
-import { ModalConfig } from '../lib/contexts/modal/types';
-import { User } from '../lib/contexts/profile/types';
-import { MarkdownToJSX } from "markdown-to-jsx";
 import React from 'react';
+import { MarkdownToJSX } from "markdown-to-jsx";
+import { Message } from '@/entities/Message/model/types';
+import { Conversation } from '@/pages/Conversation/model/types';
+import { Socket } from 'socket.io-client';
 
 export enum FeedTypes {
     CONVERSATION = 'Conversation',
     GROUP = 'Group',
     USER = 'User'
+}
+
+export enum ChatType {
+    CONVERSATION = 'conversation',
+    GROUP = 'group',
 }
 
 export enum OutletDetailsTypes {
@@ -25,10 +30,31 @@ export enum PartOfCompilerUse {
     MESSAGE_TOP_BAR = 'messageTopBar',
 }
 
+export type Recipient = Pick<Profile, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence' | 'status' | 'avatar'>;
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type WithParams<T = Record<string, unknown>> = T & { params?: RequestParams; signal?: AbortSignal };
-export type ModalSize = 'default' | 'sm' | 'lg' | 'fit' | 'fitHeight' | 'screen';
 export type MessageFormState = 'send' | 'edit' | 'reply';
+
+export interface Avatar {
+    _id: string;
+    url: string;
+}
+
+export interface Profile {
+    _id: string;
+    name: string;
+    login: string;
+    email: string;
+    presence: PRESENCE;
+    status?: string;
+    avatar?: Avatar;
+    lastSeenAt: string;
+    isOfficial: boolean;
+    isPrivate: boolean;
+    isDeleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
 
 export interface CompilerOptions extends MarkdownToJSX.Options {
     shouldStayRaw?: Array<keyof HTMLElementTagNameMap>;
@@ -61,7 +87,6 @@ export interface APIData<T> {
     data: T;
     statusCode: Response['status'];
     headers: Record<string, string>;
-    message: string;
 }
 
 export enum AppExceptionCode {
@@ -79,37 +104,11 @@ export interface IAppException {
     errorCode?: AppExceptionCode;
 }
 
-export interface IMessage {
-    _id: string;
-    sender: ConversationParticipant;
-    hasBeenRead: boolean;
-    hasBeenEdited: boolean;
-    text: string;
-    replyTo?: Pick<IMessage, '_id' | 'text'> & { sender: Pick<ConversationParticipant, 'name'> } | null;
-    createdAt: string;
-    updatedAt: string;
-    sendingInProgress?: boolean;
-}
-
 export interface GroupParticipant {
     _id: string;
     name: string;
     email: string;
     userId: string;
-}
-
-export interface ConversationParticipant extends Pick<User, '_id' | 'isOfficial' | 'email' | 'name' | 'login' | 'lastSeenAt' | 'isPrivate' | 'presence' | 'status' | 'avatar'> {}
-
-export interface Conversation {
-    _id: string;
-    recipient: ConversationParticipant;
-    messages: Array<IMessage>;
-    lastMessage?: IMessage;
-    lastMessageSentAt: string;
-    createdAt: string;
-    updatedAt: string;
-    isInitiatorBlocked?: boolean;
-    isRecipientBlocked?: boolean;
 }
 
 export interface Group {
@@ -118,16 +117,11 @@ export interface Group {
     login: string;
     participants: Array<GroupParticipant>;
     isOfficial?: boolean;
-    messages: Array<IMessage>;
-    lastMessage?: IMessage;
+    messages: Array<Message>;
+    lastMessage?: Message;
     lastMessageSentAt: string;
     createdAt: string;
     updatedAt: string;
-}
-
-export interface ModalProps extends Omit<ModalConfig, 'content'> {
-    closeHandler: () => void;
-    children: React.ReactNode;
 }
 
 export interface SheetProps {
@@ -184,12 +178,6 @@ export interface SearchUser {
     login: string;
 }
 
-export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {
-    children: React.ReactNode;
-    closeHandler: () => void;
-    size?: ModalSize;
-}
-
 export interface AvatarByNameProps extends React.HTMLAttributes<HTMLSpanElement> {
     name?: string;
     size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
@@ -222,22 +210,7 @@ export type UserFeed = SearchUser & { type: FeedTypes.USER };
 export interface Draft {
     value: string;
     state: MessageFormState;
-    selectedMessage?: IMessage;
-}
-
-export enum CONVERSATION_EVENTS {
-    JOIN = 'conversation.join',
-    LEAVE = 'conversation.leave',
-    CREATED = 'conversation.created',
-    DELETED = 'conversation.deleted',
-    MESSAGE_SEND = 'conversation.message.send',
-    MESSAGE_EDIT = 'conversation.message.edit',
-    MESSAGE_DELETE = 'conversation.message.delete',
-    USER_PRESENCE = 'conversation.user.presence',
-    USER_BLOCK = 'conversation.user.block',
-    USER_UNBLOCK = 'conversation.user.unblock',
-    START_TYPING = 'conversation.start.typing',
-    STOP_TYPING = 'conversation.stop.typing',
+    selectedMessage?: Message;
 }
 
 export enum FEED_EVENTS {
@@ -262,15 +235,8 @@ export enum PRESENCE {
     OFFLINE = 'offline'
 }
 
-export interface GetConversationsRes {
-    conversations: Array<
-        Omit<ConversationFeed, 'type' | 'recipient'> & { participants: Array<ConversationParticipant> }
-    >;
-    nextCursor: string;
-}
-
 export interface DeleteMessageEventParams {
-    lastMessage: IMessage;
+    lastMessage: Message;
     lastMessageSentAt: string;
     id: string;
 }
@@ -284,80 +250,12 @@ export type UserCheckParams =
     | { type: UserCheckType.EMAIL; email: string }
     | { type: UserCheckType.LOGIN; login: string };
 
-export enum ActionPasswordType {
-    SET = 'set',
-    CHECK = 'check'
-}
-
-export type UserPasswordParams =
-    | { type: ActionPasswordType.SET; currentPassword: string; newPassword: string }
-    | { type: ActionPasswordType.CHECK; currentPassword: string };
-
-export interface GetConversation {
-    conversation: Pick<Conversation, '_id' | 'recipient' | 'messages' | 'createdAt'>;
-    nextCursor: string;
-}
-
-export interface DeleteMessageRes {
-    isLastMessage: boolean;
-    lastMessage: IMessage;
-    lastMessageSentAt: string;
-}
-
-export interface GetSessionsReturn {
-    currentSession: {
-        _id: string;
-        userAgent: ParsedSession;
-        createdAt: string;
-        expiresAt: string;
-    };
-    sessions: Array<Session>;
-}
-
-export interface ParsedSession {
-    ua: string;
-    browser: IBrowser;
-    device: IDevice;
-    engine: IEngine;
-    os: IOS;
-    cpu: ICPU;
-}
-
-export interface IBrowser {
-    name: string | undefined;
-    version: string | undefined;
-    major: string | undefined;
-}
-
-export interface IDevice {
-    model: string | undefined;
-    type: string | undefined;
-    vendor: string | undefined;
-}
-
-export interface IEngine {
-    name: string | undefined;
-    version: string | undefined;
-}
-
-export interface IOS {
-    name: string | undefined;
-    version: string | undefined;
-}
-
-export interface ICPU {
-    architecture: string | undefined;
-}
-
-export interface Meta {
+export interface Meta<T> {
+    items: T;
     total_items: number;
     current_page: number;
     total_pages: number;
     remaining_items: number;
-}
-
-export interface WithMeta<T> extends Meta {
-    items: T;
 }
 
 export interface Pagination {
@@ -366,48 +264,12 @@ export interface Pagination {
     limit?: number;
 }
 
-export interface EmojiMartData {
-    categories: Category[];
-    emojis: { [key: string]: Emoji };
-    aliases: { [key: string]: string };
-    sheet: Sheet;
-}
-
-export interface Category {
-    id: string;
-    emojis: string[];
-}
-
-export interface EmojiData {
-    aliases: Array<string>;
-    id: string;
-    keywords: Array<string>;
-    name: string;
-    native: string;
-    shortcodes: string;
-    skin: number;
-    unified: string;
-}
-
-export interface Emoji {
-    id: string;
-    name: string;
-    keywords: string[];
-    skins: Skin[];
-    version: number;
-    emoticons?: string[];
-}
-
-export interface Skin {
-    unified: string;
-    native: string;
-    x?: number;
-    y?: number;
-}
-
-export interface Sheet {
-    cols: number;
-    rows: number;
+export interface WrappedInPagination<T> {
+    items: Array<T>;
+    total_items: number;
+    current_page: number;
+    total_pages: number;
+    remaining_items: number;
 }
 
 export interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -416,4 +278,21 @@ export interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 
 export interface PreAnimatedSkeletonProps extends React.HTMLAttributes<HTMLSpanElement> {
     animate?: boolean;
+}
+
+export interface LayoutStore {
+    drafts: Map<string, Draft>;
+    isSheetOpen: boolean;
+}
+
+export type Listeners = Map<keyof GlobalEventHandlersEventMap, Set<(event: any) => void>>
+
+export interface EventsStore {
+    listeners: Map<any, any>;
+    addEventListener<E extends keyof GlobalEventHandlersEventMap>(type: E, listener: (event: GlobalEventHandlersEventMap[E]) => void): () => void;
+}
+
+export interface SocketStore {
+    socket: Socket;
+    isConnected: boolean;
 }

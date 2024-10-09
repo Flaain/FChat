@@ -1,17 +1,15 @@
-import AvatarByName from '@/shared/ui/AvatarByName';
-import Typography from '@/shared/ui/Typography';
+import Verified from '@/shared/lib/assets/icons/verified.svg?react';
+import { AvatarByName } from '@/shared/ui/AvatarByName';
+import { Typography } from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
-import { useSession } from '@/entities/session/lib/hooks/useSession';
-import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
-import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { GroupFeed } from '@/shared/model/types';
+import { useSession } from '@/entities/session';
+import { useLayout } from '@/shared/model/store';
 
-const GroupItem = ({ group }: { group: GroupFeed }) => {
-    const { state: { userId } } = useSession();
-    const { drafts } = useLayoutContext();
-
-    const draft = drafts.get(group._id);
+export const GroupItem = ({ group }: { group: GroupFeed }) => {
+    const userId = useSession((state) => state.userId);
+    const draft = useLayout((state) => state.drafts).get(group._id);
 
     return (
         <li>
@@ -66,5 +64,3 @@ const GroupItem = ({ group }: { group: GroupFeed }) => {
         </li>
     );
 };
-
-export default GroupItem;

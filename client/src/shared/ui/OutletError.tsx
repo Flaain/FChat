@@ -1,7 +1,7 @@
-import OutletContainer from './OutletContainer';
-import Typography from './Typography';
+import { OutletContainer } from './OutletContainer';
+import { Typography } from './Typography';
 
-const OutletError = ({
+export const OutletError = ({
     title,
     description,
     callToAction
@@ -33,5 +33,3 @@ const OutletError = ({
         </OutletContainer>
     );
 };
-
-export default OutletError;

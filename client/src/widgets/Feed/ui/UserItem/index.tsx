@@ -1,15 +1,13 @@
-import AvatarByName from '@/shared/ui/AvatarByName';
-import Typography from '@/shared/ui/Typography';
+import Verified from '@/shared/lib/assets/icons/verified.svg?react';
+import { AvatarByName } from '@/shared/ui/AvatarByName';
+import { Typography } from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/utils/cn';
-import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
-import { useLayoutContext } from '@/shared/lib/hooks/useLayoutContext';
 import { PRESENCE, UserFeed } from '@/shared/model/types';
+import { useLayout } from '@/shared/model/store';
 
-const UserItem = ({ user }: { user: UserFeed }) => {
-    const { drafts } = useLayoutContext();
-
-    const draft = drafts.get(user._id);
+export const UserItem = ({ user }: { user: UserFeed }) => {
+    const draft = useLayout((state) => state.drafts).get(user._id);
 
     return (
         <li>
@@ -50,5 +48,3 @@ const UserItem = ({ user }: { user: UserFeed }) => {
         </li>
     );
 };
-
-export default UserItem;

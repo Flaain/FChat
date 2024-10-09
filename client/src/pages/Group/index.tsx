@@ -1,10 +1,8 @@
-import React from 'react';
-import OutletError from '@/shared/ui/OutletError';
+import Group from './ui/ui';
+import { OutletError } from '@/shared/ui/OutletError';
 import { routerList } from '@/shared/constants';
 import { RouteObject } from 'react-router-dom';
 import { Button } from '@/shared/ui/Button';
-import Typography from '@/shared/ui/Typography';
-import Group from './ui/ui';
 
 export const GroupPage: RouteObject = {
     path: routerList.GROUP,

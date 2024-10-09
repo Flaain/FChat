@@ -1,9 +1,9 @@
-import React, { HTMLAttributes } from 'react';
-import Typography from './Typography';
+import React from 'react';
 import { SheetProps } from '@/shared/model/types';
 import { XIcon } from 'lucide-react';
 import { cn } from '../lib/utils/cn';
-import { useDomEvents } from '../lib/hooks/useDomEvents';
+import { Typography } from './Typography';
+import { useEvents } from '../model/store';
 
 const SheetHeader = ({ title, closeHandler }: Pick<SheetProps, 'title' | 'closeHandler'>) => {
     return (
@@ -55,13 +55,13 @@ const SheetContainer = ({ children, direction = 'left', closeHandler }: Omit<She
     );
 };
 
-const SheetBody = ({ children, closeHandler, className, ...rest }: SheetProps & HTMLAttributes<HTMLDivElement>) => {
-    const { addEventListener } = useDomEvents();
-
+const SheetBody = ({ children, closeHandler, className, ...rest }: SheetProps & React.HTMLAttributes<HTMLDivElement>) => {
     const bodyRef = React.useRef<HTMLDivElement | null>(null);
     const focusableElements = React.useRef<Array<HTMLElement>>([]);
     const activeIndex = React.useRef(-1);
-
+    
+    const addEventListener = useEvents((state) => state.addEventListener);
+    
     const handleTabDown = (event: KeyboardEvent) => {
         if (!bodyRef.current) return;
 
@@ -121,7 +121,7 @@ const SheetBody = ({ children, closeHandler, className, ...rest }: SheetProps & 
     );
 };
 
-const Sheet = ({ direction, withHeader = true, closeHandler, title, children }: SheetProps) => {
+export const Sheet = ({ direction, withHeader = true, closeHandler, title, children }: SheetProps) => {
     return (
         <SheetContainer direction={direction} closeHandler={closeHandler}>
             <SheetBody closeHandler={closeHandler}>
@@ -131,5 +131,3 @@ const Sheet = ({ direction, withHeader = true, closeHandler, title, children }: 
         </SheetContainer>
     );
 };
-
-export default Sheet;

@@ -24,22 +24,22 @@ export abstract class API {
     };
 
     private refreshToken = async () => {
-        const refreshResponse = await fetch(this._baseUrl + '/auth/refresh', {
+        const response = await fetch(this._baseUrl + '/auth/refresh', {
             headers: this._headers,
             credentials: this._cretedentials
         });
         
-        const refreshData = await refreshResponse.json();
+        const data = await response.json();
 
-        if (!refreshResponse.ok) {
-            const error: AppException = { ...refreshData, headers: Object.fromEntries([...refreshResponse.headers.entries()]) };
+        if (!response.ok) {
+            const error: AppException = { ...data, headers: Object.fromEntries([...response.headers.entries()]) };
             
             this.notifyRefreshError(error);
 
             throw new AppException(error);
         }
 
-        return refreshData;
+        return data;
     }
 
     protected _checkResponse = async <T>(response: Response, requestInit?: RequestInit): Promise<APIData<T>> => {
@@ -61,7 +61,6 @@ export abstract class API {
             data,
             headers,
             statusCode: response.status,
-            message: data.message ?? 'success'
         };
     }
 }

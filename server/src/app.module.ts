@@ -10,7 +10,6 @@ import { MessageModule } from './modules/message/message.module';
 import { GatewayModule } from './modules/gateway/gateway.module';
 import { ParticipantModule } from './modules/participant/participant.module';
 import { GroupModule } from './modules/group/group.module';
-import { GroupMessageModule } from './modules/group-message/group-message.module';
 import { SessionModule } from './modules/session/session.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { FeedModule } from './modules/feed/feed.module';
@@ -21,6 +20,7 @@ import { FileModule } from './modules/file/file.module';
 
 @Module({
     imports: [
+        ConfigModule.forRoot({ isGlobal: true, expandVariables: true }),
         AuthModule,
         UserModule,
         FeedModule,
@@ -33,7 +33,6 @@ import { FileModule } from './modules/file/file.module';
                 secretAccessKey: process.env.BUCKET_SECRET,
             },
         }),
-        ConfigModule.forRoot({ isGlobal: true, expandVariables: true }),
         MongooseModule.forRoot(process.env.DATABASE_URI, { retryWrites: true }),
         ThrottlerModule.forRoot([{ limit: 10, ttl: 60000 }]),
         EventEmitterModule.forRoot({ global: true }),
@@ -43,7 +42,6 @@ import { FileModule } from './modules/file/file.module';
         GatewayModule,
         ParticipantModule,
         GroupModule,
-        GroupMessageModule,
         SessionModule,
         OtpModule,
     ],

@@ -7,7 +7,7 @@ import { UseFormReturn } from 'react-hook-form';
 export type CreateGroupType = z.infer<typeof createGroupSchema>;
 export type CreateGroupParams = Omit<z.infer<typeof createGroupSchema>, 'username'> & { participants: Array<string> };
 
-export interface CreateGroupContextProps {
+export interface ICreateGroupContext {
     form: UseFormReturn<CreateGroupType>;
     step: number;
     selectedUsers: Map<string, SearchUser>;

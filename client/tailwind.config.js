@@ -7,6 +7,8 @@ export default {
     theme: {
         extend: {
             colors: {
+                'light-secondary-color': 'rgba(170, 170, 170, 0.08)',
+                'menu-background-color': 'rgba(33, 33, 33, 0.75)',
                 'primary-white': '#F9F9F9',
                 'primary-blue': '#5181B8',
                 'secondary-blue': '#E5EBF1',

@@ -2,9 +2,11 @@ import React from "react";
 import { cn } from "../lib/utils/cn";
 import { ImageProps } from "../model/types";
 
-const Image = ({ skeleton, className, ...rest }: ImageProps) => {
+export const Image = ({ skeleton, className, ...rest }: ImageProps) => {
     const [imageLoaded, setImageLoaded] = React.useState(false);
     const [error, setError] = React.useState(false);
+
+    if (!rest.src) return skeleton;
 
     return (
         <>
@@ -32,5 +34,3 @@ const Image = ({ skeleton, className, ...rest }: ImageProps) => {
         </>
     );
 };
-
-export default Image;

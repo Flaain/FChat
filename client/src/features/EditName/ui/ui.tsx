@@ -1,12 +1,16 @@
-import Typography from '@/shared/ui/Typography';
-import { useModal } from '@/shared/lib/hooks/useModal';
+import { Typography } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
-import { useEditName } from '../lib/hooks/useEditName';
+import { useEditName } from '../lib/useEditName';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
+import { useModal } from '@/shared/lib/providers/modal';
+import { useShallow } from 'zustand/shallow';
 
-const EditName = () => {
-    const { closeModal, isAsyncActionLoading } = useModal();
+export const EditName = () => {
+    const { isModalDisabled, onCloseModal } = useModal(useShallow((state) => ({
+        onCloseModal: state.actions.onCloseModal,
+        isModalDisabled: state.isModalDisabled
+    })));
     const { form, onSubmit } = useEditName();
 
     return (
@@ -37,10 +41,10 @@ const EditName = () => {
                         )}
                     />
                     <div className='flex items-center gap-2 justify-end mt-2'>
-                        <Button type='button' variant='secondary' onClick={closeModal} disabled={isAsyncActionLoading}>
+                        <Button type='button' variant='secondary' onClick={onCloseModal} disabled={isModalDisabled}>
                             Cancel
                         </Button>
-                        <Button type='submit' size='lg' disabled={isAsyncActionLoading}>
+                        <Button type='submit' size='lg' disabled={isModalDisabled}>
                             Save
                         </Button>
                     </div>
@@ -49,5 +53,3 @@ const EditName = () => {
         </div>
     );
 };
-
-export default EditName;

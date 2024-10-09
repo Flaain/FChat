@@ -1,97 +1,71 @@
-import OutletContainer from "@/shared/ui/OutletContainer";
-import Typography from "@/shared/ui/Typography";
-import MessagesList from "@/widgets/MessagesList/ui/ui";
-import OutletHeader from "@/widgets/OutletHeader/ui/ui";
-import OutletDetails from "@/widgets/OutletDetails/ui/ui";
-import AvatarByName from "@/shared/ui/AvatarByName";
-import RecipientDetails from "@/widgets/RecipientDetails/ui/ui";
-import ConversationDDM from "@/features/ConversationDDM/ui/ui";
-import SendMessage from "@/features/SendMessage/ui/ui";
-import { FeedTypes } from "@/shared/model/types";
-import { useConversationContext } from "../../lib/hooks/useConversationContext";
-import Image from "@/shared/ui/Image";
+import { OutletHeader } from '@/widgets/OutletHeader';
+import { OutletDetails } from '@/widgets/OutletDetails';
+import { AvatarByName } from '@/shared/ui/AvatarByName';
+import { Image } from '@/shared/ui/Image';
+import { useConversation } from '../../model/context';
+import { getConversationDescription } from '../../lib/getConversationDescription';
+import { OutletContainer } from '@/shared/ui/OutletContainer';
+import { RecipientDetails } from '../RecipientDetails';
+import { ConversationDDM } from '../DropdownMenu';
+import { useChat } from '@/shared/lib/providers/chat/context';
+import { useShallow } from 'zustand/shallow';
+import { ConversationBody } from '../Body';
+import { Typography } from '@/shared/ui/Typography';
+import { SendMessage } from '@/features/SendMessage/ui/ui';
 
-const Content = () => {
-    const {
-        data,
-        listRef,
-        getPreviousMessages,
-        isPreviousMessagesLoading,
-        getConversationDescription,
-        setShowAnchor,
-        openDetails,
-        showRecipientDetails,
-        closeDetails,
-        showAcnhor,
-        handleAnchorClick,
-        handleTypingStatus
-    } = useConversationContext();
-
+export const Content = () => {
+    const { isInitiatorBlocked, isRecipientBlocked, recipient, isRecipientTyping, handleTypingStatus } = useConversation(useShallow((state) => ({
+            handleTypingStatus: state.actions.handleTypingStatus,
+            isInitiatorBlocked: state.data.conversation.isInitiatorBlocked,
+            isRecipientBlocked: state.data.conversation.isRecipientBlocked,
+            recipient: state.data.conversation.recipient,
+            isRecipientTyping: state.isRecipientTyping
+        })));
+    const { showDetails, setChatState } = useChat(useShallow((state) => ({
+        showDetails: state.showDetails,
+        setChatState: state.actions.setChatState
+    })));
+    
+    const description = getConversationDescription({ data: { recipient, isInitiatorBlocked, isRecipientBlocked }, isRecipientTyping });
+    
     return (
         <OutletContainer>
             <div className='w-full h-svh flex flex-col gap-5'>
                 <OutletHeader
-                    name={data.conversation.recipient.name}
-                    isOfficial={data.conversation.recipient.isOfficial}
-                    description={getConversationDescription()}
+                    onClick={() => setChatState({ showDetails: true })}
+                    name={recipient.name}
+                    isOfficial={recipient.isOfficial}
+                    description={description}
                     dropdownMenu={<ConversationDDM />}
-                    onClick={openDetails}
                 />
-                {data.conversation.messages.length ? (
-                    <MessagesList
-                        listRef={listRef}
-                        type={FeedTypes.CONVERSATION}
-                        messages={data.conversation.messages}
-                        getPreviousMessages={getPreviousMessages}
-                        isFetchingPreviousMessages={isPreviousMessagesLoading}
-                        nextCursor={data.nextCursor}
-                        canFetch={!isPreviousMessagesLoading && !!data.nextCursor}
-                        setShowAnchor={setShowAnchor}
-                    />
-                ) : (
-                    <Typography
-                        variant='primary'
-                        className='m-auto px-5 py-2 rounded-full dark:bg-primary-dark-50 bg-primary-white'
-                    >
-                        No messages yet
-                    </Typography>
-                )}
-                {data.conversation.isInitiatorBlocked || data.conversation.isRecipientBlocked ? (
-                    <div className='min-h-[70px] px-5 scrollbar-hide overflow-auto flex box-border w-full transition-colors duration-200 ease-in-out resize-none appearance-none ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none focus:placeholder:opacity-0 focus:placeholder:translate-x-2 outline-none ring-0 placeholder:transition-all placeholder:duration-300 placeholder:ease-in-out dark:bg-primary-dark-100 border-none text-white dark:placeholder:text-white placeholder:opacity-50'>
-                        <Typography variant='secondary' className='m-auto text-center'>
-                            {data.conversation.isRecipientBlocked
-                                ? `You blocked ${data.conversation.recipient.name}`
-                                : `${data.conversation.recipient.name} has restricted incoming messages`}
-                        </Typography>
-                    </div>
-                ) : (
-                    <SendMessage
-                        type='conversation'
-                        showAnchor={showAcnhor}
-                        onAnchorClick={handleAnchorClick}
-                        onChange={handleTypingStatus}
-                        queryId={data.conversation.recipient._id}
-                    />
-                )}
+                <ConversationBody />
+                <div className='flex flex-col sticky bottom-0 w-full z-[999]'>
+                    {isInitiatorBlocked || isRecipientBlocked ? (
+                        <div className='w-full h-[70px] overflow-hidden flex items-center dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out box-border'>
+                            <Typography variant='secondary' className='m-auto text-center'>
+                                {isRecipientBlocked ? `You blocked ${recipient.name}` : `${recipient.name} has restricted incoming messages`}
+                            </Typography>
+                        </div>
+                    ) : (
+                        <SendMessage onChange={handleTypingStatus()} />
+                    )}
+                </div>
             </div>
-            {showRecipientDetails && (
+            {showDetails && (
                 <OutletDetails
-                    name={data.conversation.recipient.name}
+                    name={recipient.name}
                     avatarSlot={
                         <Image
-                            src={data.conversation.recipient.avatar?.url}
-                            skeleton={<AvatarByName name={data.conversation.recipient.name} size='5xl' />}
+                            src={recipient.avatar?.url}
+                            skeleton={<AvatarByName name={recipient.name} size='5xl' />}
                             className='object-cover object-center size-28 rounded-full'
                         />
                     }
-                    description={getConversationDescription(false)}
-                    info={<RecipientDetails recipient={data.conversation.recipient} />}
-                    type={FeedTypes.CONVERSATION}
-                    onClose={closeDetails}
+                    description={description}
+                    info={<RecipientDetails recipient={recipient} />}
+                    onClose={() => setChatState({ showDetails: false })}
                 />
             )}
         </OutletContainer>
     );
 };
-
-export default Content;

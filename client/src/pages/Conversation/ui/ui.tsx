@@ -1,13 +1,23 @@
-import ConversationSkeleton from './Skeletons/ConversationSkeleton';
-import OutletError from '@/shared/ui/OutletError';
-import Content from './Content';
-import { useConversationContext } from '../lib/hooks/useConversationContext';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { ConversationStatuses } from '../model/types';
+import { ConversationSkeleton } from './Skeleton';
+import { OutletError } from '@/shared/ui/OutletError';
+import { Content } from './Content';
+import { useConversation } from '../model/context';
+import { useParams } from 'react-router-dom';
+import { useChat } from '@/shared/lib/providers/chat/context';
+import { useShallow } from 'zustand/shallow';
 
-const Conversation = () => {
-    const { refetch, error, status, isRefetching } = useConversationContext();
+export const Conversation = () => {
+    const { id } = useParams();
+    const { status, error, isRefetching, getConversation } = useConversation(useShallow((state) => ({
+        status: state.status,
+        error: state.error,
+        isRefetching: state.isRefetching,
+        getConversation: state.actions.getConversation
+    })));
+    const setChatState = useChat((state) => state.actions.setChatState);
 
     const components: Record<ConversationStatuses, React.ReactNode> = {
         error: (
@@ -15,7 +25,7 @@ const Conversation = () => {
                 title='Something went wrong'
                 description={error!}
                 callToAction={
-                    <Button onClick={refetch} className='mt-5'>
+                    <Button onClick={() => getConversation('refetch', id!, setChatState)} className='mt-5'>
                         {isRefetching ? <Loader2 className='w-6 h-6 animate-spin' /> : 'try again'}
                     </Button>
                 }
@@ -27,5 +37,3 @@ const Conversation = () => {
 
     return components[status];
 };
-
-export default Conversation;

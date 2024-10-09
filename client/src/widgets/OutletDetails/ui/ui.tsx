@@ -1,37 +1,18 @@
 import React from 'react';
-import Typography from '@/shared/ui/Typography';
-import { FeedTypes } from '@/shared/model/types';
 import { Button } from '@/shared/ui/Button';
 import { X } from 'lucide-react';
-import { useDomEvents } from '@/shared/lib/hooks/useDomEvents';
+import { Typography } from '@/shared/ui/Typography';
+import { OutletDetailsProps } from '../model/types';
+import { titles } from '../model/constants';
+import { useEvents } from '@/shared/model/store';
+import { useChat } from '@/shared/lib/providers/chat/context';
 
-const titles: Record<Exclude<FeedTypes, 'User'>, string> = {
-    Conversation: 'User Info',
-    Group: 'Group Info'
-};
-
-const OutletDetails = ({
-    onClose,
-    avatarSlot,
-    name,
-    description,
-    type,
-    info,
-}: {
-    name: string;
-    description?: string;
-    info?: React.ReactNode;
-    avatarSlot: React.ReactNode;
-    type: FeedTypes;
-    onClose: () => void;
-}) => {
-    const { addEventListener } = useDomEvents();
-
-    const containerRef = React.useRef<HTMLDivElement | null>(null);
+export const OutletDetails = ({ onClose, avatarSlot, name, description, info }: OutletDetailsProps) => {
+    const addEventListener = useEvents((state) => state.addEventListener);
+    
+    const type = useChat((state) => state.params.type);
 
     React.useEffect(() => {
-        if (!containerRef.current) return;
-
         const removeEventListener = addEventListener('keydown', (event) => {
             event.stopImmediatePropagation();
 
@@ -44,10 +25,7 @@ const OutletDetails = ({
     }, []);
 
     return (
-        <div
-            ref={containerRef}
-            className='flex flex-col gap-10 max-xl:absolute max-xl:top-0 max-xl:right-0 z-[999] px-5 py-3 dark:bg-primary-dark-100 h-full max-w-[390px] w-full border-l-2 border-primary-dark-50'
-        >
+        <div className='flex flex-col gap-10 max-xl:absolute max-xl:top-0 max-xl:right-0 z-[999] px-5 py-3 dark:bg-primary-dark-100 h-full max-w-[390px] w-full border-l-2 border-primary-dark-50'>
             <div className='flex items-center gap-5'>
                 <Button onClick={onClose} size='icon' variant='text' className='p-0'>
                     <X />
@@ -71,5 +49,3 @@ const OutletDetails = ({
         </div>
     );
 };
-
-export default OutletDetails;

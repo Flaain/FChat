@@ -1,7 +1,7 @@
 import { API } from "@/shared/api/API";
 import { BasicAPIResponse } from "@/shared/model/types";
 
-export class ForgotAPI extends API {
+class ForgotAPI extends API {
     forgot = async (body: { email: string }) => {
         const request: RequestInit = {
             method: 'POST',

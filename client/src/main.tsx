@@ -1,19 +1,15 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./app/ui/ui";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './app/model/router';
+import { Providers } from './app/model/providers';
 
-import Providers, { ProvidersProps } from "./providers";
-import { getTheme } from "./shared/lib/utils/getTheme";
-import "./app/styles/index.css";
+import './app/styles/index.css';
 
-const providerProps: Omit<ProvidersProps, "children"> = {
-    theme: { defaultTheme: getTheme() },
-};
-
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <Providers {...providerProps}>
-            <App />
+        <Providers>
+            <RouterProvider router={router} />
         </Providers>
     </React.StrictMode>
 );

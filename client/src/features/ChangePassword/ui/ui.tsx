@@ -1,9 +1,9 @@
 import { Button } from '@/shared/ui/Button';
-import { useChangePassword } from '../lib/hooks/useChangePassword';
+import { useChangePassword } from '../lib/useChangePassword';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Input } from '@/shared/ui/Input';
 
-const ChangePassword = () => {
+export const ChangePassword = () => {
     const { form, onSubmit, step } = useChangePassword();
 
     return (
@@ -47,10 +47,10 @@ const ChangePassword = () => {
                         )}
                     />
                 )}
-                <Button type='submit' className='sr-only'>Submit</Button>
+                <Button type='submit' className='sr-only'>
+                    Submit
+                </Button>
             </form>
         </Form>
     );
 };
-
-export default ChangePassword;

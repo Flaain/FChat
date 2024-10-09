@@ -7,7 +7,7 @@ export class User implements Omit<IUser, '_id' | 'avatar'> {
     @Prop({ type: String, required: true, unique: true })
     login: string;
 
-    @Prop({ type: String, required: true })
+    @Prop({ type: String, required: true, unique: false })
     name: string;
 
     @Prop({ type: String, required: true, unique: true })

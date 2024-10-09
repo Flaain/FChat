@@ -1,11 +1,11 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { noSearchResults } from 'src/utils/constants';
 import { AppException } from 'src/utils/exceptions/app.exception';
-import { PaginationWrapper } from 'src/utils/types';
+import { IPaginationResolver, PaginationWrapper } from 'src/utils/types';
 
 @Injectable()
-export class PaginationResolver {
-    protected wrapPagination = <T>({ page, limit, items, onSuccess }: PaginationWrapper<T>) => {
+export class PaginationResolver implements IPaginationResolver {
+    wrapPagination = <T>({ page, limit, items, onSuccess }: PaginationWrapper<T>) => {
         const total_items = items.slice(page * limit > items.length ? page : page * limit, page * limit + limit);
 
         if (!total_items.length) throw new AppException(noSearchResults, HttpStatus.NOT_FOUND);

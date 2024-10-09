@@ -45,8 +45,8 @@ export class GroupService extends BaseService<GroupDocument, Group> {
         const group = await this.create({ login, name, owner: initiator._id });
         
         const participants = await this.participantService.insertMany([initiator, ...findedUsers].map((user) => ({ 
-            userId: user._id, 
-            groupId: group._id 
+            user: user._id, 
+            group: group._id 
         })));
 
         await group.updateOne({ participants: participants.map((participant) => participant._id), owner: participants[0]._id });
@@ -74,7 +74,7 @@ export class GroupService extends BaseService<GroupDocument, Group> {
                 path: 'participants',
                 model: 'Participant',
                 populate: {
-                    path: 'userId',
+                    path: 'user',
                     model: 'User',
                     select: { login: 1, name: 1 },
                 },
@@ -102,7 +102,7 @@ export class GroupService extends BaseService<GroupDocument, Group> {
                 path: 'participants',
                 model: 'Participant',
                 populate: {
-                    path: 'userId',
+                    path: 'user',
                     model: 'User',
                     select: { login: 1, name: 1 },
                 },

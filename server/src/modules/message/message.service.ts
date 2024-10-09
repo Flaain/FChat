@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message } from './schemas/message.schema';
 import { Model, Types, isValidObjectId } from 'mongoose';
-import { DeleteMessageType, EditMessageParams, MessageDocument, SendMessageParams } from './types';
+import { DeleteMessageParams, EditMessageParams, MessageDocument, MessageRefPath, SendMessageParams } from './types';
 import { ConversationService } from '../conversation/conversation.service';
 import { AppException } from 'src/utils/exceptions/app.exception';
 import { BaseService } from 'src/utils/services/base/base.service';
@@ -68,7 +68,7 @@ export class MessageService extends BaseService<MessageDocument, Message> {
             ctx.conversation = await this.conversationService.create({ participants: [recipient._id, initiator._id] });
         };
 
-        const newMessage = await this.create({ sender: initiator._id, text: message.trim() });
+        const newMessage = await this.create({ sender: initiator._id, text: message.trim(), refPath: MessageRefPath.USER });
 
         const updateQuery = { lastMessage: newMessage._id, lastMessageSentAt: newMessage.createdAt }
         
@@ -119,7 +119,7 @@ export class MessageService extends BaseService<MessageDocument, Message> {
 
         if (!conversation) throw new AppException({ message: 'Conversation not found' }, HttpStatus.NOT_FOUND);
 
-        const newMessage = await this.create({ sender: initiator._id, text: message.trim(), replyTo: replyMessage._id });
+        const newMessage = await this.create({ sender: initiator._id, text: message.trim(), replyTo: replyMessage._id, refPath: MessageRefPath.USER });
 
         const { 0: populatedMessage } = await Promise.all([
             newMessage.populate([
@@ -149,9 +149,10 @@ export class MessageService extends BaseService<MessageDocument, Message> {
             filter: { _id: messageId, sender: initiatorId, text: { $ne: newMessage.trim() } },
             update: { text: newMessage.trim(), hasBeenEdited: true },
             options: {
+                new: true,
                 runValidators: true,
                 populate: [
-                    { path: 'sender', model: 'User', select: 'name email' },
+                    { path: 'sender', model: 'User', select: 'name email avatar', populate: { path: 'avatar', model: 'File', select: 'url' } },
                     {
                         path: 'replyTo',
                         model: 'Message',
@@ -171,28 +172,39 @@ export class MessageService extends BaseService<MessageDocument, Message> {
         };
     };
 
-    deleteMessage = async ({ messageId, initiatorId, recipientId }: DeleteMessageType) => {
-        const message = await this.findOne({ filter: { _id: messageId, sender: initiatorId } });
+    delete = async ({ messageIds, initiatorId, recipientId }: DeleteMessageParams) => {
+        const messages = await this.find({ filter: { _id: { $in: messageIds }, sender: initiatorId } });
 
-        if (!message) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
+        if (!messages.length) throw new AppException({ message: "Messages not found" }, HttpStatus.NOT_FOUND);
 
-        const conversation = await this.conversationService.findOne({
-            filter: { participants: { $all: [initiatorId, recipientId] }, messages: { $in: message._id } },
-            projection: { _id: 1, lastMessage: 1, lastMessageSentAt: 1, messages: 1, createdAt: 1 },
+        const findedMessageIds = messages.map<string>(message => message._id.toString());
+        
+        const conversation = await this.conversationService.findOneAndUpdate({
+            filter: {
+                participants: { $all: [initiatorId, recipientId] },
+                messages: { $all: messages },
+            },
+            update: { $pull: { messages: { $in: findedMessageIds } } },
             options: {
+                new: true,
+                projection: {
+                    _id: 1,
+                    lastMessage: 1,
+                    createdAt: 1,
+                    messages: { $slice: -1 },
+                },
                 populate: {
                     path: 'lastMessage',
                     model: 'Message',
-                    populate: { path: 'sender', model: 'User', select: 'name' }
-                },
-            },
+                    select: 'sender text',
+                }
+            }
         });
-
-        if (!conversation) throw new AppException({ message: "Forbidden" }, HttpStatus.FORBIDDEN);
         
-        const isLastMessage = message._id.toString() === conversation.lastMessage._id.toString();
-        const filteredMessages = conversation.messages.filter((id) => id.toString() !== message._id.toString());
-        const lastMessage = filteredMessages.length ? !isLastMessage ? conversation.lastMessage : await this.findById(filteredMessages[filteredMessages.length - 1], {
+        if (!conversation) throw new AppException({ message: "Conversation not found" }, HttpStatus.NOT_FOUND);
+
+        const isLastMessage = findedMessageIds.includes(conversation.lastMessage._id.toString());
+        const lastMessage = isLastMessage ? conversation.messages.length ? await this.findById(conversation.messages[0]._id, {
             options: {
                 populate: {
                     path: 'sender',
@@ -200,16 +212,12 @@ export class MessageService extends BaseService<MessageDocument, Message> {
                     select: 'name',
                 },
             },
-        }) : undefined;
+        }) : null : conversation.lastMessage;
         const lastMessageSentAt = (lastMessage as Message)?.createdAt ?? conversation.createdAt;
 
         await Promise.all([
-            message.deleteOne(),
-            conversation.updateOne({
-                lastMessageSentAt,
-                lastMessage: lastMessage?._id,
-                $set: { messages: filteredMessages },
-            }),
+            isLastMessage && conversation.updateOne({ lastMessage, lastMessageSentAt }),
+            this.deleteMany({ _id: { $in: findedMessageIds }, sender: initiatorId }),
             this.feedService.updateOne({
                 filter: { item: conversation._id, type: FEED_TYPE.CONVERSATION },
                 update: { lastActionAt: lastMessageSentAt },
@@ -217,10 +225,11 @@ export class MessageService extends BaseService<MessageDocument, Message> {
         ]);
 
         return {
-            lastMessage,
+            findedMessageIds,
             isLastMessage,
+            lastMessage,
             lastMessageSentAt,
             conversationId: conversation._id.toString(),
-        };
-    };
+        }
+    }
 }

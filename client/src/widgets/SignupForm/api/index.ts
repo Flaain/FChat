@@ -1,9 +1,8 @@
 import { API } from '@/shared/api/API';
 import { ISignupAPI, SignupSchemaType } from '../model/types';
-import { User } from '@/shared/lib/contexts/profile/types';
-import { BasicAPIResponse, UserCheckParams } from '@/shared/model/types';
+import { BasicAPIResponse, Profile, UserCheckParams } from '@/shared/model/types';
 
-export class SignupAPI extends API implements ISignupAPI {
+class SignupAPI extends API implements ISignupAPI {
     signup = async (body: Omit<SignupSchemaType, 'confirmPassword'>) => {
         const request: RequestInit = {
             method: 'POST',
@@ -12,7 +11,7 @@ export class SignupAPI extends API implements ISignupAPI {
             body: JSON.stringify(body)
         };
 
-        return this._checkResponse<User>(await fetch(this._baseUrl + '/auth/signup', request), request);
+        return this._checkResponse<Profile>(await fetch(this._baseUrl + '/auth/signup', request), request);
     };
 
     check = async (body: UserCheckParams) => {

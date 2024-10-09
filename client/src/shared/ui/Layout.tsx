@@ -1,33 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Sheet from './Sheet';
-import Sidebar from '@/widgets/Sidebar/ui/ui';
-import LayoutSheetSkeleton from '@/widgets/LayoutSheet/ui/Skeletons/LayoutSheetSkeleton';
+import { Sheet } from './Sheet';
+import { LayoutSheetSkeleton } from '@/widgets/LayoutSheet/ui/Skeletons/LayoutSheetSkeleton';
 import { Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { useLayoutContext } from '../lib/hooks/useLayoutContext';
-import { LayoutSheetView } from '@/widgets/LayoutSheet/model/view';
+import { LayoutSheetView } from '@/widgets/LayoutSheet';
+import { useLayout } from '../model/store';
+import { Sidebar, SidebarProvider } from '@/widgets/Sidebar';
 
-const Layout = () => {
-    const { openSheet, setOpenSheet } = useLayoutContext();
+export const Layout = () => {
+    const isSheetOpen = useLayout((state) => state.isSheetOpen);
 
     return (
-        <main className='flex h-full dark:bg-primary-dark-200 w-full'>
+        <main className='flex h-full dark:bg-primary-dark-200 w-full relative'>
             <Toaster />
-            {openSheet &&
+            {isSheetOpen &&
                 ReactDOM.createPortal(
-                    <Sheet withHeader={false} closeHandler={() => setOpenSheet(false)}>
+                    <Sheet withHeader={false} closeHandler={() => useLayout.setState({ isSheetOpen: false })}>
                         <React.Suspense fallback={<LayoutSheetSkeleton />}>
-                            <LayoutSheetView setSheetOpen={setOpenSheet} />
+                            <LayoutSheetView />
                         </React.Suspense>
                     </Sheet>,
                     document.querySelector('#modal-root')!
                 )}
-
-            <Sidebar />
+            <SidebarProvider>
+                <Sidebar />
+            </SidebarProvider>
             <Outlet />
         </main>
     );
 };
-
-export default Layout;

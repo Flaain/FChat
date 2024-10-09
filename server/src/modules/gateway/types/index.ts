@@ -36,7 +36,7 @@ export enum FEED_EVENTS {
 }
 
 export interface ConversationDeleteMessageParams {
-    messageId: string;
+    messageIds: Array<string>;
     conversationId: string;
     initiatorId: string;
     recipientId: string;

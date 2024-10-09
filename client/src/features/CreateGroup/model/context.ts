@@ -1,15 +1,17 @@
 import React from 'react';
-import { CreateGroupContextProps } from './types';
+import { ICreateGroupContext } from './types';
 
-export const CreateGroupContext = React.createContext<CreateGroupContextProps>({
-    form: undefined!,
+export const CreateGroupContext = React.createContext<ICreateGroupContext>({
+    form: null!,
     handleBack: () => {},
+    onSubmit: () => {},
     handleSelect: () => {},
     handleRemove: () => {},
     handleSearchUser: () => {},
-    onSubmit: () => {},
-    isNextButtonDisabled: false,
-    searchedUsers: [],
+    step: 0,
     selectedUsers: new Map(),
-    step: 0
+    isNextButtonDisabled: false,
+    searchedUsers: []
 });
+
+export const useCreateGroup = () => React.useContext(CreateGroupContext);

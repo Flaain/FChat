@@ -1,34 +1,30 @@
-import MessageGroup from '@/widgets/MessageGroup/ui/ui';
+import React from 'react';
 import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { MessagesListProps } from '../model/types';
-import { useMessagesList } from '../lib/hooks/useMessagesList';
+import { GroupedMessages } from '@/features/GroupedMessages/ui/ui';
+import { useMessagesList } from '../model/useMessagesList';
 
-const MessagesList = ({
-    messages,
+export const MessagesList = React.forwardRef<HTMLUListElement, MessagesListProps>(({
     canFetch,
+    messages,
     getPreviousMessages,
-    setShowAnchor,
     nextCursor,
     isFetchingPreviousMessages,
-    type,
-    listRef
-}: MessagesListProps) => {
-    const { groupedMessages, lastMessageRef } = useMessagesList({
-        messages,
-        canFetch,
-        getPreviousMessages,
-        setShowAnchor,
-        listRef
-    });
-    
+}, ref) => {
+    const groupedMessages = useMessagesList({ canFetch, messages, getPreviousMessages });
+
     return (
-        <ul ref={listRef} className='relative flex flex-col flex-1 w-full px-5 mb-auto gap-5 overflow-auto outline-none'>
+        <ul
+            ref={ref}
+            className='relative flex flex-col flex-1 w-full px-5 mb-auto max-xl:gap-5 gap-3 overflow-x-hidden overflow-y-auto outline-none'
+        >
             {nextCursor && (
                 <li className='flex justify-center items-center'>
                     <Button
                         variant='text'
                         className='p-0 dark:text-primary-white/30 text-primary-white'
+                        disabled={!canFetch}
                         onClick={getPreviousMessages}
                     >
                         {isFetchingPreviousMessages ? (
@@ -40,16 +36,12 @@ const MessagesList = ({
                 </li>
             )}
             {groupedMessages.map((messages, index, array) => (
-                <MessageGroup
+                <GroupedMessages
                     key={messages[0]._id}
-                    type={type}
                     messages={messages}
                     isLastGroup={index === array.length - 1}
-                    lastMessageRef={lastMessageRef}
                 />
             ))}
         </ul>
     );
-};
-
-export default MessagesList;
+})
