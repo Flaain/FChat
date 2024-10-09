@@ -4,13 +4,14 @@ import { LoaderCircle } from 'lucide-react';
 import { useSignin } from '../lib/useSignin';
 import { Input } from '@/shared/ui/Input';
 import { PasswordInput } from '@/shared/ui/PasswordInput';
-import { useSigninForm } from '@/widgets/SigninForm/model/context';
 import { useAuth } from '@/pages/Auth';
+import { useSigninForm } from '@/widgets/SigninForm/model/store';
 
 export const Signin = () => {
-    const { changeAuthStage } = useAuth();
-    const { setStage } = useSigninForm();
     const { form, isSubmitButtonDisabled, onSubmit, loading } = useSignin();
+    
+    const changeAuthStage = useAuth((state) => state.changeAuthStage);
+    const changeSigninStage = useSigninForm((state) => state.changeSigninStage);
 
     return (
         <Form {...form}>
@@ -55,7 +56,7 @@ export const Signin = () => {
                                     <Button
                                         type='button'
                                         variant='link'
-                                        onClick={() => setStage('forgot')}
+                                        onClick={() => changeSigninStage('forgot')}
                                         className='ml-auto p-0 opacity-50 hover:opacity-100 transition-all ease-in-out duration-200'
                                     >
                                         Forgot password?

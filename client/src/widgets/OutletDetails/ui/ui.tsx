@@ -4,10 +4,13 @@ import { X } from 'lucide-react';
 import { Typography } from '@/shared/ui/Typography';
 import { OutletDetailsProps } from '../model/types';
 import { titles } from '../model/constants';
-import { useEvents } from '@/shared/lib/providers/events/context';
+import { useEvents } from '@/shared/model/store';
+import { useChat } from '@/shared/lib/providers/chat/context';
 
-export const OutletDetails = ({ onClose, avatarSlot, name, description, type, info }: OutletDetailsProps) => {
-    const { addEventListener } = useEvents();
+export const OutletDetails = ({ onClose, avatarSlot, name, description, info }: OutletDetailsProps) => {
+    const addEventListener = useEvents((state) => state.addEventListener);
+    
+    const type = useChat((state) => state.params.type);
 
     React.useEffect(() => {
         const removeEventListener = addEventListener('keydown', (event) => {

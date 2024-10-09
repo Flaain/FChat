@@ -3,18 +3,19 @@ import { LoaderCircle } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { useModal } from '@/shared/lib/providers/modal';
 import { steps } from '../model/constants';
-import { useCreateGroup } from '../model/context';
 import { Input } from '@/shared/ui/Input';
 import { Select } from './Select';
+import { useShallow } from 'zustand/shallow';
+import { useCreateGroup } from '../model/context';
 
 export const CreateGroup = () => {
-    const { onCloseModal, isModalDisabled } = useModal((state) => ({
+    const { onCloseModal, isModalDisabled } = useModal(useShallow((state) => ({
         onCloseModal: state.actions.onCloseModal,
         isModalDisabled: state.isModalDisabled
-    }));
-    const { form, onSubmit, isNextButtonDisabled, step, handleBack } = useCreateGroup();
-
-    return (
+    })));
+   const { form, onSubmit, step, handleBack, isNextButtonDisabled } = useCreateGroup();
+    
+   return (
         <Form {...form}>
             <form onSubmit={onSubmit} className='flex flex-col gap-5'>
                 {!step && (
@@ -67,7 +68,7 @@ export const CreateGroup = () => {
                     >
                         {!step ? 'Cancel' : 'Back'}
                     </Button>
-                    <Button type='submit' className='w-full' disabled={isNextButtonDisabled()}>
+                    <Button type='submit' className='w-full' disabled={isNextButtonDisabled}>
                         {isModalDisabled ? (
                             <LoaderCircle className='w-5 h-5 animate-loading' />
                         ) : step === steps.length - 1 ? (

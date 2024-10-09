@@ -6,7 +6,7 @@ import { Button } from '@/shared/ui/Button';
 import { LoaderCircle } from 'lucide-react';
 import { SignupCredentials } from './SignupCredentials';
 import { steps } from '../model/constants';
-import { useSignup } from '../model/context';
+import { useSignup } from '../lib/useSignup';
 
 const components = {
     0: <SignupCredentials />,
@@ -30,11 +30,7 @@ export const SignupForm = () => {
                     {isLastStep ? 'Verify your email' : 'Sign up'}
                 </Typography>
                 <Typography as='p' size='xl' variant='secondary' align='right' className='max-lg:text-xl'>
-                    {isLastStep
-                        ? `We’ve sent an email to ${form
-                              .getValues('email')
-                              .toLowerCase()} with a OTP code to verify your email`
-                        : "We're so excited to have you join us!"}
+                    {isLastStep ? `We’ve sent an email to ${form.getValues('email').toLowerCase()} with a OTP code to verify your email` : "We're so excited to have you join us!"}
                 </Typography>
             </div>
             <Form {...form}>

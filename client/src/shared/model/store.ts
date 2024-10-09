@@ -28,9 +28,9 @@ export const useEvents = create<EventsStore>((set) => ({
             });
         };
     }
-}))
+}));
 
 export const useSocket = create<SocketStore>(() => ({
     socket: null!,
     isConnected: false,
-}))
+}));

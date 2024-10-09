@@ -2,16 +2,19 @@ import React from 'react';
 import { toast } from 'sonner';
 import { Draft } from '@/shared/model/types';
 import { Message } from '../model/types';
-import { useLayout } from '@/shared/lib/providers/layout/context';
 import { messageAPI } from '../api';
-import { useMessagesList } from '@/widgets/MessagesList/model/context';
 import { useModal } from '@/shared/lib/providers/modal';
-import { selectModalActions } from '@/shared/lib/providers/modal/store';
+import { useLayout } from '@/shared/model/store';
+import { useChat } from '@/shared/lib/providers/chat/context';
+import { useShallow } from 'zustand/shallow';
 
 export const useMessage = (message: Message) => {
-    const { setDrafts } = useLayout();
-    const { isContextActionsBlocked, params } = useMessagesList();
-    const { onAsyncActionModal } = useModal(selectModalActions);
+    const { params, isContextActionsBlocked } = useChat(useShallow((state) => ({
+        params: state.params,
+        isContextActionsBlocked: state.isContextActionsBlocked,
+    })))
+    
+    const onAsyncActionModal = useModal((state) => state.actions.onAsyncActionModal);
     
     const handleCopyToClipboard = React.useCallback(() => {
         navigator.clipboard.writeText(message.text);
@@ -23,6 +26,7 @@ export const useMessage = (message: Message) => {
             query: `${params.apiUrl}/delete`, 
             body: JSON.stringify({ ...params.query, messageIds: [message._id] }) 
         }), {
+            closeOnError: true,
             onReject: () => {
                 toast.error('Cannot delete message', { position: 'top-center' });
             }
@@ -32,12 +36,12 @@ export const useMessage = (message: Message) => {
     const handleContextAction = React.useCallback((draft: Draft) => {
         if (isContextActionsBlocked) return;
         
-        setDrafts((prevState) => {
-            const newState = new Map([...prevState]);
+        useLayout.setState((prevState) => {
+            const newState = new Map([...prevState.drafts]);
 
             newState.set(params.id, draft);
 
-            return newState;
+            return { drafts: newState };
         })
     }, [isContextActionsBlocked]);
 

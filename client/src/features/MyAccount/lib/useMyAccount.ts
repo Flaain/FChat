@@ -1,12 +1,16 @@
 import React from 'react';
 import { useProfile } from '@/entities/profile';
 import { MAX_STATUS_SIZE, STOP_SIZE } from '@/entities/profile/model/constants';
+import { useShallow } from 'zustand/shallow';
 
 export const useMyAccount = () => {
+    const { status, handleSetStatus } = useProfile(useShallow((state) => ({
+        status: state.profile.status,
+        handleSetStatus: state.actions.handleSetStatus
+    })));
+
     const [symbolsLeft, setSymbolsLeft] = React.useState(MAX_STATUS_SIZE - (status?.length ?? 0));
     const [statusValue, setStatusValue] = React.useState(status ?? '');
-    
-    const handleSetStatus = useProfile((state) => state.actions.handleSetStatus);
     
     const onChangeStatus = ({ nativeEvent, target: { value } }: React.ChangeEvent<HTMLTextAreaElement>) => {
         const trimmedValue = value.trim();

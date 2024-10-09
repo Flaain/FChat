@@ -1,30 +1,23 @@
 import React from "react";
-import { steps } from "./constants";
-import { FieldPath, useForm } from "react-hook-form";
-import { ISignupContext, SignupSchemaType } from "./types";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema } from "./schema";
-import { signupAPI } from "../api";
 import { UserCheckType } from "@/shared/model/types";
+import { signupAPI } from "../api";
 import { otpAPI } from "@/features/OTP";
+import { OtpType } from "@/features/OTP/model/types";
+import { useOtp } from "@/features/OTP/model/store";
 import { useProfile } from "@/entities/profile";
 import { useSession } from "@/entities/session";
 import { checkFormErrors } from "@/shared/lib/utils/checkFormErrors";
-import { SignupContext } from "./context";
-import { useOtp } from "@/shared/lib/providers/otp/context";
-import { OtpType } from "@/shared/lib/providers/otp/types";
+import { steps } from "../model/constants";
 import { useAuth } from "@/pages/Auth";
-import { SessionTypes } from "@/entities/session/model/types";
+import { FieldPath, useForm } from "react-hook-form";
+import { SignupSchemaType } from "../model/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signupSchema } from "../model/schema";
 
-export const SignupProvider = ({ children }: { children: React.ReactNode; }) => {
-    const { setOtp } = useOtp();
-    const { changeAuthStage } = useAuth();
-    const { setProfile } = useProfile();
-    const { dispatch } = useSession();
-
+export const useSignup = () => {
     const [step, setStep] = React.useState(0);
     const [loading, setLoading] = React.useState(false);
-
+    
     const form = useForm<SignupSchemaType>({
         resolver: zodResolver(signupSchema),
         defaultValues: {
@@ -40,15 +33,17 @@ export const SignupProvider = ({ children }: { children: React.ReactNode; }) => 
         mode: 'all',
         shouldFocusError: true
     })
-
+    
     const isNextButtonDisabled =
-        !form.getValues(steps[step].fields).every(Boolean) ||
-        !!Object.entries(form.formState.errors).some(([key]) => steps[step].fields.includes(key as FieldPath<SignupSchemaType>)) ||
-        loading;
-
+    !form.getValues(steps[step].fields).every(Boolean) ||
+    !!Object.entries(form.formState.errors).some(([key]) => steps[step].fields.includes(key as FieldPath<SignupSchemaType>)) ||
+    loading;
+    
     React.useEffect(() => {
         setTimeout(form.setFocus, 0, steps[step].fields[0]);
     }, [step])
+    
+    const changeAuthStage = useAuth((state) => state.changeAuthStage);
 
     const onSubmit = async (event?: React.FormEvent<HTMLFormElement>) => {
         try {
@@ -73,16 +68,17 @@ export const SignupProvider = ({ children }: { children: React.ReactNode; }) => 
                     
                     const { data: { retryDelay } } = await otpAPI.create({ email: data.email, type: OtpType.EMAIL_VERIFICATION });
                     
+                    useOtp.setState({ otp: { targetEmail: data.email, type: OtpType.EMAIL_VERIFICATION, retryDelay } });
+                    
                     setStep((prevState) => prevState + 1);
-                    setOtp({ targetEmail: data.email, type: OtpType.EMAIL_VERIFICATION, retryDelay });
                 },
                 2: async () => {
                     const { confirmPassword, ...rest } = data;
                     
                     const { data: profile } = await signupAPI.signup(rest);
 
-                    setProfile(profile);
-                    dispatch({ type: SessionTypes.AUTH, payload: { userId: profile._id } });
+                    useProfile.setState({ profile });
+                    useSession.getState().actions.onSignin(profile._id);
                 }
             };
 
@@ -107,19 +103,14 @@ export const SignupProvider = ({ children }: { children: React.ReactNode; }) => 
         setStep((prevState) => prevState - 1);
     }
 
-    const value: ISignupContext = {
-        form,
-        isLastStep: step === steps.length - 1,
+    return {
         loading,
+        isLastStep: step === steps.length - 1,
         step,
+        form,
+        isNextButtonDisabled,
+        changeAuthStage,
         onSubmit,
-        onBack,
-        isNextButtonDisabled
+        onBack
     }
-    
-    return (
-        <SignupContext.Provider value={value}>
-            {children}
-        </SignupContext.Provider>
-    )
 }

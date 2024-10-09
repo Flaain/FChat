@@ -8,13 +8,12 @@ import { changePasswordAPI } from '../api';
 import { checkFormErrors } from '@/shared/lib/utils/checkFormErrors';
 import { steps } from '../model/constants';
 import { useModal } from '@/shared/lib/providers/modal';
-import { selectModalActions } from '@/shared/lib/providers/modal/store';
 
 export const useChangePassword = () => {
-    const { onAsyncActionModal } = useModal(selectModalActions);
-
     const [step, setStep] = React.useState(0);
     const [isLoading, setIsLoading] = React.useState(false);
+    
+    const onAsyncActionModal = useModal((state) => state.actions.onAsyncActionModal);
 
     const form = useForm<ChangePasswordSchemaType>({
         resolver: zodResolver(changePasswordSchema),

@@ -1,20 +1,23 @@
 import React from 'react';
 import { createStore } from 'zustand';
-import { ChatStore } from './types';
+import { ChatProviderProps, ChatStore } from './types';
 import { ChatContext } from './context';
+import { chatActions } from './actions';
 
-const initialState: Omit<ChatStore, 'setChatState'> = {
-    isContextActionsBlocked: false,
-    lastMessageRef: React.createRef(),
-    listRef: React.createRef(),
-    params: null!,
-    showAnchor: false
-};
-
-export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
-    const { 0: store } = React.useState(() => createStore<ChatStore>((set) => ({
-        ...initialState,
-        setChatState: (store) => set(store)
+export const ChatProvider = ({ children }: ChatProviderProps) => {
+    const { 0: store } = React.useState(() => createStore<ChatStore>((set, get) => ({
+        params: null!,
+        isContextActionsBlocked: false,
+        showDetails: false,
+        selectedMessages: new Map(),
+        mode: 'default',
+        showAnchor: false,
+        refs: {
+            lastMessageRef: React.createRef(),
+            listRef: React.createRef(),
+            textareaRef: React.createRef()
+        },
+        actions: chatActions(set, get)
     })));
 
     return <ChatContext.Provider value={store}>{children}</ChatContext.Provider>;

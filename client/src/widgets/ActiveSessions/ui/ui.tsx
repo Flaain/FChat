@@ -6,10 +6,12 @@ import { Hand, Loader2 } from 'lucide-react';
 import { Session } from '@/entities/session/ui/ui';
 import { useModal } from '@/shared/lib/providers/modal';
 import { Confirm } from '@/shared/ui/Confirm';
+import { useShallow } from 'zustand/shallow';
+import { selectModalActions } from '@/shared/lib/providers/modal/store';
 
 export const ActiveSessions = () => {
     const { sessions, isLoading, isTerminating, handleTerimanteSessions, handleDropSession } = useActiveSessions();
-    const { onCloseModal, onOpenModal } = useModal();
+    const { onCloseModal, onOpenModal } = useModal(useShallow(selectModalActions));
 
     if (isLoading) return <ActiveSessionsSkeleton />;
 

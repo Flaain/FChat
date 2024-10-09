@@ -4,12 +4,13 @@ import { Input } from '@/shared/ui/Input';
 import { useEditName } from '../lib/useEditName';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { useModal } from '@/shared/lib/providers/modal';
+import { useShallow } from 'zustand/shallow';
 
 export const EditName = () => {
-    const { isModalDisabled, onCloseModal } = useModal((state) => ({
+    const { isModalDisabled, onCloseModal } = useModal(useShallow((state) => ({
         onCloseModal: state.actions.onCloseModal,
         isModalDisabled: state.isModalDisabled
-    }));
+    })));
     const { form, onSubmit } = useEditName();
 
     return (

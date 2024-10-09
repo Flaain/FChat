@@ -6,14 +6,17 @@ import { Button } from '@/shared/ui/Button';
 import { ConversationSkeleton } from './ui/Skeleton';
 import { OutletError } from '@/shared/ui/OutletError';
 import { ConversationProvider } from './model/provider';
+import { ChatProvider } from '@/shared/lib/providers/chat/provider';
 
 export const ConversationPage: RouteObject = {
     path: routerList.CONVERSATION,
     element: (
         <React.Suspense fallback={<ConversationSkeleton />}>
-            <ConversationProvider>
-                <View />
-            </ConversationProvider>
+            <ChatProvider>
+                <ConversationProvider>
+                    <View />
+                </ConversationProvider>
+            </ChatProvider>
         </React.Suspense>
     ),
     errorElement: (

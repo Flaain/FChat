@@ -8,18 +8,19 @@ import { Input } from '@/shared/ui/Input';
 import { Image } from '@/shared/ui/Image';
 import { useModal } from '@/shared/lib/providers/modal';
 import { useProfile } from '@/entities/profile';
-import { useSocket } from '@/shared/lib/providers/socket/context';
-import { selectModalActions } from '@/shared/lib/providers/modal/store';
+import { useSocket } from '@/shared/model/store';
+import { useShallow } from 'zustand/shallow';
 
 export const MyAccount = () => {
-    const { onOpenModal } = useModal(selectModalActions);
-    const { isConnected } = useSocket();
     const { statusValue, symbolsLeft, onChangeStatus } = useMyAccount();
-    const { profile, isUploadingAvatar, handleUploadAvatar } = useProfile((state) => ({
+    const { profile, isUploadingAvatar, handleUploadAvatar } = useProfile(useShallow((state) => ({
         profile: state.profile,
         isUploadingAvatar: state.isUploadingAvatar,
         handleUploadAvatar: state.actions.handleUploadAvatar
-    }));
+    })));
+    
+    const onOpenModal = useModal((state) => state.actions.onOpenModal);
+    const isConnected = useSocket((state) => state.isConnected);
 
     return (
         <div className='flex flex-col'>

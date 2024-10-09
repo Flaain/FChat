@@ -2,9 +2,13 @@ import { EllipsisVertical, Lock, Trash } from 'lucide-react';
 import { useConversationDDM } from '../../lib/useConversationDDM';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu';
 import { useConversation } from '../../model/context';
+import { useShallow } from 'zustand/shallow';
 
 export const ConversationDDM = () => {
-    const { data: { conversation: { _id, isRecipientBlocked } } } = useConversation();
+    const { _id, isRecipientBlocked } = useConversation(useShallow((state) => ({
+        _id: state.data.conversation._id,
+        isRecipientBlocked: state.data.conversation.isRecipientBlocked
+    })));
     const { handleBlockRecipient, handleDeleteConversation } = useConversationDDM();
 
     return (
@@ -16,10 +20,10 @@ export const ConversationDDM = () => {
                 onEscapeKeyDown={(event) => event.stopPropagation()}
                 loop
                 align='end'
-                className='border-none rounded-md w-[200px] h-auto dark:bg-primary-dark-50 z-[999]'
+                className='border-none rounded-md w-[200px] h-auto backdrop-blur-[50px] dark:bg-menu-background-color z-[999]'
             >
                 {_id && (
-                    <DropdownMenuItem className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-primary-dark-100/20 text-primary-white'>
+                    <DropdownMenuItem className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-light-secondary-color text-primary-white'>
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
                             width='20'
@@ -41,7 +45,7 @@ export const ConversationDDM = () => {
                 )}
                 <DropdownMenuItem
                     onClick={(event) => handleBlockRecipient(isRecipientBlocked ? 'unblock' : 'block', event)}
-                    className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-primary-dark-100/20 text-primary-white'
+                    className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-light-secondary-color text-primary-white'
                 >
                     <Lock className='w-5 h-5' />
                     {isRecipientBlocked ? 'Unblock user' : 'Block user'}
@@ -51,7 +55,7 @@ export const ConversationDDM = () => {
                         onClick={handleDeleteConversation}
                         className='flex items-center gap-5 cursor-pointer rounded-md dark:focus:bg-primary-destructive/10 text-primary-destructive'
                     >
-                        <Trash className='w-5 h-5' /> Delete conversation
+                        <Trash className='w-5 h-5' /> Delete Conversation
                     </DropdownMenuItem>
                 )}
             </DropdownMenuContent>

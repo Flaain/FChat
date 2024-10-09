@@ -1,17 +1,17 @@
 import { Signin } from "@/features/Signin/ui/ui";
 import { Forgot } from "@/features/Forgot/ui/ui";
 import { Typography } from "@/shared/ui/Typography";
-import { SigninStages } from "@/features/Signin/model/types";
-import { useSigninForm } from "../model/context";
+import { SigninStage } from "@/features/Signin/model/types";
 import { stageDescription } from "../model/constants";
+import { useSigninForm } from "../model/store";
 
-const components: Record<SigninStages, React.ReactNode> = {
+const components: Record<SigninStage, React.ReactNode> = {
     signin: <Signin />,
     forgot: <Forgot />
 };
 
 export const SigninForm = () => {
-    const { stage } = useSigninForm();
+    const stage = useSigninForm((state) => state.stage);
     
     return (
         <div className='flex items-center w-full h-full max-w-[1230px] box-border gap-5'>

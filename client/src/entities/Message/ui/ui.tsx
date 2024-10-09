@@ -8,20 +8,22 @@ import { MessageProps } from '../model/types';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 import { PartOfCompilerUse } from '@/shared/model/types';
 import { getBubblesStyles } from '../lib/getBubblesStyles';
-import { useMessagesList } from '@/widgets/MessagesList/model/context';
+import { useChat } from '@/shared/lib/providers/chat/context';
+import { useShallow } from 'zustand/shallow';
 
 export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
     ({ message, isFirst, isLast, isMessageFromMe, className, ...rest }, ref) => {
-        const { selectedMessages } = useMessagesList();
-
         const [isContextMenuOpen, setIsContextMenuOpen] = React.useState(false);
-
+        
         const { createdAt, refPath, updatedAt, sender, text, hasBeenRead, hasBeenEdited, replyTo } = message;
+        const { selectedMessages, isContextActionsBlocked } = useChat(useShallow((state) => ({
+            selectedMessages: state.selectedMessages,
+            isContextActionsBlocked: state.isContextActionsBlocked
+        })));
 
         const isSelected = selectedMessages.has(message._id);
         const createTime = new Date(createdAt);
         const editTime = new Date(updatedAt);
-
         const stylesForBottomIcon = cn(
             'w-4 h-4 mt-0.5',
             isMessageFromMe
@@ -31,7 +33,7 @@ export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
 
         return (
             <ContextMenu onOpenChange={setIsContextMenuOpen}>
-                <ContextMenuTrigger asChild>
+                <ContextMenuTrigger asChild disabled={isContextActionsBlocked}>
                     <li
                         {...rest}
                         ref={ref}
@@ -48,7 +50,7 @@ export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                                 height='20'
                                 viewBox='0 0 11 20'
                                 fill='currentColor'
-                                className={cn('absolute z-[999] bottom-0 w-[11px] h-5 block', {
+                                className={cn('absolute z-10 bottom-0 w-[11px] h-5 block', {
                                     ['-right-[11px] xl:-left-[11px] dark:text-primary-white text-primary-gray max-xl:scale-x-[-1]']: isMessageFromMe,
                                     ['dark:text-primary-dark-50 text-primary-gray -left-[11px]']: !isMessageFromMe
                                 })}
@@ -140,7 +142,7 @@ export const Message = React.forwardRef<HTMLLIElement, MessageProps>(
                         </div>
                     </li>
                 </ContextMenuTrigger>
-                {isContextMenuOpen && (
+                {isContextMenuOpen && !isContextActionsBlocked && (
                     <MessageContextMenu
                         message={message}
                         isMessageFromMe={isMessageFromMe}

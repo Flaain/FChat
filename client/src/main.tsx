@@ -1,14 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { App } from './app/ui/ui';
-import { Providers } from './providers';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './app/model/router';
+import { Providers } from './app/model/providers';
 
 import './app/styles/index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <Providers>
-            <App />
+            <RouterProvider router={router} />
         </Providers>
     </React.StrictMode>
 );

@@ -1,11 +1,12 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/Form';
 import { Input } from '@/shared/ui/Input';
 import { PasswordInput } from '@/shared/ui/PasswordInput';
-import { useSignup } from '../../model/context';
+import { useFormContext } from 'react-hook-form';
+import { SignupSchemaType } from '../../model/types';
 
 export const SignupCredentials = () => {
-    const { form } = useSignup();
-
+    const form = useFormContext<SignupSchemaType>();
+    
     return (
         <>
             <FormField

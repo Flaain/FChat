@@ -1,3 +1,2 @@
 export { Settings } from './ui/ui';
-export { useSettings } from './model/context';
-export { SettingsProvider } from './model/provider';
+export { SettingsProvider, useSettings } from './model/store';

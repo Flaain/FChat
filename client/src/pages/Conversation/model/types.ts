@@ -1,4 +1,5 @@
 import { Message } from '@/entities/Message/model/types';
+import { ChatStore } from '@/shared/lib/providers/chat/types';
 import { APIData, Recipient, WithParams, WithRequired } from '@/shared/model/types';
 
 export type ConversationStatuses = 'idle' | 'loading' | 'error';
@@ -29,22 +30,18 @@ export enum CONVERSATION_EVENTS {
     STOP_TYPING = 'conversation.stop.typing'
 }
 
-export interface IConversationContext {
+export interface ConversationStore {
     data: ConversationWithMeta;
     status: ConversationStatuses;
     isPreviousMessagesLoading: boolean;
-    showRecipientDetails: boolean;
-    showAnchor: boolean;
     error: string | null;
     isRecipientTyping: boolean;
     isRefetching: boolean;
-    isTyping: boolean;
-    listRef: React.RefObject<HTMLUListElement>;
-    lastMessageRef: React.RefObject<HTMLLIElement>;
-    getPreviousMessages: () => Promise<void>;
-    refetch: () => Promise<void>;
-    handleTypingStatus: () => void;
-    onDetails: (open: boolean) => void;
+    actions: {
+        getConversation: (action: 'init' | 'refetch', recipientId: string, setChatState: (state: Partial<ChatStore>) => void, abortController?: AbortController) => Promise<void>;
+        getPreviousMessages: () => Promise<void>;
+        handleTypingStatus: () => () => void;
+    }
 }
 
 export interface Conversation {

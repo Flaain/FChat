@@ -1,8 +1,8 @@
+import Verified from '@/shared/lib/assets/icons/verified.svg?react';
 import { AvatarByName } from '@/shared/ui/AvatarByName';
 import { Typography } from '@/shared/ui/Typography';
 import { PreAnimatedSkeleton } from '@/shared/ui/PreAnimatedSkeleton';
 import { cn } from '@/shared/lib/utils/cn';
-import { Verified } from 'lucide-react';
 import { Image } from '@/shared/ui/Image';
 import { useProfile } from '@/entities/profile';
 

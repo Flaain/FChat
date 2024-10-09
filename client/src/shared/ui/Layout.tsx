@@ -1,18 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Sheet } from './Sheet';
-import { Sidebar } from '@/widgets/Sidebar/ui/ui';
 import { LayoutSheetSkeleton } from '@/widgets/LayoutSheet/ui/Skeletons/LayoutSheetSkeleton';
 import { Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { LayoutSheetView } from '@/widgets/LayoutSheet';
 import { useLayout } from '../model/store';
+import { Sidebar, SidebarProvider } from '@/widgets/Sidebar';
 
 export const Layout = () => {
     const isSheetOpen = useLayout((state) => state.isSheetOpen);
 
     return (
-        <main className='flex h-full dark:bg-primary-dark-200 w-full'>
+        <main className='flex h-full dark:bg-primary-dark-200 w-full relative'>
             <Toaster />
             {isSheetOpen &&
                 ReactDOM.createPortal(
@@ -23,7 +23,9 @@ export const Layout = () => {
                     </Sheet>,
                     document.querySelector('#modal-root')!
                 )}
-            <Sidebar />
+            <SidebarProvider>
+                <Sidebar />
+            </SidebarProvider>
             <Outlet />
         </main>
     );

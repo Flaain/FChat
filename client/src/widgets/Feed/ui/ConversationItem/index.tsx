@@ -1,19 +1,17 @@
+import Verified from '@/shared/lib/assets/icons/verified.svg?react';
 import { AvatarByName } from '@/shared/ui/AvatarByName';
 import { Typography } from '@/shared/ui/Typography';
 import { Image } from '@/shared/ui/Image';
 import { ProfileIndicator } from '@/shared/ui/ProfileIndicator';
 import { cn } from '@/shared/lib/utils/cn';
-import { Verified } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { ConversationFeed, PRESENCE, PartOfCompilerUse } from '@/shared/model/types';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
-import { useLayout } from '@/shared/lib/providers/layout/context';
+import { useLayout } from '@/shared/model/store';
 
-const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
-    const { drafts } = useLayout();
-
+export const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) => {
     const recipient = conversation.recipient;
-    const draft = drafts.get(recipient._id);
+    const draft = useLayout((state) => state.drafts).get(recipient._id);
 
     return (
         <li>
@@ -81,5 +79,3 @@ const ConversationItem = ({ conversation }: { conversation: ConversationFeed }) 
         </li>
     );
 };
-
-export default ConversationItem;

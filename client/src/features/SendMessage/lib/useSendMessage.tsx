@@ -3,16 +3,22 @@ import { toast } from 'sonner';
 import { MessageFormState } from '@/shared/model/types';
 import { EmojiData, UseMessageParams } from '../model/types';
 import { useModal } from '@/shared/lib/providers/modal';
-import { useLayout } from '@/shared/lib/providers/layout/context';
 import { Confirm } from '@/shared/ui/Confirm';
 import { messageAPI } from '@/entities/Message/api';
 import { selectModalActions } from '@/shared/lib/providers/modal/store';
+import { useLayout } from '@/shared/model/store';
+import { useChat } from '@/shared/lib/providers/chat/context';
+import { useShallow } from 'zustand/shallow';
 
-export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
+export const useSendMessage = (onChange: UseMessageParams['onChange']) => {
     const { onCloseModal, onOpenModal, onAsyncActionModal } = useModal(selectModalActions);
-    const { drafts, setDrafts, textareaRef } = useLayout();
-
-    const currentDraft = drafts.get(params.id);
+    const { params, lastMessageRef, textareaRef } = useChat(useShallow((state) => ({ 
+        textareaRef: state.refs.textareaRef,
+        lastMessageRef: state.refs.lastMessageRef,
+        params: state.params 
+    })));
+    
+    const currentDraft = useLayout((state) => state.drafts).get(params.id);
 
     const [isLoading, setIsLoading] = React.useState(false);
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false);
@@ -23,7 +29,15 @@ export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
         textareaRef.current?.focus();
     }, []);
 
-    React.useEffect(() => { textareaRef.current?.focus() }, [])
+    React.useEffect(() => { 
+        if (!textareaRef.current) return;
+        
+        const end = value.length;
+        
+        textareaRef.current.setSelectionRange(end, end);
+        textareaRef.current.focus();
+     }, []);
+
     React.useEffect(() => { setValue(currentDraft?.value ?? '') }, [currentDraft]);
 
     React.useEffect(() => {
@@ -48,13 +62,13 @@ export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
     }, [onChange]);
 
     const setDefaultState = React.useCallback(() => {
-        setDrafts((prevState) => {
-            const newState = new Map([...prevState]);
+        useLayout.setState((prevState) => {
+            const newState = new Map([...prevState.drafts]);
 
             newState.delete(params.id);
 
-            return newState;
-        });
+            return { drafts: newState };
+        })
 
         setValue('');
 
@@ -83,8 +97,8 @@ export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
 
         if ((!trimmedValue.length && !currentDraft) || trimmedValue === currentDraft?.value) return;
 
-        setDrafts((prevState) => {
-            const newState = new Map([...prevState]);
+        useLayout.setState((prevState) => {
+            const newState = new Map([...prevState.drafts]);
             const isEmpty = !trimmedValue.length && currentDraft?.state === 'send';
 
             isEmpty ? newState.delete(params.id) : newState.set(params.id, currentDraft ? { ...currentDraft, value: trimmedValue } : { 
@@ -92,8 +106,8 @@ export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
                 value: trimmedValue 
             });
 
-            return newState;
-        });
+            return { drafts: newState };
+        })
     }, [params.id, currentDraft]);
 
     const onSendEditedMessage = async (message: string) => {
@@ -119,6 +133,8 @@ export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
                 query: `${params.apiUrl}/edit/${currentDraft!.selectedMessage!._id}`,
                 body: JSON.stringify({ message, ...params.query })
              })
+
+            setDefaultState();
         } catch (error) {
             console.error(error);
             toast.error('Cannot edit message', { position: 'top-center' });
@@ -130,9 +146,13 @@ export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
             if (!message.length) return;
 
             await messageAPI.send({ query: `${params.apiUrl}/send/${params.id}`, body: JSON.stringify({ message }) })
+
+            lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });            
         } catch (error) {
             console.error(error);
             toast.error('Cannot send message', { position: 'top-center' });
+        } finally {
+            setDefaultState();
         }
     };
 
@@ -147,6 +167,8 @@ export const useSendMessage = ({ params, onChange }: UseMessageParams) => {
         } catch (error) {
             console.error(error);
             toast.error('Cannot reply message', { position: 'top-center' });
+        } finally {
+            setDefaultState();
         }
     } 
 

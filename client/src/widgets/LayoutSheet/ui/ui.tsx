@@ -1,27 +1,29 @@
+import Verified from '@/shared/lib/assets/icons/verified.svg?react';
 import { Switch } from '@/shared/ui/Switch';
 import { Typography } from '@/shared/ui/Typography';
 import { AvatarByName } from '@/shared/ui/AvatarByName';
 import { Image } from '@/shared/ui/Image';
 import { Button } from '@/shared/ui/Button';
-import { Archive, Moon, Users, Settings as SettingsIcon, Verified } from 'lucide-react';
+import { Archive, Moon, Users, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '@/shared/lib/utils/cn';
-import { useProfile } from '@/entities/profile/model/context';
 import { ModalConfig, useModal } from '@/shared/lib/providers/modal';
 import { CreateGroup, CreateGroupProvider } from '@/features/CreateGroup';
 import { useTheme } from '@/entities/theme';
-import { useLayout } from '@/shared/lib/providers/layout/context';
 import { SettingsProvider, Settings } from '@/widgets/Settings';
+import { useLayout } from '@/shared/model/store';
+import { useProfile } from '@/entities/profile';
+import { useNavigate } from 'react-router-dom';
 
 const listIconStyle = 'dark:text-primary-white text-primary-dark-200 w-5 h-5';
 
 export const LayoutSheet = () => {
-    const { setTheme, theme } = useTheme();
-    const { onSheet } = useLayout();
-    const { profile } = useProfile();
-    const { onOpenModal } = useModal();
+    const onOpenModal = useModal((state) => state.actions.onOpenModal);
+    const navigate = useNavigate();
+    const profile = useProfile((state) => state.profile);
+    const theme = useTheme((state) => state.theme);
 
     const onSheetAction = (modal: ModalConfig) => {
-        onSheet(false);
+        useLayout.setState({ isSheetOpen: false });
         onOpenModal(modal);
     };
 
@@ -57,7 +59,7 @@ export const LayoutSheet = () => {
                             onSheetAction({
                                 withHeader: false,
                                 content: (
-                                    <CreateGroupProvider>
+                                    <CreateGroupProvider navigate={navigate}>
                                         <CreateGroup />
                                     </CreateGroupProvider>
                                 ),
@@ -90,7 +92,7 @@ export const LayoutSheet = () => {
                     </Button>
                 </li>
                 <li className='flex items-center'>
-                    <Switch onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')} checked={theme === 'dark'}>
+                    <Switch onChange={() => useTheme.setState({ theme: theme === 'dark' ? 'light' : 'dark' })} checked={theme === 'dark'}>
                         <Moon className={listIconStyle} />
                         <Typography weight='medium'>Night Mode</Typography>
                     </Switch>

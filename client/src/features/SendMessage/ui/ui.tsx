@@ -8,9 +8,18 @@ import { useSendMessage } from '../lib/useSendMessage';
 import { EmojiPicker } from '@/shared/model/view';
 import { UseMessageParams } from '../model/types';
 import { MessageFormState } from '@/shared/model/types';
-import { useLayout } from '@/shared/lib/providers/layout/context';
+import { useLayout } from '@/shared/model/store';
+import { useChat } from '@/shared/lib/providers/chat/context';
+import { getScrollBottom } from '@/shared/lib/utils/getScrollBottom';
+import { useShallow } from 'zustand/shallow';
 
-export const SendMessage = ({ params, onChange, showAnchor, onAnchorClick }: UseMessageParams) => {
+export const SendMessage = ({ onChange }: UseMessageParams) => {
+    const { params, listRef, textareaRef, showAnchor } = useChat(useShallow((state) => ({
+        params: state.params,
+        listRef: state.refs.listRef,
+        textareaRef: state.refs.textareaRef,
+        showAnchor: state.showAnchor
+    })));
     const {
         handleSubmitMessage,
         onKeyDown,
@@ -22,10 +31,8 @@ export const SendMessage = ({ params, onChange, showAnchor, onAnchorClick }: Use
         isEmojiPickerOpen,
         isLoading,
         value
-    } = useSendMessage({ params, onChange });
-    const { drafts, textareaRef } = useLayout();
-
-    const currentDraft = drafts.get(params.id);
+    } = useSendMessage(onChange);
+    const currentDraft = useLayout((state) => state.drafts).get(params.id);
 
     const bars: Record<Exclude<MessageFormState, 'send'>, React.ReactNode> = {
         edit: (
@@ -78,7 +85,11 @@ export const SendMessage = ({ params, onChange, showAnchor, onAnchorClick }: Use
                 ></textarea>
                 {showAnchor && (
                     <Button
-                        onClick={onAnchorClick}
+                        onClick={() => listRef.current?.scrollTo({ 
+                            top: getScrollBottom(listRef.current), 
+                            left: 0, 
+                            behavior: 'smooth' 
+                        })}
                         disabled={!showAnchor}
                         variant='text'
                         type='button'
@@ -102,7 +113,7 @@ export const SendMessage = ({ params, onChange, showAnchor, onAnchorClick }: Use
                     <Smile className='w-6 h-6' />
                 </Button>
                 {isEmojiPickerOpen && (
-                    <div className='absolute bottom-20 right-2'>
+                    <div className='absolute bottom-20 right-2 z-50'>
                         <React.Suspense fallback={<EmojiPickerFallback />}>
                             <EmojiPicker
                                 onClickOutside={() => setIsEmojiPickerOpen(false)}

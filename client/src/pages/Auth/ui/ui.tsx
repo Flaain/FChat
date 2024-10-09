@@ -1,8 +1,8 @@
-import { SignupForm, SignupProvider } from '@/widgets/SignupForm';
+import { SignupForm } from '@/widgets/SignupForm';
 import { SigninForm, SigninProvider } from '@/widgets/SigninForm';
 import { Toaster } from 'sonner';
 import { Welcome } from './Welcome';
-import { useAuth } from '../model/context';
+import { useAuth } from '../model/store';
 
 const stages = {
     welcome: <Welcome />,
@@ -11,15 +11,11 @@ const stages = {
             <SigninForm />
         </SigninProvider>
     ),
-    signUp: (
-        <SignupProvider>
-            <SignupForm />
-        </SignupProvider>
-    )
+    signUp: <SignupForm />
 };
 
 export const Auth = () => {
-    const { authStage } = useAuth();
+    const authStage = useAuth((state) => state.authStage);
 
     return (
         <section className='w-full h-screen flex items-center px-5 justify-center bg-primary-dark-200'>

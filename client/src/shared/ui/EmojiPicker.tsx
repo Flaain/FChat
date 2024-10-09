@@ -1,6 +1,6 @@
 import Picker from '@emoji-mart/react';
-import { EmojiData } from '../model/types';
 import { useTheme } from '@/entities/theme';
+import { EmojiData } from '@/features/SendMessage/model/types';
 
 export const EmojiPicker = ({
     onClickOutside,
@@ -13,7 +13,8 @@ export const EmojiPicker = ({
 
     return <Picker autoFocus theme={theme} data={async () => {
         const response = await fetch('https://cdn.jsdelivr.net/npm/@emoji-mart/data')
-    
-        return response.json();
+        const data = await response.json();
+
+        return data;
       }} onEmojiSelect={onEmojiSelect} onClickOutside={onClickOutside} />;
 };

@@ -250,15 +250,12 @@ export type UserCheckParams =
     | { type: UserCheckType.EMAIL; email: string }
     | { type: UserCheckType.LOGIN; login: string };
 
-export interface Meta {
+export interface Meta<T> {
+    items: T;
     total_items: number;
     current_page: number;
     total_pages: number;
     remaining_items: number;
-}
-
-export interface WithMeta<T> extends Meta {
-    items: T;
 }
 
 export interface Pagination {

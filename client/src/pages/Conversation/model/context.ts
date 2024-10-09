@@ -1,22 +1,13 @@
 import React from 'react';
-import { IConversationContext } from './types';
+import { ConversationStore } from './types';
+import { StoreApi, useStore } from 'zustand';
 
-export const ConversationContext = React.createContext<IConversationContext>({
-    data: null!,
-    onDetails: () => {},
-    getPreviousMessages: async () => {},
-    isRecipientTyping: false,
-    listRef: React.createRef<HTMLUListElement>(),
-    lastMessageRef: React.createRef<HTMLLIElement>(),
-    handleTypingStatus: () => {},
-    isPreviousMessagesLoading: false,
-    refetch: async () => {},
-    showRecipientDetails: false,
-    showAnchor: false,
-    status: 'loading',
-    isRefetching: false,
-    isTyping: false,
-    error: null
-});
+export const ConversationContext = React.createContext<StoreApi<ConversationStore>>(null!);
 
-export const useConversation = () => React.useContext<IConversationContext>(ConversationContext);
+export const useConversation = <U>(selector: (state: ConversationStore) => U) => {
+    const store = React.useContext(ConversationContext);
+
+    if (!store) throw new Error('useConversation must be used within a ConversationProvider');
+
+    return useStore(store, selector);
+};

@@ -1,15 +1,14 @@
+import Verified from '@/shared/lib/assets/icons/verified.svg?react';
 import { cn } from '@/shared/lib/utils/cn';
-import { Recipient, UserFeed } from '@/shared/model/types';
-import { Verified } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Typography } from '@/shared/ui/Typography';
 import { PreAnimatedSkeleton } from '@/shared/ui/PreAnimatedSkeleton';
 
 export const ConversationSkeleton = () => {
-    const { state } = useLocation<Recipient | UserFeed>();
+    const { state } = useLocation();
 
     return (
-        <div className='flex flex-col flex-1 h-svh overflow-hidden gap-5 items-center justify-start dark:bg-primary-dark-200 bg-primary-white'>
+        <div className='flex z-10 flex-col flex-1 h-svh overflow-hidden gap-5 items-center justify-start dark:bg-primary-dark-200 bg-primary-white'>
             <div className='min-h-[70px] flex items-center self-start w-full px-5 py-3 box-border dark:bg-primary-dark-100 sticky top-0 z-[999]'>
                 {state && (
                     <Typography

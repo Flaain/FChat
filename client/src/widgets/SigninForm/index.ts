@@ -1,2 +1,2 @@
 export { SigninForm } from './ui/ui';
-export { SigninProvider } from './model/provider';
+export { SigninProvider } from './model/store';

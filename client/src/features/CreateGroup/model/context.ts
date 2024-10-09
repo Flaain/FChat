@@ -10,7 +10,7 @@ export const CreateGroupContext = React.createContext<ICreateGroupContext>({
     handleSearchUser: () => {},
     step: 0,
     selectedUsers: new Map(),
-    isNextButtonDisabled: () => true,
+    isNextButtonDisabled: false,
     searchedUsers: []
 });
 

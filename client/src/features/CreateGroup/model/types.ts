@@ -12,7 +12,7 @@ export interface ICreateGroupContext {
     step: number;
     selectedUsers: Map<string, SearchUser>;
     searchedUsers: Array<SearchUser>;
-    isNextButtonDisabled: () => boolean;
+    isNextButtonDisabled: boolean;
     onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
     handleSelect: (user: SearchUser) => void;
     handleRemove: (id: string) => void;

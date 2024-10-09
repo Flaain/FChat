@@ -1,9 +1,9 @@
-import { useAuth } from '../../model/context';
+import { useAuth } from '../../model/store';
 import { Typography } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 
 export const Welcome = () => {
-    const { changeAuthStage } = useAuth();
+    const changeAuthStage = useAuth((state) => state.changeAuthStage);
 
     return (
         <div className='flex flex-col items-center justify-center w-full gap-5 px-4'>

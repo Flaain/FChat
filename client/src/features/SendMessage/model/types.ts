@@ -8,14 +8,7 @@ export interface MessageTopBarProps {
 }
 
 export interface UseMessageParams {
-    showAnchor?: boolean;
     onChange?: (value: string) => void;
-    onAnchorClick?: () => void;
-    params: {
-        id: string;
-        apiUrl: string;
-        query: Record<string, any>;
-    }
 }
 
 export interface EmojiMartData {

@@ -36,6 +36,7 @@ export const useSignin = () => {
             const { data: profile } = await api.signin(data);
 
             useProfile.setState({ profile });
+            
             onSignin(profile._id);
         } catch (error) {
             console.error(error);

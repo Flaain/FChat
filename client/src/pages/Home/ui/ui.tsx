@@ -3,7 +3,7 @@ import { LucideMessagesSquare } from 'lucide-react';
 
 const Home = () => {
     return (
-        <div className='flex flex-col flex-1 gap-5 items-center justify-center dark:bg-primary-dark-200 bg-primary-white px-2'>
+        <div className='max-md:hidden flex flex-col flex-1 gap-5 items-center justify-center dark:bg-primary-dark-200 bg-primary-white px-2'>
             <Typography as='h1' variant='primary' size='2xl' weight='bold' align='center' className='max-w-[400px]'>
                 Select a chat to start messaging or create one!
             </Typography>

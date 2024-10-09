@@ -5,10 +5,10 @@ import { X } from 'lucide-react';
 import { MessageTopBarProps } from '../../model/types';
 import { markdownCompiler } from '@/shared/lib/utils/markdownCompiler';
 import { PartOfCompilerUse } from '@/shared/model/types';
-import { useEvents } from '@/shared/lib/providers/events/context';
+import { useEvents } from '@/shared/model/store';
 
 export const TopBar = ({ onClose, title, mainIconSlot, closeIconSlot, description, preventClose }: MessageTopBarProps) => {
-    const { addEventListener } = useEvents();
+    const addEventListener = useEvents((state) => state.addEventListener);
 
     React.useEffect(() => {
         const removeEventListener = addEventListener('keydown', (event) => {
@@ -18,7 +18,7 @@ export const TopBar = ({ onClose, title, mainIconSlot, closeIconSlot, descriptio
         return () => {
             removeEventListener();
         };
-    }, [])
+    }, []);
 
     return (
         <div className='overscroll-contain border-b border-solid dark:border-primary-dark-50 border-primary-gray w-full flex items-center dark:bg-primary-dark-100 bg-primary-white transition-colors duration-200 ease-in-out py-3 px-4 gap-4 box-border'>

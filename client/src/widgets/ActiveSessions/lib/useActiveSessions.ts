@@ -5,12 +5,12 @@ import { useModal } from '@/shared/lib/providers/modal';
 import { sessionAPI } from '@/entities/session';
 
 export const useActiveSessions = () => {
-    const { onAsyncActionModal } = useModal();
-
     const [sessions, setSessions] = React.useState<GetSessionsReturn | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isTerminating, setIsTerminating] = React.useState(false);
-
+    
+    const onAsyncActionModal = useModal((state) => state.actions.onAsyncActionModal);
+    
     const handleTerimanteSessions = async () => {
         setIsTerminating(true);
 

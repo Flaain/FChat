@@ -3,12 +3,14 @@ import { Confirm } from '@/shared/ui/Confirm';
 import { toast } from 'sonner';
 import { conversationAPI } from '../api';
 import { profileAPI } from '@/entities/profile';
-import { useConversation } from '../model/context';
 import { selectModalActions } from '@/shared/lib/providers/modal/store';
+import { useConversation } from '../model/context';
+import { useShallow } from 'zustand/shallow';
 
 export const useConversationDDM = () => {
-    const { onAsyncActionModal, onCloseModal, onOpenModal } = useModal(selectModalActions);
-    const { data: { conversation: { recipient } } } = useConversation();
+    const { onAsyncActionModal, onCloseModal, onOpenModal } = useModal(useShallow(selectModalActions));
+    
+    const recipient = useConversation((state) => state.data.conversation.recipient);
 
     const handleBlockRecipient = async (type: 'block' | 'unblock', event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         event.stopPropagation();

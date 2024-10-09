@@ -1,6 +1,6 @@
 export type AuthStage = 'welcome' | 'signIn' | 'signUp';
 
-export interface IAuthContext {
+export interface AuthStore {
     authStage: AuthStage;
-    changeAuthStage: React.Dispatch<React.SetStateAction<AuthStage>>;
+    changeAuthStage: (stage: AuthStage) => void;
 }

@@ -9,8 +9,9 @@ import { Button } from '@/shared/ui/Button';
 import { SettingMenu } from '../model/types';
 import { titles } from '../model/constants';
 import { useModal } from '@/shared/lib/providers/modal';
-import { useSettings } from '../model/context';
 import { ActiveSessions } from '@/widgets/ActiveSessions';
+import { useShallow } from 'zustand/shallow';
+import { useSettings } from '..';
 
 const components: Record<Exclude<SettingMenu, 'deleteAccount'>, React.ReactNode> = {
     main: <SettingsMain />,
@@ -21,21 +22,36 @@ const components: Record<Exclude<SettingMenu, 'deleteAccount'>, React.ReactNode>
 };
 
 export const Settings = () => {
-    const { onCloseModal, isModalDisabled } = useModal();
-    const { menu, onBack } = useSettings();
+    const { isModalDisabled, onCloseModal } = useModal( useShallow((state) => ({
+        isModalDisabled: state.isModalDisabled,
+        onCloseModal: state.actions.onCloseModal
+    })));
+    const { menu, onBack } = useSettings(useShallow((state) => ({ menu: state.menu, onBack: state.actions.onBack })));
 
     return (
         <div className='flex flex-col py-5'>
             <div className='flex items-center px-5 gap-5'>
                 {menu !== 'main' && (
-                    <Button variant='text' size='icon' className='h-auto p-0' onClick={onBack} disabled={isModalDisabled}>
+                    <Button
+                        variant='text'
+                        size='icon'
+                        className='h-auto p-0'
+                        onClick={onBack}
+                        disabled={isModalDisabled}
+                    >
                         <ArrowLeft className='w-6 h-6' />
                     </Button>
                 )}
                 <Typography as='h1' variant='primary' size='xl' weight='medium' className='self-start'>
                     {titles[menu]}
                 </Typography>
-                <Button variant='text' size='icon' className='h-auto p-0 ml-auto' onClick={onCloseModal} disabled={isModalDisabled}>
+                <Button
+                    variant='text'
+                    size='icon'
+                    className='h-auto p-0 ml-auto'
+                    onClick={onCloseModal}
+                    disabled={isModalDisabled}
+                >
                     <X className='w-6 h-6' />
                 </Button>
             </div>

@@ -3,8 +3,7 @@ import { Button } from '@/shared/ui/Button';
 import { Loader2 } from 'lucide-react';
 import { MessagesListProps } from '../model/types';
 import { GroupedMessages } from '@/features/GroupedMessages/ui/ui';
-import { Message } from '@/entities/Message/model/types';
-import { useMessagesList } from '../model/context';
+import { useMessagesList } from '../model/useMessagesList';
 
 export const MessagesList = React.forwardRef<HTMLUListElement, MessagesListProps>(({
     canFetch,
@@ -13,19 +12,7 @@ export const MessagesList = React.forwardRef<HTMLUListElement, MessagesListProps
     nextCursor,
     isFetchingPreviousMessages,
 }, ref) => {
-    const { lastMessageRef } = useMessagesList();
-
-    const groupedMessages = React.useMemo(() => messages.reduce<Array<Array<Message>>>((acc, message) => {
-        const lastGroup = acc[acc.length - 1];
-
-        lastGroup && lastGroup[0].sender._id === message.sender._id ? lastGroup.push(message) : acc.push([message]);
-
-        return acc;
-    }, []), [messages]);
-
-    React.useEffect(() => {
-        lastMessageRef.current?.scrollIntoView({ behavior: 'instant' });
-    }, [])
+    const groupedMessages = useMessagesList({ canFetch, messages, getPreviousMessages });
 
     return (
         <ul

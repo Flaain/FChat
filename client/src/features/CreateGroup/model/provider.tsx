@@ -10,15 +10,16 @@ import { SearchUser } from "@/shared/model/types";
 import { profileAPI } from "@/entities/profile";
 import { MIN_USER_SEARCH_LENGTH } from "@/shared/constants";
 import { checkFormErrors } from "@/shared/lib/utils/checkFormErrors";
-import { useNavigate } from "react-router-dom";
 import { createGroupAPI } from "../api";
 import { CreateGroupContext } from "./context";
+import { useShallow } from "zustand/shallow";
+import { NavigateFunction } from "react-router-dom";
 
-export const CreateGroupProvider = ({ children }: { children: React.ReactNode }) => {
-    const { isModalDisabled, onAsyncActionModal } = useModal((state) => ({
+export const CreateGroupProvider = ({ children, navigate }: { children: React.ReactNode; navigate: NavigateFunction }) => {
+    const { isModalDisabled, onAsyncActionModal } = useModal(useShallow((state) => ({
         isModalDisabled: state.isModalDisabled,
         onAsyncActionModal: state.actions.onAsyncActionModal
-    }));
+    })));
 
     const [step, setStep] = React.useState(0);
     const [selectedUsers, setSelectedUsers] = React.useState<Map<string, SearchUser>>(new Map());
@@ -39,15 +40,10 @@ export const CreateGroupProvider = ({ children }: { children: React.ReactNode })
         setTimeout(form.setFocus, 0, steps[step]?.fields[0]);
     }, [step]);
 
-    const navigate = useNavigate();
-
-    const isNextButtonDisabled = () => {
-        const isFieldEmpty = step !== 1 && !form.getValues(steps[step]?.fields).every?.(Boolean);
-        const isFieldHasErrors = !!Object.entries(form.formState.errors).some(([key]) => steps[step]?.fields.includes(key as FieldPath<CreateGroupType>));
-        const fieldErrors = isFieldEmpty || isFieldHasErrors;
-
-        return fieldErrors || isModalDisabled;
-    }
+    const isNextButtonDisabled = 
+        step !== 1 && !form.getValues(steps[step]?.fields).every?.(Boolean) || 
+        !!Object.entries(form.formState.errors).some(([key]) => steps[step]?.fields.includes(key as FieldPath<CreateGroupType>)) || 
+        isModalDisabled;
 
     const handleBack = () => setStep(prevState => prevState - 1);
     

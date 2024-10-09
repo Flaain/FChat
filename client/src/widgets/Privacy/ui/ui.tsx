@@ -1,10 +1,10 @@
 import { Button } from '@/shared/ui/Button';
-import { useSettings } from '@/widgets/Settings/model/context';
+import { useSettings } from '@/widgets/Settings';
 import { LockKeyhole, MonitorSmartphone } from 'lucide-react';
 
 const Privacy = () => {
-    const { onMenuChange } = useSettings();
-    
+    const onMenuChange = useSettings((state) => state.actions.onMenuChange);
+
     return (
         <ul className='flex flex-col pt-5'>
             <li>
